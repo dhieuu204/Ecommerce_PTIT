@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.log
+.DS_Store
+
+# Biến môi trường thật: không đưa lên Git
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Prisma client sinh ra ở từng service
+services/*/generated/

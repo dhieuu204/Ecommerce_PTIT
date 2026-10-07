@@ -1,0 +1,16 @@
+{
+  "name": "@san/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Thư viện dùng chung: tên service, kiểu sự kiện, kiểm JWT, outbox/inbox",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"chưa có test\""
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

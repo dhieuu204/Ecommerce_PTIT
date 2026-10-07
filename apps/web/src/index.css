@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+/*
+ * Bảng màu đã chốt (docs/phan-tich/05-quyet-dinh-ui-flow01.md).
+ * Dùng class Tailwind theo tên màu: bg-navy, text-champagne, bg-ivory, text-ink...
+ * Không viết mã màu thẳng trong component.
+ */
+@theme {
+  --color-navy: #172554;
+  --color-navy-900: #0f1a3d;
+  --color-champagne: #c8a96b;
+  --color-champagne-50: #f6f0e3;
+  --color-ivory: #faf9f6;
+  --color-card: #ffffff;
+  --color-ink: #1f2937;
+  --color-muted: #6b7280;
+}
+
+/* Biến cho shadcn/ui: màu chính = navy, điểm nhấn = champagne. */
+:root {
+  --background: #faf9f6;
+  --foreground: #1f2937;
+  --primary: #172554;
+  --primary-foreground: #ffffff;
+  --accent: #c8a96b;
+  --accent-foreground: #172554;
+  --border: #e5e7eb;
+  --ring: #c8a96b;
+  --radius: 0.75rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

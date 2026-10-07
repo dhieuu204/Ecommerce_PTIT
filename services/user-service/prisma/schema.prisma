@@ -1,0 +1,13 @@
+// Schema của user-service [U]. Chỉ service này được đọc/ghi database user_db.
+// Bảng nghiệp vụ sẽ thêm sau khi ERD-U được chốt (xem docs/README.md).
+
+generator client {
+  provider = "prisma-client-js"
+  // Mỗi service sinh client riêng, không dùng chung node_modules/@prisma/client.
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

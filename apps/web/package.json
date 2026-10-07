@@ -1,0 +1,30 @@
+{
+  "name": "@san/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Frontend React + Vite: một app có khu mua hàng, Kênh người bán và khu quản trị",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test": "echo \"chưa có test\""
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "tailwindcss": "^4.1.14",
+    "typescript": "~5.9.3",
+    "vite": "^7.1.9"
+  }
+}
