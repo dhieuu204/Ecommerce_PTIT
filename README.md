@@ -9,7 +9,8 @@ Sàn thương mại điện tử nhiều shop, kiến trúc **4 microservice + 1
 | `services/marketplace-service` | Shop, sản phẩm, tồn kho, giỏ, voucher, đơn hàng, GHN, trả hàng, chat, thông báo       |
 | `services/payment-service`     | VNPay, hoàn tiền, sổ tiền seller, đối soát, chi trả                                   |
 | `services/approval-service`    | Lưu quyết định duyệt: shop, kiểm tra đơn, tranh chấp, rút tiền                        |
-| `packages/shared`              | Code dùng chung giữa các service                                                      |
+| `packages/shared`              | Kiểu dữ liệu dùng chung (quyền, JWT, lỗi, sự kiện)                                    |
+| `packages/nest-common`         | Nền tảng chung của 4 service: đăng nhập/quyền, lỗi, phân trang, sự kiện, nhật ký      |
 | `infra/`                       | Docker Compose (code hằng ngày), k8s (demo)                                           |
 | `docs/`                        | Kế hoạch, quyết định đã chốt, sơ đồ                                                   |
 

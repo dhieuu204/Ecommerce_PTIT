@@ -10,7 +10,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**, chạy trên Kubernetes (k3s) khi demo.
 
-Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`), **nền tảng chung đã gắn vào 4 service** (`packages/nest-common`: đăng nhập/quyền, dạng lỗi, phân trang, sự kiện outbox/inbox, nhật ký admin). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -30,7 +30,8 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
    - Bảng dữ liệu từng service: `09-erd-u-…`, `10-erd-m-…`, `11-erd-p-…`, `12-erd-a-…`
 5. `docs/api/README.md` (quy ước API, danh sách API của phase kèm quy tắc) và `docs/api/events.md` (sự kiện).
 6. `docs/erd/README.md` (khung bảng cả dự án, quy ước bảng/cột, cách tạo migration) và `prisma/schema.prisma` của service.
-7. `README.md` của service mình sắp sửa.
+7. `packages/nest-common/README.md`: cách dùng nền tảng chung (đăng nhập, lỗi, phân trang, sự kiện, nhật ký admin). **Dùng cái có sẵn, không tự viết lại.**
+8. `README.md` của service mình sắp sửa.
 
 ## 3. Bốn service và chủ dữ liệu
 
@@ -42,7 +43,8 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
 | `services/approval-service`    | A   | 3004       | `approval_db` | Hồ sơ duyệt shop và vi phạm, kiểm tra đơn theo luật, quyết định tranh chấp, duyệt rút tiền                                                            |
 | `apps/web`                     |     | 5173       |               | Một app React có 3 khu: mua hàng, Kênh người bán, quản trị                                                                                            |
 
-`packages/shared`: code dùng chung (tên service; sau này thêm kiểu sự kiện, kiểm JWT, outbox/inbox).
+`packages/shared`: kiểu dữ liệu dùng chung cả web và service (tên service, bộ quyền, nội dung JWT, dạng lỗi, kiểu sự kiện).
+`packages/nest-common`: nền tảng chung cho 4 service NestJS (kiểm JWT và quyền, dạng lỗi, phân trang, gửi/nhận sự kiện, nhật ký admin). Sửa gói này ảnh hưởng cả 4 service, phải báo cả nhóm.
 
 ## 4. Luật kiến trúc (không được vi phạm)
 
@@ -85,12 +87,13 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 - Tên biến, hàm, bảng, cột, API: **tiếng Anh**. Comment, chữ trên giao diện, thông báo lỗi cho người dùng: **tiếng Việt**.
 - NestJS: mỗi nhóm nghiệp vụ là một module trong `src/<ten-module>/` gồm `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/`. Kiểm dữ liệu vào ở DTO.
 - API theo cách **code trước, tài liệu tự sinh**: đường dẫn, quy tắc và mã lỗi phải khớp `docs/api/README.md`; dữ liệu vào/ra là class DTO có `class-validator` và chú thích tiếng Việt; controller có `@ApiTags`, API cần đăng nhập có `@ApiBearerAuth()`, mã lỗi riêng ghi bằng `@ApiResponse`. Xem tài liệu ở `/api/<service>/v1/docs` (chi tiết: `docs/api/README.md` mục 3).
-- Sự kiện: dùng đúng kiểu trong `packages/shared/src/events`, gửi qua outbox, nhận qua inbox (`docs/api/events.md`).
+- Mặc định mọi API cần đăng nhập; API công khai đánh dấu `@Public()`, API admin dùng `@RequirePermissions(...)`. Báo lỗi bằng `throw new AppError(status, 'MA_LOI', 'Câu tiếng Việt.')`. Danh sách dài dùng `PageQuery`/`toPage`. Tất cả trong `packages/nest-common`.
+- Sự kiện: dùng đúng kiểu trong `packages/shared/src/events`, gửi bằng `EventBus.publish(tx, ...)` trong cùng giao dịch, nhận bằng `EventBus.subscribe` (`docs/api/events.md`, `packages/nest-common/README.md` mục 5).
 - Bảng dữ liệu **ít và dễ hiểu** (chủ đồ án phải trình bày trước hội đồng): chỉ thêm bảng khi tính năng cần, bảng con nhỏ thì gộp thành cột, tên bảng/cột tiếng Anh thông dụng đọc là đoán được nghĩa. Thêm bảng ngoài khung `docs/erd` thì hỏi trước.
 - Prisma: bảng `snake_case` số nhiều qua `@@map`, model `PascalCase`. Mỗi lần đổi schema tạo một migration có tên rõ (ví dụ `add_shop_profiles`). Không sửa migration đã đẩy lên `main`.
 - Thời gian lưu UTC, hiển thị giờ Việt Nam (Asia/Ho_Chi_Minh).
 - Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác.
-- Thao tác của admin (duyệt, từ chối, cấp quyền, hoàn tay…) đều ghi nhật ký: ai, lúc nào, đối tượng, lý do.
+- Thao tác của admin (duyệt, từ chối, cấp quyền, hoàn tay…) đều ghi nhật ký bằng `writeAudit(tx, ...)`: ai, lúc nào, đối tượng, lý do.
 - Test: Jest cho backend (file `*.spec.ts` cạnh file code). Logic tiền, trạng thái và quyền **bắt buộc có test**.
 - Định dạng bằng Prettier, kiểm bằng ESLint. Chạy `pnpm format` trước khi commit.
 
@@ -136,4 +139,6 @@ cp services/user-service/.env.example services/user-service/.env   # làm tươn
 pnpm dev                         # chạy 4 service + web
 pnpm --filter @san/user-service dev        # chỉ chạy một service
 pnpm --filter @san/user-service prisma:migrate   # tạo migration sau khi sửa schema
+node scripts/gen-jwt-key.mjs     # tạo khóa ký JWT cố định cho services/user-service/.env (không commit)
+pnpm --filter @san/nest-common build   # build lại nền tảng chung sau khi sửa (pnpm dev tự làm)
 ```

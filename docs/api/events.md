@@ -1,6 +1,6 @@
 # Sự kiện giữa các service
 
-Sự kiện là tin một service báo "việc này đã xảy ra" cho service khác, đi qua RabbitMQ, không chờ trả lời. Kiểu dữ liệu nằm trong `packages/shared/src/events`; code gửi và nhận phải dùng đúng các kiểu đó.
+Sự kiện là tin một service báo "việc này đã xảy ra" cho service khác, đi qua RabbitMQ, không chờ trả lời. Kiểu dữ liệu nằm trong `packages/shared/src/events`; code gửi và nhận phải dùng đúng các kiểu đó. Mọi cơ chế dưới đây (outbox, inbox, thử lại, hàng lỗi) đã có sẵn trong `EventBus` của `packages/nest-common`: chỉ cần gọi `publish` và `subscribe` (cách dùng ở `packages/nest-common/README.md` mục 5).
 
 ## 1. Cách gửi và nhận
 

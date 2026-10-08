@@ -1,28 +1,19 @@
-import { ValidationPipe } from '@nestjs/common';
+import './env';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { setupApp } from '@san/nest-common';
 import { AppModule } from './app.module';
 
-// Mọi API nằm dưới tiền tố này (Ingress chuyển theo tiền tố). Riêng /health để ngoài cho Kubernetes kiểm tra.
-const API_PREFIX = 'api/payment/v1';
+export const API_PREFIX = 'api/payment/v1';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix(API_PREFIX, { exclude: ['health'] });
-  // Kiểm dữ liệu gửi lên theo DTO (class-validator); bỏ trường lạ, đổi kiểu theo DTO
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-
-  // Tài liệu API tự sinh từ code: /api/payment/v1/docs (giao diện), /api/payment/v1/docs-json (file OpenAPI)
-  const config = new DocumentBuilder()
-    .setTitle('payment-service API')
-    .setDescription(
+  // Tiền tố API, mã lần vết, tài liệu API tự sinh ở /api/payment/v1/docs (xem packages/nest-common)
+  setupApp(app, {
+    apiPrefix: API_PREFIX,
+    title: 'payment-service API',
+    description:
       'Thanh toán, hoàn tiền, sổ tiền người bán, rút tiền. Quy ước chung: docs/api/README.md',
-    )
-    .setVersion('1.0')
-    .addServer('/')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup(`${API_PREFIX}/docs`, app, () => SwaggerModule.createDocument(app, config));
+  });
 
   const port = Number(process.env.PORT ?? 3003);
   await app.listen(port);

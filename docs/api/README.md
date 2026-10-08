@@ -33,7 +33,7 @@ Mỗi service một tiền tố, Ingress NGINX chuyển theo tiền tố:
 
 - Đăng nhập xong, web nhận **access token** (JWT, sống 15 phút) trong body và **refresh token** (7 ngày) trong cookie `httpOnly` chỉ gửi tới `/api/user/v1/auth`.
 - Mọi API cần đăng nhập gửi header `Authorization: Bearer <access token>`. Hết hạn (401 `TOKEN_EXPIRED`) thì web gọi `POST /api/user/v1/auth/refresh` lấy vé mới rồi gọi lại.
-- JWT ký bằng **RS256**. Khóa công khai ở `GET /api/user/v1/.well-known/jwks.json`; các service tải khi khởi động và lưu lại.
+- JWT ký bằng **RS256**. Khóa công khai ở `GET /api/user/v1/.well-known/jwks.json`; các service tải ở lần kiểm vé đầu tiên, lưu lại, gặp mã khóa (`kid`) lạ thì tải lại. Code kiểm vé có sẵn trong `packages/nest-common`.
 - Nội dung JWT: kiểu `JwtClaims` trong `packages/shared/src/auth.ts`.
 
 ```json
@@ -80,6 +80,7 @@ Mọi lỗi trả cùng một dạng (kiểu `ErrorBody` trong `packages/shared/
 | 404 `NOT_FOUND` | Không có hoặc không được phép biết là có |
 | 409 | Xung đột trạng thái (mã cụ thể theo từng API, ghi ở mục 2) |
 | 423, 429 | Bị khóa tạm / thử quá nhiều lần (`details.retryAfterSeconds`) |
+| 500 `INTERNAL_ERROR` | Lỗi trong code; chi tiết chỉ ghi vào log kèm `X-Correlation-Id`, không trả ra ngoài |
 
 ### Danh sách dài
 

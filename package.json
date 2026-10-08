@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "predev": "pnpm --filter \"./packages/**\" build",
     "dev": "pnpm -r --parallel --filter \"./services/**\" --filter \"./apps/**\" dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
@@ -15,7 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down"
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "postinstall": "pnpm --filter \"./packages/**\" build"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
