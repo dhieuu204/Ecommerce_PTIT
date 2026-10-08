@@ -142,3 +142,4 @@ Chi tiết: `phan-tich/07-quyet-dinh-erd.md`, `san-tmdt/docs/erd/`, sơ đồ `s
 | 7 | Chat | Chữ, ảnh ≤ 5 MB, thẻ sản phẩm/đơn. | MSG-01 |
 | 8 | Mã đơn | Ngày + 6 ký tự ngẫu nhiên; đơn con -1, -2. | ORD-01 |
 | 9 | Sổ tiền seller | Mỗi biến động 1 dòng + số dư lưu sẵn. | FIN-01 |
+| 10 | Rút gọn bảng | Bảng vừa đủ cho tính năng, tên dễ hiểu để trình bày: 61 bảng (12 bảng kỹ thuật). | Tất cả |

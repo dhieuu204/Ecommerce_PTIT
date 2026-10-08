@@ -1,7 +1,7 @@
 /** Sự kiện của luồng mở shop và duyệt shop (P1: SHP-01, SHP-02, SHP-03). */
 
-/** REGISTRATION: hồ sơ mở shop. CHANGE: yêu cầu đổi tên shop hoặc tài khoản ngân hàng sau khi đã duyệt. */
-export type ShopReviewKind = 'REGISTRATION' | 'CHANGE';
+/** REGISTER: hồ sơ mở shop. CHANGE: đổi tên shop hoặc tài khoản ngân hàng sau khi đã duyệt. */
+export type ApplicationType = 'REGISTER' | 'CHANGE';
 
 /** Địa chỉ theo mã GHN, kèm tên để admin đọc được mà không cần tra. */
 export interface GhnAddress {
@@ -18,46 +18,46 @@ export interface GhnAddress {
 export interface BankAccount {
   bankName: string;
   accountNumber: string;
-  accountHolder: string;
+  /** Tên chủ tài khoản */
+  accountName: string;
 }
 
-/** Bản chụp hồ sơ shop tại lúc nộp. approval-service lưu nguyên bản này để admin xem. */
-export interface ShopProfileSnapshot {
+/** Toàn bộ hồ sơ shop lúc nộp. approval-service lưu nguyên bản này để admin xem. */
+export interface ShopApplicationData {
   name: string;
   description: string;
-  /** Đường dẫn ảnh logo (MinIO), null nếu chưa có */
+  /** Ảnh logo (MinIO), null nếu chưa có */
   logoUrl: string | null;
   phone: string;
   pickupAddress: GhnAddress;
   bankAccount: BankAccount;
 }
 
-/** marketplace-service → approval-service: seller nộp hồ sơ hoặc yêu cầu đổi thông tin. */
-export const SHOP_APPLICATION_SUBMITTED = 'shop.application_submitted';
+/** marketplace-service → approval-service: seller nộp hồ sơ mở shop hoặc yêu cầu đổi thông tin. */
+export const SHOP_APPLICATION_SUBMITTED = 'shop_application.submitted';
 export interface ShopApplicationSubmittedPayload {
   shopId: string;
   /** Số phiên bản hồ sơ, tăng dần từ 1. Bản mới thay bản cũ đang chờ. */
   version: number;
-  kind: ShopReviewKind;
+  type: ApplicationType;
   owner: { userId: string; email: string; fullName: string };
-  /** Hồ sơ đầy đủ sau khi nộp (với CHANGE: hồ sơ hiện tại đã gộp phần muốn đổi) */
-  profile: ShopProfileSnapshot;
-  /** Chỉ có với CHANGE: các trường muốn đổi và giá trị cũ của chúng */
+  /** Hồ sơ đầy đủ (với CHANGE: thông tin hiện tại đã gộp phần muốn đổi) */
+  data: ShopApplicationData;
+  /** Chỉ có với CHANGE: các mục muốn đổi và giá trị cũ */
   change?: {
     fields: Array<'name' | 'bankAccount'>;
-    previous: { name?: string; bankAccount?: BankAccount };
+    old: { name?: string; bankAccount?: BankAccount };
   };
   submittedAt: string;
 }
 
-/** approval-service → marketplace-service: admin đã duyệt hoặc từ chối. */
-export const SHOP_REVIEW_DECIDED = 'shop_review.decided';
-export interface ShopReviewDecidedPayload {
-  reviewId: string;
+/** approval-service → marketplace-service: admin đã duyệt hoặc từ chối hồ sơ. */
+export const SHOP_APPLICATION_DECIDED = 'shop_application.decided';
+export interface ShopApplicationDecidedPayload {
   shopId: string;
   /** marketplace chỉ áp quyết định nếu đúng phiên bản đang chờ; khác thì bỏ qua */
   version: number;
-  kind: ShopReviewKind;
+  type: ApplicationType;
   decision: 'APPROVED' | 'REJECTED';
   /** Bắt buộc khi REJECTED */
   reason: string | null;

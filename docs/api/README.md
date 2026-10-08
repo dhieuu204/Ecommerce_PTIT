@@ -91,7 +91,7 @@ Query `page` (từ 1) và `pageSize` (mặc định 20, tối đa 100). Trả v�
 
 ### Chống gửi lặp
 
-API tạo hồ sơ (nộp hồ sơ shop, yêu cầu đổi thông tin) nhận header `Idempotency-Key` (UUID do web sinh mỗi lần bấm nút). Gửi lại cùng key thì trả lại kết quả lần đầu, không tạo bản mới.
+API tạo hồ sơ (nộp hồ sơ shop, yêu cầu đổi thông tin) nhận header `Idempotency-Key` (UUID do web sinh mỗi lần bấm nút). Key được lưu vào cột `request_key` của hồ sơ; gửi lại cùng key thì trả lại hồ sơ đã tạo, không tạo bản mới.
 
 ### Nhật ký thao tác admin
 
@@ -110,7 +110,7 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 | POST `/auth/resend-verification` | Guest | ACC-01 | Luôn trả 202 (không lộ email có tồn tại không). Cách nhau ít nhất 60 giây. |
 | POST `/auth/login` | Guest | ACC-02 | Sai → 401 `INVALID_CREDENTIALS` kèm `attemptsLeft`. Sai 5 lần liên tiếp → khóa 15 phút (423 `LOGIN_LOCKED`). Chưa xác minh → 403 `EMAIL_NOT_VERIFIED`. Bị admin khóa → 403 `ACCOUNT_LOCKED`. |
 | GET `/auth/google/start` → `/auth/google/callback` | Guest | ACC-01, ACC-02 | Email Google đã có tài khoản → tự gộp, đăng nhập được cả hai cách. Chưa có → tạo tài khoản `ACTIVE`, họ tên lấy từ Google. Đặt cookie refresh rồi chuyển về web (`returnTo`). |
-| POST `/auth/refresh` | Web (cookie) | ACC-02 | Trả access token mới và đổi luôn refresh token (dùng một lần). Refresh token cũ bị dùng lại → thu hồi cả chuỗi phiên đó. |
+| POST `/auth/refresh` | Web (cookie) | ACC-02 | Trả access token mới và đổi luôn refresh token (dùng một lần). Mỗi phiên là 1 dòng bảng `sessions`; refresh token cũ dùng lại → 401. |
 | POST `/auth/logout` | Đã đăng nhập | ACC-02 | Thu hồi refresh token hiện tại, xóa cookie. |
 | POST `/auth/forgot-password` | Guest | ACC-03 | Luôn trả 202. Gửi mã 6 số, quy tắc như mã xác minh. |
 | POST `/auth/reset-password` | Guest | ACC-03 | Email + mã + mật khẩu mới. Thành công → thu hồi mọi phiên (đăng xuất mọi nơi). |
@@ -132,20 +132,20 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 | GET `/locations/provinces` | Mọi người, user-service | SHP-03, ACC-04 | Danh sách tỉnh/huyện/xã lấy từ GHN, lưu trong market_db, việc định kỳ (pg-boss) cập nhật mỗi ngày. Không cần đăng nhập. |
 | GET `/locations/provinces/{provinceId}/districts` | Mọi người | SHP-03, ACC-04 | |
 | GET `/locations/districts/{districtId}/wards` | Mọi người | SHP-03, ACC-04 | |
-| POST `/uploads/shop-logo` | Đã đăng nhập | SHP-01 | Gửi file dạng multipart. Chỉ JPG/PNG/WebP, tối đa 2 MB. Lưu vào MinIO, trả `{ logoKey, url }`. |
+| POST `/uploads/shop-logo` | Đã đăng nhập | SHP-01 | Gửi file dạng multipart. Chỉ JPG/PNG/WebP, tối đa 2 MB. Lưu vào MinIO trong thư mục riêng của người tải (`shop-logos/<userId>/...`), trả `{ url }`. Khi nộp hồ sơ, marketplace kiểm `logoUrl` nằm trong thư mục của chính người đó. |
 | GET `/shops/me` | Đã đăng nhập | SHP-01, SHP-03 | Trạng thái shop: `NONE` (chưa nộp), `PENDING`, `REJECTED` (kèm lý do), `ACTIVE`; phiên bản hiện tại; yêu cầu đổi thông tin đang chờ (nếu có). |
-| POST `/shops/me/applications` | Đã đăng nhập | SHP-01 | Có `Idempotency-Key`. Hồ sơ đủ: tên, mô tả, logo, SĐT, địa chỉ lấy hàng (mã GHN), tài khoản ngân hàng. Tạo phiên bản mới `PENDING` (thay bản đang chờ nếu có), phát `shop.application_submitted`. Shop đã `ACTIVE` → 409 `SHOP_ALREADY_ACTIVE`. |
+| POST `/shops/me/applications` | Đã đăng nhập | SHP-01 | Có `Idempotency-Key`. Hồ sơ đủ: tên, mô tả, logo, SĐT, địa chỉ lấy hàng (mã GHN), tài khoản ngân hàng. Tạo phiên bản mới `PENDING` (thay bản đang chờ nếu có), phát `shop_application.submitted`. Shop đã `ACTIVE` → 409 `SHOP_ALREADY_ACTIVE`. |
 | PATCH `/shops/me` | Chủ shop `ACTIVE` | SHP-03 | Mô tả, logo, SĐT, địa chỉ lấy hàng: áp dụng ngay. Ghi nhật ký. |
-| POST `/shops/me/change-requests` | Chủ shop `ACTIVE` | SHP-03 | Có `Idempotency-Key`. Đổi tên shop và/hoặc tài khoản ngân hàng phải duyệt lại; shop vẫn bán bằng thông tin cũ. Phát `shop.application_submitted` loại `CHANGE`. Đang có yêu cầu chờ → bản mới thay bản cũ. |
+| POST `/shops/me/change-requests` | Chủ shop `ACTIVE` | SHP-03 | Có `Idempotency-Key`. Đổi tên shop và/hoặc tài khoản ngân hàng phải duyệt lại; shop vẫn bán bằng thông tin cũ. Phát `shop_application.submitted` loại `CHANGE`. Đang có yêu cầu chờ → bản mới thay bản cũ. |
 | GET `/admin/audit-logs` | `SYSTEM` | ADM-02 | Xem mục 1. |
 
 ### approval-service (`/api/approval/v1`)
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/admin/shop-reviews` | `MODERATION` | SHP-02 | Lọc `status` (`PENDING`, `APPROVED`, `REJECTED`, `SUPERSEDED`), `kind` (`REGISTRATION`, `CHANGE`), phân trang. Hồ sơ cũ nhất lên đầu. |
-| GET `/admin/shop-reviews/{reviewId}` | `MODERATION` | SHP-02 | Bản chụp hồ sơ nhận qua sự kiện, phần thay đổi (nếu là `CHANGE`), lịch sử các phiên bản của shop. |
-| POST `/admin/shop-reviews/{reviewId}/decision` | `MODERATION` | SHP-02 | `decision` = `APPROVE` hoặc `REJECT`; `reason` bắt buộc khi từ chối. Admin là chủ shop đó → 403 `SELF_REVIEW_FORBIDDEN`. Đã quyết → 409 `REVIEW_ALREADY_DECIDED`; có bản mới hơn → 409 `REVIEW_SUPERSEDED`. Phát `shop_review.decided`, ghi nhật ký. |
+| GET `/admin/shop-approvals` | `MODERATION` | SHP-02 | Lọc `status` (`PENDING`, `APPROVED`, `REJECTED`, `REPLACED`), `type` (`REGISTER`, `CHANGE`), phân trang. Hồ sơ cũ nhất lên đầu. |
+| GET `/admin/shop-approvals/{approvalId}` | `MODERATION` | SHP-02 | Hồ sơ nhận qua sự kiện, phần thay đổi (nếu là `CHANGE`), lịch sử các phiên bản của shop. |
+| POST `/admin/shop-approvals/{approvalId}/decision` | `MODERATION` | SHP-02 | `decision` = `APPROVE` hoặc `REJECT`; `reason` bắt buộc khi từ chối. Admin là chủ shop đó → 403 `SELF_APPROVAL_FORBIDDEN`. Đã quyết → 409 `ALREADY_DECIDED`; shop đã nộp bản mới hơn → 409 `APPLICATION_REPLACED`. Phát `shop_application.decided`, ghi nhật ký. |
 | GET `/admin/audit-logs` | `SYSTEM` | ADM-02 | Xem mục 1. |
 
 payment-service chưa có API ở P1 (ngoài `/health`).
@@ -153,8 +153,8 @@ payment-service chưa có API ở P1 (ngoài `/health`).
 ### Luồng P1 dùng các API trên
 
 1. Guest đăng ký → nhận mã qua email → xác minh → đăng nhập (hoặc Google).
-2. Vào "Shop của tôi": chọn tỉnh/huyện/xã (marketplace), tải logo, nộp hồ sơ → marketplace lưu phiên bản 1 "Chờ duyệt", phát `shop.application_submitted`.
-3. approval-service nhận sự kiện, tạo hồ sơ duyệt. Admin `MODERATION` (không phải chủ shop) duyệt hoặc từ chối → phát `shop_review.decided`.
+2. Vào "Shop của tôi": chọn tỉnh/huyện/xã (marketplace), tải logo, nộp hồ sơ → marketplace lưu phiên bản 1 "Chờ duyệt", phát `shop_application.submitted`.
+3. approval-service nhận sự kiện, tạo hồ sơ duyệt. Admin `MODERATION` (không phải chủ shop) duyệt hoặc từ chối → phát `shop_application.decided`.
 4. marketplace-service áp quyết định nếu đúng phiên bản đang chờ: duyệt thì shop "Đang hoạt động" (vào được Kênh người bán); từ chối thì "Bị từ chối" kèm lý do, seller sửa và nộp lại thành phiên bản mới.
 5. Sau khi duyệt: sửa mô tả/logo/SĐT/địa chỉ lấy hàng bằng `PATCH /shops/me` (áp dụng ngay); đổi tên shop hoặc tài khoản ngân hàng bằng `POST /shops/me/change-requests` (đi lại bước 3–4).
 

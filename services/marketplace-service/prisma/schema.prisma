@@ -1,5 +1,5 @@
 // Schema của marketplace-service [M]. Chỉ service này được đọc/ghi database market_db.
-// P1 đã chi tiết đủ cột (SHP-01, SHP-03, địa giới GHN). Khung các phase sau: docs/erd/README.md.
+// Bảng P1 đã đủ cột. Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,44 +12,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===== Địa giới hành chính theo GHN (lấy từ API GHN, cập nhật mỗi ngày bằng pg-boss) =====
+// ===== Địa chỉ hành chính (mã theo GHN, lấy từ API GHN và cập nhật mỗi ngày) =====
 
-model GhnProvince {
+model Province {
   /// ProvinceID của GHN
-  id        Int      @id
-  name      String   @db.VarChar(100)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id   Int    @id
+  name String @db.VarChar(100)
 
-  districts GhnDistrict[]
+  districts District[]
 
-  @@map("ghn_provinces")
+  @@map("provinces")
 }
 
-model GhnDistrict {
+model District {
   /// DistrictID của GHN
-  id         Int      @id
-  provinceId Int      @map("province_id")
-  name       String   @db.VarChar(100)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id         Int    @id
+  provinceId Int    @map("province_id")
+  name       String @db.VarChar(100)
 
-  province GhnProvince @relation(fields: [provinceId], references: [id])
-  wards    GhnWard[]
+  province Province @relation(fields: [provinceId], references: [id])
+  wards    Ward[]
 
   @@index([provinceId])
-  @@map("ghn_districts")
+  @@map("districts")
 }
 
-model GhnWard {
-  /// WardCode của GHN (chuỗi)
-  code       String   @db.VarChar(20)
-  districtId Int      @map("district_id")
-  name       String   @db.VarChar(100)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+model Ward {
+  /// WardCode của GHN
+  code       String @db.VarChar(20)
+  districtId Int    @map("district_id")
+  name       String @db.VarChar(100)
 
-  district GhnDistrict @relation(fields: [districtId], references: [id])
+  district District @relation(fields: [districtId], references: [id])
 
   @@id([districtId, code])
-  @@map("ghn_wards")
+  @@map("wards")
 }
 
 // ===== Shop =====
@@ -57,169 +54,116 @@ model GhnWard {
 enum ShopStatus {
   /// Đã nộp hồ sơ lần đầu, đang chờ duyệt
   PENDING
-  /// Hồ sơ lần đầu bị từ chối, seller sửa và nộp lại
+  /// Hồ sơ lần đầu bị từ chối, sửa và nộp lại
   REJECTED
   /// Đang hoạt động, vào được Kênh người bán
   ACTIVE
-  // SUSPENDED thêm ở P2 (SHP-04)
+  // SUSPENDED thêm ở P2
 }
 
-enum ShopApplicationKind {
-  REGISTRATION
+enum ApplicationType {
+  /// Hồ sơ mở shop
+  REGISTER
+  /// Đổi tên shop hoặc tài khoản ngân hàng sau khi đã duyệt
   CHANGE
 }
 
-enum ShopApplicationStatus {
+enum ApplicationStatus {
   PENDING
   APPROVED
   REJECTED
-  /// Bị bản nộp mới hơn thay thế
-  SUPERSEDED
+  /// Seller nộp bản mới trước khi admin xét bản này
+  REPLACED
 }
 
-/// Shop (1 tài khoản 1 shop). Các cột hồ sơ là thông tin ĐANG DÙNG: null cho tới khi hồ sơ đầu tiên được duyệt.
-/// Hồ sơ đang chờ nằm ở shop_applications.
+/// Shop (1 tài khoản 1 shop). Các cột là thông tin ĐANG DÙNG, trống cho tới khi hồ sơ đầu tiên được duyệt.
 model Shop {
   id                String     @id @default(uuid()) @db.Uuid
-  /// userId của chủ shop (user-service). Duy nhất: 1 tài khoản 1 shop
-  ownerUserId       String     @unique @map("owner_user_id") @db.Uuid
+  /// Chủ shop (userId bên user-service)
+  ownerId           String     @unique @map("owner_id") @db.Uuid
   status            ShopStatus @default(PENDING)
   name              String?    @unique @db.VarChar(80)
   description       String?    @db.VarChar(3000)
-  logoKey           String?    @map("logo_key") @db.VarChar(255)
+  logoUrl           String?    @map("logo_url") @db.VarChar(255)
   phone             String?    @db.VarChar(10)
   pickupProvinceId  Int?       @map("pickup_province_id")
   pickupDistrictId  Int?       @map("pickup_district_id")
   pickupWardCode    String?    @map("pickup_ward_code") @db.VarChar(20)
   pickupStreet      String?    @map("pickup_street") @db.VarChar(200)
-  /// Tên tỉnh/huyện/xã lưu kèm để hiển thị
-  pickupAddressText String?    @map("pickup_address_text") @db.VarChar(400)
+  /// Địa chỉ lấy hàng đầy đủ bằng chữ, để hiển thị
+  pickupAddress     String?    @map("pickup_address") @db.VarChar(400)
   bankName          String?    @map("bank_name") @db.VarChar(100)
   bankAccountNumber String?    @map("bank_account_number") @db.VarChar(30)
-  bankAccountHolder String?    @map("bank_account_holder") @db.VarChar(100)
-  /// Số phiên bản hồ sơ đã duyệt gần nhất; 0 nếu chưa duyệt lần nào
-  approvedVersion   Int        @default(0) @map("approved_version")
-  /// Số phiên bản lớn nhất đã nộp (để cấp số cho lần nộp tiếp)
-  latestVersion     Int        @default(0) @map("latest_version")
-  activatedAt       DateTime?  @map("activated_at") @db.Timestamptz(3)
+  bankAccountName   String?    @map("bank_account_name") @db.VarChar(100)
   createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   applications ShopApplication[]
 
-  @@index([status])
   @@map("shops")
 }
 
-/// Mỗi lần nộp hồ sơ (mở shop hoặc đổi tên/tài khoản ngân hàng) là một phiên bản.
-/// Mỗi shop tối đa một bản PENDING: chỉ mục riêng phần trong migration.
+/// Hồ sơ shop đã nộp. Mỗi lần nộp là một phiên bản (version 1, 2, 3...); mỗi shop tối đa 1 hồ sơ đang chờ.
 model ShopApplication {
-  id            String                @id @default(uuid()) @db.Uuid
-  shopId        String                @map("shop_id") @db.Uuid
-  version       Int
-  kind          ShopApplicationKind
-  status        ShopApplicationStatus @default(PENDING)
-  /// Bản chụp hồ sơ đầy đủ, đúng dạng ShopProfileSnapshot (packages/shared) đã gửi trong sự kiện
-  profile       Json
-  /// Chỉ có với CHANGE: { fields, previous }
-  change        Json?
-  rejectReason  String?               @map("reject_reason") @db.VarChar(500)
-  decidedByName String?               @map("decided_by_name") @db.VarChar(100)
-  decidedAt     DateTime?             @map("decided_at") @db.Timestamptz(3)
-  submittedAt   DateTime              @default(now()) @map("submitted_at") @db.Timestamptz(3)
+  id           String            @id @default(uuid()) @db.Uuid
+  shopId       String            @map("shop_id") @db.Uuid
+  version      Int
+  type         ApplicationType
+  status       ApplicationStatus @default(PENDING)
+  /// Toàn bộ hồ sơ lúc nộp (dạng ShopApplicationData trong packages/shared)
+  data         Json
+  rejectReason String?           @map("reject_reason") @db.VarChar(500)
+  /// Header Idempotency-Key: gửi lại cùng key thì trả lại hồ sơ này, không tạo bản mới
+  requestKey   String            @unique @map("request_key") @db.VarChar(64)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  decidedAt    DateTime?         @map("decided_at") @db.Timestamptz(3)
 
   shop Shop @relation(fields: [shopId], references: [id])
 
   @@unique([shopId, version])
-  @@index([shopId, status])
   @@map("shop_applications")
 }
 
-// ===== File tải lên (MinIO) =====
-
-enum UploadPurpose {
-  SHOP_LOGO
-  // PRODUCT_IMAGE (P2), REVIEW_IMAGE, CHAT_IMAGE, RETURN_EVIDENCE (sau)
-}
-
-/// File đã tải lên MinIO. Dùng để kiểm tra người gửi logoKey đúng là người đã tải file đó.
-model UploadedFile {
-  /// Đường dẫn object trong MinIO, ví dụ shop-logos/2026/10/<uuid>.webp
-  key         String        @id @db.VarChar(255)
-  ownerUserId String        @map("owner_user_id") @db.Uuid
-  purpose     UploadPurpose
-  contentType String        @map("content_type") @db.VarChar(50)
-  sizeBytes   Int           @map("size_bytes")
-  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  /// Thời điểm file được gắn vào hồ sơ; file không dùng sau 24 giờ có thể dọn
-  usedAt      DateTime?     @map("used_at") @db.Timestamptz(3)
-
-  @@index([ownerUserId, createdAt])
-  @@map("uploaded_files")
-}
-
-// ===== Chống gửi lặp (header Idempotency-Key) =====
-
-/// Kết quả lần gọi đầu tiên theo (người gọi, key). Gửi lại cùng key thì trả lại kết quả này. Giữ 24 giờ.
-model IdempotencyKey {
-  userId       String   @map("user_id") @db.Uuid
-  key          String   @db.VarChar(64)
-  /// Ví dụ POST /shops/me/applications
-  endpoint     String   @db.VarChar(100)
-  /// Băm nội dung request, để báo lỗi nếu cùng key mà khác nội dung
-  requestHash  String   @map("request_hash") @db.VarChar(64)
-  statusCode   Int      @map("status_code")
-  responseBody Json     @map("response_body")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-
-  @@id([userId, key])
-  @@index([createdAt])
-  @@map("idempotency_keys")
-}
-
-// ===== Bảng nền tảng: giống nhau ở cả 4 service =====
+// ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====
 
 /// Nhật ký thao tác admin (ADM-02). Chỉ thêm, không sửa, không xóa.
 model AuditLog {
-  id            String   @id @default(uuid()) @db.Uuid
-  actorId       String   @map("actor_id") @db.Uuid
-  actorName     String   @map("actor_name") @db.VarChar(100)
-  /// Ví dụ USER_PERMISSIONS_SET, SHOP_REVIEW_DECIDED
-  action        String   @db.VarChar(64)
-  /// Ví dụ USER, SHOP, SHOP_REVIEW
-  targetType    String   @map("target_type") @db.VarChar(32)
-  targetId      String   @map("target_id") @db.VarChar(64)
-  reason        String?  @db.VarChar(500)
-  before        Json?
-  after         Json?
-  correlationId String?  @map("correlation_id") @db.VarChar(64)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  actorName  String   @map("actor_name") @db.VarChar(100)
+  /// Ví dụ SET_PERMISSIONS, APPROVE_SHOP
+  action     String   @db.VarChar(64)
+  /// Ví dụ USER, SHOP
+  targetType String   @map("target_type") @db.VarChar(32)
+  targetId   String   @map("target_id") @db.VarChar(64)
+  reason     String?  @db.VarChar(500)
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([createdAt])
-  @@index([actorId, createdAt])
-  @@index([targetType, targetId])
   @@map("audit_logs")
 }
 
-/// Sự kiện chờ gửi lên RabbitMQ (outbox). Ghi trong cùng giao dịch với dữ liệu nghiệp vụ.
+/// Sự kiện chờ gửi lên RabbitMQ. Ghi cùng lúc (cùng giao dịch) với dữ liệu nghiệp vụ, tiến trình riêng gửi đi.
 model OutboxEvent {
-  /// = eventId trong vỏ sự kiện
-  id          String    @id @db.Uuid
-  type        String    @db.VarChar(100)
-  /// Toàn bộ vỏ sự kiện (EventEnvelope trong packages/shared)
-  envelope    Json
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  publishedAt DateTime? @map("published_at") @db.Timestamptz(3)
-  attempts    Int       @default(0)
-  lastError   String?   @map("last_error")
+  /// = eventId của sự kiện
+  id        String    @id @db.Uuid
+  type      String    @db.VarChar(100)
+  /// Toàn bộ sự kiện (EventEnvelope trong packages/shared)
+  payload   Json
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// null = chưa gửi được
+  sentAt    DateTime? @map("sent_at") @db.Timestamptz(3)
 
-  @@index([publishedAt, createdAt])
+  @@index([sentAt])
   @@map("outbox_events")
 }
 
-/// Sự kiện đã xử lý (inbox), để bỏ qua bản RabbitMQ giao trùng.
+/// Sự kiện đã nhận và xử lý xong. Gặp lại cùng id thì bỏ qua (RabbitMQ có thể giao 2 lần).
 model InboxEvent {
-  eventId     String   @id @map("event_id") @db.Uuid
+  /// = eventId của sự kiện
+  id          String   @id @db.Uuid
   type        String   @db.VarChar(100)
   processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
 

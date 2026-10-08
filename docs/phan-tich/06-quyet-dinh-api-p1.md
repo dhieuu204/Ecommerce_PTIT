@@ -31,7 +31,7 @@ Kết quả đi kèm (trong repo `san-tmdt`): `docs/api/README.md` (quy ước +
 | --- | --- | --- |
 | Đường dẫn | Mỗi service một tiền tố `/api/user/v1`, `/api/market/v1`, `/api/payment/v1`, `/api/approval/v1`; `/health` để ngoài. | §2 |
 | Dạng lỗi, phân trang, mã định danh | Lỗi `{code, message, details}` (message tiếng Việt); danh sách `page`/`pageSize` (20, tối đa 100); UUID; giờ UTC; tiền số nguyên đồng. | §8 |
-| Tên sự kiện | `shop.application_submitted` (marketplace → approval) và `shop_review.decided` (approval → marketplace). Sơ đồ ARCH-01 và FLOW-01 đang ghi tên dự kiến `shop.submitted`, `shop.approved`, `shop.rejected`; tên đúng là tên trong `docs/api/events.md`. | §2; §6 (ARCH-01) |
+| Tên sự kiện | `shop_application.submitted` (marketplace → approval) và `shop_application.decided` (approval → marketplace) (đổi tên lúc rút gọn ERD, xem `07`). Sơ đồ ARCH-01 và FLOW-01 đang ghi tên dự kiến `shop.submitted`, `shop.approved`, `shop.rejected`; tên đúng là tên trong `docs/api/events.md`. | §2; §6 (ARCH-01) |
 | Thư viện thêm vào 4 service | `@nestjs/swagger` (sinh tài liệu), `class-validator` và `class-transformer` (kiểm dữ liệu vào). Đều là thư viện NestJS hướng dẫn dùng chính thức. | §2 |
 | Thử lại sự kiện | 3 lần (10 giây, 1 phút, 5 phút), sau đó vào hàng đợi lỗi. | §8 |
 | Logo shop | JPG/PNG/WebP, tối đa 2 MB. | §5.1 SHP-01 |

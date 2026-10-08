@@ -86,6 +86,7 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 - NestJS: mỗi nhóm nghiệp vụ là một module trong `src/<ten-module>/` gồm `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/`. Kiểm dữ liệu vào ở DTO.
 - API theo cách **code trước, tài liệu tự sinh**: đường dẫn, quy tắc và mã lỗi phải khớp `docs/api/README.md`; dữ liệu vào/ra là class DTO có `class-validator` và chú thích tiếng Việt; controller có `@ApiTags`, API cần đăng nhập có `@ApiBearerAuth()`, mã lỗi riêng ghi bằng `@ApiResponse`. Xem tài liệu ở `/api/<service>/v1/docs` (chi tiết: `docs/api/README.md` mục 3).
 - Sự kiện: dùng đúng kiểu trong `packages/shared/src/events`, gửi qua outbox, nhận qua inbox (`docs/api/events.md`).
+- Bảng dữ liệu **ít và dễ hiểu** (chủ đồ án phải trình bày trước hội đồng): chỉ thêm bảng khi tính năng cần, bảng con nhỏ thì gộp thành cột, tên bảng/cột tiếng Anh thông dụng đọc là đoán được nghĩa. Thêm bảng ngoài khung `docs/erd` thì hỏi trước.
 - Prisma: bảng `snake_case` số nhiều qua `@@map`, model `PascalCase`. Mỗi lần đổi schema tạo một migration có tên rõ (ví dụ `add_shop_profiles`). Không sửa migration đã đẩy lên `main`.
 - Thời gian lưu UTC, hiển thị giờ Việt Nam (Asia/Ho_Chi_Minh).
 - Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác.

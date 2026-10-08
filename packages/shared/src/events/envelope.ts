@@ -10,7 +10,7 @@ export const EVENTS_EXCHANGE = 'san.events';
 export interface EventEnvelope<TType extends string, TPayload> {
   /** UUID, duy nhất cho mỗi sự kiện */
   eventId: string;
-  /** Tên sự kiện dạng <thực thể>.<động từ quá khứ>, ví dụ shop.application_submitted */
+  /** Tên sự kiện dạng <thực thể>.<động từ quá khứ>, ví dụ shop_application.submitted */
   type: TType;
   /** Phiên bản nội dung; đổi kiểu payload không tương thích thì tăng số này */
   version: number;

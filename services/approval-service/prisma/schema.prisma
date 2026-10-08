@@ -1,6 +1,6 @@
 // Schema của approval-service [A]. Chỉ service này được đọc/ghi database approval_db.
-// A chỉ lưu hồ sơ và quyết định; M và P tự áp quyết định.
-// P1 đã chi tiết đủ cột (SHP-02). Khung các phase sau: docs/erd/README.md.
+// A chỉ lưu hồ sơ và quyết định; marketplace và payment tự áp dụng quyết định.
+// Bảng P1 đã đủ cột. Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,89 +13,84 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ShopReviewKind {
-  REGISTRATION
+enum ApplicationType {
+  REGISTER
   CHANGE
 }
 
-enum ShopReviewStatus {
+enum ApprovalStatus {
   PENDING
   APPROVED
   REJECTED
-  /// Shop đã nộp bản mới hơn trước khi admin quyết
-  SUPERSEDED
+  /// Shop nộp bản mới trước khi admin xét bản này
+  REPLACED
 }
 
-/// Hồ sơ duyệt shop (SHP-02), tạo khi nhận sự kiện shop.application_submitted.
-model ShopReview {
-  id            String           @id @default(uuid()) @db.Uuid
-  shopId        String           @map("shop_id") @db.Uuid
+/// Hồ sơ shop chờ admin duyệt. Tạo khi nhận sự kiện shop_application.submitted.
+model ShopApproval {
+  id            String          @id @default(uuid()) @db.Uuid
+  shopId        String          @map("shop_id") @db.Uuid
   version       Int
-  kind          ShopReviewKind
-  status        ShopReviewStatus @default(PENDING)
-  /// Chủ shop: dùng để chặn admin tự duyệt shop của mình
-  ownerUserId   String           @map("owner_user_id") @db.Uuid
-  ownerEmail    String           @map("owner_email") @db.VarChar(254)
-  ownerName     String           @map("owner_name") @db.VarChar(100)
-  /// Bản chụp hồ sơ nhận trong sự kiện (ShopProfileSnapshot)
-  profile       Json
-  /// Chỉ có với CHANGE: { fields, previous }
-  change        Json?
-  submittedAt   DateTime         @map("submitted_at") @db.Timestamptz(3)
-  reason        String?          @db.VarChar(500)
-  decidedById   String?          @map("decided_by_id") @db.Uuid
-  decidedByName String?          @map("decided_by_name") @db.VarChar(100)
-  decidedAt     DateTime?        @map("decided_at") @db.Timestamptz(3)
-  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  type          ApplicationType
+  status        ApprovalStatus  @default(PENDING)
+  /// Chủ shop: admin trùng người này thì không được duyệt
+  ownerId       String          @map("owner_id") @db.Uuid
+  ownerName     String          @map("owner_name") @db.VarChar(100)
+  ownerEmail    String          @map("owner_email") @db.VarChar(254)
+  /// Toàn bộ hồ sơ nhận trong sự kiện
+  data          Json
+  submittedAt   DateTime        @map("submitted_at") @db.Timestamptz(3)
+  /// Lý do (bắt buộc khi từ chối)
+  reason        String?         @db.VarChar(500)
+  decidedBy     String?         @map("decided_by") @db.Uuid
+  decidedByName String?         @map("decided_by_name") @db.VarChar(100)
+  decidedAt     DateTime?       @map("decided_at") @db.Timestamptz(3)
 
   @@unique([shopId, version])
-  @@index([status, kind, submittedAt])
-  @@map("shop_reviews")
+  @@index([status, submittedAt])
+  @@map("shop_approvals")
 }
 
-// ===== Bảng nền tảng: giống nhau ở cả 4 service =====
+// ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====
 
 /// Nhật ký thao tác admin (ADM-02). Chỉ thêm, không sửa, không xóa.
 model AuditLog {
-  id            String   @id @default(uuid()) @db.Uuid
-  actorId       String   @map("actor_id") @db.Uuid
-  actorName     String   @map("actor_name") @db.VarChar(100)
-  /// Ví dụ USER_PERMISSIONS_SET, SHOP_REVIEW_DECIDED
-  action        String   @db.VarChar(64)
-  /// Ví dụ USER, SHOP, SHOP_REVIEW
-  targetType    String   @map("target_type") @db.VarChar(32)
-  targetId      String   @map("target_id") @db.VarChar(64)
-  reason        String?  @db.VarChar(500)
-  before        Json?
-  after         Json?
-  correlationId String?  @map("correlation_id") @db.VarChar(64)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  actorName  String   @map("actor_name") @db.VarChar(100)
+  /// Ví dụ SET_PERMISSIONS, APPROVE_SHOP
+  action     String   @db.VarChar(64)
+  /// Ví dụ USER, SHOP
+  targetType String   @map("target_type") @db.VarChar(32)
+  targetId   String   @map("target_id") @db.VarChar(64)
+  reason     String?  @db.VarChar(500)
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([createdAt])
-  @@index([actorId, createdAt])
-  @@index([targetType, targetId])
   @@map("audit_logs")
 }
 
-/// Sự kiện chờ gửi lên RabbitMQ (outbox). Ghi trong cùng giao dịch với dữ liệu nghiệp vụ.
+/// Sự kiện chờ gửi lên RabbitMQ. Ghi cùng lúc (cùng giao dịch) với dữ liệu nghiệp vụ, tiến trình riêng gửi đi.
 model OutboxEvent {
-  /// = eventId trong vỏ sự kiện
-  id          String    @id @db.Uuid
-  type        String    @db.VarChar(100)
-  /// Toàn bộ vỏ sự kiện (EventEnvelope trong packages/shared)
-  envelope    Json
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  publishedAt DateTime? @map("published_at") @db.Timestamptz(3)
-  attempts    Int       @default(0)
-  lastError   String?   @map("last_error")
+  /// = eventId của sự kiện
+  id        String    @id @db.Uuid
+  type      String    @db.VarChar(100)
+  /// Toàn bộ sự kiện (EventEnvelope trong packages/shared)
+  payload   Json
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// null = chưa gửi được
+  sentAt    DateTime? @map("sent_at") @db.Timestamptz(3)
 
-  @@index([publishedAt, createdAt])
+  @@index([sentAt])
   @@map("outbox_events")
 }
 
-/// Sự kiện đã xử lý (inbox), để bỏ qua bản RabbitMQ giao trùng.
+/// Sự kiện đã nhận và xử lý xong. Gặp lại cùng id thì bỏ qua (RabbitMQ có thể giao 2 lần).
 model InboxEvent {
-  eventId     String   @id @map("event_id") @db.Uuid
+  /// = eventId của sự kiện
+  id          String   @id @db.Uuid
   type        String   @db.VarChar(100)
   processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
 
