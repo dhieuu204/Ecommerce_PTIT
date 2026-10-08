@@ -10,7 +10,9 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**, chạy trên Kubernetes (k3s) khi demo.
 
-Trạng thái hiện tại: **mới có khung repo**. Chưa có bảng dữ liệu nghiệp vụ, chưa có API nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **có khung repo và danh sách API, sự kiện của P1** (`docs/api`). Chưa có bảng dữ liệu nghiệp vụ, chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+
+Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
 ## 2. Đọc gì trước khi làm một việc
 
@@ -25,7 +27,8 @@ Trạng thái hiện tại: **mới có khung repo**. Chưa có bảng dữ li�
    - Thanh toán, hoàn tiền, tiền seller, rút tiền: `05-state02-thanh-toan-hoan-tien-tien-seller`
    - Service nào gọi service nào, sự kiện: `06-arch01-kien-truc-4-service`
    - Khung giao diện (header, footer, menu 3 khu): `07-ui-khung-chung`
-5. `README.md` của service mình sắp sửa.
+5. `docs/api/README.md` (quy ước API, danh sách API của phase kèm quy tắc) và `docs/api/events.md` (sự kiện).
+6. `README.md` của service mình sắp sửa.
 
 ## 3. Bốn service và chủ dữ liệu
 
@@ -43,7 +46,7 @@ Trạng thái hiện tại: **mới có khung repo**. Chưa có bảng dữ li�
 
 1. **Mỗi service chỉ đọc/ghi database của mình.** Cần dữ liệu của service khác thì gọi REST của service đó hoặc giữ bản sao nhận qua sự kiện. Không join chéo database, không dùng chung tài khoản database.
 2. **approval-service chỉ lưu quyết định** (duyệt/từ chối, lý do, người duyệt, phiên bản). marketplace-service và payment-service nhận quyết định qua sự kiện rồi tự áp dụng.
-3. **Gọi đồng bộ:** REST/JSON, mô tả bằng OpenAPI. **Việc không cần chờ kết quả:** sự kiện qua RabbitMQ.
+3. **Gọi đồng bộ:** REST/JSON, tài liệu OpenAPI tự sinh từ code (Swagger). **Việc không cần chờ kết quả:** sự kiện qua RabbitMQ.
 4. **Phát sự kiện bằng outbox:** ghi sự kiện vào bảng outbox trong cùng transaction với dữ liệu; tiến trình riêng đẩy lên RabbitMQ. **Nhận sự kiện bằng inbox:** lưu mã sự kiện đã xử lý, gặp lại thì bỏ qua. Không giả định sự kiện tới đúng thứ tự.
 5. **Đăng nhập:** user-service cấp JWT có chữ ký. Mỗi service tự kiểm chữ ký bằng khóa công khai và **tự kiểm quyền** (đúng user, đúng shop, đúng bộ quyền admin). Không tin vào việc frontend đã ẩn nút.
 6. **Chống làm lặp (idempotency):** checkout, thanh toán, callback VNPay, hoàn tiền, tạo vận đơn, ghi tiền và chi trả đều phải có mã tham chiếu; gửi lại cùng mã thì trả kết quả cũ, không tạo tác động mới.
@@ -79,6 +82,8 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 
 - Tên biến, hàm, bảng, cột, API: **tiếng Anh**. Comment, chữ trên giao diện, thông báo lỗi cho người dùng: **tiếng Việt**.
 - NestJS: mỗi nhóm nghiệp vụ là một module trong `src/<ten-module>/` gồm `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/`. Kiểm dữ liệu vào ở DTO.
+- API theo cách **code trước, tài liệu tự sinh**: đường dẫn, quy tắc và mã lỗi phải khớp `docs/api/README.md`; dữ liệu vào/ra là class DTO có `class-validator` và chú thích tiếng Việt; controller có `@ApiTags`, API cần đăng nhập có `@ApiBearerAuth()`, mã lỗi riêng ghi bằng `@ApiResponse`. Xem tài liệu ở `/api/<service>/v1/docs` (chi tiết: `docs/api/README.md` mục 3).
+- Sự kiện: dùng đúng kiểu trong `packages/shared/src/events`, gửi qua outbox, nhận qua inbox (`docs/api/events.md`).
 - Prisma: bảng `snake_case` số nhiều qua `@@map`, model `PascalCase`. Mỗi lần đổi schema tạo một migration có tên rõ (ví dụ `add_shop_profiles`). Không sửa migration đã đẩy lên `main`.
 - Thời gian lưu UTC, hiển thị giờ Việt Nam (Asia/Ho_Chi_Minh).
 - Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác.
@@ -102,11 +107,10 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 
 ## 9. Chưa chốt: không tự quyết, phải hỏi người
 
-- **Hợp đồng API và sự kiện** (đường dẫn REST, tên và nội dung sự kiện). Tên sự kiện trong sơ đồ ARCH-01 mới là dự kiến.
-- **ERD** (bảng và cột) của cả 4 service.
+- API và sự kiện **của P2 trở đi** (P1 đã chốt trong `docs/api`). Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
+- **ERD** (bảng và cột) của cả 4 service, làm theo từng phase.
 - **STATE-03**: quy tắc trả hàng và tranh chấp (lý do, bằng chứng, hạn xử lý, lúc hoàn tiền). Chốt trước P5.
 - Thư viện điều hướng trang (router) và cách gọi API ở frontend.
-- Quy tắc mật khẩu (độ dài tối thiểu…).
 - Dockerfile và file k3s cho từng service.
 
 Gặp điểm chưa chốt: dừng phần đó, ghi rõ câu hỏi kèm 2–3 phương án và phương án đề xuất, rồi hỏi người giao việc. Không tự chọn rồi code luôn.

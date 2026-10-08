@@ -109,3 +109,20 @@ Sơ đồ: `so-do/08-flow01-dang-ky-va-mo-shop.excalidraw`
 | 7 | Sửa sau duyệt | Tên shop và tài khoản ngân hàng cần duyệt lại (vẫn bán bằng thông tin cũ); phần còn lại dùng ngay. | SHP-02, SHP-03 |
 | 8 | Đang chờ duyệt | Chỉ xem và sửa hồ sơ, chưa vào Kênh người bán. | SHP-01 |
 | 9 | Tạo admin | Admin hệ thống đầu tiên bằng lệnh seed; cấp/thu hồi bộ quyền có nhật ký. | ACC-05, ADM-02 |
+
+## Từ vòng API P1 và cách triển khai (08/10/2026)
+
+Chi tiết: `phan-tich/06-quyet-dinh-api-p1.md`, `san-tmdt/docs/api/`.
+
+| # | Chủ đề | Quyết định | ID liên quan |
+| --- | --- | --- | --- |
+| 1 | Cách triển khai | Cuốn chiếu theo phase: chi tiết (API, bảng, màn hình) của phase nào làm ngay trước khi code phase đó. | Tất cả |
+| 2 | Hợp đồng API | Code trước, Swagger tự sinh; danh sách API + quy tắc mỗi phase ghi trong `docs/api/README.md`. | Tất cả |
+| 3 | Mật khẩu | Từ 8 ký tự, không bắt buộc chữ hoa/số/ký tự đặc biệt (tối đa 72). | ACC-01, ACC-03 |
+| 4 | Đăng ký | Họ tên + email + mật khẩu. | ACC-01 |
+| 5 | Hồ sơ cho admin duyệt | Sự kiện mang bản chụp hồ sơ; approval lưu lại. | SHP-02 |
+| 6 | Quyền admin | Ghi vào JWT, thu hồi có hiệu lực tối đa 15 phút. | ACC-05 |
+| 7 | Nhật ký admin | Mỗi service tự lưu, web gộp. | ADM-02 |
+| 8 | Email khi demo | Gmail SMTP; code hằng ngày dùng Mailpit. | ACC-01, ACC-03 |
+| 9 | Tải ảnh | Qua API marketplace, lưu MinIO. | SHP-01 |
+| 10 | Tỉnh/huyện/xã | marketplace lấy từ GHN, lưu lại, cập nhật mỗi ngày. | ACC-04, SHP-03 |

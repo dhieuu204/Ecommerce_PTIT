@@ -1,7 +1,6 @@
 /**
- * Thư viện dùng chung giữa 4 service.
- * Hiện mới có tên service. Kiểu sự kiện (envelope), kiểm JWT và outbox/inbox
- * được thêm ở bước "Hợp đồng API và sự kiện" (xem docs/README.md).
+ * Thư viện dùng chung giữa 4 service: tên service, quyền và JWT, dạng lỗi/phân trang, kiểu sự kiện.
+ * Kiểm JWT và outbox/inbox sẽ thêm ở việc nền tảng chung (xem docs/api/README.md).
  */
 export const SERVICES = {
   user: 'user-service',
@@ -11,3 +10,7 @@ export const SERVICES = {
 } as const;
 
 export type ServiceName = (typeof SERVICES)[keyof typeof SERVICES];
+
+export * from './auth';
+export * from './http';
+export * from './events';
