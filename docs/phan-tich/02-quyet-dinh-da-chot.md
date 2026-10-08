@@ -126,3 +126,19 @@ Chi tiết: `phan-tich/06-quyet-dinh-api-p1.md`, `san-tmdt/docs/api/`.
 | 8 | Email khi demo | Gmail SMTP; code hằng ngày dùng Mailpit. | ACC-01, ACC-03 |
 | 9 | Tải ảnh | Qua API marketplace, lưu MinIO. | SHP-01 |
 | 10 | Tỉnh/huyện/xã | marketplace lấy từ GHN, lưu lại, cập nhật mỗi ngày. | ACC-04, SHP-03 |
+
+## Từ vòng ERD (08/10/2026)
+
+Chi tiết: `phan-tich/07-quyet-dinh-erd.md`, `san-tmdt/docs/erd/`, sơ đồ `so-do/09..12-erd-*`.
+
+| # | Chủ đề | Quyết định | ID liên quan |
+| --- | --- | --- | --- |
+| 1 | Cách làm ERD | Khung cả dự án + đủ cột cho phase sắp code (P1 đã xong). | Tất cả |
+| 2 | Danh mục | 2 cấp, sản phẩm gắn cấp 2. | CAT-01 |
+| 3 | Biến thể | Tối đa 2 nhóm × 10 lựa chọn, mỗi tổ hợp 1 SKU. | CAT-03 |
+| 4 | Ảnh | Bộ ảnh chung ≤ 9 + 1 ảnh mỗi lựa chọn của nhóm 1. | CAT-02 |
+| 5 | Yêu thích | Theo dõi shop + thả tim sản phẩm. | ENG-03 |
+| 6 | Đánh giá | Mỗi dòng hàng 1 lần, ≤ 5 ảnh, trong 30 ngày, sửa 1 lần. | ENG-01 |
+| 7 | Chat | Chữ, ảnh ≤ 5 MB, thẻ sản phẩm/đơn. | MSG-01 |
+| 8 | Mã đơn | Ngày + 6 ký tự ngẫu nhiên; đơn con -1, -2. | ORD-01 |
+| 9 | Sổ tiền seller | Mỗi biến động 1 dòng + số dư lưu sẵn. | FIN-01 |

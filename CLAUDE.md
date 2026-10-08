@@ -10,7 +10,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**, chạy trên Kubernetes (k3s) khi demo.
 
-Trạng thái hiện tại: **có khung repo và danh sách API, sự kiện của P1** (`docs/api`). Chưa có bảng dữ liệu nghiệp vụ, chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -27,8 +27,10 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
    - Thanh toán, hoàn tiền, tiền seller, rút tiền: `05-state02-thanh-toan-hoan-tien-tien-seller`
    - Service nào gọi service nào, sự kiện: `06-arch01-kien-truc-4-service`
    - Khung giao diện (header, footer, menu 3 khu): `07-ui-khung-chung`
+   - Bảng dữ liệu từng service: `09-erd-u-…`, `10-erd-m-…`, `11-erd-p-…`, `12-erd-a-…`
 5. `docs/api/README.md` (quy ước API, danh sách API của phase kèm quy tắc) và `docs/api/events.md` (sự kiện).
-6. `README.md` của service mình sắp sửa.
+6. `docs/erd/README.md` (khung bảng cả dự án, quy ước bảng/cột, cách tạo migration) và `prisma/schema.prisma` của service.
+7. `README.md` của service mình sắp sửa.
 
 ## 3. Bốn service và chủ dữ liệu
 
@@ -108,7 +110,7 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ## 9. Chưa chốt: không tự quyết, phải hỏi người
 
 - API và sự kiện **của P2 trở đi** (P1 đã chốt trong `docs/api`). Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
-- **ERD** (bảng và cột) của cả 4 service, làm theo từng phase.
+- **Chi tiết cột của bảng P2 trở đi.** Khung (tên bảng, cột chính) đã có trong `docs/erd`; chi tiết viết trước khi bắt đầu phase đó.
 - **STATE-03**: quy tắc trả hàng và tranh chấp (lý do, bằng chứng, hạn xử lý, lúc hoàn tiền). Chốt trước P5.
 - Thư viện điều hướng trang (router) và cách gọi API ở frontend.
 - Dockerfile và file k3s cho từng service.

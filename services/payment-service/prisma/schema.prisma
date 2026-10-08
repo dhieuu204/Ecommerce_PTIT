@@ -1,5 +1,5 @@
 // Schema của payment-service [P]. Chỉ service này được đọc/ghi database payment_db.
-// Bảng nghiệp vụ sẽ thêm sau khi ERD-P được chốt (xem docs/README.md).
+// P1 chưa có bảng nghiệp vụ (bắt đầu từ P3). Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,4 +10,53 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ===== Bảng nền tảng: giống nhau ở cả 4 service =====
+
+/// Nhật ký thao tác admin (ADM-02). Chỉ thêm, không sửa, không xóa.
+model AuditLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  actorId       String   @map("actor_id") @db.Uuid
+  actorName     String   @map("actor_name") @db.VarChar(100)
+  /// Ví dụ USER_PERMISSIONS_SET, SHOP_REVIEW_DECIDED
+  action        String   @db.VarChar(64)
+  /// Ví dụ USER, SHOP, SHOP_REVIEW
+  targetType    String   @map("target_type") @db.VarChar(32)
+  targetId      String   @map("target_id") @db.VarChar(64)
+  reason        String?  @db.VarChar(500)
+  before        Json?
+  after         Json?
+  correlationId String?  @map("correlation_id") @db.VarChar(64)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+/// Sự kiện chờ gửi lên RabbitMQ (outbox). Ghi trong cùng giao dịch với dữ liệu nghiệp vụ.
+model OutboxEvent {
+  /// = eventId trong vỏ sự kiện
+  id          String    @id @db.Uuid
+  type        String    @db.VarChar(100)
+  /// Toàn bộ vỏ sự kiện (EventEnvelope trong packages/shared)
+  envelope    Json
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(3)
+  attempts    Int       @default(0)
+  lastError   String?   @map("last_error")
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+/// Sự kiện đã xử lý (inbox), để bỏ qua bản RabbitMQ giao trùng.
+model InboxEvent {
+  eventId     String   @id @map("event_id") @db.Uuid
+  type        String   @db.VarChar(100)
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@map("inbox_events")
 }
