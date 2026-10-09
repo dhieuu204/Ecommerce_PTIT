@@ -1,6 +1,6 @@
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,16 @@ function MenuList({
   note?: string;
   onNavigate?: () => void;
 }) {
+  const { hash } = useLocation();
+  // Mục có #neo (ví dụ "Địa chỉ lấy hàng") chỉ sáng khi đang ở đúng neo đó; mục cùng trang không có neo thì tắt
+  const hashes = new Set(
+    menu.flatMap((g) => g.items.map((i) => i.to.split('#')[1]).filter(Boolean)),
+  );
+  const activeFor = (to: string, routeActive: boolean) => {
+    const itemHash = to.split('#')[1];
+    if (!routeActive) return false;
+    return itemHash ? hash === `#${itemHash}` : !hashes.has(hash.slice(1));
+  };
   return (
     <nav className="space-y-5 p-4">
       {menu.map((group) => (
@@ -48,7 +58,7 @@ function MenuList({
               className={({ isActive }) =>
                 cn(
                   'block rounded-lg border-l-[3px] px-3 py-2 text-sm transition',
-                  isActive
+                  activeFor(item.to, isActive)
                     ? 'border-champagne bg-champagne-50 font-medium text-navy'
                     : 'border-transparent text-ink hover:bg-ivory-200',
                 )
