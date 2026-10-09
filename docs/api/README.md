@@ -96,7 +96,7 @@ Các con số trong quy tắc P1 (hạn mã 10 phút, sai tối đa 5 lần, kh�
 
 ### Chống gửi lặp
 
-API tạo hồ sơ (nộp hồ sơ shop, yêu cầu đổi thông tin) nhận header `Idempotency-Key` (UUID do web sinh mỗi lần bấm nút). Key được lưu vào cột `request_key` của hồ sơ; gửi lại cùng key thì trả lại hồ sơ đã tạo, không tạo bản mới.
+API tạo hồ sơ (nộp hồ sơ shop, yêu cầu đổi thông tin) nhận header `Idempotency-Key` (UUID do web sinh mỗi lần bấm nút). Key được lưu vào cột `request_key` của hồ sơ; gửi lại cùng key thì trả lại hồ sơ đã tạo, không tạo bản mới. Thiếu key → 400 `IDEMPOTENCY_KEY_REQUIRED`; key đã dùng cho người khác → 409 `IDEMPOTENCY_KEY_REUSED`.
 
 ### Nhật ký thao tác admin
 
@@ -137,11 +137,11 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 | GET `/locations/provinces` | Mọi người, user-service | SHP-03, ACC-04 | Danh sách tỉnh/huyện/xã lấy từ GHN, lưu trong market_db, việc định kỳ (pg-boss) cập nhật mỗi ngày. Không cần đăng nhập. Trả mảng `[{ id, name }]` (huyện cũng vậy, xã là `[{ code, name }]`); user-service dùng dạng này để kiểm địa chỉ. |
 | GET `/locations/provinces/{provinceId}/districts` | Mọi người | SHP-03, ACC-04 | |
 | GET `/locations/districts/{districtId}/wards` | Mọi người | SHP-03, ACC-04 | |
-| POST `/uploads/shop-logo` | Đã đăng nhập | SHP-01 | Gửi file dạng multipart. Chỉ JPG/PNG/WebP, tối đa 2 MB. Lưu vào MinIO trong thư mục riêng của người tải (`shop-logos/<userId>/...`), trả `{ url }`. Khi nộp hồ sơ, marketplace kiểm `logoUrl` nằm trong thư mục của chính người đó. |
+| POST `/uploads/shop-logo` | Đã đăng nhập | SHP-01 | Gửi file dạng multipart. Chỉ JPG/PNG/WebP (nhận diện theo nội dung file), tối đa 2 MB: sai → 400 `INVALID_IMAGE` / `FILE_TOO_LARGE` / `FILE_REQUIRED`; MinIO lỗi → 503 `STORAGE_UNAVAILABLE`. Lưu vào MinIO trong thư mục riêng của người tải (`shop-logos/<userId>/...`), trả `{ url }`. Khi nộp hồ sơ, marketplace kiểm `logoUrl` nằm trong thư mục của chính người đó. |
 | GET `/shops/me` | Đã đăng nhập | SHP-01, SHP-03 | Trạng thái shop: `NONE` (chưa nộp), `PENDING`, `REJECTED` (kèm lý do), `ACTIVE`; phiên bản hiện tại; yêu cầu đổi thông tin đang chờ (nếu có). |
-| POST `/shops/me/applications` | Đã đăng nhập | SHP-01 | Có `Idempotency-Key`. Hồ sơ đủ: tên, mô tả, logo, SĐT, địa chỉ lấy hàng (mã GHN), tài khoản ngân hàng. Tạo phiên bản mới `PENDING` (thay bản đang chờ nếu có), phát `shop_application.submitted`. Shop đã `ACTIVE` → 409 `SHOP_ALREADY_ACTIVE`. |
-| PATCH `/shops/me` | Chủ shop `ACTIVE` | SHP-03 | Mô tả, logo, SĐT, địa chỉ lấy hàng: áp dụng ngay. Ghi nhật ký. |
-| POST `/shops/me/change-requests` | Chủ shop `ACTIVE` | SHP-03 | Có `Idempotency-Key`. Đổi tên shop và/hoặc tài khoản ngân hàng phải duyệt lại; shop vẫn bán bằng thông tin cũ. Phát `shop_application.submitted` loại `CHANGE`. Đang có yêu cầu chờ → bản mới thay bản cũ. |
+| POST `/shops/me/applications` | Đã đăng nhập | SHP-01 | Có `Idempotency-Key`. Hồ sơ đủ: tên, mô tả, logo, SĐT, địa chỉ lấy hàng (mã GHN), tài khoản ngân hàng. Tạo phiên bản mới `PENDING` (thay bản đang chờ nếu có), phát `shop_application.submitted`. Shop đã `ACTIVE` → 409 `SHOP_ALREADY_ACTIVE`. Tên trùng shop khác (không phân biệt hoa thường) → 409 `SHOP_NAME_TAKEN`. |
+| PATCH `/shops/me` | Chủ shop `ACTIVE` | SHP-03 | Mô tả, logo, SĐT, địa chỉ lấy hàng: áp dụng ngay. Ghi nhật ký. Shop chưa hoạt động → 409 `SHOP_NOT_ACTIVE`. |
+| POST `/shops/me/change-requests` | Chủ shop `ACTIVE` | SHP-03 | Có `Idempotency-Key`. Đổi tên shop và/hoặc tài khoản ngân hàng phải duyệt lại; shop vẫn bán bằng thông tin cũ. Phát `shop_application.submitted` loại `CHANGE`. Đang có yêu cầu chờ → bản mới thay bản cũ. Không khác thông tin hiện tại → 400 `NOTHING_TO_CHANGE`. |
 | GET `/admin/audit-logs` | `SYSTEM` | ADM-02 | Xem mục 1. |
 
 ### approval-service (`/api/approval/v1`)

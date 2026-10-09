@@ -11,6 +11,7 @@ export * from './errors/all-exceptions.filter';
 export * from './errors/app-error';
 export * from './errors/validation';
 export * from './events/event-bus';
+export * from './jobs/job.service';
 export * from './options';
 export * from './san-common.module';
 export * from './setup-app';

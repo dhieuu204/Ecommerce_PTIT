@@ -6,6 +6,7 @@ import { JwtVerifier, loadPrivateKey } from './auth/jwt';
 import { AllExceptionsFilter } from './errors/all-exceptions.filter';
 import { createValidationPipe } from './errors/validation';
 import { EventBus } from './events/event-bus';
+import { JobService } from './jobs/job.service';
 import { JWT_SIGNING_KEY, SAN_OPTIONS, SAN_PRISMA, type SanCommonOptions } from './options';
 
 /** JWKS mặc định khi chạy trên máy (user-service ở cổng 3001) */
@@ -17,7 +18,7 @@ export const DEFAULT_JWKS_URL = 'http://localhost:3001/api/user/v1/.well-known/j
  *   SanCommonModule.forRoot({ service: 'marketplace-service', prisma: PrismaService, ... })
  *
  * Sau đó mọi API tự có: kiểm đăng nhập + bộ quyền, dạng lỗi chung, kiểm dữ liệu gửi lên.
- * PrismaService, EventBus, JwtVerifier inject được ở mọi module mà không cần import lại.
+ * PrismaService, EventBus, JobService, JwtVerifier inject được ở mọi module mà không cần import lại.
  */
 @Global()
 @Module({})
@@ -41,11 +42,20 @@ export class SanCommonModule {
             : new JwtVerifier({ jwksUrl: options.jwksUrl || DEFAULT_JWKS_URL }),
         },
         EventBus,
+        JobService,
         { provide: APP_GUARD, useClass: AuthGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },
         { provide: APP_PIPE, useFactory: createValidationPipe },
       ],
-      exports: [SAN_OPTIONS, options.prisma, SAN_PRISMA, JWT_SIGNING_KEY, JwtVerifier, EventBus],
+      exports: [
+        SAN_OPTIONS,
+        options.prisma,
+        SAN_PRISMA,
+        JWT_SIGNING_KEY,
+        JwtVerifier,
+        EventBus,
+        JobService,
+      ],
     };
   }
 }

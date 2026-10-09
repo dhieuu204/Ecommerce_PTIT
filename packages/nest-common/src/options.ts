@@ -12,6 +12,8 @@ export interface SanCommonOptions {
   jwtPrivateKey?: string;
   /** 3 service còn lại: địa chỉ JWKS của user-service để tải khóa công khai */
   jwksUrl?: string;
+  /** Database của service, để chạy job hẹn giờ bằng pg-boss (JobService). Để trống: không chạy job */
+  databaseUrl?: string;
 }
 
 export const SAN_OPTIONS = Symbol('SAN_OPTIONS');

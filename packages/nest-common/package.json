@@ -13,7 +13,8 @@
   "dependencies": {
     "@san/shared": "workspace:*",
     "amqplib": "^0.10.9",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg-boss": "^10.4.2"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.1.6",

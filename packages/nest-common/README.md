@@ -10,6 +10,7 @@ Gói này gom những việc service nào cũng cần, để mỗi người ch�
 | Kết nối database                          | `PrismaService` của service (inject ở mọi module)       | 4   |
 | Gửi và nhận sự kiện (outbox/inbox)        | `EventBus.publish`, `EventBus.subscribe`                | 5   |
 | Nhật ký thao tác admin                    | `writeAudit`                                            | 6   |
+| Job hẹn giờ (pg-boss)                     | `JobService.define`, `JobService.run`                   | 8   |
 | Mã lần vết một thao tác qua nhiều service | Header `X-Correlation-Id`, tự truyền sang sự kiện       | 7   |
 | Tài liệu API tự sinh                      | `/api/<service>/v1/docs`                                |     |
 
@@ -180,3 +181,24 @@ Mỗi request có header `X-Correlation-Id` (web gửi lên hoặc tự sinh, tr
 - Gói được build thành `dist/` khi `pnpm install` và trước `pnpm dev`. Sửa gói trong lúc service đang chạy thì build lại: `pnpm --filter @san/nest-common build`.
 - Gói ảnh hưởng cả 4 service: PR sửa gói phải chạy `pnpm test` toàn repo và báo cả nhóm.
 - Thư viện gói dùng: `jsonwebtoken` (ký và kiểm JWT), `amqplib` (kết nối RabbitMQ).
+
+## 8. Job hẹn giờ (pg-boss)
+
+Việc theo giờ (đồng bộ mỗi ngày, hết hạn 15 phút, đối soát...) dùng `JobService`. Hàng đợi nằm trong database của chính service (schema `pgboss`); nhiều bản service chạy cùng lúc thì mỗi lần chạy chỉ một bản nhận. Cần truyền `databaseUrl: process.env.DATABASE_URL` vào `SanCommonModule.forRoot`.
+
+```ts
+@Injectable()
+export class LocationsService implements OnModuleInit {
+  constructor(private readonly jobs: JobService) {}
+
+  onModuleInit() {
+    // cron theo giờ Việt Nam: 3 giờ sáng mỗi ngày
+    this.jobs.define('sync-locations', { cron: '0 3 * * *' }, () => this.sync());
+  }
+}
+
+await this.jobs.run('sync-locations'); // chạy ngay một lần
+```
+
+- Lỗi trong job: thử lại 2 lần, cách 1 phút. Job nên làm được nhiều lần mà không sai (chạy lại không tạo tác động mới).
+- Khi chạy test (`NODE_ENV=test`) pg-boss không bật; test gọi thẳng hàm nghiệp vụ (`this.sync()`).

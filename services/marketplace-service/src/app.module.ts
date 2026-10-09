@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SanCommonModule } from '@san/nest-common';
+import { CoreModule } from './core.module';
 import { HealthController } from './health/health.controller';
+import { LocationsModule } from './locations/locations.module';
 import { PrismaService } from './prisma.service';
+import { ShopsModule } from './shops/shops.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -12,7 +16,12 @@ import { PrismaService } from './prisma.service';
       prisma: PrismaService,
       rabbitmqUrl: process.env.RABBITMQ_URL,
       jwksUrl: process.env.JWKS_URL,
+      databaseUrl: process.env.DATABASE_URL,
     }),
+    CoreModule,
+    LocationsModule,
+    UploadsModule,
+    ShopsModule,
   ],
   controllers: [HealthController],
 })
