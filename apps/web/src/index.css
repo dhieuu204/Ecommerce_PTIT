@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 /*
  * Bảng màu đã chốt (docs/phan-tich/05-quyet-dinh-ui-flow01.md).
@@ -6,30 +7,74 @@
  * Không viết mã màu thẳng trong component.
  */
 @theme {
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+
   --color-navy: #172554;
+  --color-navy-800: #1e3070;
   --color-navy-900: #0f1a3d;
   --color-champagne: #c8a96b;
+  --color-champagne-600: #a88a4e;
   --color-champagne-50: #f6f0e3;
   --color-ivory: #faf9f6;
+  --color-ivory-200: #efede6;
   --color-card: #ffffff;
   --color-ink: #1f2937;
-  --color-muted: #6b7280;
+  /* Khu quản trị: header màu than để không nhầm với khu mua/bán */
+  --color-charcoal: #1f2937;
 }
 
 /* Biến cho shadcn/ui: màu chính = navy, điểm nhấn = champagne. */
 :root {
+  --radius: 0.75rem;
   --background: #faf9f6;
   --foreground: #1f2937;
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
   --primary: #172554;
   --primary-foreground: #ffffff;
-  --accent: #c8a96b;
+  --secondary: #f6f0e3;
+  --secondary-foreground: #172554;
+  --muted: #f3f2ee;
+  --muted-foreground: #6b7280;
+  --accent: #f6f0e3;
   --accent-foreground: #172554;
-  --border: #e5e7eb;
+  --destructive: #dc2626;
+  --border: #e7e3d8;
+  --input: #ddd8cb;
   --ring: #c8a96b;
-  --radius: 0.75rem;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
 }

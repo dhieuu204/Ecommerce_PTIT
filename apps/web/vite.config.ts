@@ -8,5 +8,14 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
   },
-  server: { port: 5173 },
+  server: {
+    port: 5173,
+    // Gọi API qua cùng địa chỉ web (cookie đăng nhập cùng tên miền), Vite chuyển tới từng service
+    proxy: {
+      '/api/user': 'http://localhost:3001',
+      '/api/market': 'http://localhost:3002',
+      '/api/payment': 'http://localhost:3003',
+      '/api/approval': 'http://localhost:3004',
+    },
+  },
 });
