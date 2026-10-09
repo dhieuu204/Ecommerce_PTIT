@@ -163,6 +163,30 @@ describeDb('Duyệt hồ sơ shop (SHP-02)', () => {
       await t.http().get(`${API}/admin/shop-approvals?status=GIA`).set(asAdmin()).expect(400);
     });
 
+    it('tìm theo tên shop, tên hoặc email chủ shop, không phân biệt hoa thường', async () => {
+      const other = makeUser('Trần Bình');
+      const [s1, s2] = [randomUUID(), randomUUID()];
+      await t.submit(submitted({ shopId: s1, owner: seller }));
+      const base = submitted({ shopId: s2, owner: other });
+      await t.submit({ ...base, data: { ...base.data, name: 'Bếp 100% Nhà Làm' } });
+
+      const search = async (q: string) => {
+        const res = await t
+          .http()
+          .get(`${API}/admin/shop-approvals`)
+          .query({ q })
+          .set(asAdmin())
+          .expect(200);
+        return res.body.items.map((r: { shopId: string }) => r.shopId);
+      };
+      expect(await search('hoa MAI')).toEqual([s1]);
+      expect(await search('trần bình')).toEqual([s2]);
+      expect(await search(other.email.toUpperCase())).toEqual([s2]);
+      expect(await search('100%')).toEqual([s2]);
+      expect(await search('%')).toEqual([s2]);
+      expect(await search('không có')).toEqual([]);
+    });
+
     it('chi tiết kèm lịch sử các phiên bản, mới nhất trước; mã sai → 404', async () => {
       const shopId = randomUUID();
       await t.submit(submitted({ shopId, owner: seller, version: 1 }));

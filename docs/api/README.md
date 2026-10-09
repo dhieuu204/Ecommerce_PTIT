@@ -148,7 +148,7 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/admin/shop-approvals` | `MODERATION` | SHP-02 | Lọc `status` (`PENDING`, `APPROVED`, `REJECTED`, `REPLACED`), `type` (`REGISTER`, `CHANGE`), phân trang. Hồ sơ cũ nhất lên đầu. |
+| GET `/admin/shop-approvals` | `MODERATION` | SHP-02 | Lọc `status` (`PENDING`, `APPROVED`, `REJECTED`, `REPLACED`), `type` (`REGISTER`, `CHANGE`), `q` (tìm theo tên shop, tên hoặc email chủ shop), phân trang. Hồ sơ cũ nhất lên đầu. |
 | GET `/admin/shop-approvals/{approvalId}` | `MODERATION` | SHP-02 | Hồ sơ nhận qua sự kiện, phần thay đổi (nếu là `CHANGE`), lịch sử các phiên bản của shop. |
 | POST `/admin/shop-approvals/{approvalId}/decision` | `MODERATION` | SHP-02 | `decision` = `APPROVE` hoặc `REJECT`; `reason` bắt buộc khi từ chối. Admin là chủ shop đó → 403 `SELF_APPROVAL_FORBIDDEN`. Đã quyết → 409 `ALREADY_DECIDED`; shop đã nộp bản mới hơn → 409 `APPLICATION_REPLACED`. Phát `shop_application.decided`, ghi nhật ký. |
 | GET `/admin/audit-logs` | `SYSTEM` | ADM-02 | Xem mục 1. |

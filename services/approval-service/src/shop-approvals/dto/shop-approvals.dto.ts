@@ -24,6 +24,14 @@ export class ListShopApprovalsQuery extends PageQuery {
   @IsOptional()
   @IsIn(APPLICATION_TYPES, { message: 'Loại hồ sơ không hợp lệ.' })
   type?: (typeof APPLICATION_TYPES)[number];
+
+  /** Tìm theo tên shop, tên hoặc email chủ shop (không phân biệt hoa thường) */
+  @ApiPropertyOptional({ example: 'hoa mai' })
+  @Transform(trimToUndefined)
+  @IsOptional()
+  @IsString()
+  @MaxLength(100, { message: 'Từ khóa tối đa 100 ký tự.' })
+  q?: string;
 }
 
 export class DecisionDto {

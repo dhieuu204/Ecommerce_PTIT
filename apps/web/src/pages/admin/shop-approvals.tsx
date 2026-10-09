@@ -1,11 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronRight, ClipboardCheck, Clock3, Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { nativeSelectClass } from '@/components/console/form-field';
 import { Pager } from '@/components/console/pager';
 import { PageHeader } from '@/components/layout/page-header';
+import { useDebounced } from '@/hooks/use-debounced';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -67,7 +68,9 @@ export function ShopApprovalsPage() {
   const status = (params.get('status') ?? 'PENDING') as ApprovalStatus | 'ALL';
   const type = (params.get('type') ?? '') as ApprovalType | '';
   const page = Math.max(1, Number(params.get('page')) || 1);
-  const [search, setSearch] = useState('');
+  const q = params.get('q') ?? '';
+  const [search, setSearch] = useState(q);
+  const debounced = useDebounced(search.trim());
 
   const update = (next: Record<string, string | null>) => {
     const p = new URLSearchParams(params);
@@ -79,13 +82,19 @@ export function ShopApprovalsPage() {
     setParams(p, { replace: true });
   };
 
+  // Gõ xong mới đưa từ khóa lên đường dẫn (về trang 1), API tìm trên mọi trang
+  useEffect(() => {
+    if (debounced !== q) update({ q: debounced || null });
+  }, [debounced]);
+
   const list = useQuery({
-    queryKey: [...approvalsKey, { status, type, page }],
+    queryKey: [...approvalsKey, { status, type, page, q }],
     queryFn: () =>
       api<Page<ShopApprovalRow>>(`${API.approval}/admin/shop-approvals`, {
         query: {
           status: status === 'ALL' ? undefined : status,
           type: type || undefined,
+          q: q || undefined,
           page,
           pageSize: PAGE_SIZE,
         },
@@ -101,15 +110,7 @@ export function ShopApprovalsPage() {
       }),
   });
 
-  // Tìm theo tên shop / chủ shop: API chưa có tham số tìm nên lọc trong trang đang xem
-  const q = search.trim().toLowerCase();
-  const rows = (list.data?.items ?? []).filter(
-    (r) =>
-      !q ||
-      r.shopName.toLowerCase().includes(q) ||
-      r.ownerName.toLowerCase().includes(q) ||
-      r.ownerEmail.toLowerCase().includes(q),
-  );
+  const rows = list.data?.items ?? [];
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -161,7 +162,7 @@ export function ShopApprovalsPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm tên shop, chủ shop…"
                 className="h-9 rounded-full bg-white pr-8 pl-9"
-                aria-label="Tìm trong trang này"
+                aria-label="Tìm hồ sơ"
               />
               {search && (
                 <button
@@ -203,7 +204,7 @@ export function ShopApprovalsPage() {
             }
             text={
               q
-                ? 'Từ khóa chỉ lọc trong trang đang xem. Thử bỏ bớt bộ lọc hoặc sang trang khác.'
+                ? 'Thử từ khóa khác, hoặc chọn tab "Tất cả".'
                 : status === 'PENDING'
                   ? 'Bạn đã xử lý hết. Hồ sơ mới sẽ hiện ở đây khi seller nộp.'
                   : `Không có hồ sơ "${status === 'ALL' ? 'nào' : APPROVAL_STATUS[status].label}" theo bộ lọc này.`
@@ -321,8 +322,7 @@ export function ShopApprovalsPage() {
         )}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Cột "Đã chờ" tô đỏ khi hồ sơ chờ quá {OVERDUE_HOURS} giờ. Ô tìm kiếm lọc trong trang đang
-        xem.
+        Cột "Đã chờ" tô đỏ khi hồ sơ chờ quá {OVERDUE_HOURS} giờ.
       </p>
     </div>
   );

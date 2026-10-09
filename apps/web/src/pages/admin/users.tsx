@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { nativeSelectClass } from '@/components/console/form-field';
 import { Pager } from '@/components/console/pager';
+import { useDebounced } from '@/hooks/use-debounced';
 import { PageHeader } from '@/components/layout/page-header';
 import { PERMISSION_LABELS } from '@/components/layout/admin-layout';
 import { Input } from '@/components/ui/input';
@@ -37,16 +38,6 @@ export function PermissionChips({ perms }: { perms: Permission[] }) {
       ))}
     </div>
   );
-}
-
-/** Ô tìm: gõ xong 300ms mới gọi API */
-function useDebounced<T>(value: T, ms = 300): T {
-  const [v, setV] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return v;
 }
 
 /**

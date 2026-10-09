@@ -77,6 +77,14 @@ export class ShopApprovalsService {
   /** Danh sách, hồ sơ nộp sớm nhất lên đầu */
   async list(q: ListShopApprovalsQuery): Promise<Page<ShopApprovalRow>> {
     const where: Prisma.ShopApprovalWhereInput = { status: q.status, type: q.type };
+    if (q.q) {
+      // Tên shop nằm trong cột data (JSON) nên tìm bằng SQL; % và _ người dùng gõ được coi là chữ thường
+      const like = `%${q.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      const found = await this.prisma.$queryRaw<Array<{ id: string }>>`
+        SELECT id FROM shop_approvals
+        WHERE data->>'name' ILIKE ${like} OR owner_name ILIKE ${like} OR owner_email ILIKE ${like}`;
+      where.id = { in: found.map((r) => r.id) };
+    }
     const [items, total] = await this.prisma.$transaction([
       this.prisma.shopApproval.findMany({
         where,
