@@ -1,6 +1,6 @@
 # Sàn TMĐT nhiều shop (đồ án)
 
-Sàn thương mại điện tử nhiều shop, kiến trúc **4 microservice + 1 frontend**, chạy trên Kubernetes (k3s) khi demo.
+Sàn thương mại điện tử nhiều shop, kiến trúc **4 microservice + 1 frontend**. Hiện chạy bằng Docker; Kubernetes (k3s) làm sau khi xong các phase.
 
 | Thư mục                        | Nội dung                                                                              |
 | ------------------------------ | ------------------------------------------------------------------------------------- |

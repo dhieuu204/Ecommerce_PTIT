@@ -90,6 +90,10 @@ Query `page` (từ 1) và `pageSize` (mặc định 20, tối đa 100). Trả v�
 { "items": [], "page": 1, "pageSize": 20, "total": 57 }
 ```
 
+### Con số cấu hình
+
+Các con số trong quy tắc P1 (hạn mã 10 phút, sai tối đa 5 lần, khóa đăng nhập 15 phút, gửi lại mã sau 60 giây, tối đa 10 địa chỉ, logo tối đa 2 MB…) đọc từ file `.env` của service, có giá trị mặc định trong code và được liệt kê trong `.env.example`. Từ P3 các con số về đơn và tiền chuyển vào bảng `settings` để admin sửa trên web (quyết định 09/10, `docs/phan-tich/08-quyet-dinh-chot-p1.md`).
+
 ### Chống gửi lặp
 
 API tạo hồ sơ (nộp hồ sơ shop, yêu cầu đổi thông tin) nhận header `Idempotency-Key` (UUID do web sinh mỗi lần bấm nút). Key được lưu vào cột `request_key` của hồ sơ; gửi lại cùng key thì trả lại hồ sơ đã tạo, không tạo bản mới.

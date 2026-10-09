@@ -8,9 +8,9 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Đồ án môn học: **sàn thương mại điện tử nhiều shop** (giống Shopee thu nhỏ). Có đủ vòng đời mua, bán và vận hành: đăng ký, mở shop, đăng sản phẩm, giỏ hàng, voucher, đặt hàng nhiều shop một lần, thanh toán VNPay hoặc COD, giao hàng qua GHN, trả hàng, tranh chấp, chat, thông báo, đánh giá, tiền của seller và rút tiền.
 
-Kiến trúc: **4 backend service + 1 frontend**, chạy trên Kubernetes (k3s) khi demo.
+Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; cuối P1 có Dockerfile). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
-Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`), **nền tảng chung đã gắn vào 4 service** (`packages/nest-common`: đăng nhập/quyền, dạng lỗi, phân trang, sự kiện outbox/inbox, nhật ký admin). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`), **nền tảng chung đã gắn vào 4 service** (`packages/nest-common`: đăng nhập/quyền, dạng lỗi, phân trang, sự kiện outbox/inbox, nhật ký admin), **khung màn hình P1** (`docs/so-do/13-ui-man-hinh-p1`). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -26,7 +26,8 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
    - Trạng thái đơn con, vận đơn: `04-state01-vong-doi-don-con`
    - Thanh toán, hoàn tiền, tiền seller, rút tiền: `05-state02-thanh-toan-hoan-tien-tien-seller`
    - Service nào gọi service nào, sự kiện: `06-arch01-kien-truc-4-service`
-   - Khung giao diện (header, footer, menu 3 khu): `07-ui-khung-chung`
+   - Khung giao diện (header, footer, menu 3 khu) và màn hình đăng nhập/đăng ký: `07-ui-khung-chung`
+   - Màn hình P1 (hồ sơ, sổ địa chỉ, mở shop, Hồ sơ shop, admin duyệt shop, người dùng và quyền, nhật ký): `13-ui-man-hinh-p1`
    - Bảng dữ liệu từng service: `09-erd-u-…`, `10-erd-m-…`, `11-erd-p-…`, `12-erd-a-…`
 5. `docs/api/README.md` (quy ước API, danh sách API của phase kèm quy tắc) và `docs/api/events.md` (sự kiện).
 6. `docs/erd/README.md` (khung bảng cả dự án, quy ước bảng/cột, cách tạo migration) và `prisma/schema.prisma` của service.
@@ -92,7 +93,7 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 - Bảng dữ liệu **ít và dễ hiểu** (chủ đồ án phải trình bày trước hội đồng): chỉ thêm bảng khi tính năng cần, bảng con nhỏ thì gộp thành cột, tên bảng/cột tiếng Anh thông dụng đọc là đoán được nghĩa. Thêm bảng ngoài khung `docs/erd` thì hỏi trước.
 - Prisma: bảng `snake_case` số nhiều qua `@@map`, model `PascalCase`. Mỗi lần đổi schema tạo một migration có tên rõ (ví dụ `add_shop_profiles`). Không sửa migration đã đẩy lên `main`.
 - Thời gian lưu UTC, hiển thị giờ Việt Nam (Asia/Ho_Chi_Minh).
-- Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác.
+- Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác. P1: đọc từ `.env` của service (có giá trị mặc định trong code, ghi vào `.env.example`). Từ P3: bảng `settings`, admin sửa trên web.
 - Thao tác của admin (duyệt, từ chối, cấp quyền, hoàn tay…) đều ghi nhật ký bằng `writeAudit(tx, ...)`: ai, lúc nào, đối tượng, lý do.
 - Test: Jest cho backend (file `*.spec.ts` cạnh file code). Logic tiền, trạng thái và quyền **bắt buộc có test**.
 - Định dạng bằng Prettier, kiểm bằng ESLint. Chạy `pnpm format` trước khi commit.
@@ -117,7 +118,6 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 - **Chi tiết cột của bảng P2 trở đi.** Khung (tên bảng, cột chính) đã có trong `docs/erd`; chi tiết viết trước khi bắt đầu phase đó.
 - **STATE-03**: quy tắc trả hàng và tranh chấp (lý do, bằng chứng, hạn xử lý, lúc hoàn tiền). Chốt trước P5.
 - Thư viện điều hướng trang (router) và cách gọi API ở frontend.
-- Dockerfile và file k3s cho từng service.
 
 Gặp điểm chưa chốt: dừng phần đó, ghi rõ câu hỏi kèm 2–3 phương án và phương án đề xuất, rồi hỏi người giao việc. Không tự chọn rồi code luôn.
 
