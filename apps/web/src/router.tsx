@@ -8,6 +8,15 @@ import { sessionStore } from '@/lib/api';
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
 import { Placeholder } from '@/pages/placeholder';
+import { AddressesPage } from '@/pages/account/addresses';
+import { MyShopPage } from '@/pages/account/my-shop';
+import { PasswordPage } from '@/pages/account/password';
+import { ProfilePage } from '@/pages/account/profile';
+import { ShopApplyPage } from '@/pages/account/shop-apply';
+import { ForgotPasswordPage } from '@/pages/auth/forgot-password';
+import { LoginPage } from '@/pages/auth/login';
+import { RegisterPage } from '@/pages/auth/register';
+import { VerifyEmailPage } from '@/pages/auth/verify-email';
 
 /**
  * Bảng đường dẫn của web (React Router). Đường dẫn tiếng Việt không dấu.
@@ -25,10 +34,10 @@ export const router = createBrowserRouter([
     element: <ShopLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'dang-nhap', element: <Placeholder title="Đăng nhập" /> },
-      { path: 'dang-ky', element: <Placeholder title="Đăng ký" /> },
-      { path: 'xac-minh-email', element: <Placeholder title="Xác minh email" /> },
-      { path: 'quen-mat-khau', element: <Placeholder title="Quên mật khẩu" /> },
+      { path: 'dang-nhap', element: <LoginPage /> },
+      { path: 'dang-ky', element: <RegisterPage /> },
+      { path: 'xac-minh-email', element: <VerifyEmailPage /> },
+      { path: 'quen-mat-khau', element: <ForgotPasswordPage /> },
       {
         element: <RequireAuth />,
         children: [
@@ -37,11 +46,11 @@ export const router = createBrowserRouter([
             element: <AccountLayout />,
             children: [
               { index: true, element: <Navigate to="ho-so" replace /> },
-              { path: 'ho-so', element: <Placeholder title="Hồ sơ của tôi" /> },
-              { path: 'mat-khau', element: <Placeholder title="Đổi mật khẩu" /> },
-              { path: 'dia-chi', element: <Placeholder title="Sổ địa chỉ" /> },
-              { path: 'shop', element: <Placeholder title="Shop của tôi" /> },
-              { path: 'shop/dang-ky', element: <Placeholder title="Đăng ký mở shop" /> },
+              { path: 'ho-so', element: <ProfilePage /> },
+              { path: 'mat-khau', element: <PasswordPage /> },
+              { path: 'dia-chi', element: <AddressesPage /> },
+              { path: 'shop', element: <MyShopPage /> },
+              { path: 'shop/dang-ky', element: <ShopApplyPage /> },
             ],
           },
         ],
