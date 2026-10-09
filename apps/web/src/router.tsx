@@ -7,7 +7,12 @@ import { ShopLayout } from '@/components/layout/shop-layout';
 import { sessionStore } from '@/lib/api';
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
+import { AuditLogsPage } from '@/pages/admin/audit-logs';
+import { ShopApprovalDetailPage } from '@/pages/admin/shop-approval-detail';
+import { ShopApprovalsPage } from '@/pages/admin/shop-approvals';
+import { UsersPage } from '@/pages/admin/users';
 import { Placeholder } from '@/pages/placeholder';
+import { ShopProfilePage } from '@/pages/seller/shop-profile';
 
 /**
  * Bảng đường dẫn của web (React Router). Đường dẫn tiếng Việt không dấu.
@@ -60,7 +65,7 @@ export const router = createBrowserRouter([
             element: <SellerLayout />,
             children: [
               { index: true, element: <Navigate to="ho-so-shop" replace /> },
-              { path: 'ho-so-shop', element: <Placeholder title="Hồ sơ shop" /> },
+              { path: 'ho-so-shop', element: <ShopProfilePage /> },
             ],
           },
         ],
@@ -76,18 +81,15 @@ export const router = createBrowserRouter([
               {
                 element: <RequirePermission any={['MODERATION']} />,
                 children: [
-                  { path: 'duyet-shop', element: <Placeholder title="Duyệt shop" /> },
-                  {
-                    path: 'duyet-shop/:approvalId',
-                    element: <Placeholder title="Chi tiết hồ sơ" />,
-                  },
+                  { path: 'duyet-shop', element: <ShopApprovalsPage /> },
+                  { path: 'duyet-shop/:approvalId', element: <ShopApprovalDetailPage /> },
                 ],
               },
               {
                 element: <RequirePermission any={['SYSTEM']} />,
                 children: [
-                  { path: 'nguoi-dung', element: <Placeholder title="Người dùng và quyền" /> },
-                  { path: 'nhat-ky', element: <Placeholder title="Nhật ký thao tác" /> },
+                  { path: 'nguoi-dung', element: <UsersPage /> },
+                  { path: 'nhat-ky', element: <AuditLogsPage /> },
                 ],
               },
             ],
