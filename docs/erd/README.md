@@ -156,7 +156,7 @@ Sơ đồ: `docs/so-do/12-erd-a-approval-service`
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `shop_approvals` | P1 | id<br>shop_id ↗M, version<br>type: REGISTER \| CHANGE<br>status: PENDING \| APPROVED \| REJECTED<br>owner_id ↗U (không tự duyệt)<br>data (hồ sơ nhận được)<br>reason, decided_by, decided_at | Duyệt hồ sơ shop |
+| `shop_approvals` | P1 | id<br>shop_id ↗M, version<br>type: REGISTER \| CHANGE<br>status: PENDING \| APPROVED \| REJECTED \| REPLACED<br>owner_id ↗U (không tự duyệt)<br>data (hồ sơ nhận được)<br>change (phần muốn đổi, chỉ với CHANGE)<br>reason, decided_by, decided_at | Duyệt hồ sơ shop |
 | `violations` | P2 | id<br>target: SHOP \| PRODUCT ↗M<br>reporter_id? ↗U, reason, images<br>action: SUSPEND \| RESTORE \| REMOVE<br>status, decided_by | Báo cáo vi phạm, đình chỉ |
 
 ### Kiểm tra đơn (P3)

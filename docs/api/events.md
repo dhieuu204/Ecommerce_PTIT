@@ -48,7 +48,7 @@ Kiểu: `ShopApplicationSubmittedPayload` trong `packages/shared/src/events/shop
 | `change` | Chỉ có với `CHANGE`: `fields` (các mục muốn đổi: `name`, `bankAccount`) và `old` (giá trị cũ) |
 | `submittedAt` | Thời điểm nộp |
 
-approval-service lưu nguyên hồ sơ này (bảng `shop_approvals`) để admin xem, không gọi ngược sang marketplace. Hồ sơ cũ hơn của cùng shop đang chờ thì chuyển thành `REPLACED`.
+approval-service lưu nguyên hồ sơ này (bảng `shop_approvals`) để admin xem, không gọi ngược sang marketplace. Hồ sơ cũ hơn của cùng shop đang chờ thì chuyển thành `REPLACED`; sự kiện tới sai thứ tự (đã có phiên bản mới hơn) thì lưu luôn là `REPLACED`; nhận trùng phiên bản thì bỏ qua.
 
 ### `shop_application.decided` (version 1)
 
