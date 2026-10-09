@@ -110,6 +110,11 @@ export class EventBus implements OnApplicationBootstrap, OnApplicationShutdown {
   private async connect(): Promise<void> {
     try {
       const connection = await amqp.connect(this.options.rabbitmqUrl!);
+      // App đã tắt trong lúc đang kết nối: đóng luôn, không để kết nối treo giữ tiến trình
+      if (this.stopped) {
+        await connection.close().catch(() => undefined);
+        return;
+      }
       const channel = await connection.createConfirmChannel();
       connection.on('error', (e: Error) => this.logger.error(`RabbitMQ lỗi: ${e.message}`));
       connection.on('close', () => this.reconnectLater());

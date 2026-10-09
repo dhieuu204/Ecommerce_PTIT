@@ -1,7 +1,10 @@
 import { Logger, Module } from '@nestjs/common';
 import { generateDevPrivateKey, SanCommonModule } from '@san/nest-common';
+import { AdminUsersModule } from './admin-users/admin-users.module';
 import { AuthModule } from './auth/auth.module';
+import { CoreModule } from './core.module';
 import { HealthController } from './health/health.controller';
+import { MeModule } from './me/me.module';
 import { PrismaService } from './prisma.service';
 
 /** Khóa ký access token. Máy dev chưa đặt thì dùng khóa tạm (scripts/gen-jwt-key.mjs tạo khóa cố định). */
@@ -25,7 +28,10 @@ function jwtPrivateKey(): string {
       rabbitmqUrl: process.env.RABBITMQ_URL,
       jwtPrivateKey: jwtPrivateKey(),
     }),
+    CoreModule,
     AuthModule,
+    MeModule,
+    AdminUsersModule,
   ],
   controllers: [HealthController],
 })

@@ -1,6 +1,7 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { AuditLogController } from './db/audit-log.controller';
 import { JwtVerifier, loadPrivateKey } from './auth/jwt';
 import { AllExceptionsFilter } from './errors/all-exceptions.filter';
 import { createValidationPipe } from './errors/validation';
@@ -25,6 +26,8 @@ export class SanCommonModule {
     const signingKey = options.jwtPrivateKey ? loadPrivateKey(options.jwtPrivateKey) : undefined;
     return {
       module: SanCommonModule,
+      // GET /admin/audit-logs có sẵn ở mọi service
+      controllers: [AuditLogController],
       providers: [
         { provide: SAN_OPTIONS, useValue: options },
         options.prisma,

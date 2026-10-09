@@ -110,23 +110,23 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| POST `/auth/register` | Guest | ACC-01 | Nhập họ tên, email, mật khẩu (**từ 8 ký tự, không bắt buộc chữ hoa/số/ký tự đặc biệt**; tối đa 72). Tạo tài khoản `UNVERIFIED`, gửi mã 6 số qua email (hạn 10 phút, sai tối đa 5 lần). Email đã xác minh → 409 `EMAIL_TAKEN`. Email chưa xác minh → cập nhật và gửi mã mới. |
+| POST `/auth/register` | Guest | ACC-01 | Nhập họ tên, email, mật khẩu (**từ 8 ký tự, không bắt buộc chữ hoa/số/ký tự đặc biệt**; tối đa 72). Tạo tài khoản `UNVERIFIED`, gửi mã 6 số qua email (hạn 10 phút, sai tối đa 5 lần). Email đã xác minh → 409 `EMAIL_TAKEN`. Email chưa xác minh → cập nhật và gửi mã mới. Không gửi được mail → 503 `MAIL_SEND_FAILED` (tài khoản vẫn tạo, bấm gửi lại mã). |
 | POST `/auth/verify-email` | Guest | ACC-01 | Đúng mã → `ACTIVE` và đăng nhập luôn. Sai → 400 `CODE_INVALID` kèm `attemptsLeft`. Hết hạn hoặc sai 5 lần → 400 `CODE_EXPIRED`. |
 | POST `/auth/resend-verification` | Guest | ACC-01 | Luôn trả 202 (không lộ email có tồn tại không). Cách nhau ít nhất 60 giây. |
 | POST `/auth/login` | Guest | ACC-02 | Sai → 401 `INVALID_CREDENTIALS` kèm `attemptsLeft`. Sai 5 lần liên tiếp → khóa 15 phút (423 `LOGIN_LOCKED`). Chưa xác minh → 403 `EMAIL_NOT_VERIFIED`. Bị admin khóa → 403 `ACCOUNT_LOCKED`. |
-| GET `/auth/google/start` → `/auth/google/callback` | Guest | ACC-01, ACC-02 | Email Google đã có tài khoản → tự gộp, đăng nhập được cả hai cách. Chưa có → tạo tài khoản `ACTIVE`, họ tên lấy từ Google. Đặt cookie refresh rồi chuyển về web (`returnTo`). |
+| GET `/auth/google/start` → `/auth/google/callback` | Guest | ACC-01, ACC-02 | Email Google đã có tài khoản → tự gộp, đăng nhập được cả hai cách. Chưa có → tạo tài khoản `ACTIVE`, họ tên lấy từ Google. Gộp vào tài khoản chưa xác minh thì xóa mật khẩu cũ (người đặt chưa chứng minh là chủ email). Đặt cookie refresh rồi chuyển về web (`returnTo`); lỗi thì về `/dang-nhap?error=...`. Chưa cấu hình Google → 503 `GOOGLE_NOT_CONFIGURED`. |
 | POST `/auth/refresh` | Web (cookie) | ACC-02 | Trả access token mới và đổi luôn refresh token (dùng một lần). Mỗi phiên là 1 dòng bảng `sessions`; refresh token cũ dùng lại → 401. |
 | POST `/auth/logout` | Đã đăng nhập | ACC-02 | Thu hồi refresh token hiện tại, xóa cookie. |
 | POST `/auth/forgot-password` | Guest | ACC-03 | Luôn trả 202. Gửi mã 6 số, quy tắc như mã xác minh. |
 | POST `/auth/reset-password` | Guest | ACC-03 | Email + mã + mật khẩu mới. Thành công → thu hồi mọi phiên (đăng xuất mọi nơi). |
 | GET, PATCH `/me` | Đã đăng nhập | ACC-04 | Sửa họ tên, SĐT (`0` + 9 số), ngày sinh, giới tính. Không sửa email ở P1. |
-| POST `/me/password` | Đã đăng nhập | ACC-03 | Cần mật khẩu hiện tại; tài khoản chỉ có Google thì bỏ trống để đặt lần đầu. Thu hồi các phiên khác. |
-| GET, POST `/me/addresses` | Đã đăng nhập | ACC-04 | Tối đa 10 địa chỉ. Mã tỉnh/huyện/xã kiểm qua marketplace-service. Địa chỉ đầu tiên tự thành mặc định. |
+| POST `/me/password` | Đã đăng nhập | ACC-03 | Cần mật khẩu hiện tại (sai → 400 `WRONG_PASSWORD`); tài khoản chỉ có Google thì bỏ trống để đặt lần đầu. Thu hồi các phiên khác (vé mang mã phiên `sid`). |
+| GET, POST `/me/addresses` | Đã đăng nhập | ACC-04 | Tối đa 10 địa chỉ (409 `ADDRESS_LIMIT`). Mã tỉnh/huyện/xã kiểm qua marketplace-service (không gọi được → 503 `LOCATION_SERVICE_UNAVAILABLE`). Địa chỉ đầu tiên tự thành mặc định. |
 | PATCH, DELETE `/me/addresses/{addressId}` | Đã đăng nhập | ACC-04 | Xóa địa chỉ mặc định → địa chỉ mới nhất còn lại thành mặc định. |
 | POST `/me/addresses/{addressId}/default` | Đã đăng nhập | ACC-04 | |
 | GET `/admin/users`, `/admin/users/{userId}` | `SYSTEM` | ACC-05 | Lọc theo email/tên, trạng thái, bộ quyền. |
 | PUT `/admin/users/{userId}/permissions` | `SYSTEM` | ACC-05 | Gửi danh sách đầy đủ + lý do. Không tự bỏ `SYSTEM` của mình (409 `CANNOT_REMOVE_OWN_SYSTEM`). Bỏ quyền → thu hồi refresh token người đó. Ghi nhật ký. |
-| POST `/admin/users/{userId}/lock`, `/unlock` | `SYSTEM` | ACC-05 | Bắt buộc lý do. Khóa → thu hồi mọi phiên. Ghi nhật ký. |
+| POST `/admin/users/{userId}/lock`, `/unlock` | `SYSTEM` | ACC-05 | Bắt buộc lý do. Khóa → thu hồi mọi phiên. Không tự khóa mình (409 `CANNOT_LOCK_SELF`); khóa lại tài khoản đang khóa → 409 `ALREADY_LOCKED`, mở khóa tài khoản không bị khóa → 409 `NOT_LOCKED`. Ghi nhật ký. |
 | GET `/admin/audit-logs` | `SYSTEM` | ADM-02 | Xem mục 1. |
 | GET `/.well-known/jwks.json` | Các service | ACC-02 | Khóa công khai, không cần đăng nhập. |
 
@@ -134,7 +134,7 @@ Mã chức năng (ACC, SHP, ADM) theo kế hoạch trong `docs/ke-hoach`.
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/locations/provinces` | Mọi người, user-service | SHP-03, ACC-04 | Danh sách tỉnh/huyện/xã lấy từ GHN, lưu trong market_db, việc định kỳ (pg-boss) cập nhật mỗi ngày. Không cần đăng nhập. |
+| GET `/locations/provinces` | Mọi người, user-service | SHP-03, ACC-04 | Danh sách tỉnh/huyện/xã lấy từ GHN, lưu trong market_db, việc định kỳ (pg-boss) cập nhật mỗi ngày. Không cần đăng nhập. Trả mảng `[{ id, name }]` (huyện cũng vậy, xã là `[{ code, name }]`); user-service dùng dạng này để kiểm địa chỉ. |
 | GET `/locations/provinces/{provinceId}/districts` | Mọi người | SHP-03, ACC-04 | |
 | GET `/locations/districts/{districtId}/wards` | Mọi người | SHP-03, ACC-04 | |
 | POST `/uploads/shop-logo` | Đã đăng nhập | SHP-01 | Gửi file dạng multipart. Chỉ JPG/PNG/WebP, tối đa 2 MB. Lưu vào MinIO trong thư mục riêng của người tải (`shop-logos/<userId>/...`), trả `{ url }`. Khi nộp hồ sơ, marketplace kiểm `logoUrl` nằm trong thư mục của chính người đó. |

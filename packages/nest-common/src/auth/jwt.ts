@@ -15,6 +15,8 @@ export interface AuthUser {
   email: string;
   name: string;
   permissions: Permission[];
+  /** Mã phiên đăng nhập đã cấp vé này (claim sid) */
+  sessionId?: string;
 }
 
 export const JWT_ISSUER = 'user-service';
@@ -54,10 +56,11 @@ export function toJwks(privateKey: KeyObject): { keys: JsonWebKey[] } {
 
 /** Ký access token. Chỉ user-service gọi (lúc đăng nhập, làm mới phiên). Test cũng dùng để tạo vé giả. */
 export function signAccessToken(user: AuthUser, privateKey: KeyObject): string {
-  const claims: Pick<JwtClaims, 'email' | 'name' | 'perms'> = {
+  const claims: Pick<JwtClaims, 'email' | 'name' | 'perms' | 'sid'> = {
     email: user.email,
     name: user.name,
     perms: user.permissions,
+    sid: user.sessionId,
   };
   return jwt.sign(claims, privateKey, {
     algorithm: 'RS256',
@@ -104,7 +107,14 @@ export class JwtVerifier {
         issuer: JWT_ISSUER,
         audience: JWT_AUDIENCE,
       }) as JwtClaims;
-      return { id: c.sub, email: c.email, name: c.name, permissions: c.perms ?? [] };
+      const user: AuthUser = {
+        id: c.sub,
+        email: c.email,
+        name: c.name,
+        permissions: c.perms ?? [],
+      };
+      if (c.sid) user.sessionId = c.sid;
+      return user;
     } catch (e) {
       throw new TokenError(e instanceof jwt.TokenExpiredError);
     }

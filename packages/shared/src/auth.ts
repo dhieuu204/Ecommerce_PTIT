@@ -16,6 +16,8 @@ export interface JwtClaims {
   name: string;
   /** Bộ quyền admin; rỗng nếu không phải admin */
   perms: Permission[];
+  /** Mã phiên đăng nhập (dòng bảng sessions), để "đăng xuất các máy khác" khi đổi mật khẩu */
+  sid?: string;
   iat: number;
   exp: number;
 }

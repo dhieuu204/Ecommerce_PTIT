@@ -89,6 +89,8 @@ async list(q: ListApprovalsQuery) {
 
 `page` từ 1, `pageSize` mặc định 20, tối đa 100.
 
+Mã trên đường dẫn: `@Param('addressId', ParseIdPipe) addressId: string`. Không phải UUID thì trả 404 `NOT_FOUND` như khi không có.
+
 ## 4. Database
 
 Mỗi service có `src/prisma.service.ts` (kế thừa Prisma client sinh riêng cho service đó). Inject ở bất kỳ module nào, không cần import thêm:
@@ -153,6 +155,8 @@ await this.prisma.$transaction(async (tx) => {
   });
 });
 ```
+
+Mỗi service đã có sẵn `GET /admin/audit-logs` (bộ quyền `SYSTEM`, lọc `from`, `to`, `actorId`, `action`, mới nhất lên đầu), không phải viết thêm.
 
 ## 7. Mã lần vết (correlation id)
 

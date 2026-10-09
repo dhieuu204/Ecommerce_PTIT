@@ -52,6 +52,39 @@ export interface AuditDb {
   };
 }
 
+/** Một dòng nhật ký thao tác admin */
+export interface AuditLogRow {
+  id: string;
+  actorId: string;
+  actorName: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  reason: string | null;
+  before: unknown;
+  after: unknown;
+  createdAt: Date;
+}
+
+export interface AuditLogWhere {
+  createdAt?: { gte?: Date; lte?: Date };
+  actorId?: string;
+  action?: string;
+}
+
+/** Đọc nhật ký thao tác admin (GET /admin/audit-logs) */
+export interface AuditReadDb {
+  auditLog: {
+    findMany(args: {
+      where: AuditLogWhere;
+      orderBy: { createdAt: 'desc' };
+      skip: number;
+      take: number;
+    }): PromiseLike<AuditLogRow[]>;
+    count(args: { where: AuditLogWhere }): PromiseLike<number>;
+  };
+}
+
 /** Chạy nhiều lệnh trong một giao dịch: prisma.$transaction(async (tx) => { ... }) */
 export interface TransactionRunner<Tx> {
   $transaction<R>(fn: (tx: Tx) => Promise<R>): Promise<R>;
@@ -61,4 +94,7 @@ export interface TransactionRunner<Tx> {
  * Phần PrismaService mà gói chung dùng. Mỗi service kiểm lúc biên dịch trong prisma.service.ts,
  * nên nếu ai sửa 3 bảng kỹ thuật lệch đi thì build báo lỗi ngay.
  */
-export type SanPrismaDb = OutboxRelayDb & AuditDb & TransactionRunner<OutboxDb & InboxDb & AuditDb>;
+export type SanPrismaDb = OutboxRelayDb &
+  AuditDb &
+  AuditReadDb &
+  TransactionRunner<OutboxDb & InboxDb & AuditDb>;
