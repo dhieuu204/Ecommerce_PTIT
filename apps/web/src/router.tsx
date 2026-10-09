@@ -7,18 +7,13 @@ import { ShopLayout } from '@/components/layout/shop-layout';
 import { sessionStore } from '@/lib/api';
 import { HomePage } from '@/pages/home';
 import { NotFoundPage } from '@/pages/not-found';
-import { AuditLogsPage } from '@/pages/admin/audit-logs';
-import { ShopApprovalDetailPage } from '@/pages/admin/shop-approval-detail';
-import { ShopApprovalsPage } from '@/pages/admin/shop-approvals';
-import { UsersPage } from '@/pages/admin/users';
-import { Placeholder } from '@/pages/placeholder';
-import { ShopProfilePage } from '@/pages/seller/shop-profile';
 
 /**
  * Bảng đường dẫn của web (React Router). Đường dẫn tiếng Việt không dấu.
  * - Khu mua hàng: /, /dang-nhap, /tai-khoan/...
  * - Kênh người bán: /kenh-nguoi-ban/... (shop đang hoạt động)
  * - Quản trị: /quan-tri/... (có bộ quyền admin)
+ * Trang chủ tải ngay; các trang khác tải khi mở lần đầu (`lazy`) để lần vào web đầu tiên nhẹ hơn.
  */
 function AdminIndex() {
   const s = sessionStore.get();
@@ -30,10 +25,24 @@ export const router = createBrowserRouter([
     element: <ShopLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'dang-nhap', element: <Placeholder title="Đăng nhập" /> },
-      { path: 'dang-ky', element: <Placeholder title="Đăng ký" /> },
-      { path: 'xac-minh-email', element: <Placeholder title="Xác minh email" /> },
-      { path: 'quen-mat-khau', element: <Placeholder title="Quên mật khẩu" /> },
+      {
+        path: 'dang-nhap',
+        lazy: () => import('@/pages/auth/login').then((m) => ({ Component: m.LoginPage })),
+      },
+      {
+        path: 'dang-ky',
+        lazy: () => import('@/pages/auth/register').then((m) => ({ Component: m.RegisterPage })),
+      },
+      {
+        path: 'xac-minh-email',
+        lazy: () =>
+          import('@/pages/auth/verify-email').then((m) => ({ Component: m.VerifyEmailPage })),
+      },
+      {
+        path: 'quen-mat-khau',
+        lazy: () =>
+          import('@/pages/auth/forgot-password').then((m) => ({ Component: m.ForgotPasswordPage })),
+      },
       {
         element: <RequireAuth />,
         children: [
@@ -42,11 +51,33 @@ export const router = createBrowserRouter([
             element: <AccountLayout />,
             children: [
               { index: true, element: <Navigate to="ho-so" replace /> },
-              { path: 'ho-so', element: <Placeholder title="Hồ sơ của tôi" /> },
-              { path: 'mat-khau', element: <Placeholder title="Đổi mật khẩu" /> },
-              { path: 'dia-chi', element: <Placeholder title="Sổ địa chỉ" /> },
-              { path: 'shop', element: <Placeholder title="Shop của tôi" /> },
-              { path: 'shop/dang-ky', element: <Placeholder title="Đăng ký mở shop" /> },
+              {
+                path: 'ho-so',
+                lazy: () =>
+                  import('@/pages/account/profile').then((m) => ({ Component: m.ProfilePage })),
+              },
+              {
+                path: 'mat-khau',
+                lazy: () =>
+                  import('@/pages/account/password').then((m) => ({ Component: m.PasswordPage })),
+              },
+              {
+                path: 'dia-chi',
+                lazy: () =>
+                  import('@/pages/account/addresses').then((m) => ({ Component: m.AddressesPage })),
+              },
+              {
+                path: 'shop',
+                lazy: () =>
+                  import('@/pages/account/my-shop').then((m) => ({ Component: m.MyShopPage })),
+              },
+              {
+                path: 'shop/dang-ky',
+                lazy: () =>
+                  import('@/pages/account/shop-apply').then((m) => ({
+                    Component: m.ShopApplyPage,
+                  })),
+              },
             ],
           },
         ],
@@ -65,7 +96,13 @@ export const router = createBrowserRouter([
             element: <SellerLayout />,
             children: [
               { index: true, element: <Navigate to="ho-so-shop" replace /> },
-              { path: 'ho-so-shop', element: <ShopProfilePage /> },
+              {
+                path: 'ho-so-shop',
+                lazy: () =>
+                  import('@/pages/seller/shop-profile').then((m) => ({
+                    Component: m.ShopProfilePage,
+                  })),
+              },
             ],
           },
         ],
@@ -81,15 +118,37 @@ export const router = createBrowserRouter([
               {
                 element: <RequirePermission any={['MODERATION']} />,
                 children: [
-                  { path: 'duyet-shop', element: <ShopApprovalsPage /> },
-                  { path: 'duyet-shop/:approvalId', element: <ShopApprovalDetailPage /> },
+                  {
+                    path: 'duyet-shop',
+                    lazy: () =>
+                      import('@/pages/admin/shop-approvals').then((m) => ({
+                        Component: m.ShopApprovalsPage,
+                      })),
+                  },
+                  {
+                    path: 'duyet-shop/:approvalId',
+                    lazy: () =>
+                      import('@/pages/admin/shop-approval-detail').then((m) => ({
+                        Component: m.ShopApprovalDetailPage,
+                      })),
+                  },
                 ],
               },
               {
                 element: <RequirePermission any={['SYSTEM']} />,
                 children: [
-                  { path: 'nguoi-dung', element: <UsersPage /> },
-                  { path: 'nhat-ky', element: <AuditLogsPage /> },
+                  {
+                    path: 'nguoi-dung',
+                    lazy: () =>
+                      import('@/pages/admin/users').then((m) => ({ Component: m.UsersPage })),
+                  },
+                  {
+                    path: 'nhat-ky',
+                    lazy: () =>
+                      import('@/pages/admin/audit-logs').then((m) => ({
+                        Component: m.AuditLogsPage,
+                      })),
+                  },
                 ],
               },
             ],

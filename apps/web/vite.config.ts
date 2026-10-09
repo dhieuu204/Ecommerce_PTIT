@@ -8,6 +8,19 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Tách thư viện ra file riêng: trình duyệt giữ cache lâu, code của mình đổi không phải tải lại
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(id)) return 'react';
+          if (/[\\/](@radix-ui|radix-ui)[\\/]/.test(id)) return 'radix';
+          return 'vendor';
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // Gọi API qua cùng địa chỉ web (cookie đăng nhập cùng tên miền), Vite chuyển tới từng service

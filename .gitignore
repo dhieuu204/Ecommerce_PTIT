@@ -4,6 +4,7 @@ build/
 coverage/
 .turbo/
 *.log
+*.tsbuildinfo
 .DS_Store
 
 # Biến môi trường thật: không đưa lên Git
