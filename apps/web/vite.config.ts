@@ -9,17 +9,8 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, 'src') },
   },
   build: {
-    rollupOptions: {
-      output: {
-        // Tách thư viện ra file riêng: trình duyệt giữ cache lâu, code của mình đổi không phải tải lại
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined;
-          if (/[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(id)) return 'react';
-          if (/[\\/](@radix-ui|radix-ui)[\\/]/.test(id)) return 'radix';
-          return 'vendor';
-        },
-      },
-    },
+    // File chính gồm React, router, TanStack Query, shadcn (~175 kB gzip); các trang đã tải riêng khi mở
+    chunkSizeWarningLimit: 600,
   },
   server: {
     port: 5173,

@@ -1,5 +1,10 @@
 import { createBrowserRouter, Navigate } from 'react-router';
-import { RequireActiveShop, RequireAuth, RequirePermission } from '@/components/guards';
+import {
+  FullPageSpinner,
+  RequireActiveShop,
+  RequireAuth,
+  RequirePermission,
+} from '@/components/guards';
 import { AccountLayout } from '@/components/layout/account-layout';
 import { AdminLayout, firstAdminPage } from '@/components/layout/admin-layout';
 import { SellerLayout } from '@/components/layout/seller-layout';
@@ -23,6 +28,8 @@ function AdminIndex() {
 export const router = createBrowserRouter([
   {
     element: <ShopLayout />,
+    // Mở thẳng một trang tải riêng (ví dụ /dang-nhap): hiện vòng xoay trong lúc tải
+    HydrateFallback: FullPageSpinner,
     children: [
       { index: true, element: <HomePage /> },
       {
@@ -87,6 +94,7 @@ export const router = createBrowserRouter([
   },
   {
     element: <RequireAuth />,
+    HydrateFallback: FullPageSpinner,
     children: [
       {
         path: 'kenh-nguoi-ban',

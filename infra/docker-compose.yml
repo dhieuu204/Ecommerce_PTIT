@@ -38,7 +38,8 @@ services:
       - '6379:6379'
 
   minio:
-    image: minio/minio:latest
+    # Bản minio/minio trên Docker Hub đã bị gỡ (2025); dùng bản build cộng đồng của cùng mã nguồn MinIO
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     command: server /data --console-address ':9001'
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}

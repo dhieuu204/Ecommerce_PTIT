@@ -123,15 +123,18 @@ export function ConsoleLayout({ area, tone, menu, headerInfo, menuNote }: Consol
             </span>
             {area}
           </Link>
-          <div
-            className={cn(
-              'ml-auto hidden truncate text-xs md:block',
-              dark ? 'text-white/70' : 'text-muted-foreground',
-            )}
-          >
-            {headerInfo}
+          {/* Đẩy sang phải cả trên điện thoại (lúc dòng thông tin bị ẩn) */}
+          <div className="ml-auto flex min-w-0 items-center gap-3">
+            <div
+              className={cn(
+                'hidden truncate text-xs md:block',
+                dark ? 'text-white/70' : 'text-muted-foreground',
+              )}
+            >
+              {headerInfo}
+            </div>
+            <UserMenu tone={dark ? 'dark' : 'light'} />
           </div>
-          <UserMenu tone={dark ? 'dark' : 'light'} />
         </div>
       </header>
       <div className="flex flex-1">

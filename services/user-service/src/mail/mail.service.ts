@@ -23,7 +23,8 @@ export class MailService {
   async send(message: MailMessage): Promise<void> {
     this.transporter ??= createTransport(this.config.smtpUrl);
     await this.transporter.sendMail({ from: this.config.mailFrom, ...message });
-    const fake = this.config.smtpUrl.includes('localhost:1025') ? ' (hộp thư giả Mailpit)' : '';
-    this.logger.log(`Đã gửi mail "${message.subject}"${fake}`);
+    const fake = this.config.smtpUrl.includes(':1025') ? ' (hộp thư giả Mailpit)' : '';
+    // Tiêu đề có thể chứa mã 6 số: che đi trước khi ghi log
+    this.logger.log(`Đã gửi mail "${message.subject.replace(/\d{4,}/g, '******')}"${fake}`);
   }
 }
