@@ -8,7 +8,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Đồ án môn học: **sàn thương mại điện tử nhiều shop** (giống Shopee thu nhỏ). Có đủ vòng đời mua, bán và vận hành: đăng ký, mở shop, đăng sản phẩm, giỏ hàng, voucher, đặt hàng nhiều shop một lần, thanh toán VNPay hoặc COD, giao hàng qua GHN, trả hàng, tranh chấp, chat, thông báo, đánh giá, tiền của seller và rút tiền.
 
-Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; cuối P1 có Dockerfile). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
+Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; chạy thử cả hệ thống trong Docker bằng `pnpm app:up`, Dockerfile ở `services/Dockerfile` và `apps/web/Dockerfile`). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
 Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`), **nền tảng chung đã gắn vào 4 service** (`packages/nest-common`: đăng nhập/quyền, dạng lỗi, phân trang, sự kiện outbox/inbox, nhật ký admin), **khung màn hình P1** (`docs/so-do/13-ui-man-hinh-p1`). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
 
@@ -135,6 +135,7 @@ Gặp điểm chưa chốt: dừng phần đó, ghi rõ câu hỏi kèm 2–3 ph
 pnpm install                     # cài thư viện
 cp .env.example .env             # biến cho Docker Compose
 pnpm infra:up                    # bật PostgreSQL, RabbitMQ, Redis, MinIO, Mailpit
+pnpm app:up                      # chạy cả 4 service + web trong Docker ở http://localhost:8080 (README)
 cp services/user-service/.env.example services/user-service/.env   # làm tương tự cho service khác
 pnpm dev                         # chạy 4 service + web
 pnpm --filter @san/user-service dev        # chỉ chạy một service

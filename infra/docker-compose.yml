@@ -1,5 +1,6 @@
 # Hạ tầng chạy local khi code hằng ngày (Docker Compose). Các service NestJS và web chạy bằng `pnpm dev` trên máy.
-# Bản Kubernetes (k3s) để chạy thử và demo nằm ở infra/k8s.
+# Muốn chạy cả 4 service + web trong Docker (giống lúc demo): `pnpm app:up` (profile "app", xem README mục Docker).
+# Bản Kubernetes (k3s) làm sau khi xong các phase.
 name: san-tmdt
 
 services:
@@ -26,6 +27,10 @@ services:
     ports:
       - '5672:5672'
       - '15672:15672' # trang quản lý: http://localhost:15672
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 5s
+      retries: 20
 
   redis:
     image: redis:7-alpine
@@ -49,6 +54,87 @@ services:
     ports:
       - '1025:1025' # SMTP cho service gửi mail
       - '8025:8025' # hộp thư giả: http://localhost:8025
+
+  # ---- Profile "app": 4 service + web chạy trong Docker (pnpm app:up). Khi code hằng ngày không cần. ----
+  # Biến riêng (khóa JWT, token GHN, Google, Gmail) đọc từ services/<ten>/.env như khi chạy pnpm dev;
+  # phần environment bên dưới chỉ đổi địa chỉ localhost thành tên container.
+  user-service:
+    profiles: [app]
+    build: { context: .., dockerfile: services/Dockerfile, args: { SERVICE: user-service } }
+    image: san/user-service
+    env_file: [{ path: ../services/user-service/.env, required: false }]
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://user_svc:user_svc@postgres:5432/user_db?schema=public
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
+      MARKETPLACE_API_URL: http://marketplace-service:3002/api/market/v1
+      WEB_URL: http://localhost:${WEB_PORT:-8080}
+      GOOGLE_REDIRECT_URL: http://localhost:${WEB_PORT:-8080}/api/user/v1/auth/google/callback
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    restart: unless-stopped
+
+  marketplace-service:
+    profiles: [app]
+    build: { context: .., dockerfile: services/Dockerfile, args: { SERVICE: marketplace-service } }
+    image: san/marketplace-service
+    env_file: [{ path: ../services/marketplace-service/.env, required: false }]
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://marketplace_svc:marketplace_svc@postgres:5432/market_db?schema=public
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
+      JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio12345}
+      PUBLIC_FILE_URL: http://localhost:9000
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      minio: { condition: service_started }
+    restart: unless-stopped
+
+  payment-service:
+    profiles: [app]
+    build: { context: .., dockerfile: services/Dockerfile, args: { SERVICE: payment-service } }
+    image: san/payment-service
+    env_file: [{ path: ../services/payment-service/.env, required: false }]
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgresql://payment_svc:payment_svc@postgres:5432/payment_db?schema=public
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
+      JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    restart: unless-stopped
+
+  approval-service:
+    profiles: [app]
+    build: { context: .., dockerfile: services/Dockerfile, args: { SERVICE: approval-service } }
+    image: san/approval-service
+    env_file: [{ path: ../services/approval-service/.env, required: false }]
+    environment:
+      PORT: 3004
+      DATABASE_URL: postgresql://approval_svc:approval_svc@postgres:5432/approval_db?schema=public
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
+      JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    restart: unless-stopped
+
+  web:
+    profiles: [app]
+    build: { context: .., dockerfile: apps/web/Dockerfile }
+    image: san/web
+    ports:
+      - '${WEB_PORT:-8080}:80' # mở web ở http://localhost:8080
+    depends_on: [user-service, marketplace-service, payment-service, approval-service]
+    restart: unless-stopped
 
 volumes:
   pgdata:

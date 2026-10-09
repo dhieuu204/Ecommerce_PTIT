@@ -40,6 +40,23 @@ Kiểm tra: `http://localhost:3001/health` trả `{"status":"ok","service":"user
 | MinIO                 | http://localhost:9001 (minio / minio12345) |
 | Hộp thư giả (Mailpit) | http://localhost:8025                      |
 
+## Chạy cả hệ thống trong Docker (giống lúc demo)
+
+Khi code hằng ngày dùng `pnpm dev` như trên. Muốn chạy thử cả 4 service + web đóng gói sẵn (không cần Node trên máy):
+
+```bash
+cp .env.example .env
+for s in services/*; do [ -f $s/.env ] || cp $s/.env.example $s/.env; done
+node scripts/gen-jwt-key.mjs >> services/user-service/.env   # bắt buộc: khóa ký đăng nhập cố định
+pnpm app:up                    # build image rồi bật infra + 4 service + web
+```
+
+Mở web ở http://localhost:8080 (đổi cổng bằng `WEB_PORT` trong `.env`). Mỗi service tự áp migration database khi khởi động. Tắt: `pnpm app:down`.
+
+- Image: `services/Dockerfile` dùng chung cho 4 service (chọn bằng `--build-arg SERVICE=...`), `apps/web/Dockerfile` (NGINX phục vụ web và chuyển `/api/<service>` tới đúng service, file `apps/web/nginx.conf`).
+- Biến bí mật (token GHN, Google, Gmail) vẫn đọc từ `services/<ten>/.env`; địa chỉ localhost được đổi sang tên container trong `infra/docker-compose.yml`.
+- Đăng nhập Google khi chạy bản Docker: khai thêm redirect URI `http://localhost:8080/api/user/v1/auth/google/callback` trên Google Cloud.
+
 ## Lệnh kiểm tra (CI chạy đúng các lệnh này)
 
 ```bash

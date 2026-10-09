@@ -17,6 +17,8 @@
     "format:check": "prettier --check .",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "app:up": "docker compose -f infra/docker-compose.yml --profile app up -d --build",
+    "app:down": "docker compose -f infra/docker-compose.yml --profile app down",
     "postinstall": "pnpm --filter \"./packages/**\" build"
   },
   "devDependencies": {
