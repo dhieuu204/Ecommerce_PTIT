@@ -39,6 +39,8 @@ model ShopApproval {
   ownerEmail    String          @map("owner_email") @db.VarChar(254)
   /// Toàn bộ hồ sơ nhận trong sự kiện
   data          Json
+  /// Chỉ với CHANGE: các mục muốn đổi và giá trị cũ ({ fields, old })
+  change        Json?
   submittedAt   DateTime        @map("submitted_at") @db.Timestamptz(3)
   /// Lý do (bắt buộc khi từ chối)
   reason        String?         @db.VarChar(500)
