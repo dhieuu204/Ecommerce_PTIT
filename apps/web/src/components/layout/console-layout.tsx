@@ -1,6 +1,6 @@
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -157,6 +157,8 @@ export function ConsoleLayout({
           <Outlet />
         </main>
       </div>
+      {/* Sang trang khác (hoặc mục #... khác) thì cuộn lên đầu; chỉ đổi bộ lọc ?... thì giữ chỗ */}
+      <ScrollRestoration getKey={(location) => location.pathname + location.hash} />
     </div>
   );
 }
