@@ -5,11 +5,11 @@ Nhóm chọn cách **code trước, sinh tài liệu**: không viết file OpenA
 | Nội dung | Ở đâu |
 | --- | --- |
 | Quy ước chung (đường dẫn, đăng nhập, lỗi, phân trang) | File này, mục 1 |
-| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2) |
+| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3) |
 | Sự kiện giữa các service qua RabbitMQ | `events.md` + kiểu TypeScript trong `packages/shared/src/events` |
-| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 4 |
+| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 5 |
 
-Muốn thêm hoặc đổi API so với danh sách ở mục 2–3, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
+Muốn thêm hoặc đổi API so với danh sách ở mục 2–4, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
 
 ## 1. Quy ước chung
 
@@ -262,7 +262,116 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 4. Seller và admin `FINANCE` tạo voucher shop/sàn; voucher shop hiện trên trang shop và trang sản phẩm.
 5. Admin đình chỉ một shop (approval-service) → marketplace nhận `shop_suspension.decided`, shop thành `SUSPENDED`, hàng biến mất khỏi tìm kiếm, dòng giỏ thành "Không còn bán". Khôi phục thì hàng hiện lại.
 
-## 4. Tài liệu API tự sinh (Swagger)
+## 4. Danh sách API P3
+
+P3 (đặt hàng và trả trước): ORD-01..05, INV-02, VCH-02, VCH-03 (hủy theo đơn con), SHIP-01, RSK-01, PAY-01..04, REF-01, FIN-03 (chụp phí sàn), ADM-01 (cấu hình chính sách). Mục tiêu: một lần checkout → hai đơn con → trả trước → hủy một đơn con không ảnh hưởng đơn còn lại. Quyết định của vòng này: `docs/phan-tich/10-quyet-dinh-p3.md` (chỉ trả trước VNPay, COD ở P4; hạn bàn giao 48 giờ ở P4; chưa trả thì chỉ hủy cả đơn tổng; shop bị đình chỉ thì hủy đơn chưa bàn giao; không có bước lưu voucher).
+
+### Quy tắc chung của P3
+
+- **Đơn tổng** (`orders`, mã `261011ABC123`) là một lần đặt; **đơn con** (`shop_orders`, mã `261011ABC123-1`, `-2`) là phần của từng shop, mỗi đơn con một vòng đời.
+- **Trạng thái đơn con** (STATE-01, phần P3):
+
+  | Trạng thái | Nghĩa | Sang |
+  | --- | --- | --- |
+  | `PENDING` | Chờ thanh toán và kiểm tra đơn (S1) | `TO_CONFIRM` khi đơn tổng đã trả **và** đã qua kiểm tra; `CANCELLED` |
+  | `TO_CONFIRM` | Chờ shop xác nhận, hạn `confirm_hours` (S2) | `CONFIRMED`, `CANCELLED` |
+  | `CONFIRMED` | Shop đã xác nhận, chờ giao hàng (S3; P4 nối GHN) | `CANCEL_REQUESTED`, `CANCELLED` |
+  | `CANCEL_REQUESTED` | Buyer xin hủy, chờ shop trả lời | `CANCELLED` (shop đồng ý), `CONFIRMED` (shop từ chối) |
+  | `CANCELLED` | Đã hủy (kèm `cancelledBy`: `BUYER`, `SELLER`, `ADMIN`, `SYSTEM` và lý do) | |
+
+- **Trạng thái đơn tổng** không lưu, tính từ các đơn con: còn đơn con chưa kết thúc → "Đang xử lý" (`PROCESSING`); tất cả hủy → "Đã hủy" (`CANCELLED`). P4 thêm "Hoàn tất", "Hoàn tất một phần". Đơn tổng lưu riêng `paymentStatus` (`UNPAID`, `PAID`) và `checkStatus` (`PENDING`, `PASSED`, `REJECTED`).
+- **Tiền** (số nguyên đồng): tiền hàng của đơn con `subtotal` → trừ voucher shop `shopDiscount` → trừ phần voucher sàn `platformDiscount` → cộng `shippingFee` = `total` (buyer trả). Đơn tổng `total` = tổng các đơn con. Voucher sàn chia theo tỉ lệ tiền hàng sau voucher shop, làm tròn xuống, phần dư vào đơn con lớn nhất. Phí ship không được giảm.
+- **Tồn kho** (INV-02): đặt hàng giữ tồn (`reserved += số lượng`, câu SQL có điều kiện "còn bán được ≥ số lượng" nên hai người tranh SKU cuối chỉ một người được); thanh toán xong chốt (`stock -= số lượng`, `reserved -= số lượng`, ghi `stock_history` kèm mã đơn, tăng `soldCount`); hết hạn hoặc hủy trước khi trả thì nhả giữ; hủy sau khi trả thì cộng lại tồn (ghi `stock_history`). Mỗi bước kèm điều kiện trạng thái nên chạy lại không trừ/hoàn hai lần.
+- **Voucher** (VCH-02, VCH-03): mỗi đơn con tối đa 1 voucher shop, cả đơn tổng tối đa 1 voucher sàn. Đặt hàng giữ lượt (`used_count + 1` có điều kiện còn lượt, đang chạy; giới hạn mỗi người đếm trên `voucher_usages` chưa trả). Hủy đơn con → trả lượt voucher shop của đơn đó; hủy cả đơn tổng → trả thêm voucher sàn; voucher đã hết hạn thì không trả.
+- **Hạn** (cấu hình ở bảng `settings`, xem `docs/phan-tich/10-quyet-dinh-p3.md` mục 3): thanh toán 15 phút, giữ tồn 20 phút, shop xác nhận 24 giờ (tính từ lúc đơn con sang `TO_CONFIRM`), admin duyệt đơn 24 giờ. Job mỗi phút quét đơn quá hạn: chưa trả quá hạn giữ tồn → hủy cả đơn tổng; quá hạn xác nhận → hủy đơn con, hoàn tiền.
+- **Ai được hủy** (ORD-05): đơn tổng chưa trả → buyer hoặc admin hủy **cả đơn tổng**. Đã trả: đơn con `PENDING` (đang chờ duyệt) hoặc `TO_CONFIRM` → buyer hủy ngay; `CONFIRMED` → buyer gửi yêu cầu (1 lần), shop đồng ý hoặc từ chối có lý do. Shop hủy có lý do khi `TO_CONFIRM`, `CONFIRMED`, `CANCEL_REQUESTED`. Admin `SUPPORT` hủy mọi đơn con chưa bàn giao (bắt buộc lý do, ghi nhật ký). Hủy đơn con đã trả → payment-service hoàn đúng số buyer đã trả cho đơn con đó.
+- **Shop bị đình chỉ** (SHP-04): mọi đơn con chưa bàn giao của shop bị hủy (`SYSTEM`, lý do "Shop tạm ngừng bán"); đơn tổng chưa trả thì hủy cả đơn tổng.
+- **Thanh toán** (PAY-01..03): tối đa `max_payment_attempts` lần trong hạn, mỗi lần một mã giao dịch riêng (`vnp_TxnRef`). Còn lần đang chờ (buyer đóng tab VNPay) → bấm lại trả **đúng link cũ**; lần trước "không rõ" → không tạo lần mới (409 `PAYMENT_UNKNOWN`). Chỉ ghi "đã trả" khi IPN hợp lệ (đúng chữ ký, đúng số tiền) hoặc tra cứu VNPay báo thành công; trang web báo thành công không đủ. Tiền về sau khi đơn đã hết hạn/hủy, hoặc trả trùng → tự tạo khoản hoàn.
+- **Chế độ VNPay**: `services/payment-service/.env` có `VNPAY_TMN_CODE` và `VNPAY_HASH_SECRET` → VNPay sandbox. Không có → **MÔ PHỎNG**: link thanh toán trỏ về trang `/thanh-toan/mo-phong` của web, mọi màn hình và log ghi "MÔ PHỎNG".
+- **Phí ship** (SHIP-01): có `GHN_TOKEN` → gọi API phí của GHN cho từng đơn con (khối lượng = tổng `weight × số lượng`, từ địa chỉ lấy hàng của shop tới địa chỉ nhận); GHN lỗi → `shipping_fixed_fee` và `shippingFeeSource = FALLBACK` ("phí dự phòng", sàn chịu chênh lệch). Không có token → `shipping_fixed_fee`, `shippingFeeSource = FIXED` ("Phí cố định (chưa nối GHN)"). Phí chốt ở bước xem trước và chép vào đơn con.
+- **Chống làm lặp**: xem trước tạo `checkoutId`; đặt hàng gửi lại cùng `checkoutId` trả đơn đã tạo. Tạo lần thanh toán nhận `Idempotency-Key`. IPN/callback trùng, sự kiện trùng không ghi tiền hai lần. Lệnh hoàn có mã riêng, kết quả không rõ thì tra cứu, không gửi lại mù quáng.
+
+### Cấu hình chính sách (cả marketplace, payment, approval)
+
+Mỗi service có cùng 3 API (code chung `SettingsModule` trong `packages/nest-common`) trên bảng `settings` của chính nó:
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/settings` | `SYSTEM`, `FINANCE` | ADM-01 | Mọi con số của service: `key`, tên tiếng Việt, đơn vị, giới hạn `min`/`max`, giá trị đang dùng, phiên bản, lúc có hiệu lực, người sửa. Chưa sửa lần nào thì phiên bản 0 = mặc định trong code. |
+| PUT `/admin/settings/{key}` | `SYSTEM` | ADM-01 | `{ value, reason }`. Tạo phiên bản mới có hiệu lực ngay (không sửa dòng cũ), ghi nhật ký. Khóa lạ → 404; ngoài giới hạn → 400 `VALIDATION_ERROR`; bằng giá trị đang dùng → 400 `NOTHING_TO_CHANGE`. Đơn đã đặt giữ con số đã chụp. |
+| GET `/admin/settings/{key}/history` | `SYSTEM`, `FINANCE` | ADM-01 | Các phiên bản, mới nhất trước. |
+
+### marketplace-service (`/api/market/v1`)
+
+**Checkout và đặt hàng**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/checkout/preview` | Đã đăng nhập | ORD-01, VCH-02, SHIP-01 | `{ itemIds, addressId?, shopVouchers?: [{ shopId, code }], platformVoucherCode? }`. `itemIds` là các dòng giỏ muốn mua (của chính người gọi). Địa chỉ lấy từ sổ địa chỉ ở user-service (không gửi `addressId` → địa chỉ mặc định; chưa có địa chỉ → 409 `ADDRESS_REQUIRED`; user-service lỗi → 503 `USER_SERVICE_UNAVAILABLE`). Trả bản xem trước chia theo shop: dòng hàng (giá hiện tại), tiền hàng, voucher shop đang áp và **danh sách voucher shop dùng được** (kèm lý do chưa dùng được, ví dụ "Mua thêm 50.000đ"), phí ship và nguồn phí, phần voucher sàn, tổng từng shop; danh sách voucher sàn, tổng cả đơn; `problems` (dòng hết hàng/không còn bán/vượt tồn), `voucherErrors` (mã sai, hết lượt, chưa đủ điều kiện: không áp, không lỗi cả trang); `canPlace`; `checkoutId` (mã phiên) và `expiresAt`. Lưu bản chụp vào `checkouts`. Không có dòng nào → 400 `EMPTY_CHECKOUT`. |
+| POST `/orders` | Đã đăng nhập | ORD-01, INV-02, VCH-02 | `{ checkoutId }`. Trong **một giao dịch**: tính lại toàn bộ theo bản xem trước (phí ship và địa chỉ dùng đúng bản chụp), giữ tồn, giữ lượt voucher, tạo đơn tổng + đơn con + dòng hàng, xóa các dòng đã mua khỏi giỏ, phát `order.placed`. Bất kỳ shop nào lỗi → không tạo đơn nào: giá/tồn/voucher khác bản xem trước → 409 `CHECKOUT_CHANGED` (`details.problems`, buyer xem lại); phiên quá hạn → 409 `CHECKOUT_EXPIRED`; phiên của người khác → 404. Gửi lại cùng `checkoutId` (bấm 2 lần, mạng chập) → 200 trả đơn đã tạo. Thành công 201 `{ orderId, code, total, payBefore }`. |
+| POST `/orders/{orderId}/pay` | Người mua | PAY-01 | Header `Idempotency-Key`. Đơn chưa trả, chưa hủy, còn hạn → gọi payment-service tạo (hoặc mở lại) lần thanh toán, trả `{ payUrl, attempt, maxAttempts, gateway: VNPAY \| MOCK, payBefore }`. Đã trả/đã hủy/hết hạn → 409 `ORDER_NOT_PAYABLE`; hết lượt → 409 `PAYMENT_ATTEMPTS_EXCEEDED`; lần trước chưa rõ → 409 `PAYMENT_UNKNOWN`; payment-service chưa nhận đơn → 409 `ORDER_NOT_READY` (web thử lại sau 1 giây); payment-service lỗi → 503 `PAYMENT_SERVICE_UNAVAILABLE`. |
+
+**Đơn của người mua**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/orders` | Đã đăng nhập | ORD-02 | Đơn của chính mình, mới nhất trước, phân trang. Lọc `tab` = `ALL` \| `UNPAID` (chưa trả) \| `PROCESSING` (đang chờ duyệt/xác nhận) \| `TO_SHIP` (chờ giao) \| `CANCELLED`. Mỗi đơn tổng kèm các đơn con (shop, dòng hàng, trạng thái, tổng). |
+| GET `/orders/{orderId}` | Người mua | ORD-02 | Chi tiết: địa chỉ, tiền từng phần, trạng thái thanh toán/kiểm tra, hạn trả, lịch sử trạng thái từng đơn con, trạng thái hoàn tiền (`refundStatus`). Đơn người khác → 404. |
+| POST `/orders/{orderId}/cancel` | Người mua | ORD-05 | `{ reason }`. Chỉ khi đơn tổng **chưa trả**: hủy cả đơn tổng, nhả tồn, trả lượt voucher. Đã trả → 409 `ORDER_ALREADY_PAID` (hủy từng đơn con). Đã hủy → 409 `ORDER_NOT_CANCELLABLE`. |
+| POST `/orders/{orderId}/shop-orders/{shopOrderId}/cancel` | Người mua | ORD-05, REF-01 | `{ reason }`. Đơn tổng đã trả. Đơn con `PENDING`/`TO_CONFIRM` → hủy ngay, cộng lại tồn, trả lượt voucher shop, hoàn tiền đơn con đó. `CONFIRMED` → thành `CANCEL_REQUESTED` (chờ shop). Đã xin hủy một lần và bị từ chối → 409 `CANCEL_REQUEST_USED`; trạng thái khác → 409 `ORDER_NOT_CANCELLABLE`; đơn tổng chưa trả → 409 `ORDER_NOT_PAID` (hủy cả đơn). |
+
+**Đơn của shop** (Kênh người bán; shop đã duyệt, kể cả đang bị đình chỉ)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/orders` | Chủ shop | ORD-02 | Lọc `status` (`PENDING`, `TO_CONFIRM`, `CONFIRMED`, `CANCEL_REQUESTED`, `CANCELLED`), `q` (mã đơn), phân trang. Đơn `TO_CONFIRM` sắp hết hạn lên đầu. Kèm số đơn theo từng trạng thái (cho tab). |
+| GET `/shops/me/orders/{shopOrderId}` | Chủ shop | ORD-02 | Dòng hàng, địa chỉ nhận, tiền (tiền hàng, voucher shop, **dự kiến nhận** sau phí sàn khi đã trả), hạn xác nhận, lịch sử. Không hiện voucher sàn như khoản trừ của shop (sàn chịu). Đơn shop khác → 404. |
+| POST `/shops/me/orders/{shopOrderId}/confirm` | Chủ shop | ORD-03 | `TO_CONFIRM` → `CONFIRMED`. Trạng thái khác → 409 `ORDER_NOT_CONFIRMABLE` (cập nhật có điều kiện nên đua với job hết hạn chỉ một bên thắng). |
+| POST `/shops/me/orders/{shopOrderId}/cancel` | Chủ shop | ORD-03, ORD-05 | `{ reason }`. Hủy khi `TO_CONFIRM`, `CONFIRMED`, `CANCEL_REQUESTED`; hoàn tiền, cộng lại tồn. Khác → 409 `ORDER_NOT_CANCELLABLE`. |
+| POST `/shops/me/orders/{shopOrderId}/cancel-request/accept` | Chủ shop | ORD-05 | `CANCEL_REQUESTED` → `CANCELLED` (lý do = lý do buyer gửi), hoàn tiền. Khác → 409 `NO_CANCEL_REQUEST`. |
+| POST `/shops/me/orders/{shopOrderId}/cancel-request/decline` | Chủ shop | ORD-05 | `{ reason }`. `CANCEL_REQUESTED` → `CONFIRMED`; buyer không gửi lại được. |
+
+**Đơn (admin)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/orders` | `SUPPORT` | ORD-02 | Mọi đơn tổng, lọc `q` (mã đơn tổng/đơn con), `tab` như buyer, phân trang. |
+| GET `/admin/orders/{orderId}` | `SUPPORT` | ORD-02 | Như buyer xem, thêm mã người mua và lịch sử ai làm gì. Thanh toán/hoàn tiền xem ở payment-service. |
+| POST `/admin/orders/{orderId}/shop-orders/{shopOrderId}/cancel` | `SUPPORT` | ORD-05 | `{ reason }` bắt buộc. Đơn tổng chưa trả → hủy cả đơn tổng; đã trả → hủy đơn con (mọi trạng thái chưa bàn giao). Ghi nhật ký. |
+
+### payment-service (`/api/payment/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/payments` | marketplace (chuyển vé của buyer) | PAY-01 | `{ orderId, clientIp? }`, header `Idempotency-Key`. Số tiền lấy từ bản chép đơn nhận qua `order.placed` (đơn chưa tới → 409 `ORDER_NOT_READY`; không phải đơn của người gọi → 404). Tạo lần thanh toán mới (mã `vnp_TxnRef` riêng) hoặc trả lại lần đang chờ. Lỗi như `POST /orders/{orderId}/pay`. Hạn link VNPay = hạn thanh toán của đơn. |
+| GET `/orders/{orderId}/payment` | Người mua | PAY-01 | `{ status: UNPAID \| PAID \| EXPIRED \| CANCELLED, attempts, maxAttempts, payBefore, gateway, lastAttempt }` cho trang kết quả thanh toán. |
+| POST `/payments/return` | Người mua | PAY-02 | Web gửi lại các tham số VNPay gắn vào đường dẫn quay về. Kiểm chữ ký; báo thành công thì **tra cứu VNPay** trước khi ghi đã trả; buyer bấm Hủy/thanh toán lỗi → lần đó thất bại. Trả `{ orderId, status }`. Chữ ký sai → 400 `INVALID_SIGNATURE`. |
+| GET `/webhooks/vnpay/ipn` | VNPay (công khai) | PAY-02, PAY-03 | Kiểm chữ ký, mã giao dịch, số tiền rồi mới ghi; trả `{ RspCode, Message }` theo tài liệu VNPay (`00` xác nhận, `01` không có giao dịch, `02` đã xử lý, `04` sai số tiền, `97` sai chữ ký). Gửi trùng → `02`, không ghi lại. |
+| GET, POST `/mock-gateway/payments/{ref}` | Trang mô phỏng (công khai) | PAY-01 | **Chỉ khi chạy MÔ PHỎNG** (có khóa VNPay → 404). GET: số tiền, mã đơn. POST `{ result: SUCCESS \| FAILED \| PAID_NO_NOTICE }`: như VNPay báo thành công/thất bại, hoặc "trả tiền nhưng mất tin báo" để job tra cứu tự tìm ra. Trả `{ returnUrl }` để web chuyển buyer về trang kết quả. |
+| GET `/admin/orders/{orderId}/payments` | `SUPPORT`, `FINANCE` | PAY-04, REF-01 | Các lần thanh toán, phân bổ tiền từng đơn con (buyer trả, phí sàn, seller nhận), các khoản hoàn. |
+| GET `/admin/refunds` | `FINANCE` | REF-01 | Lọc `status` (`PENDING`, `FAILED`, `UNKNOWN`, `NEEDS_MANUAL`, `SUCCEEDED`, `MANUAL_DONE`), phân trang. Mặc định khoản cần hoàn tay lên đầu. |
+| POST `/admin/uploads/refund-receipt` | `FINANCE` | REF-01 | Ảnh biên lai (JPG/PNG/WebP, tối đa 5 MB) lưu bucket riêng tư, trả `{ key }`. |
+| GET `/admin/refunds/{refundId}/receipt` | `FINANCE` | REF-01 | Xem ảnh biên lai. |
+| POST `/admin/refunds/{refundId}/manual` | `FINANCE` | REF-01 | `{ transferCode, receiptKey, note? }`. Chỉ khoản `NEEDS_MANUAL` → `MANUAL_DONE`, phát `refund.updated`, ghi nhật ký. Khác → 409 `REFUND_NOT_MANUAL`. |
+
+### approval-service (`/api/approval/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/order-checks` | `FINANCE` | RSK-01 | Lọc `status` (`PENDING` mặc định, `PASSED`, `REJECTED`, `TIMEOUT`, `CANCELLED`), phân trang; đơn chờ lâu nhất lên đầu, kèm hạn tự hủy. |
+| GET `/admin/order-checks/{checkId}` | `FINANCE` | RSK-01 | Đơn nhận qua `order.placed` (người mua, các shop, dòng hàng, tổng), luật đã chạm kèm ngưỡng lúc đó, **lịch sử mua của buyer** (số đơn, tổng tiền, số đơn bị từ chối). |
+| POST `/admin/order-checks/{checkId}/decision` | `FINANCE` | RSK-01 | `{ decision: APPROVE \| REJECT, reason }` (lý do bắt buộc khi từ chối). Admin là người mua hoặc chủ một shop trong đơn → 403 `SELF_APPROVAL_FORBIDDEN`. Không còn chờ → 409 `ALREADY_DECIDED`. Phát `order_check.decided`, ghi nhật ký. Không bao giờ tự duyệt: quá `review_timeout_hours` → `TIMEOUT`, đơn bị hủy. |
+
+### Luồng P3 dùng các API trên
+
+1. Buyer chọn các dòng của shop A và shop B trong giỏ → **Mua hàng** → web gọi `POST /checkout/preview` (địa chỉ mặc định, voucher shop, voucher sàn) → xem tiền tách theo shop.
+2. Bấm **Đặt hàng** → `POST /orders` → marketplace giữ tồn, giữ lượt voucher, tạo đơn tổng + 2 đơn con, phát `order.placed`.
+3. approval-service chạy luật: đơn < 10 triệu → `order_check.decided` PASSED ngay; đơn lớn → chờ admin `FINANCE` duyệt (song song với thanh toán).
+4. Web gọi `POST /orders/{id}/pay` → chuyển buyer sang VNPay (hoặc trang MÔ PHỎNG) → trả tiền → VNPay báo IPN / buyer quay về trang kết quả → payment-service xác minh, ghi đã trả, phát `payment.succeeded` (kèm phí sàn từng đơn con).
+5. marketplace chốt tồn; đơn đã trả và đã qua kiểm tra → 2 đơn con thành **Chờ shop xác nhận** (hạn 24 giờ).
+6. Buyer hủy đơn con của shop B → marketplace cộng lại tồn, trả lượt voucher shop B, phát `shop_order.cancelled` → payment-service hoàn đúng phần đơn con B → `refund.updated`. Đơn con A không đổi; shop A xác nhận → **Chờ giao hàng**.
+
+## 5. Tài liệu API tự sinh (Swagger)
 
 Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 
@@ -278,4 +387,4 @@ Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 - Dữ liệu vào và ra viết bằng **class DTO** (không dùng `any` hay object trơn). Trường vào kiểm bằng `class-validator` (`@IsEmail()`, `@MinLength(8)`...). Plugin Swagger trong `nest-cli.json` tự đọc kiểu và chú thích `/** ... */` của từng trường, nên viết chú thích tiếng Việt cho trường nào không tự giải thích.
 - Mỗi controller có `@ApiTags(...)`; API cần đăng nhập có `@ApiBearerAuth()`.
 - Mỗi mã lỗi riêng của API (ví dụ `EMAIL_TAKEN`) ghi bằng `@ApiResponse({ status: 409, description: 'EMAIL_TAKEN: ...' })`.
-- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–3.
+- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–4.

@@ -84,8 +84,90 @@ Kiểu: `ShopSuspensionDecidedPayload` trong `packages/shared/src/events/shop.ts
 
 marketplace-service lưu thời điểm quyết định đã áp vào cột `shops.moderated_at` và chỉ áp sự kiện có `decidedAt` mới hơn (sự kiện cũ tới sau thì bỏ qua). `SUSPEND` → shop `SUSPENDED`, lưu lý do vào `suspend_reason`; `RESTORE` → shop `ACTIVE`, xóa lý do. Nếu marketplace chưa kịp áp quyết định duyệt mở shop (shop chưa `ACTIVE`/`SUSPENDED`) thì ném lỗi để sự kiện được gửi lại sau.
 
-## 4. Thêm sự kiện mới
+## 4. Sự kiện P3
+
+Kiểu: `packages/shared/src/events/order.ts` (đơn, kiểm tra đơn) và `payment.ts` (thanh toán, hoàn tiền).
+
+| Sự kiện | Gửi → nhận | Khi nào |
+| --- | --- | --- |
+| `order.placed` | marketplace → payment, approval | Buyer đặt hàng thành công (ORD-01) |
+| `order_check.decided` | approval → marketplace | Đơn qua kiểm tra (tự động hoặc admin duyệt), bị từ chối hoặc quá hạn duyệt (RSK-01) |
+| `payment.succeeded` | payment → marketplace | Tiền của đơn tổng đã về (PAY-02) |
+| `payment.expired` | payment → marketplace | Hết hạn thanh toán hoặc hết số lần thử mà không có tiền (ORD-04) |
+| `shop_order.cancelled` | marketplace → payment, approval | Một đơn con bị hủy (ORD-05) |
+| `refund.updated` | payment → marketplace | Khoản hoàn của một đơn con đổi trạng thái (REF-01) |
+
+### `order.placed` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `code` | Đơn tổng |
+| `buyer` | `userId`, `name`, `email` (từ JWT lúc đặt) |
+| `paymentMethod` | `VNPAY` (P4 thêm `COD`) |
+| `total` | Tổng buyer phải trả (đồng) |
+| `payBefore` | Hạn thanh toán |
+| `shippingProvince` | Tên tỉnh nhận hàng (admin xem khi duyệt) |
+| `shopOrders` | Mỗi đơn con: `shopOrderId`, `code`, `shopId`, `shopName`, `ownerId` (chủ shop, để chặn tự duyệt), `subtotal`, `shopDiscount`, `platformDiscount`, `shippingFee`, `total`, `items` (`name`, `variant`, `price`, `quantity`) |
+| `placedAt` | Lúc đặt |
+
+payment-service lưu mỗi đơn con thành một dòng `seller_earnings` (chụp phí sàn đang dùng) để biết số tiền cần thu; approval-service chạy luật kiểm tra đơn. Nhận trùng thì bỏ qua (khóa `shop_order_id` / `order_id`).
+
+### `order_check.decided` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `checkId` | |
+| `result` | `PASSED` (qua), `REJECTED` (admin từ chối), `TIMEOUT` (quá hạn chưa duyệt) |
+| `reason` | Lý do (bắt buộc khi `REJECTED`/`TIMEOUT`) |
+| `decidedBy` | `userId`, `name` của admin; `null` khi tự động |
+| `decidedAt` | |
+
+marketplace chỉ áp khi đơn còn `checkStatus = PENDING`. `PASSED` và đã trả → các đơn con `PENDING` sang `TO_CONFIRM`. `REJECTED`/`TIMEOUT` → hủy mọi đơn con chưa hủy (`SYSTEM`), đã trả thì kéo theo hoàn tiền.
+
+### `payment.succeeded` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `paymentId`, `amount`, `paidAt` | |
+| `shopOrders` | Mỗi đơn con: `shopOrderId`, `platformFeeRate` (500 = 5%), `platformFee`, `sellerAmount` (seller dự kiến nhận) |
+
+Chỉ phát cho lần thanh toán **được áp vào đơn** (đơn còn chưa trả). marketplace: đơn chưa trả và chưa hủy → `paymentStatus = PAID`, chốt tồn, lưu phí sàn vào đơn con; đã qua kiểm tra thì các đơn con sang `TO_CONFIRM`. Đơn đã bị hủy (ví dụ hết giữ tồn trước khi tin tới) → bỏ qua; payment-service tự hoàn khi nhận `shop_order.cancelled`.
+
+### `payment.expired` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId` | |
+| `reason` | `TIMEOUT` (hết hạn) hoặc `ATTEMPTS_EXHAUSTED` (hết số lần thử) |
+| `expiredAt` | |
+
+Phát sau khi đã tra cứu VNPay lần cuối mà không có tiền. marketplace hủy cả đơn tổng nếu còn chưa trả (nhả tồn, trả lượt voucher).
+
+### `shop_order.cancelled` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `shopOrderId`, `code`, `shopId` | |
+| `cancelledBy` | `BUYER`, `SELLER`, `ADMIN`, `SYSTEM` |
+| `reason` | Lý do hủy |
+| `orderCancelled` | `true` khi sau lần hủy này mọi đơn con của đơn tổng đều đã hủy |
+| `cancelledAt` | |
+
+payment-service: đơn con đã thu tiền → tạo khoản hoàn bằng số buyer đã trả cho đơn con đó (mỗi đơn con tối đa một khoản); chưa thu → chỉ đánh dấu hủy. approval-service: `orderCancelled` và kiểm tra còn chờ → `CANCELLED` (admin không phải duyệt nữa).
+
+### `refund.updated` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `refundId`, `orderId`, `shopOrderId` (`null` khi hoàn khoản trả trùng/trả muộn của cả đơn) | |
+| `amount` | |
+| `status` | `PROCESSING` (đang hoàn, kể cả đang thử lại), `NEEDS_MANUAL` (chờ admin hoàn tay), `SUCCEEDED` (VNPay báo đã hoàn), `MANUAL_DONE` (admin đã chuyển khoản, có chứng từ) |
+| `updatedAt` | |
+
+marketplace lưu vào `shop_orders.refund_status` để buyer, seller thấy; chỉ áp trạng thái mới hơn (`updatedAt`).
+
+## 5. Thêm sự kiện mới
 
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
-2. Thêm một mục vào file này (bảng ở mục 2 và bảng trường).
+2. Thêm một mục vào file này (bảng sự kiện của phase và bảng trường).
 3. Cả hai việc nằm trong cùng Pull Request với code gửi sự kiện; báo người phụ trách service nhận.
