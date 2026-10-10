@@ -106,6 +106,7 @@ model Shop {
   applications ShopApplication[]
   products     Product[]
   vouchers     Voucher[]
+  shopOrders   ShopOrder[]
 
   @@map("shops")
 }
@@ -219,8 +220,9 @@ model ProductVariant {
   active        Boolean @default(true)
 
   product   Product        @relation(fields: [productId], references: [id])
-  stockLogs StockHistory[]
-  cartItems CartItem[]
+  stockLogs  StockHistory[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@unique([productId, option1Value, option2Value])
   @@map("product_variants")
@@ -253,9 +255,12 @@ model StockHistory {
   reason     String   @db.VarChar(200)
   /// Người đổi (userId)
   createdBy  String   @map("created_by") @db.Uuid
+  /// Đơn làm thay đổi tồn (bán, hủy đơn đã trả); trống = seller tự điều chỉnh
+  orderId    String?  @map("order_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   variant ProductVariant @relation(fields: [variantId], references: [id])
+  order   Order?         @relation(fields: [orderId], references: [id])
 
   @@index([variantId, createdAt])
   @@map("stock_history")
@@ -317,10 +322,271 @@ model Voucher {
   createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  shop Shop? @relation(fields: [shopId], references: [id])
+  shop   Shop?          @relation(fields: [shopId], references: [id])
+  usages VoucherUsage[]
 
   @@index([shopId, endAt])
   @@map("vouchers")
+}
+
+/// Lượt dùng voucher (VCH-02). Giới hạn mỗi người đếm các dòng chưa trả lượt
+model VoucherUsage {
+  id          String    @id @default(uuid()) @db.Uuid
+  voucherId   String    @map("voucher_id") @db.Uuid
+  /// Người mua (userId)
+  userId      String    @map("user_id") @db.Uuid
+  orderId     String    @map("order_id") @db.Uuid
+  /// Trống = voucher sàn (áp cho cả đơn tổng)
+  shopOrderId String?   @map("shop_order_id") @db.Uuid
+  /// Số tiền đã giảm
+  amount      Int
+  /// Lúc trả lại lượt (đơn bị hủy); trống = đang dùng
+  returnedAt  DateTime? @map("returned_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  voucher   Voucher    @relation(fields: [voucherId], references: [id])
+  order     Order      @relation(fields: [orderId], references: [id])
+  shopOrder ShopOrder? @relation(fields: [shopOrderId], references: [id])
+
+  @@index([voucherId, userId])
+  @@index([orderId])
+  @@map("voucher_usages")
+}
+
+// ===== Đơn hàng (P3) =====
+
+/// Bản xem trước khi đặt (ORD-01). id là mã phiên: đặt hàng gửi lại cùng mã thì trả đơn đã tạo
+model Checkout {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// Người mua (userId)
+  buyerId   String   @map("buyer_id") @db.Uuid
+  /// Lựa chọn của buyer: dòng giỏ, địa chỉ, mã voucher
+  input     Json
+  /// Bản xem trước: giá, voucher, phí ship, địa chỉ (chép từ user-service)
+  data      Json
+  total     Int
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  /// Đơn đã tạo từ phiên này
+  orderId   String?  @unique @map("order_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order? @relation(fields: [orderId], references: [id])
+
+  @@index([buyerId, createdAt])
+  @@map("checkouts")
+}
+
+enum PaymentMethod {
+  VNPAY
+}
+
+enum OrderPaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum OrderCheckStatus {
+  PENDING
+  PASSED
+  REJECTED
+}
+
+/// Đơn tổng: một lần đặt. Trạng thái chung tính từ các đơn con, không lưu
+model Order {
+  id                  String             @id @default(uuid()) @db.Uuid
+  /// Ngày đặt (YYMMDD) + 6 ký tự, ví dụ 261011ABC123
+  code                String             @unique @db.VarChar(20)
+  buyerId             String             @map("buyer_id") @db.Uuid
+  buyerName           String             @map("buyer_name") @db.VarChar(100)
+  buyerEmail          String             @map("buyer_email") @db.VarChar(255)
+  paymentMethod       PaymentMethod      @default(VNPAY) @map("payment_method")
+  // Địa chỉ nhận (chép lại lúc đặt)
+  receiverName        String             @map("receiver_name") @db.VarChar(100)
+  receiverPhone       String             @map("receiver_phone") @db.VarChar(15)
+  provinceId          Int                @map("province_id")
+  districtId          Int                @map("district_id")
+  wardCode            String             @map("ward_code") @db.VarChar(20)
+  /// Địa chỉ đầy đủ để hiển thị
+  address             String             @db.VarChar(400)
+  /// Voucher sàn (cả đơn tối đa 1)
+  platformVoucherId   String?            @map("platform_voucher_id") @db.Uuid
+  platformVoucherCode String?            @map("platform_voucher_code") @db.VarChar(20)
+  platformDiscount    Int                @default(0) @map("platform_discount")
+  /// Tổng tiền hàng các đơn con
+  subtotal            Int
+  /// Tổng phí ship các đơn con
+  shippingFee         Int                @map("shipping_fee")
+  /// Buyer phải trả = tổng total các đơn con
+  total               Int
+  paymentStatus       OrderPaymentStatus @default(UNPAID) @map("payment_status")
+  checkStatus         OrderCheckStatus   @default(PENDING) @map("check_status")
+  /// Hạn thanh toán
+  payBefore           DateTime           @map("pay_before") @db.Timestamptz(3)
+  /// Hết giữ tồn: chưa trả tới lúc này thì hủy cả đơn
+  holdUntil           DateTime           @map("hold_until") @db.Timestamptz(3)
+  paidAt              DateTime?          @map("paid_at") @db.Timestamptz(3)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  shopOrders    ShopOrder[]
+  voucherUsages VoucherUsage[]
+  stockHistory  StockHistory[]
+  checkout      Checkout?
+
+  @@index([buyerId, createdAt])
+  @@index([paymentStatus, holdUntil])
+  @@map("orders")
+}
+
+enum ShopOrderStatus {
+  /// Chờ thanh toán và kiểm tra đơn
+  PENDING
+  /// Chờ shop xác nhận
+  TO_CONFIRM
+  /// Shop đã xác nhận, chờ giao hàng
+  CONFIRMED
+  /// Buyer xin hủy, chờ shop trả lời
+  CANCEL_REQUESTED
+  CANCELLED
+}
+
+enum CancelActor {
+  BUYER
+  SELLER
+  ADMIN
+  SYSTEM
+}
+
+enum ShippingFeeSource {
+  /// Giá thật từ API GHN
+  GHN
+  /// GHN lỗi: phí dự phòng trong cấu hình, sàn chịu chênh lệch
+  FALLBACK
+  /// Chưa nối GHN: phí cố định trong cấu hình
+  FIXED
+}
+
+enum RefundStatus {
+  NONE
+  PROCESSING
+  NEEDS_MANUAL
+  SUCCEEDED
+  MANUAL_DONE
+}
+
+/// Đơn con: phần của một shop trong đơn tổng, có vòng đời riêng (STATE-01)
+model ShopOrder {
+  id                  String            @id @default(uuid()) @db.Uuid
+  /// Mã đơn tổng + "-1", "-2"
+  code                String            @unique @db.VarChar(24)
+  orderId             String            @map("order_id") @db.Uuid
+  shopId              String            @map("shop_id") @db.Uuid
+  /// Tên shop lúc đặt
+  shopName            String            @map("shop_name") @db.VarChar(80)
+  status              ShopOrderStatus   @default(PENDING)
+  /// Tiền hàng
+  subtotal            Int
+  shopVoucherId       String?           @map("shop_voucher_id") @db.Uuid
+  shopVoucherCode     String?           @map("shop_voucher_code") @db.VarChar(20)
+  shopDiscount        Int               @default(0) @map("shop_discount")
+  /// Phần voucher sàn chia cho đơn con này (sàn chịu)
+  platformDiscount    Int               @default(0) @map("platform_discount")
+  shippingFee         Int               @map("shipping_fee")
+  shippingFeeSource   ShippingFeeSource @map("shipping_fee_source")
+  /// Buyer trả = subtotal - shopDiscount - platformDiscount + shippingFee
+  total               Int
+  /// Phí sàn theo phần vạn (500 = 5%), payment-service chụp; có khi đơn đã trả
+  platformFeeRate     Int?              @map("platform_fee_rate")
+  platformFee         Int?              @map("platform_fee")
+  /// Seller dự kiến nhận
+  sellerAmount        Int?              @map("seller_amount")
+  /// Hạn shop xác nhận (khi sang TO_CONFIRM)
+  confirmBefore       DateTime?         @map("confirm_before") @db.Timestamptz(3)
+  confirmedAt         DateTime?         @map("confirmed_at") @db.Timestamptz(3)
+  cancelledBy         CancelActor?      @map("cancelled_by")
+  cancelReason        String?           @map("cancel_reason") @db.VarChar(500)
+  cancelledAt         DateTime?         @map("cancelled_at") @db.Timestamptz(3)
+  /// Buyer xin hủy sau khi shop xác nhận
+  cancelRequestReason String?           @map("cancel_request_reason") @db.VarChar(500)
+  cancelRequestedAt   DateTime?         @map("cancel_requested_at") @db.Timestamptz(3)
+  /// Đã dùng lượt xin hủy (mỗi đơn con 1 lần)
+  cancelRequestUsed   Boolean           @default(false) @map("cancel_request_used")
+  /// Trạng thái hoàn tiền (nhận từ payment-service)
+  refundStatus        RefundStatus      @default(NONE) @map("refund_status")
+  refundUpdatedAt     DateTime?         @map("refund_updated_at") @db.Timestamptz(3)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  order         Order          @relation(fields: [orderId], references: [id])
+  shop          Shop           @relation(fields: [shopId], references: [id])
+  items         OrderItem[]
+  history       OrderHistory[]
+  voucherUsages VoucherUsage[]
+
+  @@index([orderId])
+  @@index([shopId, status, createdAt])
+  @@index([status, confirmBefore])
+  @@map("shop_orders")
+}
+
+/// Dòng hàng trong đơn con (chép lại tên, ảnh, giá lúc đặt)
+model OrderItem {
+  id            String  @id @default(uuid()) @db.Uuid
+  shopOrderId   String  @map("shop_order_id") @db.Uuid
+  productId     String  @map("product_id") @db.Uuid
+  variantId     String  @map("variant_id") @db.Uuid
+  productName   String  @map("product_name") @db.VarChar(120)
+  /// Ví dụ "Đen, 128GB"; '' nếu không phân loại
+  variantName   String  @map("variant_name") @db.VarChar(80)
+  image         String? @db.VarChar(255)
+  price         Int
+  originalPrice Int?    @map("original_price")
+  quantity      Int
+  /// Khối lượng 1 sản phẩm (gram), để tính lại phí ship
+  weight        Int
+  /// Phần voucher shop + sàn chia cho dòng này (dùng khi trả hàng ở P5)
+  discount      Int     @default(0)
+
+  shopOrder ShopOrder      @relation(fields: [shopOrderId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([shopOrderId])
+  @@map("order_items")
+}
+
+/// Lịch sử trạng thái đơn con. Chỉ thêm, không sửa
+model OrderHistory {
+  id          String           @id @default(uuid()) @db.Uuid
+  shopOrderId String           @map("shop_order_id") @db.Uuid
+  fromStatus  ShopOrderStatus? @map("from_status")
+  toStatus    ShopOrderStatus  @map("to_status")
+  actorType   CancelActor      @map("actor_type")
+  actorId     String?          @map("actor_id") @db.Uuid
+  actorName   String?          @map("actor_name") @db.VarChar(100)
+  /// Lý do hoặc ghi chú
+  note        String?          @db.VarChar(500)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  shopOrder ShopOrder @relation(fields: [shopOrderId], references: [id])
+
+  @@index([shopOrderId, createdAt])
+  @@map("order_history")
+}
+
+/// Cấu hình có phiên bản (ADM-01): hạn thanh toán, giữ tồn, hạn xác nhận, phí ship cố định.
+/// Mỗi lần sửa thêm một phiên bản; phiên bản lớn nhất đang dùng
+model Setting {
+  key           String   @db.VarChar(64)
+  version       Int
+  value         Int
+  effectiveFrom DateTime @default(now()) @map("effective_from") @db.Timestamptz(3)
+  /// Admin sửa (userId)
+  createdBy     String?  @map("created_by") @db.Uuid
+  createdByName String?  @map("created_by_name") @db.VarChar(100)
+  reason        String?  @db.VarChar(500)
+
+  @@id([key, version])
+  @@map("settings")
 }
 
 // ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====

@@ -6,6 +6,6 @@ import { LocationsService } from './locations.service';
 @Module({
   controllers: [LocationsController],
   providers: [LocationsService, GhnClient],
-  exports: [LocationsService],
+  exports: [LocationsService, GhnClient],
 })
 export class LocationsModule {}

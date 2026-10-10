@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { SanCommonModule } from '@san/nest-common';
+import { SanCommonModule, SettingsModule } from '@san/nest-common';
+import { MARKET_SETTINGS } from './settings';
+import { OrdersModule } from './orders/orders.module';
 import { CoreModule } from './core.module';
 import { HealthController } from './health/health.controller';
 import { LocationsModule } from './locations/locations.module';
@@ -24,8 +26,11 @@ import { CatalogModule } from './catalog/catalog.module';
       jwksUrl: process.env.JWKS_URL,
       databaseUrl: process.env.DATABASE_URL,
     }),
+    // Cấu hình có phiên bản (bảng settings) + API /admin/settings (ADM-01)
+    SettingsModule.forRoot(MARKET_SETTINGS),
     CoreModule,
     LocationsModule,
+    OrdersModule,
     UploadsModule,
     ShopsModule,
     ShopAdminModule,

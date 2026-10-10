@@ -2,6 +2,7 @@ import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { EventBus } from '@san/nest-common';
 import { SHOP_SUSPENSION_DECIDED, type ShopSuspensionDecidedPayload } from '@san/shared';
 import type { Prisma } from '../../generated/prisma';
+import { OPEN_STATUSES, OrderLifecycle, SYSTEM } from '../orders/order-lifecycle.service';
 
 /**
  * Nhận quyết định đình chỉ/khôi phục shop từ approval-service (SHP-04).
@@ -11,7 +12,10 @@ import type { Prisma } from '../../generated/prisma';
 export class ShopSuspensionEvents implements OnModuleInit {
   private readonly logger = new Logger(ShopSuspensionEvents.name);
 
-  constructor(private readonly events: EventBus) {}
+  constructor(
+    private readonly events: EventBus,
+    private readonly lifecycle: OrderLifecycle,
+  ) {}
 
   onModuleInit(): void {
     this.events.subscribe(SHOP_SUSPENSION_DECIDED, (payload, tx: Prisma.TransactionClient) =>
@@ -43,6 +47,29 @@ export class ShopSuspensionEvents implements OnModuleInit {
     });
     if (count === 0) {
       this.logger.log(`Bỏ qua quyết định ${p.action} shop ${p.shopId}: đã áp quyết định mới hơn.`);
+      return;
     }
+    if (p.action === 'SUSPEND') await this.cancelOpenOrders(tx, p.shopId);
+  }
+
+  /**
+   * Shop bị đình chỉ (quyết định P3 số 8): hủy mọi đơn con chưa bàn giao của shop, hoàn tiền nếu đã trả.
+   * Đơn tổng chưa trả thì hủy cả đơn tổng (chưa trả chỉ hủy được cả đơn).
+   */
+  private async cancelOpenOrders(tx: Prisma.TransactionClient, shopId: string): Promise<void> {
+    const open = await tx.shopOrder.findMany({
+      where: { shopId, status: { in: OPEN_STATUSES } },
+      select: { id: true, orderId: true, order: { select: { paymentStatus: true } } },
+    });
+    for (const so of open) {
+      await this.lifecycle.cancel(
+        tx,
+        so.orderId,
+        so.order.paymentStatus === 'PAID' ? [so.id] : 'ALL',
+        SYSTEM,
+        'Shop tạm ngừng bán.',
+      );
+    }
+    if (open.length) this.logger.log(`Shop ${shopId} bị đình chỉ: hủy ${open.length} đơn con.`);
   }
 }

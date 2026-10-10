@@ -15,6 +15,8 @@ import { GhnClient } from '../src/locations/ghn.client';
 import { LocationsService } from '../src/locations/locations.service';
 import { PrismaService } from '../src/prisma.service';
 import { StorageService } from '../src/uploads/storage.service';
+import { PaymentClient } from '../src/clients/payment.client';
+import { UserClient } from '../src/clients/user.client';
 
 export const API = '/api/market/v1';
 export const describeDb = process.env.TEST_DB ? describe : describe.skip;
@@ -50,13 +52,31 @@ export interface TestApp {
   app: INestApplication;
   prisma: PrismaService;
   storage: FakeStorage;
-  ghn: { configured: boolean; provinces: jest.Mock; districts: jest.Mock; wards: jest.Mock };
+  ghn: {
+    configured: boolean;
+    provinces: jest.Mock;
+    districts: jest.Mock;
+    wards: jest.Mock;
+    fee: jest.Mock;
+  };
+  /** Sổ địa chỉ giả của user-service (mặc định 1 địa chỉ Hà Nội) */
+  users: { addresses: jest.Mock };
+  /** payment-service giả */
+  payments: { createPayment: jest.Mock };
   http: () => ReturnType<typeof request>;
 }
 
 export async function createTestApp(): Promise<TestApp> {
   const storage = new FakeStorage();
-  const ghn = { configured: false, provinces: jest.fn(), districts: jest.fn(), wards: jest.fn() };
+  const ghn = {
+    configured: false,
+    provinces: jest.fn(),
+    districts: jest.fn(),
+    wards: jest.fn(),
+    fee: jest.fn(),
+  };
+  const users = { addresses: jest.fn(async () => [BUYER_ADDRESS]) };
+  const payments = { createPayment: jest.fn() };
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(JwtVerifier)
     .useValue(new JwtVerifier({ privateKey }))
@@ -64,6 +84,10 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(storage)
     .overrideProvider(GhnClient)
     .useValue(ghn)
+    .overrideProvider(UserClient)
+    .useValue(users)
+    .overrideProvider(PaymentClient)
+    .useValue(payments)
     .compile();
   const app = moduleRef.createNestApplication({ logger: false });
   setupApp(app, { apiPrefix: 'api/market/v1', title: 'test', description: 'test' });
@@ -73,13 +97,15 @@ export async function createTestApp(): Promise<TestApp> {
     prisma: app.get(PrismaService),
     storage,
     ghn,
+    users,
+    payments,
     http: () => request(app.getHttpServer()),
   };
 }
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories CASCADE',
+    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, settings CASCADE',
   );
 }
 
@@ -94,4 +120,19 @@ export const PICKUP = {
   districtId: 90101,
   wardCode: '9010101',
   street: '12 Kim Mã',
+};
+
+/** Địa chỉ mặc định của buyer trong sổ địa chỉ giả */
+export const BUYER_ADDRESS = {
+  id: '6f1c2a10-0000-4000-8000-000000000001',
+  receiverName: 'Người Mua',
+  phone: '0987654321',
+  provinceId: 90001,
+  districtId: 90101,
+  wardCode: '9010101',
+  provinceName: 'Hà Nội',
+  districtName: 'Quận Ba Đình',
+  wardName: 'Phường Điện Biên',
+  street: '1 Điện Biên Phủ',
+  isDefault: true,
 };

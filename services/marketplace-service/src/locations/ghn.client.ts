@@ -38,6 +38,45 @@ export class GhnClient {
     return this.get(`/master-data/ward?district_id=${districtId}`);
   }
 
+  /** Phí giao hàng chuẩn (đồng) cho một kiện (SHIP-01). Lỗi hoặc quá 8 giây thì ném lỗi */
+  async fee(input: {
+    fromDistrictId: number;
+    fromWardCode: string;
+    toDistrictId: number;
+    toWardCode: string;
+    /** gram */
+    weight: number;
+  }): Promise<number> {
+    const headers: Record<string, string> = {
+      Token: this.config.ghnToken,
+      'Content-Type': 'application/json',
+    };
+    if (this.config.ghnShopId) headers.ShopId = this.config.ghnShopId;
+    const res = await fetch(`${this.config.ghnApiUrl}/v2/shipping-order/fee`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        service_type_id: 2,
+        from_district_id: input.fromDistrictId,
+        from_ward_code: input.fromWardCode,
+        to_district_id: input.toDistrictId,
+        to_ward_code: input.toWardCode,
+        weight: input.weight,
+      }),
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!res.ok) throw new Error(`GHN tính phí trả HTTP ${res.status}`);
+    const body = (await res.json()) as {
+      code: number;
+      data?: { total?: number };
+      message?: string;
+    };
+    if (body.code !== 200 || typeof body.data?.total !== 'number') {
+      throw new Error(`GHN tính phí báo lỗi: ${body.message ?? body.code}`);
+    }
+    return body.data.total;
+  }
+
   private async get<T>(path: string): Promise<T[]> {
     const res = await fetch(`${this.config.ghnApiUrl}${path}`, {
       headers: { Token: this.config.ghnToken },

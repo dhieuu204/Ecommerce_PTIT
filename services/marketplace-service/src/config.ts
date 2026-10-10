@@ -53,4 +53,14 @@ export class AppConfig {
   readonly weightMaxGrams = num('WEIGHT_MAX_GRAMS', 30000);
   /** Tồn kho tối đa của một biến thể */
   readonly stockMax = num('STOCK_MAX', 999999);
+
+  // ----- P3: đặt hàng -----
+  /** Mã shop trên GHN dev (header ShopId khi tính phí); để trống vẫn tính được theo quận/huyện */
+  readonly ghnShopId = text('GHN_SHOP_ID');
+  /** user-service: lấy sổ địa chỉ của buyer khi checkout */
+  readonly userApiUrl = text('USER_API_URL', 'http://localhost:3001/api/user/v1');
+  /** payment-service: tạo lần thanh toán */
+  readonly paymentApiUrl = text('PAYMENT_API_URL', 'http://localhost:3003/api/payment/v1');
+  /** Bản xem trước checkout dùng được trong bao nhiêu phút (kỹ thuật, không phải luật nghiệp vụ) */
+  readonly checkoutPreviewMinutes = num('CHECKOUT_PREVIEW_MINUTES', 30);
 }
