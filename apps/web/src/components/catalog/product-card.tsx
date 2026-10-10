@@ -44,7 +44,8 @@ export function ProductCard({
   className?: string;
 }) {
   const percent = discountPercent(product.minPrice, product.originalPrice);
-  const chips = product.option1Values.slice(0, 3);
+  // Một hàng chip cố định để các thẻ cùng hàng thẳng giá với nhau
+  const chips = product.option1Values.slice(0, 2);
   const more = product.option1Values.length - chips.length;
 
   return (
@@ -80,41 +81,44 @@ export function ProductCard({
         {product.name}
       </h3>
 
-      {chips.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {chips.map((v, i) => (
-            <span
-              key={v}
-              className={cn(
-                'rounded-full border px-2 py-0.5 text-[11px] leading-4',
-                i === 0
-                  ? 'border-navy bg-navy text-white'
-                  : 'border-ivory-200 bg-ivory text-ink/70',
-              )}
-            >
-              {v}
-            </span>
-          ))}
-          {more > 0 && (
-            <span className="rounded-full border border-ivory-200 px-2 py-0.5 text-[11px] leading-4 text-ink/60">
-              +{more}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Điện thoại: 1 chip; màn lớn: 2 chip; còn lại gộp thành "+N" */}
+      <div className="mt-2 flex h-5 min-w-0 gap-1.5 overflow-hidden">
+        {chips.map((v, i) => (
+          <span
+            key={v}
+            title={v}
+            className={cn(
+              'truncate rounded-full border px-2 text-[11px] leading-[18px]',
+              i === 0
+                ? 'max-w-[75%] border-navy bg-navy text-white sm:max-w-[48%]'
+                : 'hidden max-w-[48%] border-ivory-200 bg-ivory text-ink/70 sm:inline-block',
+            )}
+          >
+            {v}
+          </span>
+        ))}
+        {product.option1Values.length > 1 && (
+          <span className="shrink-0 rounded-full border border-ivory-200 px-1.5 text-[11px] leading-[18px] text-ink/60 sm:hidden">
+            +{product.option1Values.length - 1}
+          </span>
+        )}
+        {more > 0 && (
+          <span className="hidden shrink-0 rounded-full border border-ivory-200 px-1.5 text-[11px] leading-[18px] text-ink/60 sm:inline-block">
+            +{more}
+          </span>
+        )}
+      </div>
 
       <div className="mt-auto pt-3">
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-base font-bold text-navy sm:text-lg">
-            {formatMoney(product.minPrice)}
-          </span>
+        <div className="truncate text-base font-bold text-navy sm:text-lg">
+          {formatMoney(product.minPrice)}
+        </div>
+        <div className="h-4 text-xs leading-4 text-ink/45">
           {percent > 0 && (
-            <span className="text-xs text-ink/45 line-through">
-              {formatMoney(product.originalPrice!)}
-            </span>
+            <span className="line-through">{formatMoney(product.originalPrice!)}</span>
           )}
         </div>
-        <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-ink/55">
+        <div className="mt-2 flex items-center justify-between gap-2 border-t border-dashed border-ivory-200 pt-2 text-[11px] text-ink/55">
           <span className="truncate">{product.shop.name}</span>
           {product.soldCount > 0 && (
             <span className="shrink-0">Đã bán {formatSold(product.soldCount)}</span>
