@@ -39,12 +39,24 @@ export class PaymentJobs implements OnModuleInit {
       take: 200,
     });
     const overdueIds = overdue.map((o) => o.orderId);
-    const toCheck = await this.prisma.payment.findMany({
-      where: {
-        OR: [{ status: 'UNKNOWN' }, { status: 'PENDING', orderId: { in: overdueIds } }],
-      },
-      take: 100,
+    // Lần còn chờ mà link đã hết hạn (đơn quá hạn, kể cả đơn đã bị hủy khi chưa trả: buyer vẫn có thể
+    // đã trả trên cổng mà tin báo mất → tra cứu, có tiền thì tự tạo khoản hoàn)
+    const pending = await this.prisma.payment.findMany({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
+      take: 200,
     });
+    const deadlines = new Map(
+      (
+        await this.prisma.sellerEarning.findMany({
+          where: { orderId: { in: pending.map((p) => p.orderId) } },
+          select: { orderId: true, payBefore: true },
+          distinct: ['orderId'],
+        })
+      ).map((e) => [e.orderId, e.payBefore]),
+    );
+    const unknown = await this.prisma.payment.findMany({ where: { status: 'UNKNOWN' }, take: 100 });
+    const toCheck = [...unknown, ...pending.filter((p) => (deadlines.get(p.orderId) ?? now) < now)];
     for (const p of toCheck) await this.payments.check(p);
 
     // 2. Đơn quá hạn mà mọi lần thanh toán đã có kết quả, không có tiền → hết hạn

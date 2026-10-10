@@ -333,6 +333,27 @@ describeDb('Thanh toán và hoàn tiền (PAY-01..04, REF-01) — cổng MÔ PH�
     expect(r).toMatchObject({ status: 'FAILED', tries: 1 });
   });
 
+  it('đơn đã hủy khi chưa trả, buyer vẫn trả nhưng mất tin báo → job tra cứu sau hạn, tự tạo khoản hoàn', async () => {
+    const p = placedOrder(buyer, { payBefore: new Date(Date.now() + 60_000).toISOString() });
+    await placed(p);
+    await create(p.orderId).expect(201);
+    await cancelled(p, 0, false);
+    await cancelled(p, 1, true);
+    await mock(`${p.code}T1`, 'PAID_NO_NOTICE').expect(200);
+    const jobs = t.app.get(PaymentJobs);
+    await jobs.watch(); // link chưa hết hạn: chưa tra cứu
+    expect((await t.prisma.payment.findFirstOrThrow()).status).toBe('PENDING');
+    await jobs.watch(new Date(Date.now() + 120_000));
+    expect(await t.prisma.payment.findFirstOrThrow()).toMatchObject({
+      status: 'SUCCEEDED',
+      applied: false,
+    });
+    expect(await t.prisma.refund.findFirstOrThrow()).toMatchObject({
+      reason: 'LATE_PAYMENT',
+      amount: 290_000,
+    });
+  });
+
   it('admin xem thanh toán của đơn (SUPPORT/FINANCE); phí sàn đổi chỉ áp cho đơn mới', async () => {
     const p = await paidOrder();
     const sup = makeUser('Hỗ Trợ', ['SUPPORT']);
