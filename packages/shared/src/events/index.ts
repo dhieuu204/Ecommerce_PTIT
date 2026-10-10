@@ -1,5 +1,21 @@
 import type { EventEnvelope } from './envelope';
 import {
+  ORDER_CHECK_DECIDED,
+  ORDER_PLACED,
+  SHOP_ORDER_CANCELLED,
+  type OrderCheckDecidedPayload,
+  type OrderPlacedPayload,
+  type ShopOrderCancelledPayload,
+} from './order';
+import {
+  PAYMENT_EXPIRED,
+  PAYMENT_SUCCEEDED,
+  REFUND_UPDATED,
+  type PaymentExpiredPayload,
+  type PaymentSucceededPayload,
+  type RefundUpdatedPayload,
+} from './payment';
+import {
   SHOP_APPLICATION_DECIDED,
   SHOP_APPLICATION_SUBMITTED,
   SHOP_SUSPENSION_DECIDED,
@@ -9,6 +25,8 @@ import {
 } from './shop';
 
 export * from './envelope';
+export * from './order';
+export * from './payment';
 export * from './shop';
 
 /**
@@ -19,6 +37,12 @@ export interface EventPayloads {
   [SHOP_APPLICATION_SUBMITTED]: ShopApplicationSubmittedPayload;
   [SHOP_APPLICATION_DECIDED]: ShopApplicationDecidedPayload;
   [SHOP_SUSPENSION_DECIDED]: ShopSuspensionDecidedPayload;
+  [ORDER_PLACED]: OrderPlacedPayload;
+  [SHOP_ORDER_CANCELLED]: ShopOrderCancelledPayload;
+  [ORDER_CHECK_DECIDED]: OrderCheckDecidedPayload;
+  [PAYMENT_SUCCEEDED]: PaymentSucceededPayload;
+  [PAYMENT_EXPIRED]: PaymentExpiredPayload;
+  [REFUND_UPDATED]: RefundUpdatedPayload;
 }
 
 export type EventType = keyof EventPayloads;

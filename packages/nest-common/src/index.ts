@@ -15,3 +15,6 @@ export * from './jobs/job.service';
 export * from './options';
 export * from './san-common.module';
 export * from './setup-app';
+export * from './settings/settings.controller';
+export * from './settings/settings.module';
+export * from './settings/settings.service';
