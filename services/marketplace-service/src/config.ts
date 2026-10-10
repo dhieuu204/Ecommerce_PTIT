@@ -34,4 +34,19 @@ export class AppConfig {
 
   /** Logo shop tối đa (MB) */
   readonly logoMaxMb = num('SHOP_LOGO_MAX_MB', 2);
+
+  // ----- Con số cấu hình P2: sản phẩm (CAT-02, CAT-03, INV-01) -----
+  /** Ảnh sản phẩm tối đa (MB) */
+  readonly productImageMaxMb = num('PRODUCT_IMAGE_MAX_MB', 5);
+  /** Số ảnh chung tối đa của một sản phẩm (chưa kể ảnh theo lựa chọn nhóm 1) */
+  readonly productMaxImages = num('PRODUCT_MAX_IMAGES', 9);
+  /** Số lựa chọn tối đa trong mỗi nhóm phân loại (tối đa 2 nhóm) */
+  readonly variantMaxOptions = num('VARIANT_MAX_OPTIONS', 10);
+  /** Giá bán thấp nhất / cao nhất của một biến thể (đồng) */
+  readonly priceMin = num('PRICE_MIN', 1000);
+  readonly priceMax = num('PRICE_MAX', 500000000);
+  /** Khối lượng đóng gói tối đa (gram) */
+  readonly weightMaxGrams = num('WEIGHT_MAX_GRAMS', 30000);
+  /** Tồn kho tối đa của một biến thể */
+  readonly stockMax = num('STOCK_MAX', 999999);
 }
