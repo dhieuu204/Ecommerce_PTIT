@@ -1,6 +1,6 @@
 // Schema của approval-service [A]. Chỉ service này được đọc/ghi database approval_db.
 // A chỉ lưu hồ sơ và quyết định; marketplace và payment tự áp dụng quyết định.
-// Bảng P1 đã đủ cột. Khung các phase sau: docs/erd/README.md.
+// Bảng P1, P2 đã đủ cột. Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -51,6 +51,36 @@ model ShopApproval {
   @@unique([shopId, version])
   @@index([status, submittedAt])
   @@map("shop_approvals")
+}
+
+enum ViolationTarget {
+  SHOP
+}
+
+enum ViolationAction {
+  SUSPEND
+  RESTORE
+}
+
+/// Quyết định xử lý vi phạm (SHP-04): đình chỉ hoặc khôi phục shop.
+/// P2 chỉ có admin tự đình chỉ/khôi phục shop; P6 (MOD-01) thêm báo cáo của buyer, bằng chứng, sản phẩm.
+model Violation {
+  id            String          @id @default(uuid()) @db.Uuid
+  targetType    ViolationTarget @default(SHOP) @map("target_type")
+  /// Mã shop bên marketplace
+  targetId      String          @map("target_id") @db.Uuid
+  /// Tên shop lúc quyết định (để xem lại lịch sử)
+  targetName    String          @map("target_name") @db.VarChar(100)
+  /// Chủ shop: admin trùng người này thì không được xử lý
+  ownerId       String          @map("owner_id") @db.Uuid
+  action        ViolationAction
+  reason        String          @db.VarChar(500)
+  decidedBy     String          @map("decided_by") @db.Uuid
+  decidedByName String          @map("decided_by_name") @db.VarChar(100)
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([targetId, createdAt])
+  @@map("violations")
 }
 
 // ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====

@@ -64,3 +64,14 @@ export interface ShopApplicationDecidedPayload {
   decidedBy: { userId: string; name: string };
   decidedAt: string;
 }
+
+/** approval-service → marketplace-service: admin đình chỉ hoặc khôi phục shop (SHP-04). */
+export const SHOP_SUSPENSION_DECIDED = 'shop_suspension.decided';
+export interface ShopSuspensionDecidedPayload {
+  shopId: string;
+  action: 'SUSPEND' | 'RESTORE';
+  reason: string;
+  decidedBy: { userId: string; name: string };
+  /** marketplace chỉ áp nếu mới hơn quyết định đã áp trước đó (sự kiện có thể tới sai thứ tự) */
+  decidedAt: string;
+}

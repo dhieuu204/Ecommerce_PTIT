@@ -5,11 +5,11 @@ Nhóm chọn cách **code trước, sinh tài liệu**: không viết file OpenA
 | Nội dung | Ở đâu |
 | --- | --- |
 | Quy ước chung (đường dẫn, đăng nhập, lỗi, phân trang) | File này, mục 1 |
-| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 |
+| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2) |
 | Sự kiện giữa các service qua RabbitMQ | `events.md` + kiểu TypeScript trong `packages/shared/src/events` |
-| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 3 |
+| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 4 |
 
-Muốn thêm hoặc đổi API so với danh sách ở mục 2, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
+Muốn thêm hoặc đổi API so với danh sách ở mục 2–3, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
 
 ## 1. Quy ước chung
 
@@ -165,7 +165,104 @@ payment-service chưa có API ở P1 (ngoài `/health`).
 
 Ở P1 seller xem kết quả duyệt trong trang "Shop của tôi"; thông báo trong app có ở P6 (MSG-02).
 
-## 3. Tài liệu API tự sinh (Swagger)
+## 3. Danh sách API P2
+
+P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục tiêu: hai shop có hàng; buyer tìm và thêm hàng của cả hai vào giỏ. Các lựa chọn của chủ đồ án (10/10): danh mục công nghệ + vài ngành khác; **đăng là bán ngay** (không duyệt sản phẩm); voucher **chỉ tạo ở P2, áp vào đơn ở P3**; voucher giảm **số tiền** hoặc **% có trần**; **phải đăng nhập** mới thêm vào giỏ; shop bị đình chỉ thì **ẩn hàng, seller vẫn sửa được**.
+
+### Quy tắc chung của P2
+
+- **Hàng đang bán** = sản phẩm `ACTIVE` của shop `ACTIVE`. Mọi API công khai chỉ trả hàng đang bán; sản phẩm khác trả 404.
+- **Còn bán được** của một biến thể = `stock - reserved` (`reserved` là lượng đang giữ cho đơn trả trước chưa thanh toán, có từ P3). API công khai chỉ trả số còn bán được, không trả `reserved`.
+- **Danh mục 2 cấp**, sản phẩm gắn danh mục cấp 2. Danh mục ẩn không hiện trên menu và không chọn được cho sản phẩm mới; sản phẩm đã gắn vẫn bán bình thường.
+- **Biến thể**: tối đa 2 nhóm (ví dụ Màu, Dung lượng) × 10 lựa chọn, mỗi tổ hợp là một SKU có giá và tồn riêng, không trùng tổ hợp (409 `DUPLICATE_VARIANT`). Sản phẩm không có nhóm nào thì có đúng 1 SKU.
+- **Ảnh**: bộ ảnh chung tối đa 9 + mỗi lựa chọn của nhóm 1 được 1 ảnh riêng (ảnh theo màu).
+- **Bỏ một biến thể** khi sửa sản phẩm: nếu đang có lượng giữ cho đơn → 409 `VARIANT_RESERVED`; ngược lại biến thể chuyển `active = false` (không xóa dòng, để đơn cũ còn tham chiếu). Thêm lại đúng tổ hợp đó thì bật lại dòng cũ.
+- **Tồn kho** chỉ đổi qua API điều chỉnh tồn (mỗi lần một dòng `stock_history`), trừ tồn ban đầu khi tạo biến thể mới (cũng ghi lịch sử "Nhập ban đầu"). Tồn sau điều chỉnh không được nhỏ hơn lượng đang giữ (409 `STOCK_BELOW_RESERVED`).
+- **Shop bị đình chỉ** (`SUSPENDED`): hàng biến mất khỏi tìm kiếm, trang sản phẩm 404, dòng giỏ hiện "Không còn bán". Trang shop vẫn mở được và ghi "Shop đang tạm ngừng bán". Seller vẫn vào Kênh người bán, sửa sản phẩm, tồn, voucher. Shop chưa được duyệt dùng API seller → 409 `SHOP_NOT_ACTIVE`.
+- **Con số cấu hình** (đọc từ `.env` của marketplace, có mặc định trong code): ảnh sản phẩm tối đa 5 MB, 9 ảnh chung; 2 nhóm × 10 lựa chọn; giá 1.000đ–500.000.000đ; khối lượng 1–30.000 g; tồn mỗi biến thể tối đa 999.999; giỏ tối đa 100 dòng; voucher dài tối đa 180 ngày.
+
+### marketplace-service (`/api/market/v1`)
+
+**Danh mục**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/categories` | Mọi người | CAT-01 | Cây danh mục chưa ẩn: cấp 1 kèm `children` (cấp 2), theo `sort`. Mỗi mục có `id`, `name`, `slug`, `icon` (tên icon lucide). Không cần đăng nhập. |
+| GET `/admin/categories` | `MODERATION` | CAT-01 | Cả danh mục ẩn, kèm số sản phẩm của từng danh mục. |
+| POST `/admin/categories` | `MODERATION` | CAT-01 | `name`, `slug` (chữ thường không dấu, gạch nối; trùng → 409 `SLUG_TAKEN`), `parentId` (trống = cấp 1; cha phải là cấp 1 → 400 `INVALID_PARENT`), `icon`, `sort`. Ghi nhật ký. |
+| PATCH `/admin/categories/{categoryId}` | `MODERATION` | CAT-01 | Sửa tên, slug, icon, thứ tự, `hidden`, chuyển danh mục cấp 2 sang cấp 1 khác. Danh mục cấp 1 đang có con không đổi thành cấp 2 (409 `CATEGORY_HAS_CHILDREN`). Ghi nhật ký. |
+| DELETE `/admin/categories/{categoryId}` | `MODERATION` | CAT-01 | Chỉ xóa được khi không có danh mục con và chưa sản phẩm nào gắn (409 `CATEGORY_IN_USE`, gợi ý ẩn thay vì xóa). Ghi nhật ký. |
+
+**Sản phẩm của seller**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/uploads/product-image` | Chủ shop | CAT-02 | Như logo shop (JPG/PNG/WebP nhận theo nội dung file) nhưng tối đa 5 MB, lưu ở `product-images/<userId>/...`, trả `{ url }`. Khi lưu sản phẩm, mọi ảnh phải nằm trong thư mục của chính người đó (400 `INVALID_IMAGE_URL`). |
+| GET `/shops/me/products` | Chủ shop | CAT-02 | Lọc `status`, `categoryId`, `q` (tên), phân trang, mới sửa lên đầu. Mỗi dòng có ảnh đầu, khoảng giá, tổng tồn, tổng còn bán được, số biến thể, `soldCount`. |
+| POST `/shops/me/products` | Chủ shop | CAT-02, CAT-03 | Tên (5–120 ký tự), mô tả (20–5.000), `categoryId` (cấp 2, chưa ẩn → 400 `INVALID_CATEGORY`), khối lượng (g), `option1Name`/`option2Name`, `variants` (`option1Value`, `option2Value`, `price`, `originalPrice` lớn hơn `price` nếu có, `stock` ban đầu), `images` (`url`, `option1Value` nếu là ảnh theo màu). Tạo xong là `ACTIVE` (bán ngay). |
+| GET `/shops/me/products/{productId}` | Chủ shop | CAT-02 | Đầy đủ, kể cả `stock`, `reserved` của từng biến thể. Sản phẩm shop khác → 404. |
+| PUT `/shops/me/products/{productId}` | Chủ shop | CAT-02, CAT-03 | Gửi lại toàn bộ như khi tạo; biến thể cũ nhận ra bằng `id`. Không đổi tồn của biến thể cũ ở đây (dùng API điều chỉnh tồn). Biến thể bị bỏ: xem quy tắc chung. |
+| PATCH `/shops/me/products/{productId}/status` | Chủ shop | CAT-02 | `ACTIVE` ↔ `HIDDEN`. Ẩn không xóa gì; dòng giỏ của người khác hiện "Không còn bán". |
+| POST `/shops/me/products/{productId}/variants/{variantId}/stock` | Chủ shop | INV-01 | `change` (số nguyên khác 0, âm là giảm), `reason` (bắt buộc, ví dụ "Nhập thêm lô tháng 10"). Cập nhật bằng một câu SQL có điều kiện nên hai người sửa cùng lúc không làm sai số. Tồn mới < lượng đang giữ → 409 `STOCK_BELOW_RESERVED`; vượt 999.999 → 400 `STOCK_TOO_LARGE`. |
+| GET `/shops/me/products/{productId}/stock-history` | Chủ shop | INV-01 | Lọc `variantId`, phân trang, mới nhất lên đầu: thay đổi, tồn sau thay đổi, lý do, người làm, lúc nào. |
+
+**Xem hàng (công khai)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/products` | Mọi người | SRC-01, CAT-04 | Tìm và lọc hàng đang bán. `q` (gõ có dấu hay không dấu đều ra, khớp đầu từ: "ip" ra "iPhone"), `categoryId` (cấp 1 thì gồm mọi danh mục con), `minPrice`, `maxPrice` (theo giá thấp nhất của sản phẩm), `shopId`, `sort` = `relevance` (mặc định khi có `q`) \| `newest` (mặc định) \| `price_asc` \| `price_desc` \| `best_selling`, phân trang. Mỗi thẻ có ảnh, tên, giá thấp nhất, giá gốc tương ứng (để hiện nhãn -%), các lựa chọn nhóm 1 (ô chọn phiên bản trên thẻ), `soldCount`, còn hàng hay không, tên shop. |
+| GET `/products/{productId}` | Mọi người | CAT-04, CAT-03 | Chi tiết hàng đang bán: ảnh, danh mục (cả cấp 1), các nhóm lựa chọn, từng biến thể với giá, giá gốc, số còn bán được; thông tin shop (tên, logo, số sản phẩm, ngày tham gia). |
+| GET `/shops/{shopId}` | Mọi người | CAT-04 | Trang shop: tên, logo, mô tả, tỉnh lấy hàng, số sản phẩm đang bán, ngày tham gia, `status` (`ACTIVE` hoặc `SUSPENDED`). Shop chưa được duyệt → 404. Danh sách hàng của shop dùng `GET /products?shopId=`. |
+| GET `/shops/{shopId}/vouchers` | Mọi người | VCH-01 | Voucher shop đang chạy và còn lượt, để hiện trên trang shop và trang sản phẩm. P2 chỉ hiện, lưu và áp voucher có ở P3. |
+
+**Giỏ hàng** (phải đăng nhập)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/cart` | Đã đăng nhập | CRT-01 | Giỏ chia theo shop. Mỗi dòng có ảnh (ưu tiên ảnh theo màu), tên, lựa chọn, giá hiện tại, giá gốc, số còn bán được, `selected` và `state`: `OK`, `NOT_ENOUGH_STOCK` (số lượng trong giỏ > còn bán được), `OUT_OF_STOCK`, `UNAVAILABLE` (sản phẩm ẩn, biến thể bị bỏ hoặc shop bị đình chỉ). Kèm tổng tiền của các dòng đang chọn có `state = OK`. Giá trong giỏ luôn là giá hiện tại; checkout (P3) kiểm lại lần nữa. |
+| GET `/cart/count` | Đã đăng nhập | CRT-01 | `{ count }` = số dòng trong giỏ, cho biểu tượng giỏ trên header. |
+| POST `/cart/items` | Đã đăng nhập | CRT-01 | `variantId`, `quantity`. Đã có dòng của biến thể đó thì cộng thêm. Tổng vượt số còn bán được → 409 `NOT_ENOUGH_STOCK` kèm `details.available`; hàng không còn bán → 409 `PRODUCT_UNAVAILABLE`; hàng của shop mình → 409 `OWN_PRODUCT`; giỏ đã đủ 100 dòng → 409 `CART_FULL`. |
+| PATCH `/cart/items/{itemId}` | Đã đăng nhập | CRT-01 | Đổi `quantity` (≥ 1, kiểm như trên), `selected`, hoặc đổi sang biến thể khác của cùng sản phẩm (`variantId`; trùng dòng có sẵn thì gộp). Dòng của người khác → 404. |
+| DELETE `/cart/items/{itemId}` | Đã đăng nhập | CRT-01 | |
+| POST `/cart/selection` | Đã đăng nhập | CRT-01 | `{ itemIds, selected }`: chọn/bỏ chọn nhiều dòng (cả shop, cả giỏ). |
+| POST `/cart/items/remove` | Đã đăng nhập | CRT-01 | `{ itemIds }`: xóa nhiều dòng một lần (nút "Xóa các mục đã chọn", "Xóa hàng không còn bán"). |
+
+**Voucher** (P2 chỉ tạo và quản lý; áp vào đơn, lưu voucher, trừ lượt có ở P3)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET, POST `/shops/me/vouchers` | Chủ shop | VCH-01 | Danh sách lọc theo `state` (`UPCOMING` sắp diễn ra, `RUNNING` đang chạy, `ENDED` đã kết thúc; tính từ thời gian, không lưu). Tạo: `code` (4–20 chữ in hoa hoặc số, không trùng mã nào trên sàn → 409 `VOUCHER_CODE_TAKEN`), `name`, `discountType` = `AMOUNT` (giảm số tiền) hoặc `PERCENT` (giảm %, 1–90, bắt buộc `maxDiscount`), `value`, `minOrder`, `startAt` (từ bây giờ trở đi), `endAt` (sau `startAt`, dài tối đa 180 ngày), `quantity`, `perUserLimit`. Voucher shop do shop chịu. |
+| PUT `/shops/me/vouchers/{voucherId}` | Chủ shop | VCH-01 | Chưa bắt đầu: sửa mọi trường. Đang chạy: chỉ lùi `endAt` về sau và tăng `quantity`, đổi trường khác → 409 `VOUCHER_STARTED`. Đã kết thúc → 409 `VOUCHER_ENDED`. |
+| POST `/shops/me/vouchers/{voucherId}/end` | Chủ shop | VCH-01 | Kết thúc sớm (đặt `endAt` = bây giờ). |
+| DELETE `/shops/me/vouchers/{voucherId}` | Chủ shop | VCH-01 | Chỉ xóa voucher chưa bắt đầu (409 `VOUCHER_STARTED`). |
+| GET, POST `/admin/vouchers`; PUT, DELETE `/admin/vouchers/{voucherId}`; POST `/admin/vouchers/{voucherId}/end` | `FINANCE` | VCH-01 | Voucher sàn (`shop_id` trống), cùng quy tắc như voucher shop. Sàn chịu chi phí. Ghi nhật ký. |
+
+**Shop (admin)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/shops` | `MODERATION` | SHP-04 | Lọc `status`, `q` (tên shop), phân trang: tên, chủ shop, trạng thái, số sản phẩm, ngày duyệt, lý do đình chỉ. |
+| GET `/admin/shops/{shopId}` | `MODERATION` | SHP-04 | Thông tin shop đang dùng + số sản phẩm theo trạng thái. Lịch sử đình chỉ lấy từ approval-service. |
+
+### approval-service (`/api/approval/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/admin/shops/{shopId}/suspend` | `MODERATION` | SHP-04 | `reason` bắt buộc. approval-service biết shop qua hồ sơ đã duyệt (bảng `shop_approvals`), không gọi sang marketplace: shop chưa từng được duyệt → 404. Admin là chủ shop → 403 `SELF_MODERATION_FORBIDDEN`. Đang bị đình chỉ → 409 `ALREADY_SUSPENDED`. Lưu một dòng `violations`, phát `shop_suspension.decided`, ghi nhật ký. |
+| POST `/admin/shops/{shopId}/restore` | `MODERATION` | SHP-04 | Như trên; shop không bị đình chỉ → 409 `NOT_SUSPENDED`. |
+| GET `/admin/shops/{shopId}/violations` | `MODERATION` | SHP-04 | Lịch sử đình chỉ/khôi phục của shop, mới nhất lên đầu, kèm trạng thái hiện tại (`suspended`). |
+
+Đơn hàng có từ P3, nên ở P2 đình chỉ shop chưa phải xử lý đơn cũ. Cách xử lý đơn đang chạy khi shop bị đình chỉ (SHP-04 "các đơn cũ có cách tiếp tục/hủy") sẽ chốt cùng API P3.
+
+### Luồng P2 dùng các API trên
+
+1. Admin `MODERATION` dựng danh mục (có sẵn bộ danh mục mẫu chạy bằng lệnh seed).
+2. Seller tải ảnh, tạo sản phẩm có biến thể (Màu × Dung lượng), nhập tồn ban đầu → hàng lên sàn ngay. Điều chỉnh tồn khi nhập thêm; xem lịch sử.
+3. Buyer (hoặc khách) chọn danh mục trên menu hoặc gõ tìm "dien thoai", lọc giá, sắp xếp → mở trang sản phẩm, chọn màu/dung lượng thấy giá và tồn từng biến thể → đăng nhập → thêm vào giỏ. Làm vậy với hàng của shop thứ hai → giỏ hiện 2 nhóm shop.
+4. Seller và admin `FINANCE` tạo voucher shop/sàn; voucher shop hiện trên trang shop và trang sản phẩm.
+5. Admin đình chỉ một shop (approval-service) → marketplace nhận `shop_suspension.decided`, shop thành `SUSPENDED`, hàng biến mất khỏi tìm kiếm, dòng giỏ thành "Không còn bán". Khôi phục thì hàng hiện lại.
+
+## 4. Tài liệu API tự sinh (Swagger)
 
 Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 
@@ -181,4 +278,4 @@ Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 - Dữ liệu vào và ra viết bằng **class DTO** (không dùng `any` hay object trơn). Trường vào kiểm bằng `class-validator` (`@IsEmail()`, `@MinLength(8)`...). Plugin Swagger trong `nest-cli.json` tự đọc kiểu và chú thích `/** ... */` của từng trường, nên viết chú thích tiếng Việt cho trường nào không tự giải thích.
 - Mỗi controller có `@ApiTags(...)`; API cần đăng nhập có `@ApiBearerAuth()`.
 - Mỗi mã lỗi riêng của API (ví dụ `EMAIL_TAKEN`) ghi bằng `@ApiResponse({ status: 409, description: 'EMAIL_TAKEN: ...' })`.
-- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2.
+- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–3.

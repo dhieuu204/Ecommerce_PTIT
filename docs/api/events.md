@@ -64,7 +64,27 @@ Kiểu: `ShopApplicationDecidedPayload`.
 
 marketplace-service chỉ áp quyết định khi `version` đúng bằng phiên bản đang chờ; khác thì bỏ qua (seller đã nộp bản mới hơn). Duyệt `REGISTER` → shop `ACTIVE`; duyệt `CHANGE` → thay tên / tài khoản ngân hàng; từ chối → giữ nguyên thông tin cũ, lưu lý do để seller xem.
 
-## 3. Thêm sự kiện mới
+## 3. Sự kiện P2
+
+| Sự kiện | Gửi → nhận | Khi nào |
+| --- | --- | --- |
+| `shop_suspension.decided` | approval → marketplace | Admin đình chỉ hoặc khôi phục shop (SHP-04) |
+
+### `shop_suspension.decided` (version 1)
+
+Kiểu: `ShopSuspensionDecidedPayload` trong `packages/shared/src/events/shop.ts`.
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `shopId` | Mã shop |
+| `action` | `SUSPEND` (đình chỉ) hoặc `RESTORE` (khôi phục) |
+| `reason` | Lý do, luôn có |
+| `decidedBy` | `userId`, `name` của admin |
+| `decidedAt` | Thời điểm quyết |
+
+marketplace-service lưu thời điểm quyết định đã áp vào cột `shops.moderated_at` và chỉ áp sự kiện có `decidedAt` mới hơn (sự kiện cũ tới sau thì bỏ qua). `SUSPEND` → shop `SUSPENDED`, lưu lý do vào `suspend_reason`; `RESTORE` → shop `ACTIVE`, xóa lý do. Nếu marketplace chưa kịp áp quyết định duyệt mở shop (shop chưa `ACTIVE`/`SUSPENDED`) thì ném lỗi để sự kiện được gửi lại sau.
+
+## 4. Thêm sự kiện mới
 
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
 2. Thêm một mục vào file này (bảng ở mục 2 và bảng trường).

@@ -2,8 +2,10 @@ import type { EventEnvelope } from './envelope';
 import {
   SHOP_APPLICATION_DECIDED,
   SHOP_APPLICATION_SUBMITTED,
+  SHOP_SUSPENSION_DECIDED,
   type ShopApplicationDecidedPayload,
   type ShopApplicationSubmittedPayload,
+  type ShopSuspensionDecidedPayload,
 } from './shop';
 
 export * from './envelope';
@@ -16,6 +18,7 @@ export * from './shop';
 export interface EventPayloads {
   [SHOP_APPLICATION_SUBMITTED]: ShopApplicationSubmittedPayload;
   [SHOP_APPLICATION_DECIDED]: ShopApplicationDecidedPayload;
+  [SHOP_SUSPENSION_DECIDED]: ShopSuspensionDecidedPayload;
 }
 
 export type EventType = keyof EventPayloads;

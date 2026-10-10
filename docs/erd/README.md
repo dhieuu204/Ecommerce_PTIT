@@ -5,7 +5,8 @@ Cách làm đã chốt: **khung cả dự án + chi tiết theo phase**. File n�
 | Phase | Chi tiết đủ cột ở đâu |
 | --- | --- |
 | P1 | `services/*/prisma/schema.prisma` và migration đầu tiên `prisma/migrations/*_p1_init` của mỗi service |
-| P2–P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
+| P2 | `schema.prisma` + migration `*_p2_catalog_cart_voucher` (marketplace), `*_p2_violations` (approval) |
+| P3–P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
 
 Sơ đồ (mở file `.excalidraw` trên excalidraw.com để sửa, `.png` để xem): `docs/so-do/09-erd-u-user-service`, `10-erd-m-marketplace-service`, `11-erd-p-payment-service`, `12-erd-a-approval-service`.
 
@@ -57,25 +58,25 @@ Sơ đồ: `docs/so-do/10-erd-m-marketplace-service`
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `shops` | P1 | id<br>owner_id ↗U (1 tài khoản 1 shop)<br>status: PENDING \| REJECTED \| ACTIVE \| SUSPENDED<br>name, description, logo_url, phone<br>địa chỉ lấy hàng<br>tài khoản ngân hàng | Thông tin shop đang dùng |
+| `shops` | P1 | id<br>owner_id ↗U (1 tài khoản 1 shop)<br>status: PENDING \| REJECTED \| ACTIVE \| SUSPENDED<br>name, description, logo_url, phone<br>địa chỉ lấy hàng<br>tài khoản ngân hàng<br>suspend_reason, moderated_at (P2) | Thông tin shop đang dùng |
 | `shop_applications` | P1 | id<br>shop_id → shops<br>version, type: REGISTER \| CHANGE<br>status: PENDING \| APPROVED \| REJECTED<br>data (hồ sơ đã nộp)<br>reject_reason | Hồ sơ mở shop / đổi thông tin |
 
 ### Sản phẩm (P2)
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `categories` | P2 | id<br>parent_id → categories (2 cấp)<br>name, slug, sort | Danh mục |
-| `products` | P2 | id<br>shop_id → shops<br>category_id → categories<br>name, description<br>status: DRAFT \| ACTIVE \| HIDDEN \| BANNED<br>option1_name, option2_name (Màu, Size)<br>weight, rating, sold_count | Sản phẩm |
-| `product_variants` | P2 | id<br>product_id → products<br>option1_value, option2_value<br>price, stock, reserved | Biến thể (SKU): giá và tồn riêng |
+| `categories` | P2 | id<br>parent_id → categories (2 cấp)<br>name, slug, icon, sort, hidden | Danh mục |
+| `products` | P2 | id<br>shop_id → shops<br>category_id → categories<br>name, description<br>status: ACTIVE \| HIDDEN<br>option1_name, option2_name (Màu, Size)<br>weight, min_price, max_price, sold_count<br>search_vector (từ khóa không dấu, PostgreSQL tự tính)<br>rating (P6) | Sản phẩm. Đăng là bán ngay nên không có nháp; sản phẩm bị gỡ do vi phạm thêm ở P6 |
+| `product_variants` | P2 | id<br>product_id → products<br>option1_value, option2_value<br>price, original_price, stock, reserved<br>sort, active | Biến thể (SKU): giá và tồn riêng. Bỏ biến thể thì `active = false`, không xóa |
 | `product_images` | P2 | id<br>product_id → products<br>url, sort<br>option1_value? (ảnh theo màu) | Ảnh, tối đa 9 + 1 ảnh/màu |
-| `stock_history` | P2 | id<br>variant_id → product_variants<br>change (+/-), reason<br>order_id?, created_by | Lịch sử nhập/điều chỉnh tồn |
+| `stock_history` | P2 | id<br>variant_id → product_variants<br>change (+/-), stock_after, reason<br>created_by<br>order_id? (P3) | Lịch sử nhập/điều chỉnh tồn |
 
 ### Giỏ hàng, voucher
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
 | `cart_items` | P2 | user_id ↗U<br>variant_id → product_variants<br>quantity, selected | Giỏ hàng |
-| `vouchers` | P2 | id<br>shop_id? → shops (trống = voucher sàn)<br>code, discount_type, value, max_discount<br>min_order, start_at, end_at<br>quantity, per_user_limit, used_count | Voucher shop và sàn |
+| `vouchers` | P2 | id<br>shop_id? → shops (trống = voucher sàn)<br>code, name, discount_type: AMOUNT \| PERCENT<br>value, max_discount<br>min_order, start_at, end_at<br>quantity, per_user_limit, used_count<br>created_by | Voucher shop và sàn |
 | `saved_vouchers` | P3 | user_id ↗U<br>voucher_id → vouchers | Voucher buyer đã lưu |
 | `voucher_usages` | P3 | id<br>voucher_id → vouchers<br>user_id ↗U, order_id → orders<br>amount, returned | Lượt dùng voucher |
 
@@ -157,7 +158,7 @@ Sơ đồ: `docs/so-do/12-erd-a-approval-service`
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
 | `shop_approvals` | P1 | id<br>shop_id ↗M, version<br>type: REGISTER \| CHANGE<br>status: PENDING \| APPROVED \| REJECTED \| REPLACED<br>owner_id ↗U (không tự duyệt)<br>data (hồ sơ nhận được)<br>change (phần muốn đổi, chỉ với CHANGE)<br>reason, decided_by, decided_at | Duyệt hồ sơ shop |
-| `violations` | P2 | id<br>target: SHOP \| PRODUCT ↗M<br>reporter_id? ↗U, reason, images<br>action: SUSPEND \| RESTORE \| REMOVE<br>status, decided_by | Báo cáo vi phạm, đình chỉ |
+| `violations` | P2 | id<br>target_type: SHOP, target_id ↗M, target_name<br>owner_id ↗U (không tự xử lý)<br>action: SUSPEND \| RESTORE<br>reason, decided_by, decided_by_name<br>P6 thêm: PRODUCT, REMOVE, reporter_id? ↗U, images, status | Đình chỉ/khôi phục shop (P2); báo cáo vi phạm của buyer (P6) |
 
 ### Kiểm tra đơn (P3)
 

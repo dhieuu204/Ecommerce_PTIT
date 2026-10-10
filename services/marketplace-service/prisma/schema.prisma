@@ -1,5 +1,5 @@
 // Schema của marketplace-service [M]. Chỉ service này được đọc/ghi database market_db.
-// Bảng P1 đã đủ cột. Khung các phase sau: docs/erd/README.md.
+// Bảng P1, P2 đã đủ cột. Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -58,7 +58,8 @@ enum ShopStatus {
   REJECTED
   /// Đang hoạt động, vào được Kênh người bán
   ACTIVE
-  // SUSPENDED thêm ở P2
+  /// Admin đình chỉ (SHP-04): sản phẩm không hiện, không mua được; seller vẫn vào Kênh người bán và sửa hàng
+  SUSPENDED
 }
 
 enum ApplicationType {
@@ -95,10 +96,16 @@ model Shop {
   bankName          String?    @map("bank_name") @db.VarChar(100)
   bankAccountNumber String?    @map("bank_account_number") @db.VarChar(30)
   bankAccountName   String?    @map("bank_account_name") @db.VarChar(100)
+  /// Lý do đình chỉ gần nhất (hiện cho seller), xóa khi khôi phục
+  suspendReason     String?    @map("suspend_reason") @db.VarChar(500)
+  /// Thời điểm của quyết định đình chỉ/khôi phục đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua
+  moderatedAt       DateTime?  @map("moderated_at") @db.Timestamptz(3)
   createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   applications ShopApplication[]
+  products     Product[]
+  vouchers     Voucher[]
 
   @@map("shops")
 }
@@ -122,6 +129,198 @@ model ShopApplication {
 
   @@unique([shopId, version])
   @@map("shop_applications")
+}
+
+// ===== Sản phẩm (P2) =====
+
+/// Danh mục 2 cấp: cấp 1 hiện trên thanh danh mục (có icon), sản phẩm gắn vào cấp 2
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// Trống = danh mục cấp 1
+  parentId  String?  @map("parent_id") @db.Uuid
+  name      String   @db.VarChar(60)
+  /// Dùng trên đường dẫn web, ví dụ dien-thoai
+  slug      String   @unique @db.VarChar(80)
+  /// Tên icon lucide cho danh mục cấp 1, ví dụ smartphone
+  icon      String?  @db.VarChar(40)
+  /// Số nhỏ đứng trước
+  sort      Int      @default(0)
+  /// Ẩn khỏi web; sản phẩm đang gắn vẫn giữ nguyên
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+enum ProductStatus {
+  /// Đang bán (hiện cho buyer nếu shop đang hoạt động)
+  ACTIVE
+  /// Seller tạm ẩn; không xóa để giữ lịch sử
+  HIDDEN
+}
+
+/// Sản phẩm. Giá và tồn nằm ở từng biến thể (product_variants)
+model Product {
+  id           String                   @id @default(uuid()) @db.Uuid
+  shopId       String                   @map("shop_id") @db.Uuid
+  /// Danh mục cấp 2
+  categoryId   String                   @map("category_id") @db.Uuid
+  name         String                   @db.VarChar(120)
+  description  String                   @db.VarChar(5000)
+  status       ProductStatus            @default(ACTIVE)
+  /// Tên nhóm phân loại, ví dụ "Màu sắc", "Dung lượng". Trống = không có nhóm đó
+  option1Name  String?                  @map("option1_name") @db.VarChar(30)
+  option2Name  String?                  @map("option2_name") @db.VarChar(30)
+  /// Cân nặng khi đóng gói (gram), để tính phí ship GHN
+  weight       Int
+  /// Giá thấp nhất / cao nhất trong các biến thể đang bán, tính lại mỗi lần lưu (để lọc và sắp xếp theo giá)
+  minPrice     Int                      @map("min_price")
+  maxPrice     Int                      @map("max_price")
+  /// Số đã bán (tăng từ P3)
+  soldCount    Int                      @default(0) @map("sold_count")
+  createdAt    DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+  /// Từ khóa tìm kiếm đã bỏ dấu, PostgreSQL tự tính từ tên (cột GENERATED viết tay trong migration p2)
+  searchVector Unsupported("tsvector")? @default(dbgenerated("to_tsvector('simple'::regconfig, f_unaccent(lower((name)::text)))")) @map("search_vector")
+
+  shop     Shop             @relation(fields: [shopId], references: [id])
+  category Category         @relation(fields: [categoryId], references: [id])
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@index([shopId, status])
+  @@index([categoryId, status])
+  @@index([searchVector], type: Gin)
+  @@map("products")
+}
+
+/// Biến thể (SKU): mỗi tổ hợp lựa chọn có giá và tồn riêng. Sản phẩm không phân loại có đúng 1 biến thể ('', '')
+model ProductVariant {
+  id            String  @id @default(uuid()) @db.Uuid
+  productId     String  @map("product_id") @db.Uuid
+  /// Lựa chọn của nhóm 1 và nhóm 2, '' nếu không có nhóm đó
+  option1Value  String  @default("") @map("option1_value") @db.VarChar(30)
+  option2Value  String  @default("") @map("option2_value") @db.VarChar(30)
+  /// Giá bán (đồng)
+  price         Int
+  /// Giá gốc để hiện gạch ngang và nhãn giảm %, trống = không giảm
+  originalPrice Int?    @map("original_price")
+  /// Tồn kho
+  stock         Int
+  /// Đang giữ cho đơn chưa thanh toán (dùng từ P3); tồn không được chỉnh xuống dưới số này
+  reserved      Int     @default(0)
+  sort          Int     @default(0)
+  /// false = seller đã bỏ tổ hợp này; giữ dòng vì giỏ hàng và đơn cũ còn trỏ tới
+  active        Boolean @default(true)
+
+  product   Product        @relation(fields: [productId], references: [id])
+  stockLogs StockHistory[]
+  cartItems CartItem[]
+
+  @@unique([productId, option1Value, option2Value])
+  @@map("product_variants")
+}
+
+/// Ảnh sản phẩm: tối đa 9 ảnh chung + 1 ảnh cho mỗi lựa chọn của nhóm 1 (ví dụ mỗi màu)
+model ProductImage {
+  id           String  @id @default(uuid()) @db.Uuid
+  productId    String  @map("product_id") @db.Uuid
+  url          String  @db.VarChar(255)
+  sort         Int     @default(0)
+  /// Trống = ảnh chung; có giá trị = ảnh của lựa chọn đó ở nhóm 1
+  option1Value String? @map("option1_value") @db.VarChar(30)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+/// Lịch sử thay đổi tồn kho (INV-01). Chỉ thêm, không sửa
+model StockHistory {
+  id         String   @id @default(uuid()) @db.Uuid
+  variantId  String   @map("variant_id") @db.Uuid
+  /// Số thay đổi: dương = nhập thêm, âm = bớt
+  change     Int
+  /// Tồn sau khi đổi
+  stockAfter Int      @map("stock_after")
+  /// Ví dụ "Tạo sản phẩm", "Nhập hàng", "Kiểm kho"
+  reason     String   @db.VarChar(200)
+  /// Người đổi (userId)
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([variantId, createdAt])
+  @@map("stock_history")
+}
+
+// ===== Giỏ hàng, voucher (P2) =====
+
+/// Giỏ hàng: mỗi người mỗi biến thể một dòng
+model CartItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// Người mua (userId bên user-service)
+  userId    String   @map("user_id") @db.Uuid
+  variantId String   @map("variant_id") @db.Uuid
+  quantity  Int
+  /// Được tick để mua
+  selected  Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([userId, variantId])
+  @@map("cart_items")
+}
+
+enum DiscountType {
+  /// Giảm số tiền cố định
+  AMOUNT
+  /// Giảm theo %, có mức giảm tối đa
+  PERCENT
+}
+
+/// Voucher shop (shop_id có giá trị, shop chịu tiền giảm) hoặc voucher sàn (shop_id trống, sàn chịu). Áp vào đơn từ P3
+model Voucher {
+  id           String       @id @default(uuid()) @db.Uuid
+  /// Trống = voucher sàn
+  shopId       String?      @map("shop_id") @db.Uuid
+  /// Mã buyer nhập, chữ in hoa và số, không trùng trên toàn sàn
+  code         String       @unique @db.VarChar(20)
+  /// Tên hiển thị, ví dụ "Giảm 50K đơn từ 500K"
+  name         String       @db.VarChar(100)
+  discountType DiscountType @map("discount_type")
+  /// AMOUNT: số đồng; PERCENT: số % (1–100)
+  value        Int
+  /// Chỉ với PERCENT: giảm tối đa bao nhiêu đồng
+  maxDiscount  Int?         @map("max_discount")
+  /// Đơn tối thiểu (tiền hàng) để dùng được
+  minOrder     Int          @default(0) @map("min_order")
+  startAt      DateTime     @map("start_at") @db.Timestamptz(3)
+  endAt        DateTime     @map("end_at") @db.Timestamptz(3)
+  /// Tổng số lượt dùng
+  quantity     Int
+  /// Mỗi người dùng tối đa mấy lần
+  perUserLimit Int          @default(1) @map("per_user_limit")
+  /// Số lượt đã dùng (tăng từ P3)
+  usedCount    Int          @default(0) @map("used_count")
+  /// Người tạo (userId)
+  createdBy    String       @map("created_by") @db.Uuid
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  shop Shop? @relation(fields: [shopId], references: [id])
+
+  @@index([shopId, endAt])
+  @@map("vouchers")
 }
 
 // ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====
