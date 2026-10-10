@@ -1,5 +1,5 @@
 /**
- * Nạp tài khoản DEMO: 2 seller (Táo Xanh Mobile, Galaxy Hub) và 1 buyer, đã xác minh email,
+ * Nạp tài khoản DEMO: 2 seller (Táo Xanh Mobile, Galaxy Hub), 1 buyer và 1 admin đủ 4 bộ quyền, đã xác minh email,
  * mật khẩu chung `demo12345`. Chạy cùng các phần khác bằng `pnpm seed:demo` ở thư mục gốc.
  * Chạy lại không tạo trùng. Chỉ dùng khi chạy thử, không chạy trên môi trường thật.
  */
@@ -29,6 +29,8 @@ async function main() {
           phone: u.phone,
           passwordHash,
           status: 'ACTIVE',
+          permissions:
+            u.id === DEMO_USERS.admin.id ? ['MODERATION', 'SUPPORT', 'FINANCE', 'SYSTEM'] : [],
         },
       });
       console.log(`Đã tạo ${u.email}`);

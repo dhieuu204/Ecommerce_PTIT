@@ -1,5 +1,5 @@
 /**
- * Dữ liệu DEMO (lệnh `pnpm seed:demo`): 2 seller có shop đã duyệt và 1 buyer, mật khẩu chung.
+ * Dữ liệu DEMO (lệnh `pnpm seed:demo`): 2 seller có shop đã duyệt, 1 buyer và 1 admin, mật khẩu chung.
  * Mỗi service tự nạp phần của mình vào database của mình, dùng chung các mã cố định dưới đây.
  * Chỉ để chạy thử và trình diễn, không dùng cho môi trường thật.
  */
@@ -23,6 +23,13 @@ export const DEMO_USERS = {
     email: 'buyer@example.com',
     fullName: 'Nguyễn Văn An',
     phone: '0901000003',
+  },
+  /** Admin có đủ 4 bộ quyền, để trình diễn khu quản trị */
+  admin: {
+    id: '00000000-0000-4000-8000-0000000000d1',
+    email: 'admin@example.com',
+    fullName: 'Quản trị viên Demo',
+    phone: '0901000004',
   },
 } as const;
 
