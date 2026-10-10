@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
+import { useCategories } from '@/hooks/use-catalog';
 import { BRAND } from '@/lib/brand';
 
 type FooterItem = { label: string; to?: string };
@@ -33,10 +34,31 @@ const COLUMNS: Array<{ title: string; items: FooterItem[] }> = [
   },
 ];
 
+/** Cột "Danh mục": các danh mục cấp 1 (cây danh mục đã tải sẵn cho thanh danh mục) */
+function CategoryColumn() {
+  const { data } = useCategories();
+  if (!data?.length) return null;
+  return (
+    <div>
+      <h3 className="mb-3 text-sm font-semibold text-navy">Danh mục</h3>
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground sm:grid-cols-1">
+        {data.slice(0, 6).map((c) => (
+          <li key={c.id}>
+            <Link to={`/danh-muc/${c.slug}`} className="transition hover:text-navy">
+              {c.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-champagne/30 bg-ivory-200">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
+        <CategoryColumn />
         {COLUMNS.map((col) => (
           <div key={col.title}>
             <h3 className="mb-3 text-sm font-semibold text-navy">{col.title}</h3>

@@ -177,7 +177,7 @@ function ApplyFormView({ myShop }: { myShop: MyShop | null }) {
       title={resubmit ? 'Sửa hồ sơ mở shop' : 'Đăng ký mở shop'}
       description="Điền đủ 3 phần rồi nộp. Admin duyệt xong là bạn bán được hàng."
     >
-      <nav className="sticky top-16 z-10 -mx-5 mb-6 border-b bg-card/95 px-5 py-3 backdrop-blur md:top-20 md:-mx-7 md:px-7">
+      <nav className="sticky top-[6.5rem] z-10 -mx-5 mb-6 border-b bg-card/95 px-5 py-3 backdrop-blur md:top-20 md:-mx-7 md:px-7">
         <ol className="grid grid-cols-3 gap-2">
           {SECTIONS.map((s, i) => (
             <li key={s.id}>
