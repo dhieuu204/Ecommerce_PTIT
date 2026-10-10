@@ -9,6 +9,7 @@ import {
   Loader2,
   MapPin,
   Phone,
+  ShieldAlert,
   Store,
   XCircle,
 } from 'lucide-react';
@@ -32,6 +33,7 @@ import { useCurrentUser } from '@/lib/auth';
 import { formatDate, formatDateTime, maskAccount } from '@/lib/format';
 import { showApiError } from '@/lib/form';
 import type { ApplicationView, BankAccount, MyShop, ShopView } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { ChangeRequestDialog, type ChangeField } from './change-request-dialog';
 
 /** Logo: JPG/PNG/WebP, tối đa 2 MB (máy chủ kiểm lại theo cấu hình của nó) */
@@ -91,6 +93,8 @@ export function ShopProfilePage() {
   }
   const data = shop.data;
   const current = data.shop!;
+  // Shop bị đình chỉ: API sửa hồ sơ trả 409 SHOP_NOT_ACTIVE nên khóa các nút sửa
+  const suspended = data.status === 'SUSPENDED';
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -101,8 +105,8 @@ export function ShopProfilePage() {
       />
       <ShopHero shop={current} />
       <ChangeRequestBanner data={data} />
-      <EditNowCard shop={current} />
-      <ReviewCard data={data} />
+      <EditNowCard shop={current} suspended={suspended} />
+      <ReviewCard data={data} suspended={suspended} />
     </div>
   );
 }
@@ -135,9 +139,15 @@ function ShopHero({ shop }: { shop: ShopView }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-xl font-semibold md:text-2xl">{shop.name}</h2>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200 ring-1 ring-emerald-300/30">
-              <BadgeCheck className="size-3.5" /> Đang hoạt động
-            </span>
+            {shop.status === 'SUSPENDED' ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-medium text-amber-200 ring-1 ring-amber-300/30">
+                <ShieldAlert className="size-3.5" /> Bị đình chỉ
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200 ring-1 ring-emerald-300/30">
+                <BadgeCheck className="size-3.5" /> Đang hoạt động
+              </span>
+            )}
           </div>
           <div className="mt-3 flex flex-col gap-1.5 text-sm text-white/75 sm:flex-row sm:flex-wrap sm:gap-x-5">
             <span className="inline-flex items-center gap-1.5">
@@ -269,7 +279,7 @@ function ChangeRequestBanner({ data }: { data: MyShop }) {
 }
 
 /** Thông tin sửa ngay: mô tả, logo, SĐT, địa chỉ lấy hàng */
-function EditNowCard({ shop }: { shop: ShopView }) {
+function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }) {
   const user = useCurrentUser();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -515,6 +525,7 @@ function EditNowCard({ shop }: { shop: ShopView }) {
         </div>
 
         <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-end">
+          {suspended && <SuspendedNote className="sm:mr-auto" />}
           {dirty && (
             <Button
               type="button"
@@ -529,7 +540,7 @@ function EditNowCard({ shop }: { shop: ShopView }) {
             type="submit"
             size="lg"
             className="rounded-full px-8"
-            disabled={!dirty || isSubmitting || uploading}
+            disabled={!dirty || isSubmitting || uploading || suspended}
           >
             {isSubmitting && <Loader2 className="animate-spin" />}
             Lưu thay đổi
@@ -541,7 +552,7 @@ function EditNowCard({ shop }: { shop: ShopView }) {
 }
 
 /** Thông tin cần duyệt lại: tên shop, tài khoản ngân hàng */
-function ReviewCard({ data }: { data: MyShop }) {
+function ReviewCard({ data, suspended }: { data: MyShop; suspended: boolean }) {
   const shop = data.shop!;
   const [dialog, setDialog] = useState<ChangeField | null>(null);
   const pending = data.changeRequest?.status === 'PENDING' ? data.changeRequest : null;
@@ -604,6 +615,7 @@ function ReviewCard({ data }: { data: MyShop }) {
                 variant="outline"
                 size="sm"
                 className="rounded-full border-navy/30 text-navy"
+                disabled={suspended}
                 onClick={() => setDialog(field)}
               >
                 Yêu cầu đổi
@@ -612,11 +624,27 @@ function ReviewCard({ data }: { data: MyShop }) {
           </li>
         ))}
       </ul>
+      {suspended && <SuspendedNote className="mt-4" />}
       <ChangeRequestDialog
         field={dialog}
         data={data}
         onOpenChange={(open) => !open && setDialog(null)}
       />
     </SectionCard>
+  );
+}
+
+/** Ghi chú cạnh nút sửa bị khóa khi shop đang bị đình chỉ */
+function SuspendedNote({ className }: { className?: string }) {
+  return (
+    <p
+      className={cn(
+        'flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900',
+        className,
+      )}
+    >
+      <ShieldAlert className="size-3.5 shrink-0" />
+      Shop đang bị đình chỉ nên tạm chưa sửa được hồ sơ shop.
+    </p>
   );
 }

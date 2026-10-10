@@ -21,6 +21,8 @@ interface ConsoleLayoutProps {
   headerInfo?: React.ReactNode;
   /** Ghi chú cuối menu, ví dụ "Đơn hàng, Sản phẩm... hiện từ P2" */
   menuNote?: string;
+  /** Thông báo đầu mọi trang của khu, ví dụ "Shop đang bị đình chỉ" */
+  notice?: React.ReactNode;
 }
 
 function MenuList({
@@ -78,7 +80,14 @@ function MenuList({
  * Khung Kênh người bán và Quản trị (docs/so-do/07 mục C, D): header mỏng + menu trái theo nhóm việc.
  * Điện thoại: menu trái vào nút ☰ (bảng trượt).
  */
-export function ConsoleLayout({ area, tone, menu, headerInfo, menuNote }: ConsoleLayoutProps) {
+export function ConsoleLayout({
+  area,
+  tone,
+  menu,
+  headerInfo,
+  menuNote,
+  notice,
+}: ConsoleLayoutProps) {
   const [open, setOpen] = useState(false);
   const dark = tone === 'admin';
   return (
@@ -144,6 +153,7 @@ export function ConsoleLayout({ area, tone, menu, headerInfo, menuNote }: Consol
           </div>
         </aside>
         <main className="min-w-0 flex-1 px-4 py-6 md:px-8">
+          {notice}
           <Outlet />
         </main>
       </div>
