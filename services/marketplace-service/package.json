@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --runInBand",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "seed:categories": "nest build && node dist/scripts/seed-categories.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

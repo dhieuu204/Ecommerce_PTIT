@@ -188,9 +188,9 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
 | GET `/categories` | Mọi người | CAT-01 | Cây danh mục chưa ẩn: cấp 1 kèm `children` (cấp 2), theo `sort`. Mỗi mục có `id`, `name`, `slug`, `icon` (tên icon lucide). Không cần đăng nhập. |
-| GET `/admin/categories` | `MODERATION` | CAT-01 | Cả danh mục ẩn, kèm số sản phẩm của từng danh mục. |
+| GET `/admin/categories` | `MODERATION` | CAT-01 | Cả danh mục ẩn, kèm số sản phẩm của từng danh mục (mọi trạng thái; danh mục cấp 1 là tổng của các con). Dạng cây như `GET /categories`. |
 | POST `/admin/categories` | `MODERATION` | CAT-01 | `name`, `slug` (chữ thường không dấu, gạch nối; trùng → 409 `SLUG_TAKEN`), `parentId` (trống = cấp 1; cha phải là cấp 1 → 400 `INVALID_PARENT`), `icon`, `sort`. Ghi nhật ký. |
-| PATCH `/admin/categories/{categoryId}` | `MODERATION` | CAT-01 | Sửa tên, slug, icon, thứ tự, `hidden`, chuyển danh mục cấp 2 sang cấp 1 khác. Danh mục cấp 1 đang có con không đổi thành cấp 2 (409 `CATEGORY_HAS_CHILDREN`). Ghi nhật ký. |
+| PATCH `/admin/categories/{categoryId}` | `MODERATION` | CAT-01 | Sửa tên, slug, icon, thứ tự, `hidden`, chuyển danh mục cấp 2 sang cấp 1 khác. Danh mục cấp 1 đang có con không đổi thành cấp 2 (409 `CATEGORY_HAS_CHILDREN`); `parentId: null` đưa danh mục cấp 2 lên cấp 1, chỉ khi chưa có sản phẩm gắn (409 `CATEGORY_IN_USE`). Ghi nhật ký. |
 | DELETE `/admin/categories/{categoryId}` | `MODERATION` | CAT-01 | Chỉ xóa được khi không có danh mục con và chưa sản phẩm nào gắn (409 `CATEGORY_IN_USE`, gợi ý ẩn thay vì xóa). Ghi nhật ký. |
 
 **Sản phẩm của seller**
@@ -200,10 +200,10 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 | POST `/uploads/product-image` | Chủ shop | CAT-02 | Như logo shop (JPG/PNG/WebP nhận theo nội dung file) nhưng tối đa 5 MB, lưu ở `product-images/<userId>/...`, trả `{ url }`. Khi lưu sản phẩm, mọi ảnh phải nằm trong thư mục của chính người đó (400 `INVALID_IMAGE_URL`). |
 | GET `/shops/me/products` | Chủ shop | CAT-02 | Lọc `status`, `categoryId`, `q` (tên), phân trang, mới sửa lên đầu. Mỗi dòng có ảnh đầu, khoảng giá, tổng tồn, tổng còn bán được, số biến thể, `soldCount`. |
 | POST `/shops/me/products` | Chủ shop | CAT-02, CAT-03 | Tên (5–120 ký tự), mô tả (20–5.000), `categoryId` (cấp 2, chưa ẩn → 400 `INVALID_CATEGORY`), khối lượng (g), `option1Name`/`option2Name`, `variants` (`option1Value`, `option2Value`, `price`, `originalPrice` lớn hơn `price` nếu có, `stock` ban đầu), `images` (`url`, `option1Value` nếu là ảnh theo màu). Tạo xong là `ACTIVE` (bán ngay). |
-| GET `/shops/me/products/{productId}` | Chủ shop | CAT-02 | Đầy đủ, kể cả `stock`, `reserved` của từng biến thể. Sản phẩm shop khác → 404. |
-| PUT `/shops/me/products/{productId}` | Chủ shop | CAT-02, CAT-03 | Gửi lại toàn bộ như khi tạo; biến thể cũ nhận ra bằng `id`. Không đổi tồn của biến thể cũ ở đây (dùng API điều chỉnh tồn). Biến thể bị bỏ: xem quy tắc chung. |
+| GET `/shops/me/products/{productId}` | Chủ shop | CAT-02 | Đầy đủ, kể cả `stock`, `reserved` của từng biến thể đang bán (biến thể đã bỏ không trả). Sản phẩm shop khác → 404. |
+| PUT `/shops/me/products/{productId}` | Chủ shop | CAT-02, CAT-03 | Gửi lại toàn bộ như khi tạo; biến thể cũ nhận ra bằng `id`. Không đổi tồn của biến thể cũ ở đây (trường `stock` của biến thể có `id` bị bỏ qua; dùng API điều chỉnh tồn). Biến thể mới (không `id`) bắt buộc `stock`. Biến thể bị bỏ: xem quy tắc chung; biến thể không `id` trùng tổ hợp của dòng cũ thì dùng lại dòng đó (giữ tồn cũ). Đổi tên lựa chọn thành đúng tổ hợp của biến thể đã bỏ → 409 `DUPLICATE_VARIANT` (gửi tổ hợp đó không kèm `id` để bật lại). Sai quy tắc nhóm/lựa chọn/ảnh/giá hoặc `id` không thuộc sản phẩm → 400 `VALIDATION_ERROR` (`details.fields`). |
 | PATCH `/shops/me/products/{productId}/status` | Chủ shop | CAT-02 | `ACTIVE` ↔ `HIDDEN`. Ẩn không xóa gì; dòng giỏ của người khác hiện "Không còn bán". |
-| POST `/shops/me/products/{productId}/variants/{variantId}/stock` | Chủ shop | INV-01 | `change` (số nguyên khác 0, âm là giảm), `reason` (bắt buộc, ví dụ "Nhập thêm lô tháng 10"). Cập nhật bằng một câu SQL có điều kiện nên hai người sửa cùng lúc không làm sai số. Tồn mới < lượng đang giữ → 409 `STOCK_BELOW_RESERVED`; vượt 999.999 → 400 `STOCK_TOO_LARGE`. |
+| POST `/shops/me/products/{productId}/variants/{variantId}/stock` | Chủ shop | INV-01 | `change` (số nguyên khác 0, âm là giảm), `reason` (bắt buộc, ví dụ "Nhập thêm lô tháng 10"). Cập nhật bằng một câu SQL có điều kiện nên hai người sửa cùng lúc không làm sai số. Tồn mới < lượng đang giữ (kể cả tồn âm) → 409 `STOCK_BELOW_RESERVED`; vượt 999.999 → 400 `STOCK_TOO_LARGE`. Trả `{ variantId, stock, reserved, available }`. |
 | GET `/shops/me/products/{productId}/stock-history` | Chủ shop | INV-01 | Lọc `variantId`, phân trang, mới nhất lên đầu: thay đổi, tồn sau thay đổi, lý do, người làm, lúc nào. |
 
 **Xem hàng (công khai)**
@@ -212,7 +212,7 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 | --- | --- | --- | --- |
 | GET `/products` | Mọi người | SRC-01, CAT-04 | Tìm và lọc hàng đang bán. `q` (gõ có dấu hay không dấu đều ra, khớp đầu từ: "ip" ra "iPhone"), `categoryId` (cấp 1 thì gồm mọi danh mục con), `minPrice`, `maxPrice` (theo giá thấp nhất của sản phẩm), `shopId`, `sort` = `relevance` (mặc định khi có `q`) \| `newest` (mặc định) \| `price_asc` \| `price_desc` \| `best_selling`, phân trang. Mỗi thẻ có ảnh, tên, giá thấp nhất, giá gốc tương ứng (để hiện nhãn -%), các lựa chọn nhóm 1 (ô chọn phiên bản trên thẻ), `soldCount`, còn hàng hay không, tên shop. |
 | GET `/products/{productId}` | Mọi người | CAT-04, CAT-03 | Chi tiết hàng đang bán: ảnh, danh mục (cả cấp 1), các nhóm lựa chọn, từng biến thể với giá, giá gốc, số còn bán được; thông tin shop (tên, logo, số sản phẩm, ngày tham gia). |
-| GET `/shops/{shopId}` | Mọi người | CAT-04 | Trang shop: tên, logo, mô tả, tỉnh lấy hàng, số sản phẩm đang bán, ngày tham gia, `status` (`ACTIVE` hoặc `SUSPENDED`). Shop chưa được duyệt → 404. Danh sách hàng của shop dùng `GET /products?shopId=`. |
+| GET `/shops/{shopId}` | Mọi người | CAT-04 | Trang shop: tên, logo, mô tả, tỉnh lấy hàng, số sản phẩm đang bán (0 khi bị đình chỉ), ngày tham gia (lúc hồ sơ mở shop được duyệt), `status` (`ACTIVE` hoặc `SUSPENDED`) và `suspended` (true = hiện "Shop đang tạm ngừng bán"). Shop chưa được duyệt → 404. Danh sách hàng của shop dùng `GET /products?shopId=`. |
 | GET `/shops/{shopId}/vouchers` | Mọi người | VCH-01 | Voucher shop đang chạy và còn lượt, để hiện trên trang shop và trang sản phẩm. P2 chỉ hiện, lưu và áp voucher có ở P3. |
 
 **Giỏ hàng** (phải đăng nhập)

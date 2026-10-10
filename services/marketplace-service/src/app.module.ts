@@ -9,6 +9,9 @@ import { UploadsModule } from './uploads/uploads.module';
 import { CartModule } from './cart/cart.module';
 import { ShopAdminModule } from './shop-admin/shop-admin.module';
 import { VouchersModule } from './vouchers/vouchers.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -28,6 +31,10 @@ import { VouchersModule } from './vouchers/vouchers.module';
     ShopAdminModule,
     CartModule,
     VouchersModule,
+    CategoriesModule,
+    ProductsModule,
+    // Sau ShopsModule: GET /shops/{shopId} (công khai) không được che GET /shops/me
+    CatalogModule,
   ],
   controllers: [HealthController],
 })
