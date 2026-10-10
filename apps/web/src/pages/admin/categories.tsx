@@ -16,7 +16,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { CATEGORY_ICONS, CategoryIcon } from '@/components/category-icon';
+import { CATEGORY_ICONS, CategoryIcon } from '@/components/catalog/category-icon';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { FormField, inputClass, nativeSelectClass } from '@/components/console/form-field';
 import { PageHeader } from '@/components/layout/page-header';
@@ -320,7 +320,7 @@ function CategoryRow({
                 : 'bg-champagne-50 text-champagne-600 ring-champagne/40',
             )}
           >
-            <CategoryIcon name={c.icon} className="size-[18px]" />
+            <CategoryIcon icon={c.icon} className="size-[18px]" />
           </span>
         )}
         <div className="min-w-0">
@@ -667,7 +667,7 @@ function CategoryDialog({
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       Xem trước
                       <span className="flex size-7 items-center justify-center rounded-lg bg-champagne-50 text-champagne-600 ring-1 ring-champagne/40">
-                        <CategoryIcon name={field.value} />
+                        <CategoryIcon icon={field.value} className="size-4" />
                       </span>
                     </span>
                   </div>

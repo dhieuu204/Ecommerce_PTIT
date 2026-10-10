@@ -50,14 +50,14 @@ const CONFIG: Record<
     crumbs: [{ label: 'Marketing' }, { label: 'Voucher của shop' }],
     title: 'Voucher của shop',
     description: 'Mã giảm giá riêng của shop, shop chịu phần tiền giảm.',
-    note: 'Voucher được áp vào đơn từ giai đoạn đặt hàng (P3). Voucher đang diễn ra và còn lượt đã hiện trên trang shop và trang sản phẩm của bạn.',
+    note: 'Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt. Voucher đang diễn ra và còn lượt đã hiện trên trang shop và trang sản phẩm của bạn.',
   },
   platform: {
     path: `${API.market}/admin/vouchers`,
     crumbs: [{ label: 'Tài chính' }, { label: 'Voucher sàn' }],
     title: 'Voucher sàn',
     description: 'Mã giảm giá dùng cho đơn của mọi shop. Mọi thay đổi đều ghi nhật ký.',
-    note: 'Voucher sàn do sàn chịu chi phí. Voucher được áp vào đơn từ giai đoạn đặt hàng (P3).',
+    note: 'Voucher sàn do sàn chịu chi phí. Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt.',
   },
 };
 

@@ -584,7 +584,7 @@ export function VoucherFormDialog({
 
             <p className="flex gap-2 rounded-lg bg-ivory px-3 py-2 text-xs text-muted-foreground">
               <Info className="mt-px size-3.5 shrink-0 text-champagne-600" />
-              Voucher được áp vào đơn từ giai đoạn đặt hàng (P3).
+              Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt.
               {kind === 'platform' && ' Voucher sàn do sàn chịu chi phí.'}
             </p>
           </div>

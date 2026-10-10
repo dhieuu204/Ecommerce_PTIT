@@ -15,7 +15,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Controller, useForm, type Control, type UseFormGetValues } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
-import { CategoryIcon } from '@/components/category-icon';
+import { CategoryIcon } from '@/components/catalog/category-icon';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { FormField, inputClass, SectionCard } from '@/components/console/form-field';
 import { NumberInput } from '@/components/console/money-input';
@@ -1042,8 +1042,11 @@ function CategoryPicker({
                     )}
                   >
                     <CategoryIcon
-                      name={p.icon}
-                      className={active ? 'text-champagne-600' : 'text-muted-foreground'}
+                      icon={p.icon}
+                      className={cn(
+                        'size-4',
+                        active ? 'text-champagne-600' : 'text-muted-foreground',
+                      )}
                     />
                     <span className="min-w-0 flex-1 truncate">{p.name}</span>
                     <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />

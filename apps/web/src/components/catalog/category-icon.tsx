@@ -6,6 +6,7 @@ import {
   Cable,
   Camera,
   Car,
+  CookingPot,
   Dumbbell,
   Gamepad2,
   Gem,
@@ -34,14 +35,16 @@ import {
 /**
  * Tên icon lucide (cột `icon` của danh mục, dạng kebab-case như "smartphone") → component.
  * Chỉ nạp một bộ icon chọn sẵn để không kéo cả thư viện vào bản build; tên lạ dùng icon dự phòng.
+ * Admin chọn icon danh mục từ chính bộ này.
  */
-const ICONS: Record<string, LucideIcon> = {
+export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   baby: Baby,
   bike: Bike,
   'book-open': BookOpen,
   cable: Cable,
   camera: Camera,
   car: Car,
+  'cooking-pot': CookingPot,
   dumbbell: Dumbbell,
   'gamepad-2': Gamepad2,
   gem: Gem,
@@ -49,7 +52,6 @@ const ICONS: Record<string, LucideIcon> = {
   glasses: Glasses,
   headphones: Headphones,
   house: House,
-  home: House,
   laptop: Laptop,
   monitor: Monitor,
   package: Package,
@@ -71,7 +73,7 @@ const ICONS: Record<string, LucideIcon> = {
 export const FALLBACK_CATEGORY_ICON: LucideIcon = LayoutGrid;
 
 export function categoryIcon(name: string | null | undefined): LucideIcon {
-  return (name && ICONS[name]) || FALLBACK_CATEGORY_ICON;
+  return (name && CATEGORY_ICONS[name]) || FALLBACK_CATEGORY_ICON;
 }
 
 /** Icon của một danh mục theo tên icon lucide */
