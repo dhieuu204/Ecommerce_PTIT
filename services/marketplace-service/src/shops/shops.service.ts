@@ -39,6 +39,8 @@ export interface ShopView {
   } | null;
   /** Chỉ chủ shop xem; web chỉ hiện 4 số cuối */
   bankAccount: BankAccount | null;
+  /** Lý do admin đình chỉ shop (status = SUSPENDED), để seller xem (SHP-04) */
+  suspendReason: string | null;
   createdAt: Date;
 }
 
@@ -482,6 +484,7 @@ export class ShopsService implements OnModuleInit {
             accountName: shop.bankAccountName ?? '',
           }
         : null,
+      suspendReason: shop.suspendReason,
       createdAt: shop.createdAt,
     };
   }

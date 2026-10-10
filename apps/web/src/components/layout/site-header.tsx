@@ -27,7 +27,10 @@ function HeaderAction({ to, icon, label }: { to: string; icon: React.ReactNode; 
 export function SiteHeader() {
   const session = useSession();
   const shop = useMyShop();
-  const sellerLink = shop.data?.status === 'ACTIVE' ? '/kenh-nguoi-ban' : '/tai-khoan/shop';
+  const sellerLink =
+    shop.data?.status === 'ACTIVE' || shop.data?.status === 'SUSPENDED'
+      ? '/kenh-nguoi-ban'
+      : '/tai-khoan/shop';
 
   return (
     <header className="sticky top-0 z-40 bg-navy shadow-[0_1px_0_rgba(200,169,107,0.25)]">

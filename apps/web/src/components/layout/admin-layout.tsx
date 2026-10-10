@@ -9,12 +9,21 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   SYSTEM: 'Hệ thống',
 };
 
-/** Menu theo bộ quyền: admin chỉ thấy nhóm mình có quyền. Mục của P2 trở đi thêm khi tới giai đoạn. */
+/** Menu theo bộ quyền: admin chỉ thấy nhóm mình có quyền. Mục của các giai đoạn sau thêm khi tới giai đoạn. */
 const GROUPS: Array<ConsoleMenuGroup & { permission: Permission }> = [
   {
     permission: 'MODERATION',
     title: 'Kiểm duyệt',
-    items: [{ to: '/quan-tri/duyet-shop', label: 'Duyệt shop' }],
+    items: [
+      { to: '/quan-tri/duyet-shop', label: 'Duyệt shop' },
+      { to: '/quan-tri/shop', label: 'Quản lý shop' },
+      { to: '/quan-tri/danh-muc', label: 'Danh mục' },
+    ],
+  },
+  {
+    permission: 'FINANCE',
+    title: 'Tài chính',
+    items: [{ to: '/quan-tri/voucher', label: 'Voucher sàn' }],
   },
   {
     permission: 'SYSTEM',
@@ -40,7 +49,7 @@ export function AdminLayout() {
       tone="admin"
       menu={GROUPS.filter((g) => perms.includes(g.permission))}
       headerInfo={<>Quyền: {perms.map((p) => PERMISSION_LABELS[p]).join(' · ')}</>}
-      menuNote="Hỗ trợ, Tài chính và các mục khác có từ giai đoạn sau."
+      menuNote="Đơn hàng, Hỗ trợ, đối soát và các mục khác có từ giai đoạn sau."
     />
   );
 }

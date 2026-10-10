@@ -51,8 +51,28 @@ export const router = createBrowserRouter([
           import('@/pages/auth/forgot-password').then((m) => ({ Component: m.ForgotPasswordPage })),
       },
       {
+        path: 'danh-muc/:slug',
+        lazy: () => import('@/pages/catalog/category').then((m) => ({ Component: m.CategoryPage })),
+      },
+      {
+        path: 'tim-kiem',
+        lazy: () => import('@/pages/catalog/search').then((m) => ({ Component: m.SearchPage })),
+      },
+      {
+        path: 'san-pham/:productId',
+        lazy: () => import('@/pages/catalog/product').then((m) => ({ Component: m.ProductPage })),
+      },
+      {
+        path: 'shop/:shopId',
+        lazy: () => import('@/pages/catalog/shop').then((m) => ({ Component: m.ShopPage })),
+      },
+      {
         element: <RequireAuth />,
         children: [
+          {
+            path: 'gio-hang',
+            lazy: () => import('@/pages/cart/cart').then((m) => ({ Component: m.CartPage })),
+          },
           {
             path: 'tai-khoan',
             element: <AccountLayout />,
@@ -103,7 +123,33 @@ export const router = createBrowserRouter([
           {
             element: <SellerLayout />,
             children: [
-              { index: true, element: <Navigate to="ho-so-shop" replace /> },
+              { index: true, element: <Navigate to="san-pham" replace /> },
+              {
+                path: 'san-pham',
+                lazy: () =>
+                  import('@/pages/seller/products').then((m) => ({ Component: m.ProductsPage })),
+              },
+              {
+                path: 'san-pham/moi',
+                lazy: () =>
+                  import('@/pages/seller/product-form').then((m) => ({
+                    Component: m.ProductFormPage,
+                  })),
+              },
+              {
+                path: 'san-pham/:productId',
+                lazy: () =>
+                  import('@/pages/seller/product-form').then((m) => ({
+                    Component: m.ProductFormPage,
+                  })),
+              },
+              {
+                path: 'voucher',
+                lazy: () =>
+                  import('@/pages/seller/vouchers').then((m) => ({
+                    Component: m.SellerVouchersPage,
+                  })),
+              },
               {
                 path: 'ho-so-shop',
                 lazy: () =>
@@ -138,6 +184,37 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/shop-approval-detail').then((m) => ({
                         Component: m.ShopApprovalDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'danh-muc',
+                    lazy: () =>
+                      import('@/pages/admin/categories').then((m) => ({
+                        Component: m.CategoriesPage,
+                      })),
+                  },
+                  {
+                    path: 'shop',
+                    lazy: () =>
+                      import('@/pages/admin/shops').then((m) => ({ Component: m.ShopsPage })),
+                  },
+                  {
+                    path: 'shop/:shopId',
+                    lazy: () =>
+                      import('@/pages/admin/shop-detail').then((m) => ({
+                        Component: m.ShopDetailPage,
+                      })),
+                  },
+                ],
+              },
+              {
+                element: <RequirePermission any={['FINANCE']} />,
+                children: [
+                  {
+                    path: 'voucher',
+                    lazy: () =>
+                      import('@/pages/admin/vouchers').then((m) => ({
+                        Component: m.AdminVouchersPage,
                       })),
                   },
                 ],

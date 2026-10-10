@@ -21,7 +21,7 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
   const navigate = useNavigate();
   if (!user) return null;
   const isAdmin = user.permissions.length > 0;
-  const shopActive = shop.data?.status === 'ACTIVE';
+  const shopActive = shop.data?.status === 'ACTIVE' || shop.data?.status === 'SUSPENDED';
 
   return (
     <DropdownMenu>

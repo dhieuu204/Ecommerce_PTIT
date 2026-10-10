@@ -54,7 +54,8 @@ export interface WardPlace {
   name: string;
 }
 
-export type ShopStatus = 'PENDING' | 'REJECTED' | 'ACTIVE';
+/** SUSPENDED: admin đình chỉ (từ P2); seller vẫn vào Kênh người bán, hàng bị ẩn khỏi sàn */
+export type ShopStatus = 'PENDING' | 'REJECTED' | 'ACTIVE' | 'SUSPENDED';
 
 export interface ShopView {
   id: string;
@@ -71,6 +72,8 @@ export interface ShopView {
     fullText: string;
   } | null;
   bankAccount: BankAccount | null;
+  /** Lý do đình chỉ khi status = SUSPENDED */
+  suspendReason: string | null;
   createdAt: string;
 }
 

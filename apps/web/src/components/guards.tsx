@@ -28,7 +28,10 @@ export function RequireAuth() {
 export function RequireActiveShop() {
   const shop = useMyShop();
   if (shop.isPending) return <FullPageSpinner />;
-  if (shop.data?.status !== 'ACTIVE') return <Navigate to="/tai-khoan/shop" replace />;
+  // Shop bị đình chỉ vẫn vào được để sửa hàng (quyết định P2); trang sẽ hiện thông báo đình chỉ
+  const status = shop.data?.status;
+  if (status !== 'ACTIVE' && status !== 'SUSPENDED')
+    return <Navigate to="/tai-khoan/shop" replace />;
   return <Outlet />;
 }
 

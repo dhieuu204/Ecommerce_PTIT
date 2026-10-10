@@ -83,7 +83,8 @@ export function ShopApplyPage() {
       </AccountCard>
     );
   }
-  if (shop.data?.status === 'ACTIVE') return <Navigate to="/tai-khoan/shop" replace />;
+  if (shop.data?.status === 'ACTIVE' || shop.data?.status === 'SUSPENDED')
+    return <Navigate to="/tai-khoan/shop" replace />;
   return <ApplyFormView myShop={shop.data ?? null} />;
 }
 
