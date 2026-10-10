@@ -10,7 +10,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; chạy thử cả hệ thống trong Docker bằng `pnpm app:up`, Dockerfile ở `services/Dockerfile` và `apps/web/Dockerfile`). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
-Trạng thái hiện tại: **có khung repo, danh sách API và sự kiện của P1** (`docs/api`), **khung ERD cả dự án và bảng P1 đầy đủ cột** (`docs/erd`, `services/*/prisma`), **nền tảng chung đã gắn vào 4 service** (`packages/nest-common`: đăng nhập/quyền, dạng lỗi, phân trang, sự kiện outbox/inbox, nhật ký admin), **khung màn hình P1** (`docs/so-do/13-ui-man-hinh-p1`). Chưa có code nghiệp vụ. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **P1 (tài khoản, mở shop, quản trị) và P2 (danh mục, sản phẩm, tồn kho, tìm kiếm, giỏ, tạo voucher, đình chỉ shop) đã code xong và nằm trên `main`**, kèm test. API và sự kiện P1–P2 ở `docs/api`, bảng P1–P2 đầy đủ cột ở `docs/erd` và `services/*/prisma`, quyết định P2 ở `docs/phan-tich/09-quyet-dinh-p2.md`. Nền tảng chung ở `packages/nest-common`. Dữ liệu demo: `pnpm seed:demo` (xem README). Phase tiếp theo: **P3 (đặt hàng và trả trước)**. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -96,6 +96,7 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 - Mọi mốc thời gian và con số nghiệp vụ (15 phút, 24 giờ, 5%, 50.000đ…) là **cấu hình**, không viết cứng rải rác. P1: đọc từ `.env` của service (có giá trị mặc định trong code, ghi vào `.env.example`). Từ P3: bảng `settings`, admin sửa trên web.
 - Thao tác của admin (duyệt, từ chối, cấp quyền, hoàn tay…) đều ghi nhật ký bằng `writeAudit(tx, ...)`: ai, lúc nào, đối tượng, lý do.
 - Test: Jest cho backend (file `*.spec.ts` cạnh file code). Logic tiền, trạng thái và quyền **bắt buộc có test**.
+- Kiểm tra bằng test tự động (`pnpm lint`, `typecheck`, `test`, `build`). **Không chụp màn hình hay chạy trình duyệt tự động** để kiểm giao diện (tốn token); thay vào đó báo chủ đồ án những trang đã đổi để họ tự mở xem.
 - Định dạng bằng Prettier, kiểm bằng ESLint. Chạy `pnpm format` trước khi commit.
 
 ## 8. Quy trình Git (mặc định do Claude đề xuất, chủ đồ án có thể đổi)
