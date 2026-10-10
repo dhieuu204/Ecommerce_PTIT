@@ -3,6 +3,7 @@ import { SanCommonModule } from '@san/nest-common';
 import { HealthController } from './health/health.controller';
 import { PrismaService } from './prisma.service';
 import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
+import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -15,6 +16,7 @@ import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
       jwksUrl: process.env.JWKS_URL,
     }),
     ShopApprovalsModule,
+    ShopModerationModule,
   ],
   controllers: [HealthController],
 })
