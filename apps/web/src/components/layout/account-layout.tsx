@@ -5,6 +5,7 @@ import { useCurrentUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
 const MENU = [
+  { to: '/tai-khoan/don-mua', label: 'Đơn mua' },
   { to: '/tai-khoan/ho-so', label: 'Hồ sơ của tôi' },
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu' },
   { to: '/tai-khoan/dia-chi', label: 'Sổ địa chỉ' },
@@ -13,7 +14,7 @@ const MENU = [
 
 /**
  * Tài khoản của tôi (docs/so-do/07 mục A2): menu trái + nội dung. Điện thoại: menu thành hàng nút cuộn ngang.
- * Đơn mua, voucher, thông báo thêm vào MENU khi tới P2/P3/P6.
+ * Thông báo thêm vào MENU ở P6.
  */
 export function AccountLayout() {
   const user = useCurrentUser();

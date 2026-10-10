@@ -48,9 +48,21 @@ export const AUDIT_ACTIONS: Record<string, { label: string; source: SourceKey }>
   APPROVE_SHOP: { label: 'Duyệt hồ sơ shop', source: 'approval' },
   REJECT_SHOP: { label: 'Từ chối hồ sơ shop', source: 'approval' },
   UPDATE_SHOP: { label: 'Sửa thông tin shop', source: 'market' },
+  CANCEL_ORDER: { label: 'Hủy đơn hàng', source: 'market' },
+  APPROVE_ORDER: { label: 'Duyệt đơn lớn', source: 'approval' },
+  REJECT_ORDER: { label: 'Từ chối đơn lớn', source: 'approval' },
+  MANUAL_REFUND: { label: 'Hoàn tiền tay', source: 'payment' },
+  UPDATE_SETTING: { label: 'Sửa cấu hình chính sách', source: 'market' },
 };
 
-const TARGET_TYPES: Record<string, string> = { USER: 'Người dùng', SHOP: 'Shop' };
+const TARGET_TYPES: Record<string, string> = {
+  USER: 'Người dùng',
+  SHOP: 'Shop',
+  SHOP_ORDER: 'Đơn con',
+  ORDER: 'Đơn hàng',
+  REFUND: 'Khoản hoàn',
+  SETTING: 'Cấu hình',
+};
 
 const FIELD_LABELS: Record<string, string> = {
   permissions: 'Bộ quyền',

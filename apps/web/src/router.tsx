@@ -67,11 +67,29 @@ export const router = createBrowserRouter([
         lazy: () => import('@/pages/catalog/shop').then((m) => ({ Component: m.ShopPage })),
       },
       {
+        // Cổng thanh toán MÔ PHỎNG (khi chưa có khóa VNPay): không cần đăng nhập, giống trang của cổng thật
+        path: 'thanh-toan/mo-phong',
+        lazy: () =>
+          import('@/pages/checkout/mock-gateway').then((m) => ({ Component: m.MockGatewayPage })),
+      },
+      {
         element: <RequireAuth />,
         children: [
           {
             path: 'gio-hang',
             lazy: () => import('@/pages/cart/cart').then((m) => ({ Component: m.CartPage })),
+          },
+          {
+            path: 'dat-hang',
+            lazy: () =>
+              import('@/pages/checkout/checkout').then((m) => ({ Component: m.CheckoutPage })),
+          },
+          {
+            path: 'thanh-toan/ket-qua',
+            lazy: () =>
+              import('@/pages/checkout/payment-result').then((m) => ({
+                Component: m.PaymentResultPage,
+              })),
           },
           {
             path: 'tai-khoan',
@@ -92,6 +110,18 @@ export const router = createBrowserRouter([
                 path: 'dia-chi',
                 lazy: () =>
                   import('@/pages/account/addresses').then((m) => ({ Component: m.AddressesPage })),
+              },
+              {
+                path: 'don-mua',
+                lazy: () =>
+                  import('@/pages/account/orders').then((m) => ({ Component: m.OrdersPage })),
+              },
+              {
+                path: 'don-mua/:orderId',
+                lazy: () =>
+                  import('@/pages/account/order-detail').then((m) => ({
+                    Component: m.OrderDetailPage,
+                  })),
               },
               {
                 path: 'shop',
@@ -123,7 +153,7 @@ export const router = createBrowserRouter([
           {
             element: <SellerLayout />,
             children: [
-              { index: true, element: <Navigate to="san-pham" replace /> },
+              { index: true, element: <Navigate to="don-hang" replace /> },
               {
                 path: 'san-pham',
                 lazy: () =>
@@ -148,6 +178,20 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/seller/vouchers').then((m) => ({
                     Component: m.SellerVouchersPage,
+                  })),
+              },
+              {
+                path: 'don-hang',
+                lazy: () =>
+                  import('@/pages/seller/orders').then((m) => ({
+                    Component: m.SellerOrdersPage,
+                  })),
+              },
+              {
+                path: 'don-hang/:shopOrderId',
+                lazy: () =>
+                  import('@/pages/seller/order-detail').then((m) => ({
+                    Component: m.SellerOrderDetailPage,
                   })),
               },
               {
@@ -216,6 +260,54 @@ export const router = createBrowserRouter([
                       import('@/pages/admin/vouchers').then((m) => ({
                         Component: m.AdminVouchersPage,
                       })),
+                  },
+                  {
+                    path: 'duyet-don',
+                    lazy: () =>
+                      import('@/pages/admin/order-checks').then((m) => ({
+                        Component: m.OrderChecksPage,
+                      })),
+                  },
+                  {
+                    path: 'duyet-don/:checkId',
+                    lazy: () =>
+                      import('@/pages/admin/order-checks').then((m) => ({
+                        Component: m.OrderCheckDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'hoan-tien',
+                    lazy: () =>
+                      import('@/pages/admin/refunds').then((m) => ({ Component: m.RefundsPage })),
+                  },
+                ],
+              },
+              {
+                element: <RequirePermission any={['SUPPORT']} />,
+                children: [
+                  {
+                    path: 'don-hang',
+                    lazy: () =>
+                      import('@/pages/admin/orders').then((m) => ({
+                        Component: m.AdminOrdersPage,
+                      })),
+                  },
+                  {
+                    path: 'don-hang/:orderId',
+                    lazy: () =>
+                      import('@/pages/admin/orders').then((m) => ({
+                        Component: m.AdminOrderDetailPage,
+                      })),
+                  },
+                ],
+              },
+              {
+                element: <RequirePermission any={['SYSTEM', 'FINANCE']} />,
+                children: [
+                  {
+                    path: 'cau-hinh',
+                    lazy: () =>
+                      import('@/pages/admin/settings').then((m) => ({ Component: m.SettingsPage })),
                   },
                 ],
               },

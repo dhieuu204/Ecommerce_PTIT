@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { QuantityStepper } from '@/components/catalog/quantity-stepper';
 import { LoadError } from '@/components/console/empty-state';
@@ -38,7 +38,7 @@ const COLS = 'lg:grid lg:grid-cols-[minmax(0,1fr)_10rem_9rem_9rem_3.5rem] lg:ite
 /** Chọn được = chưa "không còn bán" */
 const selectable = (it: CartItem) => it.state !== 'UNAVAILABLE';
 
-/** Giỏ hàng (CRT-01): nhóm theo shop, chọn dòng, đổi số lượng/phân loại, xóa; đặt hàng có ở P3 */
+/** Giỏ hàng (CRT-01): nhóm theo shop, chọn dòng, đổi số lượng/phân loại, xóa; Mua hàng sang trang Thanh toán (P3) */
 export function CartPage() {
   const cart = useCart();
 
@@ -80,6 +80,13 @@ function CartView({ cart }: { cart: Cart }) {
       (it) => it.selected && it.state === 'OK' && it.originalPrice && it.originalPrice > it.price,
     )
     .reduce((sum, it) => sum + (it.originalPrice! - it.price) * it.quantity, 0);
+
+  // Mua hàng: các dòng đang chọn; dòng chọn mà hết hàng/vượt tồn thì phải sửa trước
+  const buyIds = items.filter((it) => it.selected && it.state === 'OK').map((it) => it.id);
+  const blocked = items.filter(
+    (it) => it.selected && (it.state === 'OUT_OF_STOCK' || it.state === 'NOT_ENOUGH_STOCK'),
+  ).length;
+  const navigate = useNavigate();
 
   const { select, removeMany } = useCartBulkActions();
   const [confirm, setConfirm] = useState<null | { ids: string[]; title: string; text: string }>(
@@ -239,9 +246,21 @@ function CartView({ cart }: { cart: Cart }) {
               )}
             </div>
           </div>
-          <div className="mt-2.5 flex items-center justify-center gap-1.5 border-t border-ivory-200 pt-2.5 text-xs text-ink/50 md:justify-end">
-            <Info className="size-3.5 shrink-0" />
-            Đặt hàng và thanh toán sẽ mở ở giai đoạn tiếp theo.
+          <div className="mt-2.5 flex flex-col gap-2 border-t border-ivory-200 pt-2.5 sm:flex-row sm:items-center sm:justify-end">
+            {blocked > 0 && (
+              <span className="flex items-center justify-center gap-1.5 text-xs text-amber-700 sm:mr-auto">
+                <Info className="size-3.5 shrink-0" />
+                {blocked} sản phẩm đã chọn cần sửa (hết hàng hoặc vượt tồn)
+              </span>
+            )}
+            <Button
+              size="lg"
+              className="h-11 rounded-xl px-10 text-[15px]"
+              disabled={buyIds.length === 0 || blocked > 0}
+              onClick={() => navigate(`/dat-hang?items=${buyIds.join(',')}`)}
+            >
+              Mua hàng ({buyIds.length})
+            </Button>
           </div>
         </div>
       </div>

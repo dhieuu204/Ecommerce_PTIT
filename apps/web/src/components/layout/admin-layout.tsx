@@ -9,35 +9,55 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   SYSTEM: 'Hệ thống',
 };
 
-/** Menu theo bộ quyền: admin chỉ thấy nhóm mình có quyền. Mục của các giai đoạn sau thêm khi tới giai đoạn. */
-const GROUPS: Array<ConsoleMenuGroup & { permission: Permission }> = [
+/** Nhóm menu admin: mỗi mục hiện khi admin có ít nhất một bộ quyền trong `any` */
+type AdminMenuGroup = {
+  title: string;
+  items: Array<{ to: string; label: string; any: Permission[] }>;
+};
+
+/** Menu theo bộ quyền: admin chỉ thấy mục mình có quyền. Mục của các giai đoạn sau thêm khi tới giai đoạn. */
+const GROUPS: AdminMenuGroup[] = [
   {
-    permission: 'MODERATION',
     title: 'Kiểm duyệt',
     items: [
-      { to: '/quan-tri/duyet-shop', label: 'Duyệt shop' },
-      { to: '/quan-tri/shop', label: 'Quản lý shop' },
-      { to: '/quan-tri/danh-muc', label: 'Danh mục' },
+      { to: '/quan-tri/duyet-shop', label: 'Duyệt shop', any: ['MODERATION'] },
+      { to: '/quan-tri/shop', label: 'Quản lý shop', any: ['MODERATION'] },
+      { to: '/quan-tri/danh-muc', label: 'Danh mục', any: ['MODERATION'] },
     ],
   },
   {
-    permission: 'FINANCE',
-    title: 'Tài chính',
-    items: [{ to: '/quan-tri/voucher', label: 'Voucher sàn' }],
+    title: 'Hỗ trợ',
+    items: [{ to: '/quan-tri/don-hang', label: 'Đơn hàng', any: ['SUPPORT'] }],
   },
   {
-    permission: 'SYSTEM',
+    title: 'Tài chính',
+    items: [
+      { to: '/quan-tri/duyet-don', label: 'Duyệt đơn lớn', any: ['FINANCE'] },
+      { to: '/quan-tri/hoan-tien', label: 'Hoàn tiền', any: ['FINANCE'] },
+      { to: '/quan-tri/voucher', label: 'Voucher sàn', any: ['FINANCE'] },
+    ],
+  },
+  {
     title: 'Hệ thống',
     items: [
-      { to: '/quan-tri/nguoi-dung', label: 'Người dùng và quyền' },
-      { to: '/quan-tri/nhat-ky', label: 'Nhật ký thao tác' },
+      { to: '/quan-tri/cau-hinh', label: 'Cấu hình chính sách', any: ['SYSTEM', 'FINANCE'] },
+      { to: '/quan-tri/nguoi-dung', label: 'Người dùng và quyền', any: ['SYSTEM'] },
+      { to: '/quan-tri/nhat-ky', label: 'Nhật ký thao tác', any: ['SYSTEM'] },
     ],
   },
 ];
 
+/** Menu của một admin: bỏ mục không có quyền, bỏ nhóm rỗng */
+function menuFor(perms: Permission[]): ConsoleMenuGroup[] {
+  return GROUPS.map((g) => ({
+    title: g.title,
+    items: g.items.filter((i) => i.any.some((p) => perms.includes(p))),
+  })).filter((g) => g.items.length > 0);
+}
+
 /** Trang đầu tiên admin được vào (dùng khi mở /quan-tri) */
 export function firstAdminPage(perms: Permission[]): string {
-  return GROUPS.find((g) => perms.includes(g.permission))?.items[0]?.to ?? '/';
+  return menuFor(perms)[0]?.items[0]?.to ?? '/';
 }
 
 export function AdminLayout() {
@@ -47,9 +67,9 @@ export function AdminLayout() {
     <ConsoleLayout
       area="Quản trị"
       tone="admin"
-      menu={GROUPS.filter((g) => perms.includes(g.permission))}
+      menu={menuFor(perms)}
       headerInfo={<>Quyền: {perms.map((p) => PERMISSION_LABELS[p]).join(' · ')}</>}
-      menuNote="Đơn hàng, Hỗ trợ, đối soát và các mục khác có từ giai đoạn sau."
+      menuNote="Đối soát, rút tiền, tranh chấp có từ giai đoạn sau."
     />
   );
 }

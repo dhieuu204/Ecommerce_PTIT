@@ -173,6 +173,17 @@ export async function api<T>(
   );
 }
 
+/** Tải file cần đăng nhập (ví dụ ảnh biên lai trong bucket riêng tư), trả Blob */
+export async function apiBlob(path: string, retried = false): Promise<Blob> {
+  const res = await fetch(path, {
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    credentials: 'include',
+  });
+  if (res.status === 401 && !retried && (await refreshSession())) return apiBlob(path, true);
+  if (!res.ok) throw new ApiError(res.status, 'DOWNLOAD_FAILED', 'Chưa tải được file.');
+  return res.blob();
+}
+
 /** Mở trang đăng nhập Google (chuyển hẳn sang Google, xong quay về returnTo) */
 export function startGoogleLogin(returnTo = '/') {
   window.location.href = `${API.user}/auth/google/start?returnTo=${encodeURIComponent(returnTo)}`;

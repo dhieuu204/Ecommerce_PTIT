@@ -2,8 +2,12 @@ import { ShieldAlert } from 'lucide-react';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { ConsoleLayout, type ConsoleMenuGroup } from './console-layout';
 
-/** Menu Kênh người bán. Đơn hàng (P3) và Tài chính (P3–P5) thêm khi tới giai đoạn */
+/** Menu Kênh người bán. Tài chính (ví, rút tiền) thêm khi tới giai đoạn */
 const MENU: ConsoleMenuGroup[] = [
+  {
+    title: 'Đơn hàng',
+    items: [{ to: '/kenh-nguoi-ban/don-hang', label: 'Tất cả đơn' }],
+  },
   {
     title: 'Sản phẩm',
     items: [
@@ -62,7 +66,7 @@ export function SellerLayout() {
       tone="seller"
       menu={MENU}
       headerInfo={shop.data?.shop?.name && <>Shop: {shop.data.shop.name}</>}
-      menuNote="Đơn hàng, Tài chính có từ giai đoạn sau."
+      menuNote="Tài chính (ví, rút tiền) có từ giai đoạn sau."
       notice={suspended && <SuspendedBanner reason={shop.data?.shop?.suspendReason ?? null} />}
     />
   );
