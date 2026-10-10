@@ -33,6 +33,16 @@ pnpm dev                       # 4 service (cổng 3001–3004) + web (5173)
 
 Kiểm tra: `http://localhost:3001/health` trả `{"status":"ok","service":"user-service"}`.
 
+### Dữ liệu demo
+
+Sau khi 4 service đã chạy ít nhất một lần (để có bảng và danh sách tỉnh/huyện/xã):
+
+```bash
+pnpm seed:demo
+```
+
+Lệnh nạp bộ danh mục, 2 shop đã duyệt (Táo Xanh Mobile, Galaxy Hub) với 23 sản phẩm có biến thể, vài voucher, và 3 tài khoản **demo** mật khẩu `demo12345`: `taoxanh@example.com`, `galaxyhub@example.com` (seller), `buyer@example.com` (buyer). Ảnh sản phẩm là ảnh minh hoạ tự vẽ, không phải ảnh thật. Chạy lại không tạo trùng. Chỉ nạp danh mục: `pnpm --filter @san/marketplace-service seed:categories`.
+
 | Công cụ               | Địa chỉ                                    |
 | --------------------- | ------------------------------------------ |
 | Web                   | http://localhost:5173                      |

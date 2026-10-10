@@ -1,0 +1,1512 @@
+{
+  "products": [
+    {
+      "key": "iphone-16-pro-max",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại Apple iPhone 16 Pro Max",
+      "description": "iPhone 16 Pro Max khung titan cấp 5, màn hình Super Retina XDR 6,9 inch có ProMotion 120Hz và Always-On.\n\nĐiểm nổi bật\n- Chip A18 Pro 3 nm, GPU 6 lõi, chơi game và dựng video 4K mượt mà.\n- Cụm camera Pro: chính 48MP, góc siêu rộng 48MP, tele 5x 12MP; quay 4K 120 fps Dolby Vision.\n- Nút Điều khiển Camera mới, nút Tác vụ tuỳ chỉnh.\n- Pin dùng cả ngày, sạc MagSafe tới 25W, cổng USB-C (USB 3).\n\nTrong hộp: máy, cáp USB-C dệt, sách hướng dẫn.\nBảo hành 12 tháng chính hãng. Hàng mới 100%, nguyên seal.",
+      "weight": 450,
+      "soldCount": 128,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Titan Sa Mạc",
+          "option2Value": "256GB",
+          "price": 30990000,
+          "originalPrice": 33990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Titan Sa Mạc",
+          "option2Value": "512GB",
+          "price": 37490000,
+          "originalPrice": 40490000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Titan Sa Mạc",
+          "option2Value": "1TB",
+          "price": 43990000,
+          "originalPrice": 46990000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Titan Đen",
+          "option2Value": "256GB",
+          "price": 30990000,
+          "originalPrice": 33990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Titan Đen",
+          "option2Value": "512GB",
+          "price": 37490000,
+          "originalPrice": 40490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Titan Đen",
+          "option2Value": "1TB",
+          "price": 43990000,
+          "originalPrice": 46990000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Titan Trắng",
+          "option2Value": "256GB",
+          "price": 30990000,
+          "originalPrice": 33990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Titan Trắng",
+          "option2Value": "512GB",
+          "price": 37490000,
+          "originalPrice": 40490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Titan Trắng",
+          "option2Value": "1TB",
+          "price": 43990000,
+          "originalPrice": 46990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Titan Tự Nhiên",
+          "option2Value": "256GB",
+          "price": 30990000,
+          "originalPrice": 33990000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Titan Tự Nhiên",
+          "option2Value": "512GB",
+          "price": 37490000,
+          "originalPrice": 40490000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Titan Tự Nhiên",
+          "option2Value": "1TB",
+          "price": 43990000,
+          "originalPrice": 46990000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-16-pro-max-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-16-pro-max-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-16-pro-max-c1.webp",
+          "option1Value": "Titan Sa Mạc"
+        },
+        {
+          "file": "iphone-16-pro-max-c2.webp",
+          "option1Value": "Titan Đen"
+        },
+        {
+          "file": "iphone-16-pro-max-c3.webp",
+          "option1Value": "Titan Trắng"
+        },
+        {
+          "file": "iphone-16-pro-max-c4.webp",
+          "option1Value": "Titan Tự Nhiên"
+        }
+      ]
+    },
+    {
+      "key": "iphone-16",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại Apple iPhone 16",
+      "description": "iPhone 16 màn hình 6,1 inch Super Retina XDR, mặt lưng kính pha màu, khung nhôm.\n\n- Chip A18 mạnh mẽ, hỗ trợ Apple Intelligence.\n- Camera Fusion 48MP, chụp ảnh không gian (spatial) cho Apple Vision Pro.\n- Nút Tác vụ và nút Điều khiển Camera.\n- Sạc MagSafe, cổng USB-C.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 400,
+      "soldCount": 342,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh Lưu Ly",
+          "option2Value": "128GB",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Lưu Ly",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 24990000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "128GB",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 24990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "128GB",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 24990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "128GB",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 24990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Xanh Mòng Két",
+          "option2Value": "128GB",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 27
+        },
+        {
+          "option1Value": "Xanh Mòng Két",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 24990000,
+          "stock": 18
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-16-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-16-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-16-c1.webp",
+          "option1Value": "Xanh Lưu Ly"
+        },
+        {
+          "file": "iphone-16-c2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-16-c3.webp",
+          "option1Value": "Trắng"
+        },
+        {
+          "file": "iphone-16-c4.webp",
+          "option1Value": "Hồng"
+        },
+        {
+          "file": "iphone-16-c5.webp",
+          "option1Value": "Xanh Mòng Két"
+        }
+      ]
+    },
+    {
+      "key": "iphone-15",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại Apple iPhone 15",
+      "description": "iPhone 15 với Dynamic Island, camera chính 48MP và cổng USB-C.\n\n- Màn hình 6,1 inch Super Retina XDR, độ sáng ngoài trời 2000 nit.\n- Chip A16 Bionic.\n- Mặt lưng kính pha màu nhám, khung nhôm.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 400,
+      "soldCount": 511,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh Lá",
+          "option2Value": "128GB",
+          "price": 16490000,
+          "originalPrice": 18990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Lá",
+          "option2Value": "256GB",
+          "price": 19290000,
+          "originalPrice": 21790000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "128GB",
+          "price": 16490000,
+          "originalPrice": 18990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 19290000,
+          "originalPrice": 21790000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "128GB",
+          "price": 16490000,
+          "originalPrice": 18990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "256GB",
+          "price": 19290000,
+          "originalPrice": 21790000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-15-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-15-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "iphone-15-c1.webp",
+          "option1Value": "Xanh Lá"
+        },
+        {
+          "file": "iphone-15-c2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-15-c3.webp",
+          "option1Value": "Hồng"
+        }
+      ]
+    },
+    {
+      "key": "ipad-air-m2",
+      "shop": "A",
+      "category": "iPad",
+      "name": "Máy tính bảng Apple iPad Air 11 inch M2 Wi-Fi",
+      "description": "iPad Air 11 inch chip M2, màn hình Liquid Retina, hỗ trợ Apple Pencil Pro và Magic Keyboard.\n\n- Camera trước 12MP đặt ở cạnh ngang, tiện họp trực tuyến.\n- Wi-Fi 6E, cổng USB-C, Touch ID trên nút nguồn.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 650,
+      "soldCount": 76,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "128GB",
+          "price": 14990000,
+          "originalPrice": 16490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "256GB",
+          "price": 17990000,
+          "originalPrice": 19490000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Xám Không Gian",
+          "option2Value": "128GB",
+          "price": 14990000,
+          "originalPrice": 16490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Xám Không Gian",
+          "option2Value": "256GB",
+          "price": 17990000,
+          "originalPrice": 19490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "128GB",
+          "price": 14990000,
+          "originalPrice": 16490000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "256GB",
+          "price": 17990000,
+          "originalPrice": 19490000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "ipad-air-m2-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "ipad-air-m2-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "ipad-air-m2-c1.webp",
+          "option1Value": "Xanh Dương"
+        },
+        {
+          "file": "ipad-air-m2-c2.webp",
+          "option1Value": "Xám Không Gian"
+        },
+        {
+          "file": "ipad-air-m2-c3.webp",
+          "option1Value": "Tím"
+        }
+      ]
+    },
+    {
+      "key": "macbook-air-m3",
+      "shop": "A",
+      "category": "MacBook",
+      "name": "Laptop Apple MacBook Air 13 inch M3",
+      "description": "MacBook Air 13 inch chip M3, mỏng 1,13 cm, nặng 1,24 kg, không quạt nên hoạt động hoàn toàn yên lặng.\n\n- Màn hình Liquid Retina 13,6 inch, 500 nit, 1 tỉ màu.\n- Pin tới 18 giờ, sạc MagSafe 3.\n- Hỗ trợ 2 màn hình ngoài khi gập máy.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 1700,
+      "soldCount": 54,
+      "option1Name": "Màu sắc",
+      "option2Name": "Cấu hình",
+      "variants": [
+        {
+          "option1Value": "Đêm Xanh Thẳm",
+          "option2Value": "8GB / 256GB",
+          "price": 24990000,
+          "originalPrice": 27990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Đêm Xanh Thẳm",
+          "option2Value": "16GB / 512GB",
+          "price": 32990000,
+          "originalPrice": 35990000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "8GB / 256GB",
+          "price": 24990000,
+          "originalPrice": 27990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "16GB / 512GB",
+          "price": 32990000,
+          "originalPrice": 35990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xám Không Gian",
+          "option2Value": "8GB / 256GB",
+          "price": 24990000,
+          "originalPrice": 27990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Xám Không Gian",
+          "option2Value": "16GB / 512GB",
+          "price": 32990000,
+          "originalPrice": 35990000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "macbook-air-m3-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "macbook-air-m3-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "macbook-air-m3-c1.webp",
+          "option1Value": "Đêm Xanh Thẳm"
+        },
+        {
+          "file": "macbook-air-m3-c2.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "macbook-air-m3-c3.webp",
+          "option1Value": "Xám Không Gian"
+        }
+      ]
+    },
+    {
+      "key": "apple-watch-s10",
+      "shop": "A",
+      "category": "Apple Watch",
+      "name": "Đồng hồ thông minh Apple Watch Series 10 GPS",
+      "description": "Apple Watch Series 10 mỏng nhất từ trước tới nay, màn hình góc rộng OLED lớn hơn, sáng hơn khi nhìn nghiêng.\n\n- Theo dõi giấc ngủ, phát hiện ngưng thở khi ngủ, đo nhiệt độ cổ tay.\n- Sạc nhanh: 80% trong khoảng 30 phút.\n- Chống nước tới 50 m.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 300,
+      "soldCount": 97,
+      "option1Name": "Màu sắc",
+      "option2Name": "Kích cỡ",
+      "variants": [
+        {
+          "option1Value": "Đen Bóng",
+          "option2Value": "42mm",
+          "price": 10490000,
+          "originalPrice": 11490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Đen Bóng",
+          "option2Value": "46mm",
+          "price": 11490000,
+          "originalPrice": 12490000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Vàng Hồng",
+          "option2Value": "42mm",
+          "price": 10490000,
+          "originalPrice": 11490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Vàng Hồng",
+          "option2Value": "46mm",
+          "price": 11490000,
+          "originalPrice": 12490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "42mm",
+          "price": 10490000,
+          "originalPrice": 11490000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "46mm",
+          "price": 11490000,
+          "originalPrice": 12490000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "apple-watch-s10-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "apple-watch-s10-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "apple-watch-s10-c1.webp",
+          "option1Value": "Đen Bóng"
+        },
+        {
+          "file": "apple-watch-s10-c2.webp",
+          "option1Value": "Vàng Hồng"
+        },
+        {
+          "file": "apple-watch-s10-c3.webp",
+          "option1Value": "Bạc"
+        }
+      ]
+    },
+    {
+      "key": "airpods-pro-2",
+      "shop": "A",
+      "category": "Tai nghe",
+      "name": "Tai nghe Apple AirPods Pro 2 (USB-C)",
+      "description": "AirPods Pro 2 hộp sạc USB-C, chống ồn chủ động gấp 2 lần thế hệ trước, chế độ Xuyên âm thích ứng.\n\n- Âm thanh không gian cá nhân hoá.\n- Hộp sạc có loa, móc dây đeo, chống nước IP54.\n- Tổng thời gian nghe tới 30 giờ cùng hộp sạc.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 200,
+      "soldCount": 623,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 5790000,
+          "originalPrice": 6790000,
+          "stock": 60
+        }
+      ],
+      "images": [
+        {
+          "file": "airpods-pro-2-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "airpods-pro-2-2.webp",
+          "option1Value": null
+        }
+      ]
+    },
+    {
+      "key": "cu-sac-20w",
+      "shop": "A",
+      "category": "Sạc và cáp",
+      "name": "Củ sạc nhanh USB-C 20W",
+      "description": "Củ sạc USB-C công suất 20W, sạc nhanh iPhone 50% trong khoảng 30 phút.\n\n- Tương thích iPhone, iPad, AirPods.\n- Bảo vệ quá nhiệt, quá dòng.\n\nBảo hành 12 tháng, 1 đổi 1 nếu lỗi nhà sản xuất.",
+      "weight": 100,
+      "soldCount": 1204,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 390000,
+          "originalPrice": 550000,
+          "stock": 60
+        }
+      ],
+      "images": [
+        {
+          "file": "cu-sac-20w-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "cu-sac-20w-2.webp",
+          "option1Value": null
+        }
+      ]
+    },
+    {
+      "key": "op-lung-magsafe",
+      "shop": "A",
+      "category": "Ốp lưng",
+      "name": "Ốp lưng silicon MagSafe cho iPhone 16",
+      "description": "Ốp silicon mềm mịn, lót vi sợi bên trong, nam châm MagSafe bám chắc khi sạc không dây.\n\n- Viền cao bảo vệ camera và màn hình.\n- Nút bấm nhạy, không bám bụi.\n\nĐổi trả trong 7 ngày nếu không vừa máy.",
+      "weight": 100,
+      "soldCount": 388,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "",
+          "price": 290000,
+          "originalPrice": 390000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Be",
+          "option2Value": "",
+          "price": 290000,
+          "originalPrice": 390000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Hồng Phấn",
+          "option2Value": "",
+          "price": 290000,
+          "originalPrice": 390000,
+          "stock": 41
+        }
+      ],
+      "images": [
+        {
+          "file": "op-lung-magsafe-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "op-lung-magsafe-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "op-lung-magsafe-c1.webp",
+          "option1Value": "Xanh Đậm"
+        },
+        {
+          "file": "op-lung-magsafe-c2.webp",
+          "option1Value": "Be"
+        },
+        {
+          "file": "op-lung-magsafe-c3.webp",
+          "option1Value": "Hồng Phấn"
+        }
+      ]
+    },
+    {
+      "key": "galaxy-s25-ultra",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy S25 Ultra",
+      "description": "Galaxy S25 Ultra khung titan, màn hình Dynamic AMOLED 2X 6,9 inch, bút S Pen tích hợp.\n\n- Snapdragon 8 Elite for Galaxy.\n- Camera chính 200MP, góc siêu rộng 50MP, tele 5x 50MP.\n- Galaxy AI: khoanh vùng tìm kiếm, trợ lý ghi chú, dịch trực tiếp cuộc gọi.\n- Pin 5000 mAh, sạc nhanh 45W.\n\nBảo hành 12 tháng chính hãng Samsung Việt Nam.",
+      "weight": 450,
+      "soldCount": 164,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Titan Xám",
+          "option2Value": "256GB",
+          "price": 28990000,
+          "originalPrice": 32990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Titan Xám",
+          "option2Value": "512GB",
+          "price": 33990000,
+          "originalPrice": 37990000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Titan Đen",
+          "option2Value": "256GB",
+          "price": 28990000,
+          "originalPrice": 32990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Titan Đen",
+          "option2Value": "512GB",
+          "price": 33990000,
+          "originalPrice": 37990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Titan Xanh",
+          "option2Value": "256GB",
+          "price": 28990000,
+          "originalPrice": 32990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Titan Xanh",
+          "option2Value": "512GB",
+          "price": 33990000,
+          "originalPrice": 37990000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "galaxy-s25-ultra-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "galaxy-s25-ultra-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "galaxy-s25-ultra-c1.webp",
+          "option1Value": "Titan Xám"
+        },
+        {
+          "file": "galaxy-s25-ultra-c2.webp",
+          "option1Value": "Titan Đen"
+        },
+        {
+          "file": "galaxy-s25-ultra-c3.webp",
+          "option1Value": "Titan Xanh"
+        }
+      ]
+    },
+    {
+      "key": "galaxy-z-flip6",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy Z Flip6",
+      "description": "Galaxy Z Flip6 gập nhỏ gọn, màn hình phụ 3,4 inch dùng được hầu hết ứng dụng.\n\n- Camera chính 50MP, chụp FlexCam rảnh tay.\n- Snapdragon 8 Gen 3 for Galaxy, RAM 12GB.\n- Chống nước IP48.\n\nBảo hành 12 tháng chính hãng Samsung Việt Nam.",
+      "weight": 400,
+      "soldCount": 88,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh Mint",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 26490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Mint",
+          "option2Value": "512GB",
+          "price": 25990000,
+          "originalPrice": 29490000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 26490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "512GB",
+          "price": 25990000,
+          "originalPrice": 29490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 26490000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "512GB",
+          "price": 25990000,
+          "originalPrice": 29490000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "galaxy-z-flip6-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "galaxy-z-flip6-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "galaxy-z-flip6-c1.webp",
+          "option1Value": "Xanh Mint"
+        },
+        {
+          "file": "galaxy-z-flip6-c2.webp",
+          "option1Value": "Vàng"
+        },
+        {
+          "file": "galaxy-z-flip6-c3.webp",
+          "option1Value": "Xám"
+        }
+      ]
+    },
+    {
+      "key": "xiaomi-14t",
+      "shop": "B",
+      "category": "Xiaomi",
+      "name": "Điện thoại Xiaomi 14T 5G",
+      "description": "Xiaomi 14T camera đồng phát triển cùng Leica, màn hình AMOLED 144Hz.\n\n- MediaTek Dimensity 8300-Ultra.\n- Camera chính 50MP cảm biến lớn, ống kính Leica Summilux.\n- Pin 5000 mAh, sạc nhanh 67W.\n\nBảo hành 18 tháng chính hãng.",
+      "weight": 400,
+      "soldCount": 203,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh",
+          "option2Value": "256GB",
+          "price": 11990000,
+          "originalPrice": 13490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh",
+          "option2Value": "512GB",
+          "price": 13490000,
+          "originalPrice": 14990000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 11990000,
+          "originalPrice": 13490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 13490000,
+          "originalPrice": 14990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xám Titan",
+          "option2Value": "256GB",
+          "price": 11990000,
+          "originalPrice": 13490000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Xám Titan",
+          "option2Value": "512GB",
+          "price": 13490000,
+          "originalPrice": 14990000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "xiaomi-14t-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "xiaomi-14t-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "xiaomi-14t-c1.webp",
+          "option1Value": "Xanh"
+        },
+        {
+          "file": "xiaomi-14t-c2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "xiaomi-14t-c3.webp",
+          "option1Value": "Xám Titan"
+        }
+      ]
+    },
+    {
+      "key": "oppo-reno12",
+      "shop": "B",
+      "category": "OPPO",
+      "name": "Điện thoại OPPO Reno12 5G 12GB/256GB",
+      "description": "OPPO Reno12 5G thiết kế mỏng nhẹ, chụp chân dung AI, màn hình cong 120Hz.\n\n- Camera chân dung 50MP, xoá vật thể bằng AI.\n- Pin 5000 mAh, sạc SUPERVOOC 80W.\n\nBảo hành 12 tháng chính hãng.",
+      "weight": 400,
+      "soldCount": 145,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Bạc Thiên Hà",
+          "option2Value": "",
+          "price": 9490000,
+          "originalPrice": 10490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Nâu",
+          "option2Value": "",
+          "price": 9490000,
+          "originalPrice": 10490000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "oppo-reno12-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "oppo-reno12-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "oppo-reno12-c1.webp",
+          "option1Value": "Bạc Thiên Hà"
+        },
+        {
+          "file": "oppo-reno12-c2.webp",
+          "option1Value": "Nâu"
+        }
+      ]
+    },
+    {
+      "key": "tai-nghe-h900",
+      "shop": "B",
+      "category": "Tai nghe",
+      "name": "Tai nghe chụp tai chống ồn SoundMax H900",
+      "description": "Tai nghe chụp tai không dây, chống ồn chủ động 4 micro, pin 40 giờ.\n\n- Driver 40 mm, hỗ trợ LDAC.\n- Gập gọn, kèm hộp đựng cứng.\n- Kết nối cùng lúc 2 thiết bị.\n\nBảo hành 12 tháng.",
+      "weight": 500,
+      "soldCount": 230,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 3290000,
+          "originalPrice": 4490000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "",
+          "price": 3290000,
+          "originalPrice": 4490000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "",
+          "price": 3290000,
+          "originalPrice": 4490000,
+          "stock": 41
+        }
+      ],
+      "images": [
+        {
+          "file": "tai-nghe-h900-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "tai-nghe-h900-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "tai-nghe-h900-c1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "tai-nghe-h900-c2.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "tai-nghe-h900-c3.webp",
+          "option1Value": "Xanh Navy"
+        }
+      ]
+    },
+    {
+      "key": "loa-go3",
+      "shop": "B",
+      "category": "Loa",
+      "name": "Loa bluetooth SoundMax Go 3",
+      "description": "Loa bluetooth chống nước IP67, âm bass mạnh, pin 12 giờ.\n\n- Ghép đôi 2 loa phát stereo.\n- Dây đeo tiện mang theo khi dã ngoại.\n\nBảo hành 12 tháng.",
+      "weight": 600,
+      "soldCount": 412,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 990000,
+          "originalPrice": 1290000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Đỏ",
+          "option2Value": "",
+          "price": 990000,
+          "originalPrice": 1290000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Xanh",
+          "option2Value": "",
+          "price": 990000,
+          "originalPrice": 1290000,
+          "stock": 41
+        }
+      ],
+      "images": [
+        {
+          "file": "loa-go3-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "loa-go3-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "loa-go3-c1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "loa-go3-c2.webp",
+          "option1Value": "Đỏ"
+        },
+        {
+          "file": "loa-go3-c3.webp",
+          "option1Value": "Xanh"
+        }
+      ]
+    },
+    {
+      "key": "sac-du-phong-20000",
+      "shop": "B",
+      "category": "Sạc dự phòng",
+      "name": "Sạc dự phòng 20000mAh 22.5W",
+      "description": "Pin dự phòng 20000 mAh, sạc nhanh 22,5W, 2 cổng USB-A + 1 cổng USB-C.\n\n- Sạc đầy iPhone khoảng 4 lần.\n- Đèn báo dung lượng 4 mức.\n\nBảo hành 12 tháng.",
+      "weight": 500,
+      "soldCount": 867,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 450000,
+          "originalPrice": 650000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "",
+          "price": 450000,
+          "originalPrice": 650000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "sac-du-phong-20000-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "sac-du-phong-20000-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "sac-du-phong-20000-c1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "sac-du-phong-20000-c2.webp",
+          "option1Value": "Trắng"
+        }
+      ]
+    },
+    {
+      "key": "ao-thun-basic",
+      "shop": "B",
+      "category": "Thời trang nam",
+      "name": "Áo thun nam cotton Basic cổ tròn",
+      "description": "Áo thun 100% cotton 250gsm, dày dặn, thấm hút mồ hôi, form regular dễ mặc.\n\nBảng size (chiều cao / cân nặng)\n- S: 1m60–1m65, 50–57 kg\n- M: 1m65–1m70, 57–64 kg\n- L: 1m70–1m75, 64–72 kg\n- XL: 1m75–1m82, 72–80 kg\n\nGiặt máy ở chế độ nhẹ, không dùng thuốc tẩy.",
+      "weight": 250,
+      "soldCount": 1530,
+      "option1Name": "Màu sắc",
+      "option2Name": "Size",
+      "variants": [
+        {
+          "option1Value": "Trắng",
+          "option2Value": "S",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "M",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "L",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "XL",
+          "price": 219000,
+          "originalPrice": 279000,
+          "stock": 6
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "S",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "M",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "L",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "XL",
+          "price": 219000,
+          "originalPrice": 279000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "S",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "M",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "L",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "XL",
+          "price": 219000,
+          "originalPrice": 279000,
+          "stock": 14
+        },
+        {
+          "option1Value": "Be",
+          "option2Value": "S",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Be",
+          "option2Value": "M",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Be",
+          "option2Value": "L",
+          "price": 199000,
+          "originalPrice": 259000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Be",
+          "option2Value": "XL",
+          "price": 219000,
+          "originalPrice": 279000,
+          "stock": 35
+        }
+      ],
+      "images": [
+        {
+          "file": "ao-thun-basic-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "ao-thun-basic-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "ao-thun-basic-c1.webp",
+          "option1Value": "Trắng"
+        },
+        {
+          "file": "ao-thun-basic-c2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "ao-thun-basic-c3.webp",
+          "option1Value": "Xanh Navy"
+        },
+        {
+          "file": "ao-thun-basic-c4.webp",
+          "option1Value": "Be"
+        }
+      ]
+    },
+    {
+      "key": "tui-tote-canvas",
+      "shop": "B",
+      "category": "Túi xách",
+      "name": "Túi tote vải canvas có khoá kéo",
+      "description": "Túi tote canvas dày, có khoá kéo và ngăn nhỏ bên trong, vừa laptop 14 inch.\n\nKích thước: 38 × 33 × 10 cm.",
+      "weight": 300,
+      "soldCount": 640,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Kem",
+          "option2Value": "",
+          "price": 159000,
+          "originalPrice": 199000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 159000,
+          "originalPrice": 199000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "tui-tote-canvas-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "tui-tote-canvas-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "tui-tote-canvas-c1.webp",
+          "option1Value": "Kem"
+        },
+        {
+          "file": "tui-tote-canvas-c2.webp",
+          "option1Value": "Đen"
+        }
+      ]
+    },
+    {
+      "key": "binh-giu-nhiet",
+      "shop": "B",
+      "category": "Đồ dùng nhà bếp",
+      "name": "Bình giữ nhiệt inox 316 500ml",
+      "description": "Bình giữ nhiệt 2 lớp inox 316, giữ nóng 12 giờ, giữ lạnh 24 giờ.\n\n- Nắp chống tràn, không mùi.\n- Dung tích 500 ml, vừa hộc để ly ô tô.",
+      "weight": 450,
+      "soldCount": 905,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Xanh Rêu",
+          "option2Value": "",
+          "price": 249000,
+          "originalPrice": 319000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Kem",
+          "option2Value": "",
+          "price": 249000,
+          "originalPrice": 319000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 249000,
+          "originalPrice": 319000,
+          "stock": 41
+        }
+      ],
+      "images": [
+        {
+          "file": "binh-giu-nhiet-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "binh-giu-nhiet-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "binh-giu-nhiet-c1.webp",
+          "option1Value": "Xanh Rêu"
+        },
+        {
+          "file": "binh-giu-nhiet-c2.webp",
+          "option1Value": "Kem"
+        },
+        {
+          "file": "binh-giu-nhiet-c3.webp",
+          "option1Value": "Đen"
+        }
+      ]
+    },
+    {
+      "key": "chao-chong-dinh",
+      "shop": "B",
+      "category": "Đồ dùng nhà bếp",
+      "name": "Chảo chống dính đáy từ",
+      "description": "Chảo chống dính phủ đá 5 lớp, đáy từ dùng được mọi loại bếp.\n\n- Tay cầm cách nhiệt.\n- Không chứa PFOA.",
+      "weight": 1200,
+      "soldCount": 318,
+      "option1Name": "Kích cỡ",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "24cm",
+          "option2Value": "",
+          "price": 289000,
+          "originalPrice": null,
+          "stock": 35
+        },
+        {
+          "option1Value": "26cm",
+          "option2Value": "",
+          "price": 319000,
+          "originalPrice": null,
+          "stock": 9
+        },
+        {
+          "option1Value": "28cm",
+          "option2Value": "",
+          "price": 349000,
+          "originalPrice": null,
+          "stock": 41
+        }
+      ],
+      "images": [
+        {
+          "file": "chao-chong-dinh-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "chao-chong-dinh-2.webp",
+          "option1Value": null
+        }
+      ]
+    },
+    {
+      "key": "den-ban-trang-tri",
+      "shop": "B",
+      "category": "Trang trí",
+      "name": "Đèn bàn trang trí chao vải",
+      "description": "Đèn bàn chân kim loại mạ vàng, chao vải, ánh sáng vàng ấm dễ chịu.\n\nKèm bóng LED 7W. Cao 45 cm.",
+      "weight": 1500,
+      "soldCount": 96,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Trắng Kem",
+          "option2Value": "",
+          "price": 420000,
+          "originalPrice": 500000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "",
+          "price": 420000,
+          "originalPrice": 500000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "den-ban-trang-tri-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "den-ban-trang-tri-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "den-ban-trang-tri-c1.webp",
+          "option1Value": "Trắng Kem"
+        },
+        {
+          "file": "den-ban-trang-tri-c2.webp",
+          "option1Value": "Xanh Navy"
+        }
+      ]
+    },
+    {
+      "key": "serum-ha",
+      "shop": "B",
+      "category": "Chăm sóc da",
+      "name": "Serum cấp ẩm Hyaluronic Acid B5",
+      "description": "Serum HA đa phân tử kết hợp B5, cấp ẩm sâu, làm dịu da.\n\nDùng sáng và tối sau bước toner. Phù hợp mọi loại da.",
+      "weight": 150,
+      "soldCount": 1120,
+      "option1Name": "Dung tích",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "30ml",
+          "option2Value": "",
+          "price": 320000,
+          "originalPrice": 370000,
+          "stock": 35
+        },
+        {
+          "option1Value": "50ml",
+          "option2Value": "",
+          "price": 450000,
+          "originalPrice": 500000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "serum-ha-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "serum-ha-2.webp",
+          "option1Value": null
+        }
+      ]
+    },
+    {
+      "key": "nuoc-hoa-noir",
+      "shop": "B",
+      "category": "Nước hoa",
+      "name": "Nước hoa Noir Eau de Parfum",
+      "description": "Hương gỗ ấm: cam bergamot, hoa nhài, gỗ đàn hương và hổ phách.\n\nĐộ lưu hương 6–8 giờ.",
+      "weight": 400,
+      "soldCount": 77,
+      "option1Name": "Dung tích",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "50ml",
+          "option2Value": "",
+          "price": 1290000,
+          "originalPrice": 1590000,
+          "stock": 35
+        },
+        {
+          "option1Value": "100ml",
+          "option2Value": "",
+          "price": 1890000,
+          "originalPrice": 2190000,
+          "stock": 9
+        }
+      ],
+      "images": [
+        {
+          "file": "nuoc-hoa-noir-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "nuoc-hoa-noir-2.webp",
+          "option1Value": null
+        }
+      ]
+    }
+  ]
+}

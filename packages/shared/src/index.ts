@@ -14,3 +14,4 @@ export type ServiceName = (typeof SERVICES)[keyof typeof SERVICES];
 export * from './auth';
 export * from './http';
 export * from './events';
+export * from './demo';

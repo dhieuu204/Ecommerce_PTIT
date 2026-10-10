@@ -19,7 +19,8 @@
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "app:up": "docker compose -f infra/docker-compose.yml --profile app up -d --build",
     "app:down": "docker compose -f infra/docker-compose.yml --profile app down",
-    "postinstall": "pnpm --filter \"./packages/**\" build"
+    "postinstall": "pnpm --filter \"./packages/**\" build",
+    "seed:demo": "pnpm --filter @san/user-service seed:demo && pnpm --filter @san/approval-service seed:demo && pnpm --filter @san/marketplace-service seed:demo"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
