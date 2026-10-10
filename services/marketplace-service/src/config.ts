@@ -34,4 +34,9 @@ export class AppConfig {
 
   /** Logo shop tối đa (MB) */
   readonly logoMaxMb = num('SHOP_LOGO_MAX_MB', 2);
+
+  /** Giỏ hàng tối đa bao nhiêu dòng (CRT-01) */
+  readonly cartMaxItems = num('CART_MAX_ITEMS', 100);
+  /** Voucher dài tối đa bao nhiêu ngày (VCH-01) */
+  readonly voucherMaxDays = num('VOUCHER_MAX_DAYS', 180);
 }

@@ -219,10 +219,10 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/cart` | Đã đăng nhập | CRT-01 | Giỏ chia theo shop. Mỗi dòng có ảnh (ưu tiên ảnh theo màu), tên, lựa chọn, giá hiện tại, giá gốc, số còn bán được, `selected` và `state`: `OK`, `NOT_ENOUGH_STOCK` (số lượng trong giỏ > còn bán được), `OUT_OF_STOCK`, `UNAVAILABLE` (sản phẩm ẩn, biến thể bị bỏ hoặc shop bị đình chỉ). Kèm tổng tiền của các dòng đang chọn có `state = OK`. Giá trong giỏ luôn là giá hiện tại; checkout (P3) kiểm lại lần nữa. |
+| GET `/cart` | Đã đăng nhập | CRT-01 | Giỏ chia theo shop. Mỗi dòng có ảnh (ưu tiên ảnh theo màu), tên, lựa chọn, giá hiện tại, giá gốc, số còn bán được, `selected` và `state`: `OK`, `NOT_ENOUGH_STOCK` (số lượng trong giỏ > còn bán được), `OUT_OF_STOCK`, `UNAVAILABLE` (sản phẩm ẩn, biến thể bị bỏ hoặc shop bị đình chỉ). Kèm tổng tiền (`selectedTotal`) và số dòng (`selectedCount`) của các dòng đang chọn có `state = OK`. Nhóm shop có dòng mới thêm gần nhất đứng trước, trong nhóm dòng mới thêm trước. Giá trong giỏ luôn là giá hiện tại; checkout (P3) kiểm lại lần nữa. |
 | GET `/cart/count` | Đã đăng nhập | CRT-01 | `{ count }` = số dòng trong giỏ, cho biểu tượng giỏ trên header. |
-| POST `/cart/items` | Đã đăng nhập | CRT-01 | `variantId`, `quantity`. Đã có dòng của biến thể đó thì cộng thêm. Tổng vượt số còn bán được → 409 `NOT_ENOUGH_STOCK` kèm `details.available`; hàng không còn bán → 409 `PRODUCT_UNAVAILABLE`; hàng của shop mình → 409 `OWN_PRODUCT`; giỏ đã đủ 100 dòng → 409 `CART_FULL`. |
-| PATCH `/cart/items/{itemId}` | Đã đăng nhập | CRT-01 | Đổi `quantity` (≥ 1, kiểm như trên), `selected`, hoặc đổi sang biến thể khác của cùng sản phẩm (`variantId`; trùng dòng có sẵn thì gộp). Dòng của người khác → 404. |
+| POST `/cart/items` | Đã đăng nhập | CRT-01 | `variantId`, `quantity`. Đã có dòng của biến thể đó thì cộng thêm. Tổng vượt số còn bán được → 409 `NOT_ENOUGH_STOCK` kèm `details.available`; hàng không còn bán → 409 `PRODUCT_UNAVAILABLE`; hàng của shop mình → 409 `OWN_PRODUCT`; giỏ đã đủ 100 dòng → 409 `CART_FULL`; biến thể không có → 404. Trả `{ itemId, quantity, count }`. |
+| PATCH `/cart/items/{itemId}` | Đã đăng nhập | CRT-01 | Đổi `quantity` (≥ 1, kiểm như trên), `selected`, hoặc đổi sang biến thể khác của cùng sản phẩm (`variantId`; trùng dòng có sẵn thì gộp; biến thể của sản phẩm khác → 400 `INVALID_VARIANT`). Dòng của người khác → 404. Trả giỏ mới (như GET `/cart`); DELETE và hai API dưới cũng vậy. |
 | DELETE `/cart/items/{itemId}` | Đã đăng nhập | CRT-01 | |
 | POST `/cart/selection` | Đã đăng nhập | CRT-01 | `{ itemIds, selected }`: chọn/bỏ chọn nhiều dòng (cả shop, cả giỏ). |
 | POST `/cart/items/remove` | Đã đăng nhập | CRT-01 | `{ itemIds }`: xóa nhiều dòng một lần (nút "Xóa các mục đã chọn", "Xóa hàng không còn bán"). |
@@ -233,22 +233,22 @@ P2 (hàng và giỏ): SHP-04, CAT-01..04, INV-01, SRC-01, CRT-01, VCH-01. Mục 
 | --- | --- | --- | --- |
 | GET, POST `/shops/me/vouchers` | Chủ shop | VCH-01 | Danh sách lọc theo `state` (`UPCOMING` sắp diễn ra, `RUNNING` đang chạy, `ENDED` đã kết thúc; tính từ thời gian, không lưu). Tạo: `code` (4–20 chữ in hoa hoặc số, không trùng mã nào trên sàn → 409 `VOUCHER_CODE_TAKEN`), `name`, `discountType` = `AMOUNT` (giảm số tiền) hoặc `PERCENT` (giảm %, 1–90, bắt buộc `maxDiscount`), `value`, `minOrder`, `startAt` (từ bây giờ trở đi), `endAt` (sau `startAt`, dài tối đa 180 ngày), `quantity`, `perUserLimit`. Voucher shop do shop chịu. |
 | PUT `/shops/me/vouchers/{voucherId}` | Chủ shop | VCH-01 | Chưa bắt đầu: sửa mọi trường. Đang chạy: chỉ lùi `endAt` về sau và tăng `quantity`, đổi trường khác → 409 `VOUCHER_STARTED`. Đã kết thúc → 409 `VOUCHER_ENDED`. |
-| POST `/shops/me/vouchers/{voucherId}/end` | Chủ shop | VCH-01 | Kết thúc sớm (đặt `endAt` = bây giờ). |
-| DELETE `/shops/me/vouchers/{voucherId}` | Chủ shop | VCH-01 | Chỉ xóa voucher chưa bắt đầu (409 `VOUCHER_STARTED`). |
+| POST `/shops/me/vouchers/{voucherId}/end` | Chủ shop | VCH-01 | Kết thúc sớm (đặt `endAt` = bây giờ; voucher chưa bắt đầu thì `startAt` cũng về bây giờ). Đã kết thúc → 409 `VOUCHER_ENDED`. |
+| DELETE `/shops/me/vouchers/{voucherId}` | Chủ shop | VCH-01 | Chỉ xóa voucher chưa bắt đầu (đang chạy → 409 `VOUCHER_STARTED`, đã kết thúc → 409 `VOUCHER_ENDED`). |
 | GET, POST `/admin/vouchers`; PUT, DELETE `/admin/vouchers/{voucherId}`; POST `/admin/vouchers/{voucherId}/end` | `FINANCE` | VCH-01 | Voucher sàn (`shop_id` trống), cùng quy tắc như voucher shop. Sàn chịu chi phí. Ghi nhật ký. |
 
 **Shop (admin)**
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/admin/shops` | `MODERATION` | SHP-04 | Lọc `status`, `q` (tên shop), phân trang: tên, chủ shop, trạng thái, số sản phẩm, ngày duyệt, lý do đình chỉ. |
-| GET `/admin/shops/{shopId}` | `MODERATION` | SHP-04 | Thông tin shop đang dùng + số sản phẩm theo trạng thái. Lịch sử đình chỉ lấy từ approval-service. |
+| GET `/admin/shops` | `MODERATION` | SHP-04 | Chỉ shop đã duyệt (`ACTIVE`, `SUSPENDED`). Lọc `status`, `q` (tên shop), phân trang, mới nhất trước: tên, logo, mã chủ shop (`ownerId`; marketplace không lưu tên chủ shop), trạng thái, số sản phẩm, ngày duyệt, lý do đình chỉ. |
+| GET `/admin/shops/{shopId}` | `MODERATION` | SHP-04 | Thông tin shop đang dùng (số tài khoản chỉ hiện 4 số cuối) + số sản phẩm theo trạng thái. Shop chưa duyệt → 404. Lịch sử đình chỉ lấy từ approval-service. |
 
 ### approval-service (`/api/approval/v1`)
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| POST `/admin/shops/{shopId}/suspend` | `MODERATION` | SHP-04 | `reason` bắt buộc. approval-service biết shop qua hồ sơ đã duyệt (bảng `shop_approvals`), không gọi sang marketplace: shop chưa từng được duyệt → 404. Admin là chủ shop → 403 `SELF_MODERATION_FORBIDDEN`. Đang bị đình chỉ → 409 `ALREADY_SUSPENDED`. Lưu một dòng `violations`, phát `shop_suspension.decided`, ghi nhật ký. |
+| POST `/admin/shops/{shopId}/suspend` | `MODERATION` | SHP-04 | `reason` bắt buộc (5–500 ký tự). approval-service biết shop qua hồ sơ đã duyệt (bảng `shop_approvals`), không gọi sang marketplace: shop chưa từng được duyệt → 404. Admin là chủ shop → 403 `SELF_MODERATION_FORBIDDEN`. Đang bị đình chỉ → 409 `ALREADY_SUSPENDED`. Lưu một dòng `violations`, phát `shop_suspension.decided`, ghi nhật ký (cùng một giao dịch, khóa theo shop nên hai admin bấm cùng lúc chỉ một người được). Trả như GET `violations`. |
 | POST `/admin/shops/{shopId}/restore` | `MODERATION` | SHP-04 | Như trên; shop không bị đình chỉ → 409 `NOT_SUSPENDED`. |
 | GET `/admin/shops/{shopId}/violations` | `MODERATION` | SHP-04 | Lịch sử đình chỉ/khôi phục của shop, mới nhất lên đầu, kèm trạng thái hiện tại (`suspended`). |
 

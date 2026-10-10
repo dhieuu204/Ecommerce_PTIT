@@ -139,7 +139,8 @@ export class ShopsService implements OnModuleInit {
     try {
       await this.prisma.$transaction(async (tx) => {
         const existing = await tx.shop.findUnique({ where: { ownerId: user.id } });
-        if (existing?.status === 'ACTIVE') {
+        // Shop bị đình chỉ cũng đã được duyệt: không nộp lại hồ sơ mở shop để thoát đình chỉ
+        if (existing?.status === 'ACTIVE' || existing?.status === 'SUSPENDED') {
           throw new AppError(409, 'SHOP_ALREADY_ACTIVE', 'Shop của bạn đã hoạt động.');
         }
         await this.ensureNameFree(tx, dto.name, existing?.id);

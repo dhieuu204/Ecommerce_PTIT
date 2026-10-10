@@ -6,6 +6,9 @@ import { LocationsModule } from './locations/locations.module';
 import { PrismaService } from './prisma.service';
 import { ShopsModule } from './shops/shops.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { CartModule } from './cart/cart.module';
+import { ShopAdminModule } from './shop-admin/shop-admin.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -22,6 +25,9 @@ import { UploadsModule } from './uploads/uploads.module';
     LocationsModule,
     UploadsModule,
     ShopsModule,
+    ShopAdminModule,
+    CartModule,
+    VouchersModule,
   ],
   controllers: [HealthController],
 })
