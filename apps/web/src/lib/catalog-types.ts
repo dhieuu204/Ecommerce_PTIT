@@ -123,8 +123,9 @@ export interface CartItem {
   image: string | null;
   option1Name: string | null;
   option2Name: string | null;
-  option1Value: string | null;
-  option2Value: string | null;
+  /** '' nếu sản phẩm không có nhóm đó */
+  option1Value: string;
+  option2Value: string;
   price: number;
   originalPrice: number | null;
   /** Số còn bán được (0 nếu không còn bán) */
