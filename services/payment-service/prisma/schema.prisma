@@ -1,5 +1,5 @@
 // Schema của payment-service [P]. Chỉ service này được đọc/ghi database payment_db.
-// P1 chưa có bảng nghiệp vụ (bắt đầu từ P3). Khung các phase sau: docs/erd/README.md.
+// P3: thu tiền VNPay, hoàn tiền, tiền seller của mỗi đơn con. Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,6 +10,173 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ===== Thu tiền, hoàn tiền (P3) =====
+
+enum EarningStatus {
+  /// Đơn chưa trả
+  UNPAID
+  /// Đã thu tiền, đang giữ (P4 chuyển sang khả dụng khi đơn hoàn tất)
+  HELD
+  /// Hết hạn thanh toán, không có tiền
+  EXPIRED
+  /// Đơn con bị hủy (nếu đã thu thì có khoản hoàn)
+  CANCELLED
+}
+
+/// Tiền của mỗi đơn con (PAY-04, FIN-03): buyer trả bao nhiêu, phí sàn, seller nhận bao nhiêu.
+/// Cũng là bản chép đơn nhận qua sự kiện order.placed để biết số tiền cần thu
+model SellerEarning {
+  id               String        @id @default(uuid()) @db.Uuid
+  orderId          String        @map("order_id") @db.Uuid
+  orderCode        String        @map("order_code") @db.VarChar(20)
+  shopOrderId      String        @unique @map("shop_order_id") @db.Uuid
+  shopOrderCode    String        @map("shop_order_code") @db.VarChar(24)
+  shopId           String        @map("shop_id") @db.Uuid
+  /// Người mua (userId)
+  buyerId          String        @map("buyer_id") @db.Uuid
+  subtotal         Int
+  shopDiscount     Int           @map("shop_discount")
+  /// Phần voucher sàn (sàn chịu, không trừ vào tiền seller)
+  platformDiscount Int           @map("platform_discount")
+  shippingFee      Int           @map("shipping_fee")
+  /// Buyer trả cho đơn con = subtotal - shopDiscount - platformDiscount + shippingFee
+  buyerPaid        Int           @map("buyer_paid")
+  /// Phí sàn theo phần vạn (500 = 5%), chụp lúc nhận đơn
+  platformFeeRate  Int           @map("platform_fee_rate")
+  platformFee      Int           @map("platform_fee")
+  /// Seller nhận = subtotal - shopDiscount - platformFee
+  sellerAmount     Int           @map("seller_amount")
+  status           EarningStatus @default(UNPAID)
+  payBefore        DateTime      @map("pay_before") @db.Timestamptz(3)
+  paidAt           DateTime?     @map("paid_at") @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([orderId])
+  @@index([status, payBefore])
+  @@map("seller_earnings")
+}
+
+enum Gateway {
+  VNPAY
+  /// Cổng mô phỏng khi chưa có khóa VNPay
+  MOCK
+}
+
+enum PaymentStatus {
+  /// Đã tạo link, chờ kết quả
+  PENDING
+  SUCCEEDED
+  FAILED
+  /// Chưa rõ kết quả: không tạo lần mới, job tra cứu
+  UNKNOWN
+}
+
+/// Mỗi lần thanh toán VNPay của một đơn tổng (PAY-01..03), tối đa 3 lần
+model Payment {
+  id              String        @id @default(uuid()) @db.Uuid
+  orderId         String        @map("order_id") @db.Uuid
+  attempt         Int
+  /// = vnp_TxnRef, mã giao dịch riêng của mỗi lần
+  ref             String        @unique @db.VarChar(40)
+  /// Idempotency-Key của lần bấm "Thanh toán"
+  requestKey      String        @unique @map("request_key") @db.VarChar(64)
+  gateway         Gateway
+  amount          Int
+  payUrl          String        @map("pay_url") @db.VarChar(2000)
+  status          PaymentStatus @default(PENDING)
+  /// Tiền được áp vào đơn; false + SUCCEEDED = trả muộn/trả trùng, đã tạo khoản hoàn
+  applied         Boolean       @default(false)
+  transactionNo   String?       @map("transaction_no") @db.VarChar(40)
+  bankCode        String?       @map("bank_code") @db.VarChar(20)
+  paidAt          DateTime?     @map("paid_at") @db.Timestamptz(3)
+  /// IP người mua (VNPay yêu cầu vnp_IpAddr)
+  clientIp        String        @map("client_ip") @db.VarChar(45)
+  /// Dữ liệu VNPay gửi/trả gần nhất (không chứa khóa bí mật)
+  gatewayResponse Json?         @map("gateway_response")
+  /// Lần tra cứu gần nhất
+  checkedAt       DateTime?     @map("checked_at") @db.Timestamptz(3)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  refunds Refund[]
+
+  @@unique([orderId, attempt])
+  @@map("payments")
+}
+
+enum RefundReason {
+  /// Đơn con bị hủy sau khi đã trả
+  CANCELLED
+  /// Tiền về sau khi đơn đã hết hạn/hủy
+  LATE_PAYMENT
+  /// Đơn đã được trả bằng lần khác
+  DUPLICATE_PAYMENT
+}
+
+enum RefundStatus {
+  /// Chờ gửi lệnh
+  PENDING
+  /// Lỗi, chờ thử lại theo lịch
+  FAILED
+  /// Đã gửi lệnh nhưng chưa rõ kết quả: tra cứu, không gửi lại mù quáng
+  UNKNOWN
+  /// Thử đủ số lần vẫn lỗi: chờ admin tài chính hoàn tay
+  NEEDS_MANUAL
+  SUCCEEDED
+  /// Admin đã chuyển khoản tay, có chứng từ
+  MANUAL_DONE
+}
+
+/// Hoàn tiền cho buyer (REF-01). Mỗi đơn con tối đa một khoản hoàn ở P3
+model Refund {
+  id              String       @id @default(uuid()) @db.Uuid
+  paymentId       String       @map("payment_id") @db.Uuid
+  orderId         String       @map("order_id") @db.Uuid
+  /// Trống = hoàn cả khoản trả muộn/trả trùng
+  shopOrderId     String?      @unique @map("shop_order_id") @db.Uuid
+  amount          Int
+  reason          RefundReason
+  status          RefundStatus @default(PENDING)
+  /// Số lần đã gửi lệnh hoàn qua cổng
+  tries           Int          @default(0)
+  nextTryAt       DateTime?    @map("next_try_at") @db.Timestamptz(3)
+  /// Mã lệnh hoàn gần nhất (vnp_RequestId), mỗi lần gửi một mã
+  requestId       String?      @map("request_id") @db.VarChar(40)
+  lastError       String?      @map("last_error") @db.VarChar(500)
+  gatewayResponse Json?        @map("gateway_response")
+  // Hoàn tay
+  transferCode    String?      @map("transfer_code") @db.VarChar(60)
+  receiptKey      String?      @map("receipt_key") @db.VarChar(200)
+  manualNote      String?      @map("manual_note") @db.VarChar(500)
+  /// Admin tài chính hoàn tay (userId)
+  manualBy        String?      @map("manual_by") @db.Uuid
+  completedAt     DateTime?    @map("completed_at") @db.Timestamptz(3)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  @@index([status, nextTryAt])
+  @@index([orderId])
+  @@map("refunds")
+}
+
+/// Cấu hình có phiên bản (ADM-01): phí sàn, số lần thanh toán, số lần thử hoàn. Phiên bản lớn nhất đang dùng
+model Setting {
+  key           String   @db.VarChar(64)
+  version       Int
+  value         Int
+  effectiveFrom DateTime @default(now()) @map("effective_from") @db.Timestamptz(3)
+  /// Admin sửa (userId)
+  createdBy     String?  @map("created_by") @db.Uuid
+  createdByName String?  @map("created_by_name") @db.VarChar(100)
+  reason        String?  @db.VarChar(500)
+
+  @@id([key, version])
+  @@map("settings")
 }
 
 // ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====

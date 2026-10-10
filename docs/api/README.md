@@ -349,7 +349,7 @@ Mỗi service có cùng 3 API (code chung `SettingsModule` trong `packages/nest-
 | GET `/webhooks/vnpay/ipn` | VNPay (công khai) | PAY-02, PAY-03 | Kiểm chữ ký, mã giao dịch, số tiền rồi mới ghi; trả `{ RspCode, Message }` theo tài liệu VNPay (`00` xác nhận, `01` không có giao dịch, `02` đã xử lý, `04` sai số tiền, `97` sai chữ ký). Gửi trùng → `02`, không ghi lại. |
 | GET, POST `/mock-gateway/payments/{ref}` | Trang mô phỏng (công khai) | PAY-01 | **Chỉ khi chạy MÔ PHỎNG** (có khóa VNPay → 404). GET: số tiền, mã đơn. POST `{ result: SUCCESS \| FAILED \| PAID_NO_NOTICE }`: như VNPay báo thành công/thất bại, hoặc "trả tiền nhưng mất tin báo" để job tra cứu tự tìm ra. Trả `{ returnUrl }` để web chuyển buyer về trang kết quả. |
 | GET `/admin/orders/{orderId}/payments` | `SUPPORT`, `FINANCE` | PAY-04, REF-01 | Các lần thanh toán, phân bổ tiền từng đơn con (buyer trả, phí sàn, seller nhận), các khoản hoàn. |
-| GET `/admin/refunds` | `FINANCE` | REF-01 | Lọc `status` (`PENDING`, `FAILED`, `UNKNOWN`, `NEEDS_MANUAL`, `SUCCEEDED`, `MANUAL_DONE`), phân trang. Mặc định khoản cần hoàn tay lên đầu. |
+| GET `/admin/refunds` | `FINANCE` | REF-01 | Lọc `status` (`PENDING`, `FAILED`, `UNKNOWN`, `NEEDS_MANUAL`, `SUCCEEDED`, `MANUAL_DONE`), phân trang, mới nhất trước (trang admin mở sẵn lọc `NEEDS_MANUAL`). |
 | POST `/admin/uploads/refund-receipt` | `FINANCE` | REF-01 | Ảnh biên lai (JPG/PNG/WebP, tối đa 5 MB) lưu bucket riêng tư, trả `{ key }`. |
 | GET `/admin/refunds/{refundId}/receipt` | `FINANCE` | REF-01 | Xem ảnh biên lai. |
 | POST `/admin/refunds/{refundId}/manual` | `FINANCE` | REF-01 | `{ transferCode, receiptKey, note? }`. Chỉ khoản `NEEDS_MANUAL` → `MANUAL_DONE`, phát `refund.updated`, ghi nhật ký. Khác → 409 `REFUND_NOT_MANUAL`. |

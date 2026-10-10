@@ -92,6 +92,8 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio12345}
       PUBLIC_FILE_URL: http://localhost:9000
+      USER_API_URL: http://user-service:3001/api/user/v1
+      PAYMENT_API_URL: http://payment-service:3003/api/payment/v1
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -108,9 +110,15 @@ services:
       DATABASE_URL: postgresql://payment_svc:payment_svc@postgres:5432/payment_db?schema=public
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
       JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
+      WEB_URL: http://localhost:${WEB_PORT:-8080}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio12345}
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
+      minio: { condition: service_started }
     restart: unless-stopped
 
   approval-service:

@@ -131,7 +131,7 @@ Sơ đồ: `docs/so-do/11-erd-p-payment-service`
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `payments` | P3 | id<br>order_id ↗M, attempt (1..3, không trùng theo đơn)<br>ref (= `vnp_TxnRef`, không trùng), request_key (Idempotency-Key, không trùng)<br>gateway: VNPAY \| MOCK<br>amount, pay_url<br>status: PENDING \| SUCCEEDED \| FAILED \| UNKNOWN<br>applied (tiền được áp vào đơn; false = trả muộn/trùng, phải hoàn)<br>transaction_no, bank_code, paid_at<br>gateway_response, checked_at | Mỗi lần thanh toán VNPay |
+| `payments` | P3 | id<br>order_id ↗M, attempt (1..3, không trùng theo đơn)<br>ref (= `vnp_TxnRef`, không trùng), request_key (Idempotency-Key, không trùng)<br>gateway: VNPAY | MOCK<br>amount, pay_url, client_ip<br>\| MOCK<br>amount, pay_url<br>status: PENDING \| SUCCEEDED \| FAILED \| UNKNOWN<br>applied (tiền được áp vào đơn; false = trả muộn/trùng, phải hoàn)<br>transaction_no, bank_code, paid_at<br>gateway_response, checked_at | Mỗi lần thanh toán VNPay |
 | `refunds` | P3 | id<br>payment_id → payments<br>order_id ↗M, shop_order_id? ↗M (không trùng; trống = hoàn cả khoản trả muộn/trùng)<br>amount, reason: CANCELLED \| LATE_PAYMENT \| DUPLICATE_PAYMENT<br>status: PENDING \| FAILED \| UNKNOWN \| NEEDS_MANUAL \| SUCCEEDED \| MANUAL_DONE<br>tries, next_try_at, request_id (mã lệnh hoàn gần nhất), last_error, gateway_response<br>transfer_code, receipt_key, manual_note, manual_by ↗U (hoàn tay)<br>completed_at<br>return_id? ↗M (P5) | Hoàn tiền |
 | `settings` | P3 | Như `settings` của marketplace | Phí sàn (500 = 5%), số lần thanh toán, số lần thử hoàn |
 
