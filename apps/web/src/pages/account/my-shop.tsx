@@ -8,6 +8,7 @@ import {
   Hourglass,
   Landmark,
   Info,
+  ShieldAlert,
   Percent,
   Store,
   Truck,
@@ -29,6 +30,7 @@ import { describeChange, ShopLogo, ShopSummary } from './shop-parts';
 /**
  * Shop của tôi (SHP-01, SHP-02; màn hình H2): nội dung đổi theo trạng thái GET /shops/me.
  * NONE: mời mở shop · PENDING: chờ duyệt · REJECTED: lý do + sửa và nộp lại · ACTIVE: vào Kênh người bán.
+ * SUSPENDED: admin đình chỉ (P2): lý do + vẫn vào Kênh người bán để sửa hàng.
  */
 export function MyShopPage() {
   const shop = useMyShop();
@@ -70,6 +72,8 @@ export function MyShopPage() {
       return <RejectedCard data={data} />;
     case 'ACTIVE':
       return <ActiveCard data={data} />;
+    case 'SUSPENDED':
+      return <SuspendedCard data={data} />;
     default:
       return (
         <AccountCard title="Shop của tôi">
@@ -395,6 +399,53 @@ function ActiveCard({ data }: { data: MyShop }) {
             </span>
           }
         >
+          <ShopSummary shop={shop} />
+        </AccountCard>
+      )}
+    </div>
+  );
+}
+
+/** Shop bị admin đình chỉ (SHP-04): hàng tạm ẩn khỏi sàn, seller vẫn quản lý được hàng và voucher */
+function SuspendedCard({ data }: { data: MyShop }) {
+  const shop = data.shop;
+  return (
+    <div className="space-y-6">
+      <AccountCard title="Shop của tôi" description="Shop của bạn đang tạm ngừng bán.">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <ShopLogo url={shop?.logoUrl ?? null} className="size-20" />
+          <div className="min-w-0 flex-1">
+            <StatusBadge tone="pending">Bị đình chỉ</StatusBadge>
+            <h2 className="mt-2 text-lg font-semibold break-words text-navy md:text-xl">
+              {shop?.name ?? 'Shop của bạn'} đang bị đình chỉ
+            </h2>
+            <div className="mt-3 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-700" />
+              <div className="min-w-0 space-y-1">
+                <p className="font-medium">Hàng của bạn tạm ẩn khỏi sàn.</p>
+                {shop?.suspendReason && (
+                  <p className="break-words">
+                    <span className="font-medium">Lý do:</span> {shop.suspendReason}
+                  </p>
+                )}
+                <p className="text-amber-900/80">
+                  Bạn vẫn sửa được sản phẩm, tồn kho và voucher trong Kênh người bán. Hàng hiện lại
+                  khi admin khôi phục shop.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+              <Button asChild className={primaryBtn}>
+                <Link to="/kenh-nguoi-ban">
+                  Vào Kênh người bán <ArrowRight />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AccountCard>
+      {shop && (
+        <AccountCard title="Thông tin shop">
           <ShopSummary shop={shop} />
         </AccountCard>
       )}

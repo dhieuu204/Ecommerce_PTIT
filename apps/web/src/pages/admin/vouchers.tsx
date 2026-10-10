@@ -1,4 +1,6 @@
-/** TẠM: trang khung, sẽ được thay bằng trang thật (Voucher sàn) */
+import { VoucherManager } from '@/components/vouchers/voucher-manager';
+
+/** Quản trị › Voucher sàn (VCH-01, bộ quyền FINANCE): sàn chịu phần tiền giảm, mọi thay đổi ghi nhật ký */
 export function AdminVouchersPage() {
-  return <div className="p-8 text-ink/60">Voucher sàn</div>;
+  return <VoucherManager kind="platform" />;
 }

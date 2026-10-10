@@ -1,4 +1,6 @@
-/** TẠM: trang khung, sẽ được thay bằng trang thật (Voucher của shop) */
+import { VoucherManager } from '@/components/vouchers/voucher-manager';
+
+/** Kênh người bán › Voucher của shop (VCH-01): shop chịu phần tiền giảm */
 export function SellerVouchersPage() {
-  return <div className="p-8 text-ink/60">Voucher của shop</div>;
+  return <VoucherManager kind="shop" />;
 }
