@@ -43,6 +43,8 @@ pnpm seed:demo
 
 Lệnh nạp bộ danh mục, 2 shop đã duyệt (Táo Xanh Mobile, Galaxy Hub) với 23 sản phẩm có biến thể, vài voucher, và 3 tài khoản **demo** mật khẩu `demo12345`: `taoxanh@example.com`, `galaxyhub@example.com` (seller), `buyer@example.com` (buyer), `admin@example.com` (admin đủ 4 bộ quyền). Ảnh sản phẩm là ảnh minh hoạ tự vẽ, không phải ảnh thật. Chạy lại không tạo trùng. Chỉ nạp danh mục: `pnpm --filter @san/marketplace-service seed:categories`.
 
+Đặt hàng (P3): chưa điền khóa VNPay vào `services/payment-service/.env` thì bấm Thanh toán sẽ mở **cổng MÔ PHỎNG** (không có tiền thật). Cách bật VNPay sandbox và nhận IPN bằng cloudflared: `services/payment-service/README.md`. Muốn thử hết hạn nhanh: đăng nhập admin, vào Quản trị › Cấu hình chính sách, giảm "Hạn thanh toán" và "Giữ tồn" xuống 1–2 phút.
+
 | Công cụ               | Địa chỉ                                    |
 | --------------------- | ------------------------------------------ |
 | Web                   | http://localhost:5173                      |

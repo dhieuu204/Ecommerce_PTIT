@@ -10,7 +10,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; chạy thử cả hệ thống trong Docker bằng `pnpm app:up`, Dockerfile ở `services/Dockerfile` và `apps/web/Dockerfile`). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
-Trạng thái hiện tại: **P1 (tài khoản, mở shop, quản trị) và P2 (danh mục, sản phẩm, tồn kho, tìm kiếm, giỏ, tạo voucher, đình chỉ shop) đã code xong và nằm trên `main`**, kèm test. API và sự kiện P1–P2 ở `docs/api`, bảng P1–P2 đầy đủ cột ở `docs/erd` và `services/*/prisma`, quyết định P2 ở `docs/phan-tich/09-quyet-dinh-p2.md`. Nền tảng chung ở `packages/nest-common`. Dữ liệu demo: `pnpm seed:demo` (xem README). Phase tiếp theo: **P3 (đặt hàng và trả trước)**. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **P1 (tài khoản, mở shop, quản trị), P2 (danh mục, sản phẩm, tồn kho, tìm kiếm, giỏ, tạo voucher, đình chỉ shop) và P3 (checkout nhiều shop, thanh toán VNPay/mô phỏng, kiểm tra đơn lớn, xác nhận/hủy đơn, hoàn tiền, cấu hình chính sách) đã code xong**, kèm test. API và sự kiện P1–P3 ở `docs/api`, bảng P1–P3 đầy đủ cột ở `docs/erd` và `services/*/prisma`, quyết định P2 ở `docs/phan-tich/09-quyet-dinh-p2.md`, P3 ở `10-quyet-dinh-p3.md`. Nền tảng chung (kể cả cấu hình có phiên bản `SettingsModule`) ở `packages/nest-common`. Dữ liệu demo: `pnpm seed:demo` (xem README). Phase tiếp theo: **P4 (giao hàng và đối soát)**. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -115,8 +115,8 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 
 ## 9. Chưa chốt: không tự quyết, phải hỏi người
 
-- API và sự kiện **của P2 trở đi** (P1 đã chốt trong `docs/api`). Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
-- **Chi tiết cột của bảng P2 trở đi.** Khung (tên bảng, cột chính) đã có trong `docs/erd`; chi tiết viết trước khi bắt đầu phase đó.
+- API và sự kiện **của P4 trở đi** (P1–P3 đã chốt trong `docs/api`). Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
+- **Chi tiết cột của bảng P4 trở đi.** Khung (tên bảng, cột chính) đã có trong `docs/erd`; chi tiết viết trước khi bắt đầu phase đó.
 - **STATE-03**: quy tắc trả hàng và tranh chấp (lý do, bằng chứng, hạn xử lý, lúc hoàn tiền). Chốt trước P5.
 - Thư viện điều hướng trang (router) và cách gọi API ở frontend.
 
