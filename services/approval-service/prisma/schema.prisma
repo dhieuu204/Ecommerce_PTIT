@@ -83,6 +83,66 @@ model Violation {
   @@map("violations")
 }
 
+// ===== Kiểm tra đơn (P3) =====
+
+enum OrderCheckStatus {
+  /// Chạm luật, chờ admin tài chính duyệt
+  PENDING
+  /// Qua (không chạm luật thì qua ngay, hoặc admin duyệt)
+  PASSED
+  REJECTED
+  /// Quá hạn chưa duyệt: không bao giờ tự duyệt, đơn bị hủy
+  TIMEOUT
+  /// Đơn bị hủy trong lúc chờ duyệt, admin không phải duyệt nữa
+  CANCELLED
+}
+
+/// Kiểm tra đơn theo luật (RSK-01). Mọi đơn có một dòng; đơn lớn chờ admin FINANCE duyệt
+model OrderCheck {
+  id            String           @id @default(uuid()) @db.Uuid
+  orderId       String           @unique @map("order_id") @db.Uuid
+  orderCode     String           @map("order_code") @db.VarChar(20)
+  buyerId       String           @map("buyer_id") @db.Uuid
+  buyerName     String           @map("buyer_name") @db.VarChar(100)
+  buyerEmail    String           @map("buyer_email") @db.VarChar(255)
+  /// Chủ các shop trong đơn: không được tự duyệt
+  ownerIds      String[]         @map("owner_ids") @db.Uuid
+  amount        Int
+  paymentMethod String           @map("payment_method") @db.VarChar(10)
+  /// Đơn nhận qua sự kiện order.placed (shop, dòng hàng, tỉnh nhận)
+  data          Json
+  /// Luật đã chạm kèm ngưỡng lúc đó, ví dụ [{ "rule": "TOTAL", "threshold": 10000000 }]
+  rulesHit      Json             @map("rules_hit")
+  status        OrderCheckStatus
+  /// Hạn duyệt (chỉ với PENDING)
+  deadline      DateTime?        @db.Timestamptz(3)
+  reason        String?          @db.VarChar(500)
+  /// Admin quyết định (userId); trống khi tự động
+  decidedBy     String?          @map("decided_by") @db.Uuid
+  decidedByName String?          @map("decided_by_name") @db.VarChar(100)
+  decidedAt     DateTime?        @map("decided_at") @db.Timestamptz(3)
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([status, deadline])
+  @@index([buyerId])
+  @@map("order_checks")
+}
+
+/// Cấu hình có phiên bản (ADM-01): ngưỡng duyệt, hạn duyệt. Phiên bản lớn nhất đang dùng
+model Setting {
+  key           String   @db.VarChar(64)
+  version       Int
+  value         Int
+  effectiveFrom DateTime @default(now()) @map("effective_from") @db.Timestamptz(3)
+  /// Admin sửa (userId)
+  createdBy     String?  @map("created_by") @db.Uuid
+  createdByName String?  @map("created_by_name") @db.VarChar(100)
+  reason        String?  @db.VarChar(500)
+
+  @@id([key, version])
+  @@map("settings")
+}
+
 // ===== Bảng kỹ thuật: giống nhau ở cả 4 service =====
 
 /// Nhật ký thao tác admin (ADM-02). Chỉ thêm, không sửa, không xóa.

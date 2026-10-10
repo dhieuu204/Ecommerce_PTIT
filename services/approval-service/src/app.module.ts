@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { SanCommonModule } from '@san/nest-common';
+import { SanCommonModule, SettingsModule } from '@san/nest-common';
 import { HealthController } from './health/health.controller';
+import { OrderChecksModule } from './order-checks/order-checks.module';
 import { PrismaService } from './prisma.service';
+import { APPROVAL_SETTINGS } from './settings';
 import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
 import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
 
@@ -14,9 +16,13 @@ import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
       prisma: PrismaService,
       rabbitmqUrl: process.env.RABBITMQ_URL,
       jwksUrl: process.env.JWKS_URL,
+      databaseUrl: process.env.DATABASE_URL,
     }),
+    // Cấu hình có phiên bản (bảng settings) + API /admin/settings (ADM-01)
+    SettingsModule.forRoot(APPROVAL_SETTINGS),
     ShopApprovalsModule,
     ShopModerationModule,
+    OrderChecksModule,
   ],
   controllers: [HealthController],
 })

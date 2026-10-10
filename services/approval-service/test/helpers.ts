@@ -55,7 +55,7 @@ export async function createTestApp(): Promise<TestApp> {
 /** Xóa sạch dữ liệu giữa các test */
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE shop_approvals, violations, audit_logs, outbox_events, inbox_events CASCADE',
+    'TRUNCATE shop_approvals, violations, order_checks, settings, audit_logs, outbox_events, inbox_events CASCADE',
   );
 }
 
