@@ -27,7 +27,9 @@ pnpm infra:up                  # PostgreSQL, RabbitMQ, Redis, MinIO, Mailpit
 
 # mỗi service một file .env
 for s in services/*; do cp $s/.env.example $s/.env; done
+node scripts/gen-jwt-key.mjs   # dán dòng in ra vào JWT_PRIVATE_KEY trong services/user-service/.env
 
+pnpm db:migrate                # tạo bảng trong 4 database (chạy lại sau mỗi lần kéo code có migration mới)
 pnpm dev                       # 4 service (cổng 3001–3004) + web (5173)
 ```
 

@@ -20,6 +20,7 @@
     "app:up": "docker compose -f infra/docker-compose.yml --profile app up -d --build",
     "app:down": "docker compose -f infra/docker-compose.yml --profile app down",
     "postinstall": "pnpm --filter \"./packages/**\" build",
+    "db:migrate": "pnpm -r --filter \"./services/**\" exec prisma migrate deploy",
     "seed:demo": "pnpm --filter @san/user-service seed:demo && pnpm --filter @san/approval-service seed:demo && pnpm --filter @san/marketplace-service seed:demo"
   },
   "devDependencies": {
