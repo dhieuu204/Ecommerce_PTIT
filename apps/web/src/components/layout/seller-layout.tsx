@@ -2,7 +2,7 @@ import { ShieldAlert } from 'lucide-react';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { ConsoleLayout, type ConsoleMenuGroup } from './console-layout';
 
-/** Menu Kênh người bán. Tài chính (ví, rút tiền) thêm khi tới giai đoạn */
+/** Menu Kênh người bán. Rút tiền thêm khi tới giai đoạn */
 const MENU: ConsoleMenuGroup[] = [
   {
     title: 'Đơn hàng',
@@ -18,6 +18,10 @@ const MENU: ConsoleMenuGroup[] = [
   {
     title: 'Marketing',
     items: [{ to: '/kenh-nguoi-ban/voucher', label: 'Voucher của shop' }],
+  },
+  {
+    title: 'Tài chính',
+    items: [{ to: '/kenh-nguoi-ban/tai-chinh', label: 'Ví của shop' }],
   },
   {
     title: 'Shop',
@@ -66,7 +70,7 @@ export function SellerLayout() {
       tone="seller"
       menu={MENU}
       headerInfo={shop.data?.shop?.name && <>Shop: {shop.data.shop.name}</>}
-      menuNote="Tài chính (ví, rút tiền) có từ giai đoạn sau."
+      menuNote="Rút tiền có từ giai đoạn sau."
       notice={suspended && <SuspendedBanner reason={shop.data?.shop?.suspendReason ?? null} />}
     />
   );

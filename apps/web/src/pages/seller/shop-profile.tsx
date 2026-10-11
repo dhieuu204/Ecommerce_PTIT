@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ArrowRight,
+  Banknote,
   BadgeCheck,
   CalendarDays,
   Camera,
@@ -26,6 +27,7 @@ import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { MY_SHOP_KEY, useMyShop } from '@/hooks/use-my-shop';
 import { API, api, ApiError } from '@/lib/api';
@@ -68,7 +70,7 @@ export const bankText = (b: BankAccount) =>
 
 /**
  * Kênh người bán › Hồ sơ shop (SHP-03, docs/so-do/13 mục I).
- * - Mô tả, logo, SĐT, địa chỉ lấy hàng: PATCH /shops/me, dùng ngay.
+ * - Mô tả, logo, SĐT, địa chỉ lấy hàng, nhận COD: PATCH /shops/me, dùng ngay.
  * - Tên shop, tài khoản ngân hàng: POST /shops/me/change-requests, admin duyệt lại.
  */
 export function ShopProfilePage() {
@@ -106,6 +108,7 @@ export function ShopProfilePage() {
       <ShopHero shop={current} />
       <ChangeRequestBanner data={data} />
       <EditNowCard shop={current} suspended={suspended} />
+      <CodCard shop={current} suspended={suspended} />
       <ReviewCard data={data} suspended={suspended} />
     </div>
   );
@@ -279,6 +282,54 @@ function ChangeRequestBanner({ data }: { data: MyShop }) {
 }
 
 /** Thông tin sửa ngay: mô tả, logo, SĐT, địa chỉ lấy hàng */
+/** Công tắc nhận COD (COD-01): đổi là lưu ngay, áp dụng cho đơn đặt sau đó */
+function CodCard({ shop, suspended }: { shop: ShopView; suspended: boolean }) {
+  const user = useCurrentUser();
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+  const toggle = async (on: boolean) => {
+    setSaving(true);
+    try {
+      const result = await api<MyShop>(`${API.market}/shops/me`, {
+        method: 'PATCH',
+        body: { codEnabled: on },
+      });
+      queryClient.setQueryData([...MY_SHOP_KEY, user?.id], result);
+      toast.success(on ? 'Đã bật nhận COD.' : 'Đã tắt nhận COD.');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Chưa lưu được, bạn thử lại.');
+      void queryClient.invalidateQueries({ queryKey: MY_SHOP_KEY });
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <SectionCard
+      id="cod"
+      title="Thanh toán khi nhận hàng (COD)"
+      description="Người mua trả tiền mặt cho GHN khi nhận hàng; sàn đối soát với GHN rồi chuyển tiền vào ví của shop."
+    >
+      <label className="flex items-start gap-4 px-5 py-4 md:px-6">
+        <Banknote className="mt-0.5 size-5 shrink-0 text-champagne-600" />
+        <span className="min-w-0 flex-1 text-sm">
+          <span className="block font-medium text-ink">Nhận đơn COD</span>
+          <span className="block text-muted-foreground">
+            Tắt thì người mua chỉ trả trước được qua VNPay khi mua hàng của shop. Đơn COD đã đặt vẫn
+            giữ nguyên.
+          </span>
+        </span>
+        {saving && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+        <Switch
+          checked={shop.codEnabled}
+          onCheckedChange={(v) => void toggle(v)}
+          disabled={saving || suspended}
+          aria-label="Nhận đơn COD"
+        />
+      </label>
+    </SectionCard>
+  );
+}
+
 function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }) {
   const user = useCurrentUser();
   const queryClient = useQueryClient();

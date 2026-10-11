@@ -27,13 +27,18 @@ const GROUPS: AdminMenuGroup[] = [
   },
   {
     title: 'Hỗ trợ',
-    items: [{ to: '/quan-tri/don-hang', label: 'Đơn hàng', any: ['SUPPORT'] }],
+    items: [
+      { to: '/quan-tri/don-hang', label: 'Đơn hàng', any: ['SUPPORT'] },
+      { to: '/quan-tri/ghn-mo-phong', label: 'GHN mô phỏng', any: ['SUPPORT'] },
+    ],
   },
   {
     title: 'Tài chính',
     items: [
       { to: '/quan-tri/duyet-don', label: 'Duyệt đơn lớn', any: ['FINANCE'] },
       { to: '/quan-tri/hoan-tien', label: 'Hoàn tiền', any: ['FINANCE'] },
+      { to: '/quan-tri/doi-soat-cod', label: 'Đối soát COD', any: ['FINANCE'] },
+      { to: '/quan-tri/doi-soat-vnpay', label: 'Đối soát VNPay', any: ['FINANCE'] },
       { to: '/quan-tri/voucher', label: 'Voucher sàn', any: ['FINANCE'] },
     ],
   },
@@ -69,7 +74,7 @@ export function AdminLayout() {
       tone="admin"
       menu={menuFor(perms)}
       headerInfo={<>Quyền: {perms.map((p) => PERMISSION_LABELS[p]).join(' · ')}</>}
-      menuNote="Đối soát, rút tiền, tranh chấp có từ giai đoạn sau."
+      menuNote="Rút tiền, trả hàng, tranh chấp có từ giai đoạn sau."
     />
   );
 }

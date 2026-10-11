@@ -6,7 +6,9 @@ import {
   ImageOff,
   Loader2,
   PackageCheck,
+  TriangleAlert,
   Truck,
+  Undo2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
@@ -47,15 +49,39 @@ export function shopOrderStatusLabel(status: ShopOrderStatus, paid: boolean): st
       return 'Đang xin hủy';
     case 'CANCELLED':
       return 'Đã hủy';
+    case 'SHIPPING':
+      return 'Đang giao';
+    case 'DELIVERED':
+      return 'Đã giao';
+    case 'COMPLETED':
+      return 'Hoàn tất';
+    case 'RETURNING':
+      return 'Giao không thành công, đang hoàn hàng';
+    case 'RETURNED':
+      return 'Đã hoàn hàng về shop';
+    case 'FAILED':
+      return 'Giao không thành công';
+    case 'INCIDENT':
+      return 'Sự cố vận chuyển';
+    case 'INCIDENT_RESOLVED':
+      return 'Đã xử lý sự cố';
   }
 }
 
 const STATUS_TONE: Record<ShopOrderStatus, Tone> = {
   PENDING: 'pending',
   TO_CONFIRM: 'info',
-  CONFIRMED: 'success',
+  CONFIRMED: 'info',
   CANCEL_REQUESTED: 'pending',
   CANCELLED: 'neutral',
+  SHIPPING: 'info',
+  DELIVERED: 'success',
+  COMPLETED: 'success',
+  RETURNING: 'danger',
+  RETURNED: 'pending',
+  FAILED: 'neutral',
+  INCIDENT: 'danger',
+  INCIDENT_RESOLVED: 'neutral',
 };
 
 export function ShopOrderStatusBadge({
@@ -195,10 +221,21 @@ export function MoneyRow({
 const HISTORY_ICON: Record<ShopOrderStatus, typeof Circle> = {
   PENDING: Clock,
   TO_CONFIRM: PackageCheck,
-  CONFIRMED: Truck,
+  CONFIRMED: PackageCheck,
   CANCEL_REQUESTED: CircleX,
   CANCELLED: CircleX,
+  SHIPPING: Truck,
+  DELIVERED: PackageCheck,
+  COMPLETED: CheckCircle2,
+  RETURNING: Undo2,
+  RETURNED: Undo2,
+  FAILED: CircleX,
+  INCIDENT: TriangleAlert,
+  INCIDENT_RESOLVED: TriangleAlert,
 };
+
+/** Trạng thái kết thúc không thành công: tô đỏ ở mốc mới nhất */
+const BAD_END: ShopOrderStatus[] = ['CANCELLED', 'FAILED', 'INCIDENT', 'RETURNING'];
 
 /** Lịch sử trạng thái của một đơn con (mới nhất trên cùng) */
 export function OrderTimeline({ history, paid }: { history: OrderHistoryRow[]; paid: boolean }) {
@@ -206,12 +243,9 @@ export function OrderTimeline({ history, paid }: { history: OrderHistoryRow[]; p
   return (
     <ol className="space-y-0">
       {rows.map((h, i) => {
+        const bad = BAD_END.includes(h.toStatus);
         const Icon =
-          i === 0
-            ? h.toStatus === 'CANCELLED'
-              ? CircleX
-              : CheckCircle2
-            : HISTORY_ICON[h.toStatus];
+          i === 0 ? (bad ? HISTORY_ICON[h.toStatus] : CheckCircle2) : HISTORY_ICON[h.toStatus];
         return (
           <li key={`${h.createdAt}-${i}`} className="relative flex gap-3 pb-4 last:pb-0">
             {i < rows.length - 1 && (
@@ -220,11 +254,7 @@ export function OrderTimeline({ history, paid }: { history: OrderHistoryRow[]; p
             <Icon
               className={cn(
                 'relative mt-0.5 size-6 shrink-0 rounded-full bg-card p-0.5',
-                i === 0
-                  ? h.toStatus === 'CANCELLED'
-                    ? 'text-red-500'
-                    : 'text-emerald-600'
-                  : 'text-ink/35',
+                i === 0 ? (bad ? 'text-red-500' : 'text-emerald-600') : 'text-ink/35',
               )}
             />
             <div className="min-w-0 text-sm">
@@ -363,3 +393,55 @@ export const DECLINE_CANCEL_REASONS = [
   'Đơn đã đóng gói, chuẩn bị giao',
   'Đã liên hệ, người mua đồng ý nhận',
 ];
+
+/** Hộp xác nhận một bước (Đã nhận hàng, Xác nhận đơn...). `onConfirm` xong thì hộp tự đóng */
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: React.ReactNode;
+  confirmLabel: string;
+  onConfirm: () => Promise<unknown>;
+  children?: React.ReactNode;
+}) {
+  const [pending, setPending] = useState(false);
+  const submit = async () => {
+    setPending(true);
+    try {
+      await onConfirm();
+      onOpenChange(false);
+    } catch {
+      // người gọi tự báo lỗi (toast); giữ hộp mở để thử lại
+    } finally {
+      setPending(false);
+    }
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => !pending && onOpenChange(o)}>
+      <DialogContent className="rounded-2xl sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-navy">{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        {children}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
+            Quay lại
+          </Button>
+          <Button onClick={submit} disabled={pending}>
+            {pending && <Loader2 className="size-4 animate-spin" />}
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

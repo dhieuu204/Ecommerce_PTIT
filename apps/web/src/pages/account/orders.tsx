@@ -24,12 +24,14 @@ const TABS: Array<{ value: BuyerTab; label: string }> = [
   { value: 'UNPAID', label: 'Chờ thanh toán' },
   { value: 'PROCESSING', label: 'Đang xử lý' },
   { value: 'TO_SHIP', label: 'Chờ giao hàng' },
+  { value: 'SHIPPING', label: 'Đang giao' },
+  { value: 'COMPLETED', label: 'Hoàn tất' },
   { value: 'CANCELLED', label: 'Đã hủy' },
 ];
 
 export const ordersKey = ['orders'] as const;
 
-/** Tài khoản › Đơn mua (ORD-02): đơn tổng mới nhất trước, mỗi đơn chia theo shop */
+/** Tài khoản › Đơn mua (ORD-02, SHIP-03): đơn tổng mới nhất trước, mỗi đơn chia theo shop */
 export function OrdersPage() {
   const [params, setParams] = useSearchParams();
   const tab = (params.get('tab') ?? 'ALL') as BuyerTab;
@@ -120,7 +122,8 @@ export function OrdersPage() {
 }
 
 function OrderCard({ order }: { order: Order }) {
-  const paid = order.paymentStatus === 'PAID';
+  const paid = order.paymentStatus !== 'UNPAID';
+  const toReceive = order.shopOrders.some((so) => so.canConfirmReceived);
   const left = useCountdown(order.canPay ? order.payBefore : null);
   const link = `/tai-khoan/don-mua/${order.id}`;
   return (
@@ -136,6 +139,10 @@ function OrderCard({ order }: { order: Order }) {
           </span>
         ) : order.status === 'CANCELLED' ? (
           <span className="text-xs font-medium text-ink/50">Đã hủy</span>
+        ) : order.status === 'COMPLETED' ? (
+          <span className="text-xs font-medium text-emerald-700">Hoàn tất</span>
+        ) : order.paymentMethod === 'COD' ? (
+          <span className="text-xs font-medium text-champagne-600">Thanh toán khi nhận hàng</span>
         ) : null}
       </header>
       <div className="divide-y divide-ivory-200">
@@ -178,6 +185,11 @@ function OrderCard({ order }: { order: Order }) {
           {order.canPay && (
             <Button asChild size="sm" className="rounded-lg">
               <Link to={link}>Thanh toán</Link>
+            </Button>
+          )}
+          {toReceive && (
+            <Button asChild size="sm" className="rounded-lg">
+              <Link to={link}>Đã nhận hàng</Link>
             </Button>
           )}
         </div>

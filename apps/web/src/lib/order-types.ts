@@ -1,10 +1,40 @@
 /**
- * Kiểu dữ liệu P3 (đặt hàng, thanh toán, kiểm tra đơn, hoàn tiền, cấu hình) theo API ở
- * docs/api/README.md mục 4. Thời gian là chuỗi ISO (UTC).
+ * Kiểu dữ liệu P3–P4 (đặt hàng, thanh toán, kiểm tra đơn, hoàn tiền, cấu hình, giao hàng, COD) theo API ở
+ * docs/api/README.md mục 4 và 5. Thời gian là chuỗi ISO (UTC).
  */
 
+import type { EarningStatus } from './finance-types';
+
 export type ShopOrderStatus =
-  'PENDING' | 'TO_CONFIRM' | 'CONFIRMED' | 'CANCEL_REQUESTED' | 'CANCELLED';
+  | 'PENDING'
+  | 'TO_CONFIRM'
+  | 'CONFIRMED'
+  | 'CANCEL_REQUESTED'
+  | 'CANCELLED'
+  // P4: giao hàng
+  | 'SHIPPING'
+  | 'DELIVERED'
+  | 'COMPLETED'
+  | 'RETURNING'
+  | 'RETURNED'
+  | 'FAILED'
+  | 'INCIDENT'
+  | 'INCIDENT_RESOLVED';
+export type PaymentMethod = 'VNPAY' | 'COD';
+/** COD: thanh toán khi nhận hàng (không có bước trả trước) */
+export type PaymentStatus = 'UNPAID' | 'PAID' | 'COD';
+export type ShipmentStatus =
+  | 'CREATING'
+  | 'UNKNOWN'
+  | 'CREATE_FAILED'
+  | 'READY_TO_PICK'
+  | 'PICKED'
+  | 'DELIVERED'
+  | 'RETURNING'
+  | 'RETURNED'
+  | 'CANCELLING'
+  | 'CANCELLED'
+  | 'LOST';
 export type CancelActor = 'BUYER' | 'SELLER' | 'ADMIN' | 'SYSTEM';
 export type ShippingFeeSource = 'GHN' | 'FALLBACK' | 'FIXED';
 export type RefundStatus = 'NONE' | 'PROCESSING' | 'NEEDS_MANUAL' | 'SUCCEEDED' | 'MANUAL_DONE';
@@ -63,7 +93,9 @@ export interface CheckoutShop {
 export interface CheckoutPreview {
   checkoutId: string;
   expiresAt: string;
-  paymentMethod: 'VNPAY';
+  paymentMethod: PaymentMethod;
+  /** Mọi shop trong đơn đều nhận COD */
+  codAvailable: boolean;
   address: {
     id: string;
     receiverName: string;
@@ -88,7 +120,8 @@ export interface PlacedOrder {
   orderId: string;
   code: string;
   total: number;
-  payBefore: string;
+  /** Trống với đơn COD */
+  payBefore: string | null;
 }
 
 export interface PaymentLink {
@@ -106,7 +139,7 @@ export interface OrderPayment {
   orderCode: string;
   status: 'UNPAID' | 'PAID' | 'EXPIRED' | 'CANCELLED';
   amount: number;
-  payBefore: string;
+  payBefore: string | null;
   attempts: number;
   maxAttempts: number;
   gateway: 'VNPAY' | 'MOCK';
@@ -140,6 +173,26 @@ export interface OrderHistoryRow {
   createdAt: string;
 }
 
+/** Một mốc vận chuyển GHN báo về (mới nhất trước) */
+export interface TrackingRow {
+  ghnStatus: string;
+  note: string | null;
+  happenedAt: string;
+}
+
+/** Vận đơn của đơn con */
+export interface Shipment {
+  ghnCode: string | null;
+  status: ShipmentStatus;
+  failedAttempts: number;
+  fee: number | null;
+  /** Vận đơn MÔ PHỎNG (chưa nối GHN thật) */
+  simulated: boolean;
+  lastError: string | null;
+  /** Chỉ ở trang chi tiết */
+  tracking?: TrackingRow[];
+}
+
 export interface ShopOrder {
   id: string;
   code: string;
@@ -152,8 +205,16 @@ export interface ShopOrder {
   shippingFee: number;
   shippingFeeSource: ShippingFeeSource;
   total: number;
+  codAmount: number;
   confirmBefore: string | null;
   confirmedAt: string | null;
+  deliveredAt: string | null;
+  /** Tự hoàn tất lúc này nếu người mua chưa bấm "Đã nhận hàng" */
+  completeBefore: string | null;
+  completedAt: string | null;
+  incidentNote: string | null;
+  canConfirmReceived: boolean;
+  shipment: Shipment | null;
   cancelledBy: CancelActor | null;
   cancelReason: string | null;
   cancelledAt: string | null;
@@ -168,11 +229,12 @@ export interface ShopOrder {
 export interface Order {
   id: string;
   code: string;
-  status: 'PROCESSING' | 'CANCELLED';
-  paymentMethod: 'VNPAY';
-  paymentStatus: 'UNPAID' | 'PAID';
+  status: 'PROCESSING' | 'COMPLETED' | 'PARTIALLY_COMPLETED' | 'CANCELLED';
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
   checkStatus: 'PENDING' | 'PASSED' | 'REJECTED';
-  payBefore: string;
+  /** Trống với đơn COD */
+  payBefore: string | null;
   paidAt: string | null;
   createdAt: string;
   canPay: boolean;
@@ -188,7 +250,10 @@ export interface Order {
   buyer?: { id: string; name: string; email: string };
 }
 
-export type BuyerTab = 'ALL' | 'UNPAID' | 'PROCESSING' | 'TO_SHIP' | 'CANCELLED';
+export type BuyerTab =
+  'ALL' | 'UNPAID' | 'PROCESSING' | 'TO_SHIP' | 'SHIPPING' | 'COMPLETED' | 'CANCELLED';
+/** Admin có thêm tab đơn có sự cố GHN chờ xác nhận */
+export type AdminTab = BuyerTab | 'INCIDENT';
 
 export interface SellerOrder {
   id: string;
@@ -197,7 +262,8 @@ export interface SellerOrder {
   orderCode: string;
   status: ShopOrderStatus;
   createdAt: string;
-  paymentStatus: 'UNPAID' | 'PAID';
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
   paidAt: string | null;
   checkStatus: 'PENDING' | 'PASSED' | 'REJECTED';
   buyerName: string;
@@ -211,14 +277,26 @@ export interface SellerOrder {
   platformFeeRate: number | null;
   platformFee: number | null;
   sellerAmount: number | null;
+  codAmount: number;
   confirmBefore: string | null;
   confirmedAt: string | null;
+  /** Hạn bàn giao cho GHN */
+  handoverBefore: string | null;
+  pickedAt: string | null;
+  deliveredAt: string | null;
+  completeBefore: string | null;
+  completedAt: string | null;
+  returnedAt: string | null;
+  /** Hạn shop xác nhận đã nhận kiện hoàn (quá hạn thì tự đóng, không cộng kho) */
+  returnCloseBefore: string | null;
   cancelledBy: CancelActor | null;
   cancelReason: string | null;
   cancelledAt: string | null;
   cancelRequestReason: string | null;
   cancelRequestedAt: string | null;
   refundStatus: RefundStatus;
+  incidentNote: string | null;
+  shipment: Shipment | null;
   history?: OrderHistoryRow[];
 }
 
@@ -250,7 +328,7 @@ export interface OrderCheck {
   createdAt: string;
   order?: {
     shippingProvince: string;
-    payBefore: string;
+    payBefore: string | null;
     placedAt: string;
     shopOrders: Array<{
       shopOrderId: string;
@@ -279,7 +357,7 @@ export interface AdminRefund {
   paymentRef: string;
   gateway: 'VNPAY' | 'MOCK';
   amount: number;
-  reason: 'CANCELLED' | 'LATE_PAYMENT' | 'DUPLICATE_PAYMENT';
+  reason: 'CANCELLED' | 'LATE_PAYMENT' | 'DUPLICATE_PAYMENT' | 'DELIVERY_FAILED' | 'INCIDENT';
   status: AdminRefundStatus;
   tries: number;
   nextTryAt: string | null;
@@ -304,7 +382,7 @@ export interface AdminOrderPayments {
     platformFeeRate: number;
     platformFee: number;
     sellerAmount: number;
-    status: 'UNPAID' | 'HELD' | 'EXPIRED' | 'CANCELLED';
+    status: EarningStatus;
   }>;
   payments: Array<{
     id: string;

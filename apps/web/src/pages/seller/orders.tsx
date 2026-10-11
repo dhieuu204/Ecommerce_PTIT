@@ -16,14 +16,26 @@ import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
 type Tab = ShopOrderStatus | 'ALL';
-const TABS: Array<{ value: Tab; label: string }> = [
+/** Tab luôn hiện; `rare` = chỉ hiện khi có đơn hoặc đang chọn (đỡ rối thanh tab) */
+const TABS: Array<{ value: Tab; label: string; rare?: boolean }> = [
   { value: 'ALL', label: 'Tất cả' },
   { value: 'TO_CONFIRM', label: 'Chờ xác nhận' },
-  { value: 'CONFIRMED', label: 'Chờ giao hàng' },
-  { value: 'CANCEL_REQUESTED', label: 'Yêu cầu hủy' },
+  { value: 'CONFIRMED', label: 'Chờ lấy hàng' },
+  { value: 'CANCEL_REQUESTED', label: 'Yêu cầu hủy', rare: true },
+  { value: 'SHIPPING', label: 'Đang giao' },
+  { value: 'DELIVERED', label: 'Đã giao' },
+  { value: 'COMPLETED', label: 'Hoàn tất' },
+  { value: 'RETURNING', label: 'Đang hoàn', rare: true },
+  { value: 'RETURNED', label: 'Chờ nhận hàng hoàn', rare: true },
+  { value: 'FAILED', label: 'Giao thất bại', rare: true },
+  { value: 'INCIDENT', label: 'Sự cố', rare: true },
+  { value: 'INCIDENT_RESOLVED', label: 'Đã xử lý sự cố', rare: true },
   { value: 'PENDING', label: 'Chờ thanh toán / duyệt' },
   { value: 'CANCELLED', label: 'Đã hủy' },
 ];
+
+/** Tab cần seller làm gì đó: số đơn tô đỏ */
+const URGENT: Tab[] = ['TO_CONFIRM', 'CANCEL_REQUESTED', 'RETURNED'];
 
 export const sellerOrdersKey = ['seller', 'orders'] as const;
 
@@ -66,7 +78,7 @@ export function SellerOrdersPage() {
       <PageHeader
         crumbs={[{ label: 'Đơn hàng' }]}
         title="Đơn hàng"
-        description="Xác nhận đơn trong hạn (quá hạn đơn tự hủy và hoàn tiền cho người mua). Bàn giao vận chuyển có ở giai đoạn sau."
+        description="Xác nhận đơn trong hạn để tạo vận đơn GHN, rồi đóng gói chờ GHN đến lấy. Quá hạn xác nhận hoặc bàn giao thì đơn tự hủy."
       />
       <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
         <div className="flex flex-col gap-3 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
@@ -74,7 +86,8 @@ export function SellerOrdersPage() {
             {TABS.map((t) => {
               const active = status === t.value;
               const n = t.value === 'ALL' ? total : counts?.[t.value];
-              const urgent = (t.value === 'TO_CONFIRM' || t.value === 'CANCEL_REQUESTED') && !!n;
+              if (t.rare && !active && !n) return null;
+              const urgent = URGENT.includes(t.value) && !!n;
               return (
                 <button
                   key={t.value}
@@ -146,7 +159,7 @@ export function SellerOrdersPage() {
           <EmptyState
             icon={ClipboardList}
             title={q ? 'Không có đơn khớp mã này' : 'Chưa có đơn nào ở mục này'}
-            text="Đơn mới sẽ hiện ở tab Chờ xác nhận khi người mua đã thanh toán."
+            text="Đơn mới sẽ hiện ở tab Chờ xác nhận khi người mua đã thanh toán hoặc chọn COD."
           />
         ) : (
           <>
@@ -179,9 +192,14 @@ export function SellerOrdersPage() {
 function Row({ order }: { order: SellerOrder }) {
   const first = order.items[0];
   const more = order.items.length - 1;
-  const hoursLeft = order.confirmBefore
-    ? (new Date(order.confirmBefore).getTime() - Date.now()) / 3_600_000
-    : null;
+  // Hạn đang đếm: xác nhận (Chờ xác nhận) hoặc bàn giao cho GHN (Chờ lấy hàng)
+  const deadline =
+    order.status === 'TO_CONFIRM'
+      ? order.confirmBefore
+      : order.status === 'CONFIRMED'
+        ? order.handoverBefore
+        : null;
+  const hoursLeft = deadline ? (new Date(deadline).getTime() - Date.now()) / 3_600_000 : null;
   return (
     <Link
       to={`/kenh-nguoi-ban/don-hang/${order.id}`}
@@ -215,16 +233,21 @@ function Row({ order }: { order: SellerOrder }) {
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <ShopOrderStatusBadge status={order.status} paid={order.paymentStatus === 'PAID'} />
+        <ShopOrderStatusBadge status={order.status} paid={order.paymentStatus !== 'UNPAID'} />
         <RefundBadge status={order.refundStatus} />
-        {order.status === 'TO_CONFIRM' && hoursLeft !== null && (
+        {order.paymentMethod === 'COD' && (
+          <span className="rounded-md bg-champagne-50 px-1.5 py-0.5 text-[11px] font-semibold text-champagne-600">
+            COD
+          </span>
+        )}
+        {deadline && hoursLeft !== null && (
           <span
             className={cn(
               'text-xs',
               hoursLeft < 6 ? 'font-semibold text-red-600' : 'text-muted-foreground',
             )}
           >
-            còn {hoursLeft <= 0 ? '0 giờ' : elapsedUntil(order.confirmBefore!)}
+            còn {hoursLeft <= 0 ? '0 giờ' : elapsedUntil(deadline)}
           </span>
         )}
       </div>

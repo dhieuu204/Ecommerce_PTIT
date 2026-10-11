@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, ReceiptText, Search, X } from 'lucide-react';
+import { ChevronRight, ReceiptText, Search, TriangleAlert, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import {
   RefundBadge,
   ShopOrderStatusBadge,
 } from '@/components/orders/order-parts';
+import { ShipmentPanel } from '@/components/orders/shipment-parts';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,25 +23,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounced } from '@/hooks/use-debounced';
 import { API, api } from '@/lib/api';
 import { formatDateTime, formatMoney } from '@/lib/format';
-import type { AdminOrderPayments, BuyerTab, Order, ShopOrder } from '@/lib/order-types';
+import type { AdminOrderPayments, AdminTab, Order, ShopOrder } from '@/lib/order-types';
 import type { Page } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { REFUND_STATUS } from './refunds';
 
 const PAGE_SIZE = 20;
-const TABS: Array<{ value: BuyerTab; label: string }> = [
+const TABS: Array<{ value: AdminTab; label: string }> = [
   { value: 'ALL', label: 'Tất cả' },
   { value: 'UNPAID', label: 'Chờ thanh toán' },
   { value: 'PROCESSING', label: 'Đang xử lý' },
   { value: 'TO_SHIP', label: 'Chờ giao hàng' },
+  { value: 'SHIPPING', label: 'Đang giao' },
+  { value: 'COMPLETED', label: 'Hoàn tất' },
+  { value: 'INCIDENT', label: 'Sự cố GHN' },
   { value: 'CANCELLED', label: 'Đã hủy' },
 ];
 const ordersKey = ['admin', 'orders'] as const;
 
-/** Quản trị › Đơn hàng (ORD-02, bộ quyền SUPPORT): tra cứu theo mã đơn */
+/** Quản trị › Đơn hàng (ORD-02, SHIP-04, bộ quyền SUPPORT): tra cứu theo mã đơn, xác nhận sự cố GHN */
 export function AdminOrdersPage() {
   const [params, setParams] = useSearchParams();
-  const tab = (params.get('tab') ?? 'ALL') as BuyerTab;
+  const tab = (params.get('tab') ?? 'ALL') as AdminTab;
   const page = Math.max(1, Number(params.get('page')) || 1);
   const q = params.get('q') ?? '';
   const [search, setSearch] = useState(q);
@@ -149,7 +153,7 @@ export function AdminOrdersPage() {
                       <ShopOrderStatusBadge
                         key={so.id}
                         status={so.status}
-                        paid={o.paymentStatus === 'PAID'}
+                        paid={o.paymentStatus !== 'UNPAID'}
                       />
                     ))}
                   </div>
@@ -192,6 +196,21 @@ export function AdminOrderDetailPage() {
     retry: false,
   });
   const [target, setTarget] = useState<ShopOrder | null>(null);
+  const [incidentTarget, setIncidentTarget] = useState<ShopOrder | null>(null);
+  const incident = useMutation({
+    mutationFn: ({ so, note }: { so: ShopOrder; note: string }) =>
+      api<Order>(`${API.market}/admin/orders/${orderId}/shop-orders/${so.id}/incident`, {
+        method: 'POST',
+        body: { note },
+      }),
+    onSuccess: (o) => {
+      qc.setQueryData([...ordersKey, 'detail', orderId], o);
+      void qc.invalidateQueries({ queryKey: ordersKey });
+      void payments.refetch();
+      toast.success('Đã xác nhận sự cố. Người mua được hoàn tiền, seller được đền vào ví.');
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const cancel = useMutation({
     mutationFn: ({ so, reason }: { so: ShopOrder; reason: string }) =>
       api<Order>(`${API.market}/admin/orders/${orderId}/shop-orders/${so.id}/cancel`, {
@@ -211,7 +230,7 @@ export function AdminOrderDetailPage() {
     return <LoadError message={detail.error.message} onRetry={() => detail.refetch()} />;
   }
   const o = detail.data;
-  const paid = o.paymentStatus === 'PAID';
+  const paid = o.paymentStatus !== 'UNPAID';
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -220,9 +239,13 @@ export function AdminOrderDetailPage() {
         title={`Đơn ${o.code}`}
         description={`${o.buyer?.name} (${o.buyer?.email}) · ${formatDateTime(o.createdAt)}`}
         actions={
-          <StatusBadge tone={paid ? 'success' : 'pending'}>
-            {paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
-          </StatusBadge>
+          o.paymentStatus === 'COD' ? (
+            <StatusBadge tone="info">Thanh toán khi nhận hàng (COD)</StatusBadge>
+          ) : (
+            <StatusBadge tone={paid ? 'success' : 'pending'}>
+              {paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+            </StatusBadge>
+          )
         }
       />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -249,6 +272,24 @@ export function AdminOrderDetailPage() {
                   Hủy bởi {CANCEL_ACTOR[so.cancelledBy ?? 'SYSTEM']}: {so.cancelReason}
                 </p>
               )}
+              {so.status === 'INCIDENT' && (
+                <div className="mt-2 flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-900 sm:flex-row sm:items-center">
+                  <TriangleAlert className="hidden size-5 shrink-0 sm:block" />
+                  <span className="min-w-0 flex-1">
+                    GHN báo kiện hàng thất lạc / hư hỏng. Xác minh với GHN rồi xác nhận: người mua
+                    trả trước được hoàn tiền, seller được đền tiền hàng.
+                  </span>
+                  <Button size="sm" onClick={() => setIncidentTarget(so)}>
+                    Xác nhận sự cố
+                  </Button>
+                </div>
+              )}
+              {so.status === 'INCIDENT_RESOLVED' && so.incidentNote && (
+                <p className="mt-2 rounded-lg bg-ivory px-3 py-2 text-sm text-ink/70">
+                  Đã xác nhận sự cố: {so.incidentNote}
+                </p>
+              )}
+              {so.shipment && <ShipmentPanel shipment={so.shipment} forSeller className="mt-3" />}
               {so.history && (
                 <details className="mt-3 rounded-xl bg-ivory/50 px-4 py-3">
                   <summary className="cursor-pointer text-sm font-medium text-navy">
@@ -263,7 +304,7 @@ export function AdminOrderDetailPage() {
                 <span className="text-sm text-muted-foreground">
                   Buyer trả: <b className="text-navy">{formatMoney(so.total)}</b>
                 </span>
-                {so.status !== 'CANCELLED' && (
+                {ADMIN_CANCELLABLE.includes(so.status) && (
                   <Button variant="outline" size="sm" onClick={() => setTarget(so)}>
                     {paid ? 'Hủy đơn con' : 'Hủy cả đơn'}
                   </Button>
@@ -353,9 +394,11 @@ export function AdminOrderDetailPage() {
         onOpenChange={(open) => !open && setTarget(null)}
         title={paid ? `Hủy đơn con ${target?.code ?? ''}?` : 'Hủy cả đơn?'}
         description={
-          paid
-            ? 'Người mua được hoàn tiền của đơn con này. Thao tác được ghi nhật ký.'
-            : 'Đơn chưa thanh toán nên hủy cả đơn tổng. Thao tác được ghi nhật ký.'
+          o.paymentStatus === 'COD'
+            ? 'Đơn con bị hủy, vận đơn GHN (nếu có) được hủy, hàng cộng lại kho. Thao tác được ghi nhật ký.'
+            : paid
+              ? 'Người mua được hoàn tiền của đơn con này. Thao tác được ghi nhật ký.'
+              : 'Đơn chưa thanh toán nên hủy cả đơn tổng. Thao tác được ghi nhật ký.'
         }
         reasons={[
           'Người mua nhờ hủy qua tổng đài',
@@ -365,6 +408,24 @@ export function AdminOrderDetailPage() {
         confirmLabel="Hủy đơn"
         onSubmit={(reason) => cancel.mutateAsync({ so: target!, reason })}
       />
+      <ReasonDialog
+        open={!!incidentTarget}
+        onOpenChange={(open) => !open && setIncidentTarget(null)}
+        title={`Xác nhận sự cố đơn ${incidentTarget?.code ?? ''}?`}
+        description="Ghi rõ kết quả xác minh với GHN. Tiền tự xử lý theo quy định; thao tác được ghi nhật ký."
+        reasons={['GHN xác nhận thất lạc hàng', 'GHN xác nhận hàng bị hư hỏng']}
+        confirmLabel="Xác nhận sự cố"
+        destructive={false}
+        onSubmit={(note) => incident.mutateAsync({ so: incidentTarget!, note })}
+      />
     </div>
   );
 }
+
+/** Trạng thái admin còn hủy được (trước khi GHN lấy hàng) */
+const ADMIN_CANCELLABLE: ShopOrder['status'][] = [
+  'PENDING',
+  'TO_CONFIRM',
+  'CONFIRMED',
+  'CANCEL_REQUESTED',
+];

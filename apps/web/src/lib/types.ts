@@ -74,6 +74,8 @@ export interface ShopView {
   bankAccount: BankAccount | null;
   /** Lý do đình chỉ khi status = SUSPENDED */
   suspendReason: string | null;
+  /** Shop nhận thanh toán khi nhận hàng (COD) */
+  codEnabled: boolean;
   createdAt: string;
 }
 

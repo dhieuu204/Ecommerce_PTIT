@@ -37,10 +37,12 @@ export const REFUND_STATUS: Record<AdminRefundStatus, { label: string; tone: Ton
   MANUAL_DONE: { label: 'Đã hoàn tay', tone: 'success' },
 };
 
-const REASON: Record<AdminRefund['reason'], string> = {
+export const REFUND_REASON: Record<AdminRefund['reason'], string> = {
   CANCELLED: 'Hủy đơn con',
   LATE_PAYMENT: 'Tiền về sau khi đơn hết hạn/hủy',
   DUPLICATE_PAYMENT: 'Trả trùng',
+  DELIVERY_FAILED: 'Giao không thành công',
+  INCIDENT: 'Sự cố vận chuyển',
 };
 
 const TABS: Array<{ value: AdminRefundStatus | 'ALL'; label: string }> = [
@@ -134,7 +136,7 @@ export function RefundsPage() {
                         {r.shopOrderCode ?? r.orderCode ?? r.orderId}
                       </Link>
                       <div className="text-muted-foreground">
-                        {REASON[r.reason]} · {r.gateway === 'MOCK' ? 'MÔ PHỎNG' : 'VNPay'}{' '}
+                        {REFUND_REASON[r.reason]} · {r.gateway === 'MOCK' ? 'MÔ PHỎNG' : 'VNPay'}{' '}
                         {r.paymentRef}
                       </div>
                       <div className="text-xs text-muted-foreground">

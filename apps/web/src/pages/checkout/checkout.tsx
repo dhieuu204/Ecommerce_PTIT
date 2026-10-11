@@ -6,6 +6,8 @@ import {
   ImageOff,
   Loader2,
   ShieldCheck,
+  Banknote,
+  CheckCircle2,
   ShoppingBag,
   TicketPercent,
   Truck,
@@ -29,7 +31,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CART_KEY } from '@/hooks/use-cart';
 import { API, ApiError, api } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
-import type { CheckoutPreview, CheckoutShop, PaymentLink, PlacedOrder } from '@/lib/order-types';
+import type {
+  CheckoutPreview,
+  CheckoutShop,
+  PaymentLink,
+  PaymentMethod,
+  PlacedOrder,
+} from '@/lib/order-types';
 import { cn } from '@/lib/utils';
 import { AddressCard, AddressDialog, VoucherDialog } from './checkout-parts';
 
@@ -38,6 +46,7 @@ interface Choices {
   addressId?: string;
   shopVouchers?: Record<string, string | null>;
   platformVoucherCode?: string | null;
+  paymentMethod?: PaymentMethod;
 }
 
 const sleep = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
@@ -65,8 +74,9 @@ export async function startPayment(orderId: string): Promise<PaymentLink> {
 }
 
 /**
- * Trang Thanh toán (ORD-01, VCH-02, SHIP-01): địa chỉ, hàng tách theo shop kèm voucher shop và phí ship,
- * voucher sàn, phương thức thanh toán, tổng tiền. Bấm Đặt hàng → tạo đơn → sang cổng thanh toán.
+ * Trang Thanh toán (ORD-01, VCH-02, SHIP-01, COD-01): địa chỉ, hàng tách theo shop kèm voucher shop và phí ship,
+ * voucher sàn, phương thức thanh toán (VNPay hoặc COD), tổng tiền. Bấm Đặt hàng → tạo đơn → sang cổng thanh
+ * toán (VNPay) hoặc tới trang đơn (COD).
  */
 export function CheckoutPage() {
   const [params] = useSearchParams();
@@ -140,6 +150,13 @@ export function CheckoutPage() {
       return;
     }
     void qc.invalidateQueries({ queryKey: CART_KEY });
+    if (data.paymentMethod === 'COD') {
+      toast.success('Đặt hàng thành công!', {
+        description: 'Bạn thanh toán bằng tiền mặt khi nhận hàng.',
+      });
+      navigate(`/tai-khoan/don-mua/${order.orderId}`, { replace: true });
+      return;
+    }
     setPlacing('PAY');
     try {
       const link = await startPayment(order.orderId);
@@ -289,19 +306,29 @@ export function CheckoutPage() {
               ))}
           </section>
 
-          {/* Phương thức thanh toán: P3 chỉ trả trước qua VNPay */}
+          {/* Phương thức thanh toán: VNPay hoặc COD (khi mọi shop trong đơn nhận COD) */}
           <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
             <div className="mb-3 font-semibold text-navy">Phương thức thanh toán</div>
-            <div className="flex items-center gap-3 rounded-xl border border-navy bg-navy/[0.03] px-3 py-3 ring-1 ring-navy">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-white text-navy shadow-sm">
-                <CreditCard className="size-5" />
-              </span>
-              <div className="min-w-0 flex-1 text-sm">
-                <div className="font-semibold text-ink">Thanh toán online qua VNPay</div>
-                <div className="text-xs text-ink/55">
-                  Thẻ ATM, thẻ quốc tế, QR ngân hàng. Đơn chưa thanh toán sẽ tự hủy khi hết hạn.
-                </div>
-              </div>
+            <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Phương thức">
+              <MethodOption
+                selected={data.paymentMethod === 'VNPAY'}
+                icon={CreditCard}
+                title="Thanh toán online qua VNPay"
+                text="Thẻ ATM, thẻ quốc tế, QR ngân hàng. Đơn chưa thanh toán sẽ tự hủy khi hết hạn."
+                onSelect={() => setChoices((c) => ({ ...c, paymentMethod: 'VNPAY' }))}
+              />
+              <MethodOption
+                selected={data.paymentMethod === 'COD'}
+                disabled={!data.codAvailable && data.paymentMethod !== 'COD'}
+                icon={Banknote}
+                title="Thanh toán khi nhận hàng (COD)"
+                text={
+                  data.codAvailable
+                    ? 'Trả tiền mặt cho nhân viên giao hàng của từng shop.'
+                    : 'Có shop trong đơn không nhận COD.'
+                }
+                onSelect={() => setChoices((c) => ({ ...c, paymentMethod: 'COD' }))}
+              />
             </div>
           </section>
         </div>
@@ -321,7 +348,7 @@ export function CheckoutPage() {
             </div>
             <p className="mt-3 flex items-start gap-1.5 text-xs text-ink/50">
               <ShieldCheck className="mt-px size-3.5 shrink-0 text-emerald-600" />
-              Đơn từ 10 triệu có thể cần sàn kiểm tra trước khi shop xử lý.
+              Đơn giá trị lớn có thể cần sàn kiểm tra trước khi shop xử lý.
             </p>
           </div>
         </aside>
@@ -398,6 +425,7 @@ function toBody(c: Choices) {
     body.shopVouchers = Object.entries(c.shopVouchers).map(([shopId, code]) => ({ shopId, code }));
   }
   if (c.platformVoucherCode !== undefined) body.platformVoucherCode = c.platformVoucherCode;
+  if (c.paymentMethod) body.paymentMethod = c.paymentMethod;
   return body;
 }
 
@@ -451,6 +479,48 @@ function PlaceButton({
           ? 'Đang mở trang thanh toán…'
           : 'Đặt hàng'}
     </Button>
+  );
+}
+
+function MethodOption({
+  selected,
+  disabled,
+  icon: Icon,
+  title,
+  text,
+  onSelect,
+}: {
+  selected: boolean;
+  disabled?: boolean;
+  icon: typeof CreditCard;
+  title: string;
+  text: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      disabled={disabled}
+      onClick={onSelect}
+      className={cn(
+        'relative flex items-start gap-3 rounded-xl border px-3 py-3 text-left transition',
+        selected
+          ? 'border-navy bg-navy/[0.03] ring-1 ring-navy'
+          : 'border-ivory-200 hover:border-champagne',
+        disabled && 'cursor-not-allowed opacity-50 hover:border-ivory-200',
+      )}
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-navy shadow-sm">
+        <Icon className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1 text-sm">
+        <span className="block pr-5 font-semibold text-ink">{title}</span>
+        <span className="block text-xs text-ink/55">{text}</span>
+      </span>
+      {selected && <CheckCircle2 className="absolute top-2.5 right-2.5 size-4 text-navy" />}
+    </button>
   );
 }
 

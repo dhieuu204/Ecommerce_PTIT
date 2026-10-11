@@ -201,6 +201,13 @@ export const router = createBrowserRouter([
                     Component: m.ShopProfilePage,
                   })),
               },
+              {
+                path: 'tai-chinh',
+                lazy: () =>
+                  import('@/pages/seller/finance').then((m) => ({
+                    Component: m.SellerFinancePage,
+                  })),
+              },
             ],
           },
         ],
@@ -280,6 +287,27 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/refunds').then((m) => ({ Component: m.RefundsPage })),
                   },
+                  {
+                    path: 'doi-soat-cod',
+                    lazy: () =>
+                      import('@/pages/admin/cod-reconciliation').then((m) => ({
+                        Component: m.CodReconciliationsPage,
+                      })),
+                  },
+                  {
+                    path: 'doi-soat-cod/:id',
+                    lazy: () =>
+                      import('@/pages/admin/cod-reconciliation').then((m) => ({
+                        Component: m.CodReconciliationDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'doi-soat-vnpay',
+                    lazy: () =>
+                      import('@/pages/admin/vnpay-reconciliation').then((m) => ({
+                        Component: m.VnpayReconciliationPage,
+                      })),
+                  },
                 ],
               },
               {
@@ -297,6 +325,13 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/orders').then((m) => ({
                         Component: m.AdminOrderDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'ghn-mo-phong',
+                    lazy: () =>
+                      import('@/pages/admin/carrier-simulator').then((m) => ({
+                        Component: m.CarrierSimulatorPage,
                       })),
                   },
                 ],

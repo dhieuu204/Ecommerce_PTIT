@@ -1,10 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Banknote,
+  CheckCircle2,
   ChevronLeft,
   Clock,
   CreditCard,
   Loader2,
   MapPin,
+  PackageCheck,
   ShieldCheck,
   XCircle,
 } from 'lucide-react';
@@ -16,6 +19,7 @@ import { ShopLogo } from '@/components/console/shop-logo';
 import {
   BUYER_CANCEL_REASONS,
   CANCEL_ACTOR,
+  ConfirmDialog,
   MoneyRow,
   OrderItemRow,
   OrderTimeline,
@@ -25,6 +29,7 @@ import {
   ShopOrderStatusBadge,
   useCountdown,
 } from '@/components/orders/order-parts';
+import { PAYMENT_METHOD, ShipmentPanel } from '@/components/orders/shipment-parts';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, api } from '@/lib/api';
@@ -33,7 +38,10 @@ import type { Order, ShopOrder } from '@/lib/order-types';
 import { startPayment } from '@/pages/checkout/checkout';
 import { ordersKey } from './orders';
 
-/** Tài khoản › Đơn mua › Chi tiết (ORD-02, ORD-05): thanh toán, hủy đơn, xin hủy, lịch sử từng đơn con */
+/**
+ * Tài khoản › Đơn mua › Chi tiết (ORD-02, ORD-05, SHIP-03): thanh toán, hủy đơn, xin hủy, theo dõi vận
+ * chuyển, "Đã nhận hàng", lịch sử từng đơn con
+ */
 export function OrderDetailPage() {
   const { orderId = '' } = useParams();
   const qc = useQueryClient();
@@ -45,7 +53,24 @@ export function OrderDetailPage() {
       q.state.data?.shopOrders.some((s) => s.refundStatus === 'PROCESSING') ? 5000 : false,
   });
   const [cancelTarget, setCancelTarget] = useState<'ORDER' | ShopOrder | null>(null);
+  const [receiveTarget, setReceiveTarget] = useState<ShopOrder | null>(null);
   const [paying, setPaying] = useState(false);
+
+  const received = useMutation({
+    mutationFn: (so: ShopOrder) =>
+      api<Order>(`${API.market}/orders/${orderId}/shop-orders/${so.id}/received`, {
+        method: 'POST',
+      }),
+    onSuccess: (o) => {
+      qc.setQueryData([...ordersKey, 'detail', orderId], o);
+      void qc.invalidateQueries({ queryKey: [...ordersKey, 'list'] });
+      toast.success('Cảm ơn bạn! Đơn hàng đã hoàn tất.');
+    },
+    onError: (e) => {
+      toast.error(e.message);
+      void detail.refetch();
+    },
+  });
 
   const cancel = useMutation({
     mutationFn: ({ target, reason }: { target: 'ORDER' | ShopOrder; reason: string }) =>
@@ -97,7 +122,8 @@ export function OrderDetailPage() {
     );
   }
   const o = detail.data;
-  const paid = o.paymentStatus === 'PAID';
+  // COD: không có bước trả trước, đơn chờ duyệt hiện "Chờ duyệt đơn" như đơn đã trả
+  const paid = o.paymentStatus !== 'UNPAID';
 
   return (
     <div className="space-y-4">
@@ -134,7 +160,14 @@ export function OrderDetailPage() {
       </section>
 
       {o.shopOrders.map((so) => (
-        <ShopOrderCard key={so.id} so={so} paid={paid} onCancel={() => setCancelTarget(so)} />
+        <ShopOrderCard
+          key={so.id}
+          so={so}
+          paid={paid}
+          cod={o.paymentMethod === 'COD'}
+          onCancel={() => setCancelTarget(so)}
+          onReceived={() => setReceiveTarget(so)}
+        />
       ))}
 
       <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
@@ -151,10 +184,24 @@ export function OrderDetailPage() {
         <div className="my-2 border-t border-ivory-200" />
         <MoneyRow label="Tổng thanh toán" value={o.total} strong />
         <div className="mt-1 flex items-center gap-2 text-xs text-ink/55">
-          <CreditCard className="size-3.5" /> VNPay
+          {o.paymentMethod === 'COD' ? (
+            <Banknote className="size-3.5" />
+          ) : (
+            <CreditCard className="size-3.5" />
+          )}
+          {PAYMENT_METHOD[o.paymentMethod]}
           {o.paidAt && <span>· đã trả lúc {formatDateTime(o.paidAt)}</span>}
         </div>
       </section>
+
+      <ConfirmDialog
+        open={receiveTarget !== null}
+        onOpenChange={(open) => !open && setReceiveTarget(null)}
+        title="Bạn đã nhận được hàng?"
+        description={`Xác nhận đã nhận đủ hàng của ${receiveTarget?.shop.name ?? ''} và hàng không có vấn đề. Sau khi xác nhận, đơn hoàn tất và shop nhận được tiền.`}
+        confirmLabel="Đã nhận hàng"
+        onConfirm={() => received.mutateAsync(receiveTarget!)}
+      />
 
       <ReasonDialog
         open={cancelTarget !== null}
@@ -171,7 +218,9 @@ export function OrderDetailPage() {
             ? 'Cả đơn (mọi shop) sẽ bị hủy, voucher được trả lại.'
             : cancelTarget?.cancelAction === 'REQUEST'
               ? 'Shop đã xác nhận đơn nên cần shop đồng ý. Mỗi đơn chỉ gửi yêu cầu hủy một lần.'
-              : `Sàn sẽ hoàn ${formatMoney(cancelTarget?.total ?? 0)} về tài khoản thanh toán của bạn. Đơn của các shop khác không bị ảnh hưởng.`
+              : o.paymentMethod === 'COD'
+                ? 'Đơn của các shop khác không bị ảnh hưởng.'
+                : `Sàn sẽ hoàn ${formatMoney(cancelTarget?.total ?? 0)} về tài khoản thanh toán của bạn. Đơn của các shop khác không bị ảnh hưởng.`
         }
         reasons={BUYER_CANCEL_REASONS}
         confirmLabel={
@@ -232,11 +281,45 @@ function StatusPanel({
       </Panel>
     );
   }
+  const cod = order.paymentMethod === 'COD';
   if (order.checkStatus === 'PENDING') {
     return (
-      <Panel tone="info" icon={ShieldCheck} title="Đã thanh toán, đơn đang được sàn kiểm tra">
-        Đơn có giá trị lớn nên sàn kiểm tra trước khi shop xử lý (tối đa 24 giờ). Không qua kiểm tra
-        thì đơn bị hủy và bạn được hoàn tiền.
+      <Panel
+        tone="info"
+        icon={ShieldCheck}
+        title={
+          cod
+            ? 'Đặt hàng thành công, đơn đang được sàn kiểm tra'
+            : 'Đã thanh toán, đơn đang được sàn kiểm tra'
+        }
+      >
+        Đơn có giá trị lớn nên sàn kiểm tra trước khi shop xử lý (tối đa 24 giờ).
+        {cod
+          ? ' Không qua kiểm tra thì đơn bị hủy.'
+          : ' Không qua kiểm tra thì đơn bị hủy và bạn được hoàn tiền.'}
+      </Panel>
+    );
+  }
+  if (order.status === 'COMPLETED') {
+    return (
+      <Panel tone="success" icon={CheckCircle2} title="Đơn hàng đã hoàn tất">
+        Cảm ơn bạn đã mua sắm.
+      </Panel>
+    );
+  }
+  if (order.status === 'PARTIALLY_COMPLETED') {
+    return (
+      <Panel tone="neutral" icon={PackageCheck} title="Đơn đã xử lý xong">
+        Một phần đơn đã giao thành công, phần còn lại không giao được hoặc đã hủy. Xem chi tiết từng
+        shop bên dưới.
+      </Panel>
+    );
+  }
+  if (cod) {
+    return (
+      <Panel tone="info" icon={Banknote} title="Thanh toán khi nhận hàng">
+        Chuẩn bị tiền mặt để trả cho nhân viên giao hàng của từng shop (số tiền ghi ở mỗi kiện bên
+        dưới).
       </Panel>
     );
   }
@@ -245,6 +328,72 @@ function StatusPanel({
       Theo dõi trạng thái của từng shop bên dưới.
     </Panel>
   );
+}
+
+/** Trạng thái đã qua bước shop xác nhận: có vận đơn để theo dõi */
+const SHIPPED: ShopOrder['status'][] = [
+  'CONFIRMED',
+  'CANCEL_REQUESTED',
+  'SHIPPING',
+  'DELIVERED',
+  'COMPLETED',
+  'RETURNING',
+  'RETURNED',
+  'FAILED',
+  'INCIDENT',
+  'INCIDENT_RESOLVED',
+];
+
+/** Câu giải thích theo trạng thái giao hàng của đơn con */
+function DeliveryNote({ so, cod }: { so: ShopOrder; cod: boolean }) {
+  const box = (tone: 'info' | 'warn' | 'muted', text: React.ReactNode) => (
+    <p
+      className={
+        'mb-2 rounded-lg px-3 py-2 text-sm ' +
+        {
+          info: 'bg-champagne-50 text-navy',
+          warn: 'bg-amber-50 text-amber-800',
+          muted: 'bg-ivory text-ink/70',
+        }[tone]
+      }
+    >
+      {text}
+    </p>
+  );
+  switch (so.status) {
+    case 'DELIVERED':
+      return box(
+        'info',
+        <>
+          Đã giao lúc {formatDateTime(so.deliveredAt)}. Kiểm tra hàng rồi bấm <b>"Đã nhận hàng"</b>;
+          nếu không, đơn tự hoàn tất lúc {formatDateTime(so.completeBefore)}.
+        </>,
+      );
+    case 'RETURNING':
+    case 'RETURNED':
+    case 'FAILED':
+      return box(
+        'warn',
+        cod
+          ? 'Giao hàng không thành công, kiện hàng được hoàn về shop. Bạn không phải trả tiền.'
+          : 'Giao hàng không thành công, kiện hàng được hoàn về shop. Sàn hoàn lại tiền hàng cho bạn (phí vận chuyển không được hoàn).',
+      );
+    case 'INCIDENT':
+      return box(
+        'warn',
+        'Đơn vị vận chuyển báo kiện hàng gặp sự cố. Sàn đang xác minh và sẽ báo bạn.',
+      );
+    case 'INCIDENT_RESOLVED':
+      return box(
+        'muted',
+        <>
+          Sàn đã xác nhận sự cố vận chuyển{so.incidentNote ? `: ${so.incidentNote}` : ''}.
+          {cod ? ' Bạn không phải trả tiền.' : ' Bạn được hoàn đủ số tiền đã trả.'}
+        </>,
+      );
+    default:
+      return null;
+  }
 }
 
 function Panel({
@@ -278,11 +427,15 @@ function Panel({
 function ShopOrderCard({
   so,
   paid,
+  cod,
   onCancel,
+  onReceived,
 }: {
   so: ShopOrder;
   paid: boolean;
+  cod: boolean;
   onCancel: () => void;
+  onReceived: () => void;
 }) {
   const [showHistory, setShowHistory] = useState(false);
   return (
@@ -319,9 +472,13 @@ function ShopOrderCard({
         )}
         {so.status === 'TO_CONFIRM' && so.confirmBefore && (
           <p className="mb-2 text-xs text-ink/55">
-            Shop cần xác nhận trước {formatDateTime(so.confirmBefore)}, quá hạn đơn tự hủy và hoàn
-            tiền.
+            Shop cần xác nhận trước {formatDateTime(so.confirmBefore)}, quá hạn đơn tự hủy
+            {cod ? '.' : ' và hoàn tiền.'}
           </p>
+        )}
+        <DeliveryNote so={so} cod={cod} />
+        {so.shipment && SHIPPED.includes(so.status) && (
+          <ShipmentPanel shipment={so.shipment} className="mb-3" />
         )}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="space-y-0.5 text-xs text-ink/55">
@@ -335,7 +492,9 @@ function ShopOrderCard({
             )}
           </div>
           <div className="text-right">
-            <div className="text-xs text-ink/55">Thành tiền</div>
+            <div className="text-xs text-ink/55">
+              {cod && so.codAmount > 0 ? 'Trả khi nhận hàng' : 'Thành tiền'}
+            </div>
             <div className="text-lg font-bold text-navy">{formatMoney(so.total)}</div>
           </div>
         </div>
@@ -353,6 +512,11 @@ function ShopOrderCard({
           {so.cancelAction && (
             <Button variant="outline" size="sm" onClick={onCancel} className="rounded-lg">
               {so.cancelAction === 'REQUEST' ? 'Yêu cầu hủy' : 'Hủy đơn của shop này'}
+            </Button>
+          )}
+          {so.canConfirmReceived && (
+            <Button size="sm" onClick={onReceived} className="rounded-lg">
+              <PackageCheck className="size-4" /> Đã nhận hàng
             </Button>
           )}
         </div>

@@ -53,6 +53,10 @@ export const AUDIT_ACTIONS: Record<string, { label: string; source: SourceKey }>
   REJECT_ORDER: { label: 'Từ chối đơn lớn', source: 'approval' },
   MANUAL_REFUND: { label: 'Hoàn tiền tay', source: 'payment' },
   UPDATE_SETTING: { label: 'Sửa cấu hình chính sách', source: 'market' },
+  CONFIRM_INCIDENT: { label: 'Xác nhận sự cố vận chuyển', source: 'market' },
+  IMPORT_COD_RECONCILIATION: { label: 'Nhập file đối soát COD', source: 'payment' },
+  RESOLVE_COD_ITEM: { label: 'Xử lý dòng lệch đối soát COD', source: 'payment' },
+  RESOLVE_VNPAY_RECONCILE: { label: 'Xử lý khoản lệch VNPay', source: 'payment' },
 };
 
 const TARGET_TYPES: Record<string, string> = {
@@ -62,6 +66,9 @@ const TARGET_TYPES: Record<string, string> = {
   ORDER: 'Đơn hàng',
   REFUND: 'Khoản hoàn',
   SETTING: 'Cấu hình',
+  PAYMENT: 'Giao dịch thanh toán',
+  COD_RECONCILIATION: 'File đối soát COD',
+  COD_RECONCILIATION_ITEM: 'Dòng đối soát COD',
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -73,6 +80,9 @@ const FIELD_LABELS: Record<string, string> = {
   logoUrl: 'Logo',
   phone: 'Số điện thoại',
   pickupAddress: 'Địa chỉ lấy hàng',
+  codEnabled: 'Nhận COD',
+  resolution: 'Cách xử lý',
+  reconcileStatus: 'Trạng thái đối soát',
   pickupStreet: 'Số nhà, đường',
   pickupProvinceId: 'Mã tỉnh',
   pickupDistrictId: 'Mã quận/huyện',

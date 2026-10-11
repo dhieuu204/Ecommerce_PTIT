@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 interface PageHeaderProps {
   /** Đường dẫn: [{ label, to? }] */
   crumbs?: Array<{ label: string; to?: string }>;
-  title: string;
+  title: React.ReactNode;
   description?: string;
   /** Nút hành động chính bên phải */
   actions?: React.ReactNode;
