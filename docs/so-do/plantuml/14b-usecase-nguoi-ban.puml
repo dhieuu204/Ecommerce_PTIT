@@ -1,0 +1,27 @@
+@startuml 14b-usecase-nguoi-ban
+' Use case phân rã: người bán.
+!include style.iuml
+left to right direction
+
+actor "Người bán" as Seller
+actor "GHN" as GHN <<đối tác>>
+
+rectangle "Kênh người bán" {
+  usecase "UC12 Đăng ký mở shop" as UC12
+  usecase "UC13 Quản lý sản phẩm, tồn kho" as UC13
+  usecase "UC14 Quản lý voucher shop" as UC14
+  usecase "UC15 Xử lý đơn, giao hàng" as UC15
+  usecase "UC16 Xử lý trả hàng" as UC16
+  usecase "UC17 Xem doanh thu, rút tiền" as UC17
+}
+
+Seller -- UC12
+Seller -- UC13
+Seller -- UC14
+Seller -- UC15
+Seller -- UC16
+Seller -- UC17
+UC15 -- GHN
+UC16 -- GHN
+
+@enduml

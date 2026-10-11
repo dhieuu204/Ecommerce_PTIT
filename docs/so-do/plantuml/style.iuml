@@ -1,0 +1,22 @@
+' Kiểu chung cho các sơ đồ PlantUML (màu navy/champagne của dự án).
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #172554
+  ArrowColor #172554
+}
+skinparam rectangle {
+  BorderColor #C8A96B
+  FontColor #172554
+}
+skinparam package {
+  BorderColor #C8A96B
+  FontColor #172554
+}
+skinparam actor {
+  BorderColor #172554
+  BackgroundColor #F6F0E3
+}

@@ -1,0 +1,39 @@
+@startuml 14a-usecase-nguoi-mua
+' Use case phân rã: khách vãng lai và người mua.
+!include style.iuml
+left to right direction
+
+actor "Khách vãng lai" as Guest
+actor "Người mua" as Buyer
+actor "VNPay" as VNPay <<đối tác>>
+Buyer -|> Guest
+
+rectangle "Khu mua hàng" {
+  usecase "UC01 Xem, tìm kiếm sản phẩm" as UC01
+  usecase "UC02 Đăng ký, đăng nhập" as UC02
+  usecase "UC03 Quản lý hồ sơ, sổ địa chỉ" as UC03
+  usecase "UC04 Quản lý giỏ hàng" as UC04
+  usecase "UC05 Đặt hàng nhiều shop" as UC05
+  usecase "UC06 Áp voucher" as UC06
+  usecase "UC07 Thanh toán trả trước" as UC07
+  usecase "UC08 Theo dõi đơn mua" as UC08
+  usecase "UC09 Hủy đơn" as UC09
+  usecase "UC10 Trả hàng, khiếu nại" as UC10
+  usecase "UC11 Đánh giá, chat với shop" as UC11
+}
+
+Guest -- UC01
+Guest -- UC02
+Buyer -- UC03
+Buyer -- UC04
+Buyer -- UC05
+Buyer -- UC08
+Buyer -- UC09
+Buyer -- UC10
+Buyer -- UC11
+
+UC05 ..> UC07 : <<include>>
+UC06 ..> UC05 : <<extend>>
+UC07 -- VNPay
+
+@enduml

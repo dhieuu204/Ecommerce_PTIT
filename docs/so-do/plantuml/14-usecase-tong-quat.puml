@@ -1,0 +1,55 @@
+@startuml 14-usecase-tong-quat
+' Sơ đồ use case tổng quát: các nhóm chức năng lớn của sàn và tác nhân.
+' Chi tiết từng nhóm: 14a (người mua), 14b (người bán), 14c (quản trị).
+!include style.iuml
+left to right direction
+
+actor "Khách vãng lai" as Guest
+actor "Người mua" as Buyer
+actor "Người bán" as Seller
+actor "Quản trị viên" as Admin
+actor "Hệ thống\n(việc hẹn giờ)" as Timer
+actor "VNPay" as VNPay <<đối tác>>
+actor "GHN" as GHN <<đối tác>>
+
+Buyer -|> Guest
+Seller -|> Buyer
+
+rectangle "Sàn thương mại điện tử nhiều người bán" {
+  usecase "Xem, tìm kiếm sản phẩm" as G1
+  usecase "Quản lý tài khoản" as G2
+  usecase "Mua hàng\n(giỏ hàng, voucher, đặt hàng)" as G3
+  usecase "Thanh toán" as G4
+  usecase "Quản lý đơn mua, hậu mãi\n(hủy, trả hàng, khiếu nại)" as G5
+  usecase "Tương tác\n(đánh giá, chat, theo dõi shop)" as G6
+  usecase "Quản lý cửa hàng" as G7
+  usecase "Quản lý sản phẩm, khuyến mãi" as G8
+  usecase "Xử lý đơn, vận chuyển" as G9
+  usecase "Quản lý doanh thu, rút tiền" as G10
+  usecase "Kiểm duyệt\n(shop, danh mục, vi phạm)" as G11
+  usecase "Điều hành giao dịch, tài chính\n(duyệt đơn, hoàn tiền, đối soát, chi trả)" as G12
+  usecase "Quản trị hệ thống\n(phân quyền, cấu hình, nhật ký)" as G13
+  usecase "Xử lý tự động theo thời hạn" as G14
+}
+
+Guest -- G1
+Guest -- G2
+Buyer -- G3
+Buyer -- G4
+Buyer -- G5
+Buyer -- G6
+Seller -- G7
+Seller -- G8
+Seller -- G9
+Seller -- G10
+
+G11 -- Admin
+G12 -- Admin
+G13 -- Admin
+G14 -- Timer
+G4 -- VNPay
+G12 -- VNPay
+G9 -- GHN
+G12 -- GHN
+
+@enduml

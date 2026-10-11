@@ -1,0 +1,44 @@
+@startuml 14c-usecase-quan-tri
+' Use case phân rã: quản trị viên (theo bộ quyền) và việc tự động của hệ thống.
+!include style.iuml
+left to right direction
+
+actor "Quản trị viên\nKiểm duyệt" as Mod
+actor "Quản trị viên\nHỗ trợ" as Sup
+actor "Quản trị viên\nTài chính" as Fin
+actor "Quản trị viên\nHệ thống" as Sys
+actor "Hệ thống\n(việc hẹn giờ)" as Timer
+actor "VNPay" as VNPay <<đối tác>>
+actor "GHN" as GHN <<đối tác>>
+
+rectangle "Khu quản trị" {
+  usecase "UC18 Duyệt shop, đình chỉ shop" as UC18
+  usecase "UC19 Quản lý danh mục, voucher sàn" as UC19
+  usecase "UC20 Duyệt đơn lớn" as UC20
+  usecase "UC21 Tra cứu, hủy đơn hỗ trợ" as UC21
+  usecase "UC22 Hoàn tiền thủ công" as UC22
+  usecase "UC23 Phân xử khiếu nại" as UC23
+  usecase "UC24 Duyệt rút tiền, chi trả" as UC24
+  usecase "UC25 Đối soát VNPay, COD" as UC25
+  usecase "UC26 Cấu hình chính sách" as UC26
+  usecase "UC27 Phân quyền, nhật ký" as UC27
+  usecase "UC28 Xử lý quá hạn\n(hủy đơn, hoàn tất đơn)" as UC28
+}
+
+Mod -- UC18
+Mod -- UC19
+Sup -- UC21
+Sup -- UC23
+Fin -- UC20
+Fin -- UC22
+Fin -- UC24
+Fin -- UC25
+Sys -- UC26
+Sys -- UC27
+
+UC28 -- Timer
+UC22 -- VNPay
+UC25 -- VNPay
+UC25 -- GHN
+
+@enduml

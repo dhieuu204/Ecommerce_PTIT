@@ -1,0 +1,94 @@
+@startuml 15-sequence-dat-hang-thanh-toan
+' Sơ đồ tuần tự: đặt hàng nhiều shop và thanh toán trả trước qua VNPay (UC05, UC07).
+' Xuất ảnh: xem docs/so-do/plantuml/README.md
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam sequence {
+  ArrowColor #172554
+  LifeLineBorderColor #C8A96B
+  ParticipantBorderColor #172554
+  ParticipantBackgroundColor #F6F0E3
+  ActorBorderColor #172554
+  ActorBackgroundColor #F6F0E3
+  GroupBorderColor #C8A96B
+}
+autonumber "<b>0."
+
+actor "Người mua" as B
+participant "Ứng dụng web" as W
+participant "marketplace-service\n(Sàn)" as M
+participant "user-service\n(Tài khoản)" as U
+queue "RabbitMQ\n(sự kiện)" as Q
+participant "payment-service\n(Thanh toán)" as P
+participant "approval-service\n(Phê duyệt)" as A
+participant "VNPay" as V
+
+== Bước 1. Xem trước đơn hàng ==
+B -> W : Chọn sản phẩm trong giỏ, bấm "Mua hàng"
+W -> M : Yêu cầu bản xem trước (các dòng giỏ, voucher)
+M -> U : Lấy sổ địa chỉ của người mua
+U --> M : Danh sách địa chỉ
+M -> M : Kiểm tra hàng còn bán, tính giá, voucher,\nphí vận chuyển từng shop; lưu bản chụp
+M --> W : Bản xem trước tách theo shop + mã phiên
+W --> B : Hiển thị tổng tiền từng shop
+
+== Bước 2. Đặt hàng ==
+B -> W : Bấm "Đặt hàng"
+W -> M : Đặt hàng (mã phiên)
+activate M
+M -> M : Trong một giao dịch: kiểm tra lại giá, tồn, voucher;\ngiữ tồn kho, giữ lượt voucher;\ntạo đơn tổng + đơn con theo shop;\nghi sự kiện "đơn đã đặt" vào hộp thư đi
+note right of M
+  Lỗi ở bất kỳ shop nào thì không tạo đơn nào.
+  Gửi lại cùng mã phiên thì trả về đơn đã tạo.
+end note
+M --> W : Mã đơn, hạn thanh toán (15 phút)
+deactivate M
+
+M ->> Q : Sự kiện "đơn đã đặt"
+par Ghi nhận số tiền cần thu
+  Q ->> P : "đơn đã đặt"
+  P -> P : Lưu số tiền buyer trả, phí sàn,\nsố seller nhận cho từng đơn con
+else Kiểm tra đơn theo luật
+  Q ->> A : "đơn đã đặt"
+  A -> A : Áp luật (đơn từ 10 triệu cần duyệt)
+  alt Không chạm luật
+    A ->> Q : "kiểm tra đơn: đạt"
+    Q ->> M : "kiểm tra đơn: đạt"
+  else Chạm luật
+    A -> A : Chờ quản trị viên Tài chính duyệt (tối đa 24 giờ)
+  end
+end
+
+== Bước 3. Thanh toán ==
+W -> M : Yêu cầu thanh toán
+M -> P : Tạo lần thanh toán (chuyển kèm vé đăng nhập)
+P -> P : Tạo giao dịch, mã tham chiếu riêng,\nký đường dẫn bằng khóa bí mật
+P --> M : Đường dẫn VNPay
+M --> W : Đường dẫn VNPay
+W -> V : Chuyển người mua sang cổng VNPay
+B -> V : Nhập thông tin thẻ, xác nhận
+
+alt Thanh toán thành công
+  V -> P : Thông báo kết quả (IPN) có chữ ký
+  P -> P : Kiểm chữ ký, mã giao dịch, số tiền;\nghi "đã thanh toán", phân bổ tiền theo đơn con;\nghi sự kiện "thanh toán thành công"
+  P --> V : Xác nhận đã nhận
+  V --> W : Đưa người mua về trang kết quả
+  W -> P : Gửi tham số kết quả
+  P -> V : Tra cứu giao dịch (nếu chưa nhận IPN)
+  P --> W : Trạng thái: đã thanh toán
+  P ->> Q : "thanh toán thành công"
+  Q ->> M : "thanh toán thành công"
+  M -> M : Chốt tồn kho; nếu đã qua kiểm tra thì\ncác đơn con chuyển "Chờ shop xác nhận"
+else Thất bại hoặc người mua hủy
+  V --> W : Trang kết quả: thất bại
+  W --> B : Cho phép thanh toán lại (tối đa 3 lần trong 15 phút)
+else Quá hạn không có tiền
+  P -> V : Tra cứu lần cuối
+  P ->> Q : "thanh toán hết hạn"
+  Q ->> M : "thanh toán hết hạn"
+  M -> M : Hủy đơn, nhả tồn kho, trả lượt voucher
+end
+
+@enduml
