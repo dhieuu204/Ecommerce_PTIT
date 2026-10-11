@@ -69,12 +69,16 @@ export class RefundsService {
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
   ) {}
 
-  /** Đơn con đã thu tiền bị hủy: tạo khoản hoàn bằng số buyer đã trả (mỗi đơn con một khoản) */
+  /**
+   * Tạo khoản hoàn cho một đơn con đã thu tiền: bị hủy (số buyer đã trả), giao thất bại (tiền hàng sau
+   * voucher), sự cố GHN (hoàn đủ). Mỗi đơn con tối đa một khoản: gọi lại không tạo thêm.
+   */
   async createForShopOrder(
     tx: Tx,
     orderId: string,
     shopOrderId: string,
     amount: number,
+    reason: 'CANCELLED' | 'DELIVERY_FAILED' | 'INCIDENT' = 'CANCELLED',
   ): Promise<void> {
     if (amount <= 0) return;
     const payment = await tx.payment.findFirst({
@@ -88,7 +92,7 @@ export class RefundsService {
           orderId,
           shopOrderId,
           amount,
-          reason: 'CANCELLED',
+          reason,
           nextTryAt: new Date(),
         },
       ],

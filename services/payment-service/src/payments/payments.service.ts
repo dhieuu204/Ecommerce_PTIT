@@ -4,6 +4,7 @@ import { PAYMENT_EXPIRED, PAYMENT_SUCCEEDED } from '@san/shared';
 import { PAYMENT_GATEWAY, type GatewayQuery, type PaymentGateway } from '../gateway/gateway';
 import { PrismaService } from '../prisma.service';
 import { PaymentSetting } from '../settings';
+import { WalletService } from '../wallet/wallet.service';
 import type { Payment, Prisma, SellerEarning } from '../../generated/prisma';
 
 type Tx = Prisma.TransactionClient;
@@ -23,7 +24,8 @@ export interface OrderPaymentView {
   orderCode: string;
   status: 'UNPAID' | 'PAID' | 'EXPIRED' | 'CANCELLED';
   amount: number;
-  payBefore: Date;
+  /** Trống với đơn COD */
+  payBefore: Date | null;
   attempts: number;
   maxAttempts: number;
   gateway: 'VNPAY' | 'MOCK';
@@ -66,6 +68,7 @@ export class PaymentsService {
     private readonly events: EventBus,
     private readonly settings: SettingsService,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    private readonly wallet: WalletService,
   ) {}
 
   async lock(tx: Tx, orderId: string): Promise<void> {
@@ -115,8 +118,16 @@ export class PaymentsService {
       }
       if (rows[0]!.buyerId !== buyer.id)
         throw new AppError(404, 'NOT_FOUND', 'Không tìm thấy đơn.');
+      if (rows[0]!.paymentMethod === 'COD') {
+        throw new AppError(
+          409,
+          'ORDER_NOT_PAYABLE',
+          'Đơn thanh toán khi nhận hàng, không cần trả trước.',
+        );
+      }
       const state = orderState(rows);
-      if (state !== 'UNPAID' || rows[0]!.payBefore <= new Date()) {
+      const payBefore = rows[0]!.payBefore;
+      if (state !== 'UNPAID' || !payBefore || payBefore <= new Date()) {
         throw new AppError(
           409,
           'ORDER_NOT_PAYABLE',
@@ -159,7 +170,7 @@ export class PaymentsService {
           clientIp: normalizeIp(clientIp),
         },
       });
-      const payUrl = this.gateway.payUrl(created, rows[0]!.orderCode, rows[0]!.payBefore);
+      const payUrl = this.gateway.payUrl(created, rows[0]!.orderCode, payBefore);
       const saved = await tx.payment.update({ where: { id: created.id }, data: { payUrl } });
       this.logger.log(
         `${this.gateway.kind === 'MOCK' ? 'MÔ PHỎNG: ' : ''}tạo lần thanh toán ${saved.ref} (${amount}đ)`,
@@ -262,8 +273,10 @@ export class PaymentsService {
 
     await tx.sellerEarning.updateMany({
       where: { orderId: p.orderId, status: 'UNPAID' },
-      data: { status: 'HELD', paidAt },
+      data: { status: 'HELD', paidAt, moneyReceivedAt: paidAt },
     });
+    // Tiền seller của từng đơn con vào ngăn đang giữ (FIN-01)
+    for (const row of rows) await this.wallet.hold(tx, row, 'Người mua đã thanh toán');
     await this.events.publish(tx, PAYMENT_SUCCEEDED, {
       orderId: p.orderId,
       paymentId: p.id,

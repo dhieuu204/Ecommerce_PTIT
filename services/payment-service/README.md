@@ -5,7 +5,7 @@ Giao dịch VNPay, phân bổ tiền, hoàn tiền, sổ tiền seller, phí sà
 - Cổng chạy local: `3003`
 - Database riêng: `payment_db` (không service nào khác được đọc/ghi)
 - Kiểm tra sống: `GET http://localhost:3003/health`
-- API P3: `docs/api/README.md` mục 4; sự kiện: `docs/api/events.md` mục 4
+- API P3: `docs/api/README.md` mục 4, P4: mục 5; sự kiện: `docs/api/events.md` mục 4 và 5
 
 ```bash
 cp .env.example .env
@@ -49,3 +49,10 @@ Không chạy tunnel vẫn dùng được: khi buyer quay về trang `/thanh-toa
 - Hủy đơn con đã trả → khoản hoàn đúng số buyer trả cho đơn con đó. Job gửi lệnh hoàn; lỗi thì thử lại sau 5, 15 phút...; đủ `refund_max_tries` lần vẫn lỗi thì chờ admin `FINANCE` hoàn tay (nhập mã giao dịch + ảnh biên lai). Không rõ kết quả thì tra cứu, không gửi lại.
 - Phí sàn (`platform_fee_percent_x100`, mặc định 500 = 5%) tính trên tiền hàng sau voucher shop, làm tròn xuống, chụp vào `seller_earnings` khi nhận đơn.
 - Tra cứu hoàn tiền của VNPay sandbox dựa trên giao dịch gốc (`querydr`), nên với đơn có nhiều khoản hoàn một phần, kết quả tra cứu chỉ biết "giao dịch đã có hoàn"; trường hợp đó admin kiểm lại trên trang merchant VNPay.
+
+## Ví seller và đối soát (P4)
+
+- **Ví 3 ngăn** (`seller_wallets`): đang giữ (`pending`), khả dụng (`available`), đang khóa (`locked`, dùng ở P5). Mọi biến động ghi một dòng `wallet_transactions` (mỗi đơn con mỗi loại tối đa một dòng, nên sự kiện lặp không ghi tiền hai lần); database có ràng buộc số dư không âm.
+- Tiền seller vào **đang giữ** khi đơn trả trước đã thu, hoặc đơn COD đã giao. Sang **khả dụng** khi đơn con hoàn tất **và** tiền đã về sàn (COD: đối soát khớp). Hủy/giao thất bại thì trừ lại; sự cố GHN thì đền vào khả dụng.
+- **Đối soát COD**: admin `FINANCE` tải file `.xlsx`/`.csv` của GHN ở trang "Đối soát COD". Hệ thống nhận cột theo tiêu đề (danh sách tên cột ở `src/reconciliation/cod-file.ts`, thêm tên khi có file mẫu thật). Mỗi file nhập một lần. Chưa có file thật thì bấm **"Tải file MÔ PHỎNG"** (gồm các đơn COD đã giao chưa đối soát) rồi tải lên lại.
+- **Đối soát VNPay**: job `vnpay-reconcile` chạy 2 giờ sáng (giờ Việt Nam), tra cứu lại giao dịch thành công 2 ngày gần nhất; khoản lệch, chưa rõ, tiền về muộn/trùng hiện ở trang "Đối soát VNPay" để admin ghi chú xử lý. Có nút chạy ngay.

@@ -69,7 +69,7 @@ export async function createTestApp(gateway?: PaymentGateway): Promise<TestApp> 
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE refunds, payments, seller_earnings, settings, audit_logs, outbox_events, inbox_events CASCADE',
+    'TRUNCATE cod_reconciliation_items, cod_reconciliations, wallet_transactions, seller_wallets, refunds, payments, seller_earnings, settings, audit_logs, outbox_events, inbox_events CASCADE',
   );
 }
 

@@ -423,18 +423,18 @@ P4 (giao hàng và đối soát): ORD-03 (bàn giao), SHIP-02..05, COD-01, COD-0
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| GET `/shops/me/wallet` | Chủ shop | FIN-01 | Số dư `pending`, `available`, `locked` của shop người gọi (nhận ra qua chủ shop lưu từ `order.placed`); chưa có đơn nào thì trả số 0. |
+| GET `/shops/me/wallet` | Chủ shop | FIN-01 | Số dư `pending`, `available`, `locked` của shop người gọi (nhận ra qua chủ shop lưu từ `order.placed`); chưa có đơn nào thì trả số 0 (`shopId = null`). Kèm `pendingWaitingCompletion` (đang giữ vì đơn chưa hoàn tất) và `pendingWaitingCod` (đã hoàn tất, chờ đối soát COD). |
 | GET `/shops/me/wallet/transactions` | Chủ shop | FIN-01 | Lịch sử biến động, mới nhất trước, phân trang: loại, số tiền, từ ngăn nào sang ngăn nào, mã đơn con. |
 | GET `/shops/me/earnings` | Chủ shop | FIN-01, FIN-02 | Tiền từng đơn con: tiền hàng, voucher shop, phí sàn, seller nhận, trạng thái (`UNPAID`, `HELD`, `AVAILABLE`, `CANCELLED`, `FAILED`, `COMPENSATED`...), lý do chưa khả dụng (chưa hoàn tất / chưa đối soát COD). Lọc `status`, phân trang. |
 | GET `/admin/cod-reconciliations` | `FINANCE` | COD-02 | Các lần nhập file đối soát: tên file, người tải, số dòng khớp/lệch/trùng/không tìm thấy, tổng tiền COD. |
-| POST `/admin/cod-reconciliations` | `FINANCE` | COD-02, SHIP-05 | Tải file `.xlsx` hoặc `.csv` (tối đa 5 MB). Nhận diện cột theo tiêu đề (mã vận đơn, tiền thu hộ, phí giao, phí hoàn). Mỗi dòng: khớp mã vận đơn và số tiền → **khớp** (tiền COD của đơn con coi là đã về sàn, xét chuyển khả dụng); lệch tiền → **lệch**; vận đơn đã đối soát → **trùng** (không cộng lần nữa); không có → **không tìm thấy**; chưa giao → **chưa giao**. Cùng một file (mã băm) đã nhập → 409 `FILE_ALREADY_IMPORTED`. Thiếu cột bắt buộc → 400 `INVALID_RECONCILIATION_FILE`. Ghi nhật ký. |
+| POST `/admin/cod-reconciliations` | `FINANCE` | COD-02, SHIP-05 | Tải file `.xlsx` hoặc `.csv` (tối đa 5 MB). Nhận diện cột theo tiêu đề (mã vận đơn, tiền thu hộ, phí giao, phí hoàn). Mỗi dòng: khớp mã vận đơn và số tiền → **khớp** (tiền COD của đơn con coi là đã về sàn, xét chuyển khả dụng); lệch tiền → **lệch**; vận đơn đã đối soát → **trùng** (không cộng lần nữa); không có → **không tìm thấy**; chưa giao → **chưa giao**. Cùng một file (mã băm) đã nhập → 409 `FILE_ALREADY_IMPORTED`. Thiếu cột bắt buộc, sai định dạng → 400 `INVALID_RECONCILIATION_FILE`; quá 5 MB → 400 `FILE_TOO_LARGE`. Đơn trả trước có trong file (tiền thu hộ 0) chỉ dùng để đối soát phí ship. Ghi nhật ký. |
 | GET `/admin/cod-reconciliations/{id}` | `FINANCE` | COD-02, SHIP-05 | Các dòng: mã vận đơn, đơn con, tiền COD theo GHN và theo sàn, phí ship đã thu của người mua, phí GHN, phí hoàn, chênh lệch sàn chịu, kết quả, ghi chú xử lý. |
 | POST `/admin/cod-reconciliations/items/{itemId}/resolve` | `FINANCE` | COD-02 | `{ accept, note }`: dòng lệch → `accept = true` thì chấp nhận số GHN, coi tiền đã về; `false` thì chỉ ghi chú. Ghi nhật ký. Dòng không lệch → 409 `ITEM_NOT_MISMATCHED`. |
 | GET `/admin/cod-reconciliations/template` | `FINANCE` | COD-02 | Tải file Excel mẫu (các cột hệ thống đọc được). |
 | GET `/admin/cod-reconciliations/simulated-file` | `FINANCE` | COD-02 | File Excel **MÔ PHỎNG** "GHN chuyển tiền" gồm các đơn COD đã giao chưa đối soát, để demo khi chưa có file thật. |
 | GET `/admin/vnpay-reconciliation` | `FINANCE` | PAY-05 | Các khoản cần xem: giao dịch "chưa rõ", giao dịch tra cứu lại không khớp (số tiền/trạng thái), tiền về muộn/trùng đã tạo khoản hoàn, khoản hoàn chưa rõ hoặc chờ hoàn tay; kèm lần chạy đối soát gần nhất. |
 | POST `/admin/vnpay-reconciliation/run` | `FINANCE` | PAY-05 | Chạy ngay việc đối soát (bình thường chạy mỗi đêm). |
-| POST `/admin/vnpay-reconciliation/payments/{paymentId}/note` | `FINANCE` | PAY-05 | `{ note }`: ghi chú xử lý khoản lệch, đánh dấu đã xử lý. Ghi nhật ký. |
+| POST `/admin/vnpay-reconciliation/payments/{paymentId}/note` | `FINANCE` | PAY-05 | `{ note }`: ghi chú xử lý khoản lệch, đánh dấu đã xử lý. Ghi nhật ký. Giao dịch bình thường hoặc còn "chưa rõ" (job đang tra cứu) → 409 `NOT_RECONCILE_EXCEPTION`. |
 
 ### Luồng P4 dùng các API trên
 

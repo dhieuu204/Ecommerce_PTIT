@@ -1,5 +1,5 @@
 // Schema của payment-service [P]. Chỉ service này được đọc/ghi database payment_db.
-// P3: thu tiền VNPay, hoàn tiền, tiền seller của mỗi đơn con. Khung các phase sau: docs/erd/README.md.
+// P3: thu tiền VNPay, hoàn tiền, tiền seller của mỗi đơn con. P4: ví seller, đối soát COD và VNPay.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,15 +14,27 @@ datasource db {
 
 // ===== Thu tiền, hoàn tiền (P3) =====
 
+enum PaymentMethod {
+  VNPAY
+  /// Thanh toán khi nhận hàng (P4)
+  COD
+}
+
 enum EarningStatus {
-  /// Đơn chưa trả
+  /// Chưa có tiền: đơn trả trước chưa trả, hoặc đơn COD chưa giao
   UNPAID
-  /// Đã thu tiền, đang giữ (P4 chuyển sang khả dụng khi đơn hoàn tất)
+  /// Tiền seller nằm ở ngăn đang giữ (trả trước: đã thu; COD: đã giao)
   HELD
+  /// Đã chuyển sang ngăn khả dụng (đơn hoàn tất và tiền đã về sàn)
+  AVAILABLE
   /// Hết hạn thanh toán, không có tiền
   EXPIRED
   /// Đơn con bị hủy (nếu đã thu thì có khoản hoàn)
   CANCELLED
+  /// Giao thất bại, hàng hoàn về shop
+  FAILED
+  /// Sự cố GHN đã xác nhận, seller được đền vào ngăn khả dụng
+  COMPENSATED
 }
 
 /// Tiền của mỗi đơn con (PAY-04, FIN-03): buyer trả bao nhiêu, phí sàn, seller nhận bao nhiêu.
@@ -49,14 +61,166 @@ model SellerEarning {
   /// Seller nhận = subtotal - shopDiscount - platformFee
   sellerAmount     Int           @map("seller_amount")
   status           EarningStatus @default(UNPAID)
-  payBefore        DateTime      @map("pay_before") @db.Timestamptz(3)
+  /// Trống với đơn COD (không có hạn thanh toán)
+  payBefore        DateTime?     @map("pay_before") @db.Timestamptz(3)
   paidAt           DateTime?     @map("paid_at") @db.Timestamptz(3)
+  // ----- P4 -----
+  paymentMethod    PaymentMethod @default(VNPAY) @map("payment_method")
+  /// Số GHN thu hộ (= buyerPaid với COD, 0 với trả trước)
+  codAmount        Int           @default(0) @map("cod_amount")
+  /// Mã vận đơn GHN (nhận khi đã giao), dùng khớp file đối soát
+  ghnCode          String?       @map("ghn_code") @db.VarChar(40)
+  /// Phí GHN tính cho vận đơn
+  carrierFee       Int?          @map("carrier_fee")
+  deliveredAt      DateTime?     @map("delivered_at") @db.Timestamptz(3)
+  completedAt      DateTime?     @map("completed_at") @db.Timestamptz(3)
+  /// Tiền đã về sàn: trả trước lúc thu, COD lúc đối soát khớp
+  moneyReceivedAt  DateTime?     @map("money_received_at") @db.Timestamptz(3)
+  /// Lúc chuyển sang ngăn khả dụng
+  releasedAt       DateTime?     @map("released_at") @db.Timestamptz(3)
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@index([orderId])
   @@index([status, payBefore])
+  @@index([shopId, createdAt])
+  @@index([ghnCode])
   @@map("seller_earnings")
+}
+
+// ===== Ví seller (P4: FIN-01, FIN-02) =====
+
+/// Ví của mỗi shop: 3 ngăn tiền, không ngăn nào được âm (ràng buộc CHECK trong database)
+model SellerWallet {
+  shopId    String   @id @map("shop_id") @db.Uuid
+  /// Chủ shop (userId), nhận qua order.placed: seller xem ví bằng vé đăng nhập của mình
+  ownerId   String   @unique @map("owner_id") @db.Uuid
+  /// Đang giữ: đã có tiền nhưng đơn chưa hoàn tất hoặc tiền COD chưa đối soát
+  pending   Int      @default(0)
+  /// Khả dụng: rút được (P5)
+  available Int      @default(0)
+  /// Đang khóa cho yêu cầu rút tiền (P5)
+  locked    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  transactions WalletTransaction[]
+
+  @@map("seller_wallets")
+}
+
+enum WalletTxType {
+  /// Tiền đơn con vào ngăn đang giữ
+  HELD
+  /// Đang giữ → khả dụng
+  RELEASED
+  /// Trừ lại khỏi ngăn đang giữ (đơn hủy, giao thất bại, sự cố)
+  REVERSED
+  /// Đền cho seller khi GHN làm mất/hỏng hàng, vào thẳng ngăn khả dụng
+  COMPENSATION
+}
+
+enum WalletBucket {
+  PENDING
+  AVAILABLE
+  LOCKED
+}
+
+/// Lịch sử ví: mỗi biến động một dòng, không sửa không xóa. Mỗi đơn con mỗi loại tối đa một dòng
+model WalletTransaction {
+  id          String        @id @default(uuid()) @db.Uuid
+  shopId      String        @map("shop_id") @db.Uuid
+  type        WalletTxType
+  /// Luôn dương
+  amount      Int
+  /// Trống = tiền vào ví từ ngoài
+  fromBucket  WalletBucket? @map("from_bucket")
+  /// Trống = tiền ra khỏi ví
+  toBucket    WalletBucket? @map("to_bucket")
+  shopOrderId String?       @map("shop_order_id") @db.Uuid
+  note        String?       @db.VarChar(300)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  wallet SellerWallet @relation(fields: [shopId], references: [shopId])
+
+  @@unique([shopOrderId, type])
+  @@index([shopId, createdAt])
+  @@map("wallet_transactions")
+}
+
+// ===== Đối soát COD (P4: COD-02, SHIP-05) =====
+
+/// Mỗi lần admin tài chính nhập file đối soát COD của GHN
+model CodReconciliation {
+  id             String   @id @default(uuid()) @db.Uuid
+  fileName       String   @map("file_name") @db.VarChar(200)
+  /// File gốc trong MinIO (bucket riêng tư)
+  fileKey        String   @map("file_key") @db.VarChar(200)
+  /// Mã băm nội dung: mỗi file chỉ nhập một lần
+  fileHash       String   @unique @map("file_hash") @db.VarChar(64)
+  uploadedBy     String   @map("uploaded_by") @db.Uuid
+  uploadedByName String   @map("uploaded_by_name") @db.VarChar(100)
+  totalRows      Int      @map("total_rows")
+  matched        Int
+  mismatched     Int
+  duplicated     Int
+  notFound       Int      @map("not_found")
+  notDelivered   Int      @map("not_delivered")
+  /// Tổng tiền COD theo file
+  totalCod       Int      @map("total_cod")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  items CodReconciliationItem[]
+
+  @@index([createdAt])
+  @@map("cod_reconciliations")
+}
+
+enum ReconcileResult {
+  /// Khớp mã vận đơn và số tiền: tiền COD coi là đã về sàn
+  MATCHED
+  /// Lệch số tiền: chờ admin xử lý
+  MISMATCHED
+  /// Vận đơn đã đối soát trước đó: không cộng lần nữa
+  DUPLICATE
+  NOT_FOUND
+  /// Vận đơn chưa giao xong
+  NOT_DELIVERED
+}
+
+enum ReconcileResolution {
+  /// Chấp nhận số GHN, coi tiền đã về
+  ACCEPTED
+  /// Chỉ ghi chú, để lại
+  NOTED
+}
+
+/// Từng dòng trong file đối soát COD
+model CodReconciliationItem {
+  id               String               @id @default(uuid()) @db.Uuid
+  reconciliationId String               @map("reconciliation_id") @db.Uuid
+  rowNumber        Int                  @map("row_number")
+  // Theo file GHN
+  ghnCode          String               @map("ghn_code") @db.VarChar(40)
+  codAmount        Int                  @map("cod_amount")
+  shipFee          Int                  @map("ship_fee")
+  returnFee        Int                  @map("return_fee")
+  // Theo sàn
+  shopOrderId      String?              @map("shop_order_id") @db.Uuid
+  expectedCod      Int?                 @map("expected_cod")
+  /// Phí ship sàn đã thu của người mua
+  buyerShippingFee Int?                 @map("buyer_shipping_fee")
+  result           ReconcileResult
+  resolution       ReconcileResolution?
+  note             String?              @db.VarChar(500)
+  resolvedBy       String?              @map("resolved_by") @db.Uuid
+  resolvedAt       DateTime?            @map("resolved_at") @db.Timestamptz(3)
+
+  reconciliation CodReconciliation @relation(fields: [reconciliationId], references: [id])
+
+  @@index([reconciliationId, rowNumber])
+  @@index([ghnCode])
+  @@map("cod_reconciliation_items")
 }
 
 enum Gateway {
@@ -98,13 +262,27 @@ model Payment {
   gatewayResponse Json?         @map("gateway_response")
   /// Lần tra cứu gần nhất
   checkedAt       DateTime?     @map("checked_at") @db.Timestamptz(3)
+  // ----- Đối soát VNPay (P4: PAY-05) -----
+  reconcileStatus ReconcileStatus? @map("reconcile_status")
+  reconcileNote   String?          @map("reconcile_note") @db.VarChar(500)
+  reconciledAt    DateTime?        @map("reconciled_at") @db.Timestamptz(3)
   createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   refunds Refund[]
 
   @@unique([orderId, attempt])
+  @@index([reconcileStatus])
   @@map("payments")
+}
+
+enum ReconcileStatus {
+  /// Tra cứu lại VNPay khớp
+  MATCHED
+  /// Lệch (số tiền/trạng thái), chờ admin tài chính xem
+  MISMATCH
+  /// Admin đã xử lý, có ghi chú
+  RESOLVED
 }
 
 enum RefundReason {
@@ -114,6 +292,10 @@ enum RefundReason {
   LATE_PAYMENT
   /// Đơn đã được trả bằng lần khác
   DUPLICATE_PAYMENT
+  /// Giao thất bại lần cuối: hoàn tiền hàng sau voucher (P4)
+  DELIVERY_FAILED
+  /// GHN làm mất/hỏng hàng: hoàn đủ (P4)
+  INCIDENT
 }
 
 enum RefundStatus {
