@@ -47,6 +47,8 @@ Lệnh nạp bộ danh mục, 2 shop đã duyệt (Táo Xanh Mobile, Galaxy Hub)
 
 Đặt hàng (P3): chưa điền khóa VNPay vào `services/payment-service/.env` thì bấm Thanh toán sẽ mở **cổng MÔ PHỎNG** (không có tiền thật). Cách bật VNPay sandbox và nhận IPN bằng cloudflared: `services/payment-service/README.md`. Muốn thử hết hạn nhanh: đăng nhập admin, vào Quản trị › Cấu hình chính sách, giảm "Hạn thanh toán" và "Giữ tồn" xuống 1–2 phút.
 
+Giao hàng và đối soát (P4): chưa điền `GHN_TOKEN` vào `services/marketplace-service/.env` thì vận đơn là **MÔ PHỎNG**: admin (bộ quyền Hỗ trợ) vào Quản trị › GHN mô phỏng để bấm "Đã lấy hàng", "Đã giao", "Giao thất bại"... thay cho GHN. Tiền COD về ví seller sau khi admin Tài chính nhập file ở Quản trị › Đối soát COD (chưa có file GHN thật thì bấm "Tải file MÔ PHỎNG" rồi tải lên lại).
+
 | Công cụ               | Địa chỉ                                    |
 | --------------------- | ------------------------------------------ |
 | Web                   | http://localhost:5173                      |
