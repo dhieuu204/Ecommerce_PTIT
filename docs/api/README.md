@@ -5,11 +5,11 @@ Nhóm chọn cách **code trước, sinh tài liệu**: không viết file OpenA
 | Nội dung | Ở đâu |
 | --- | --- |
 | Quy ước chung (đường dẫn, đăng nhập, lỗi, phân trang) | File này, mục 1 |
-| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3) |
+| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3), mục 5 (P4) |
 | Sự kiện giữa các service qua RabbitMQ | `events.md` + kiểu TypeScript trong `packages/shared/src/events` |
-| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 5 |
+| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 6 |
 
-Muốn thêm hoặc đổi API so với danh sách ở mục 2–4, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
+Muốn thêm hoặc đổi API so với danh sách ở mục 2–5, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
 
 ## 1. Quy ước chung
 
@@ -371,7 +371,80 @@ Mỗi service có cùng 3 API (code chung `SettingsModule` trong `packages/nest-
 5. marketplace chốt tồn; đơn đã trả và đã qua kiểm tra → 2 đơn con thành **Chờ shop xác nhận** (hạn 24 giờ).
 6. Buyer hủy đơn con của shop B → marketplace cộng lại tồn, trả lượt voucher shop B, phát `shop_order.cancelled` → payment-service hoàn đúng phần đơn con B → `refund.updated`. Đơn con A không đổi; shop A xác nhận → **Chờ giao hàng**.
 
-## 5. Tài liệu API tự sinh (Swagger)
+## 5. Danh sách API P4
+
+P4 (giao hàng và đối soát): ORD-03 (bàn giao), SHIP-02..05, COD-01, COD-02, PAY-05, FIN-01, FIN-02 (phần P4). Mục tiêu: theo dõi đầy đủ hàng và tiền; tiền COD chưa đối soát không được coi là đã về sàn. Quyết định của vòng này: `docs/phan-tich/11-quyet-dinh-p4.md` (GHN mô phỏng khi chưa có token, xác nhận = tạo vận đơn, giao thất bại tối đa 3 lần, shop chọn nhập lại kho từng dòng, COD do shop bật/tắt, file đối soát COD dạng Excel/CSV theo mẫu GHN).
+
+### Quy tắc chung của P4
+
+- **Trạng thái đơn con** (bổ sung vào bảng ở mục 4):
+
+  | Trạng thái | Nghĩa | Sang |
+  | --- | --- | --- |
+  | `CONFIRMED` | Shop đã xác nhận, vận đơn đã tạo, chờ GHN lấy hàng (hạn `handover_hours` tính từ lúc sang `TO_CONFIRM`) | `SHIPPING`, `CANCEL_REQUESTED`, `CANCELLED` |
+  | `SHIPPING` | GHN đã lấy hàng, đang giao | `DELIVERED`, `RETURNING`, `INCIDENT` |
+  | `DELIVERED` | GHN giao thành công; bắt đầu `complete_days` ngày (hạn trả hàng ở P5) | `COMPLETED` |
+  | `COMPLETED` | Hoàn tất (hết hạn, hoặc người mua bấm "Đã nhận, không trả") | |
+  | `RETURNING` | Giao thất bại lần cuối, GHN đang hoàn kiện về shop | `RETURNED`, `INCIDENT` |
+  | `RETURNED` | GHN báo đã hoàn kiện, chờ shop xác nhận đã nhận | `FAILED` |
+  | `FAILED` | Đóng: giao thất bại (shop đã nhận kiện, hoặc quá `return_close_days` ngày) | |
+  | `INCIDENT` | GHN báo thất lạc/hư hỏng, chờ admin `SUPPORT` xác nhận | `INCIDENT_RESOLVED` |
+  | `INCIDENT_RESOLVED` | Đóng: sự cố đã xác nhận | |
+
+- **Trạng thái đơn tổng** thêm: tất cả hoàn tất → `COMPLETED`; có đơn con hoàn tất và có đơn con hủy/thất bại/sự cố → `PARTIALLY_COMPLETED`; không có đơn con nào hoàn tất mà tất cả đã đóng → `CANCELLED`.
+- **Vận đơn** (`shipments`, SHIP-02): mỗi đơn con một vận đơn, `client_order_code` gửi GHN là mã đơn con nên gửi lại không tạo vận đơn thứ hai. Trạng thái vận đơn: `CREATING` (đang tạo), `UNKNOWN` (tạo bị lỗi mạng, job tra cứu GHN theo mã đơn con), `CREATE_FAILED` (GHN từ chối, seller bấm tạo lại), `READY_TO_PICK`, `PICKED` (đang giao), `DELIVERED`, `RETURNING`, `RETURNED`, `CANCELLED`, `LOST`.
+- **Trạng thái GHN báo về** (SHIP-03, bảng ở sơ đồ 04): `ready_to_pick`, `picking` → chờ lấy hàng; `picked`, `storing`, `transporting`, `sorting`, `delivering`, `money_collect_delivering` → đang giao; `delivery_fail` → giao thất bại một lần (đếm); `delivered` → đã giao; `waiting_to_return`, `return`, `return_transporting`, `return_sorting`, `returning` → đang hoàn kiện; `returned` → đã hoàn kiện; `cancel` → hủy; `lost`, `damage`, `exception`, `return_fail` → sự cố. Mỗi tin ghi một dòng `shipment_history` (trùng thì bỏ qua); trạng thái chỉ đi tiến, tin cũ tới sau không làm lùi.
+- **Hủy sau khi đã có vận đơn**: hủy vận đơn GHN trước; GHN đã lấy hàng → 409 `ALREADY_PICKED_UP`. Tin "đã lấy hàng" tới khi đơn đang `CANCEL_REQUESTED` → yêu cầu hủy hết hiệu lực, đơn sang `SHIPPING`.
+- **Giao thất bại lần cuối** (sang `RETURNING`): đơn trả trước được hoàn ngay tiền hàng sau voucher (`total - shippingFee`); COD không có gì để hoàn; sàn chịu phí hoàn. Shop xác nhận nhận kiện (`RETURNED` → `FAILED`) và chọn nhập lại kho từng dòng; quá hạn thì tự đóng, không cộng kho.
+- **Sự cố GHN**: admin `SUPPORT` xác nhận → đơn trả trước hoàn đủ `total`; seller được đền `sellerAmount` vào ngăn khả dụng.
+- **COD** (COD-01): chỉ chọn được khi mọi shop trong đơn có `codEnabled = true`. Đặt hàng COD trừ tồn ngay (không giữ), không có hạn thanh toán; đơn tổng `paymentStatus = COD`; mỗi đơn con thu hộ `codAmount = total`. Đơn từ 3 triệu cần duyệt (luật có sẵn).
+- **Tiền seller** (FIN-01, FIN-02): ví 3 ngăn `pending` (đang giữ), `available` (khả dụng), `locked` (P5). Mỗi biến động một dòng `wallet_transactions`, không sửa hay xóa dòng cũ; số dư mỗi ngăn không bao giờ âm. Vào `pending`: trả trước khi đã thanh toán, COD khi đã giao. Sang `available`: đơn con hoàn tất **và** tiền đã về sàn (trả trước: đã thu; COD: đã đối soát). Hủy/thất bại sau khi đã vào `pending` → dòng trừ lại.
+- **Con số cấu hình mới**: `handover_hours` (48), `max_delivery_attempts` (3), `complete_days` (7), `return_close_days` (7).
+
+### marketplace-service (`/api/market/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/checkout/preview` (bổ sung) | Đã đăng nhập | COD-01 | Nhận thêm `paymentMethod` = `VNPAY` (mặc định) \| `COD`; trả `codAvailable` (mọi shop nhận COD). Chọn COD khi có shop không nhận → `problems` ghi rõ shop nào, `canPlace = false`. |
+| POST `/orders` (bổ sung) | Đã đăng nhập | ORD-01, COD-01 | Đơn COD: trừ tồn ngay (câu SQL có điều kiện còn đủ hàng), ghi `stock_history`, không có hạn thanh toán; `POST /orders/{id}/pay` → 409 `ORDER_NOT_PAYABLE`. |
+| PATCH `/shops/me` (bổ sung) | Chủ shop | COD-01 | Thêm `codEnabled` (bật/tắt nhận COD), áp dụng cho đơn đặt sau đó. |
+| POST `/shops/me/orders/{shopOrderId}/confirm` (đổi) | Chủ shop | ORD-03, SHIP-02 | "Xác nhận và giao cho GHN": `TO_CONFIRM` → `CONFIRMED` và tạo vận đơn (khối lượng cộng từ sản phẩm, COD thì kèm tiền thu hộ). GHN lỗi thì đơn vẫn xác nhận, vận đơn ở `CREATE_FAILED`/`UNKNOWN`; trả đơn kèm `shipment`. |
+| POST `/shops/me/orders/{shopOrderId}/shipment/retry` | Chủ shop | SHIP-02 | Tạo lại vận đơn khi đang `CREATE_FAILED`. Trạng thái khác → 409 `SHIPMENT_NOT_RETRYABLE`. |
+| POST `/shops/me/orders/{shopOrderId}/return-received` | Chủ shop | SHIP-04 | `{ restockItemIds }`: các dòng hàng nhập lại kho (mỗi dòng cộng tồn, ghi `stock_history`). Chỉ khi `RETURNED` → `FAILED`; khác → 409 `ORDER_NOT_RETURNED`. |
+| POST `/orders/{orderId}/shop-orders/{shopOrderId}/received` | Người mua | ORD-02 | "Đã nhận, không trả hàng": `DELIVERED` → `COMPLETED` ngay. Khác → 409 `ORDER_NOT_DELIVERED`. |
+| GET `/orders/{orderId}`, `/shops/me/orders/{id}`, `/admin/orders/{orderId}` (bổ sung) | | SHIP-03 | Mỗi đơn con có thêm `shipment` (mã vận đơn, trạng thái, số lần giao thất bại, phí GHN, `simulated`) và `tracking` (các mốc GHN, mới nhất trước). |
+| POST `/webhooks/ghn?token=` | GHN (công khai) | SHIP-03 | Tin trạng thái từ GHN thật. Sai `token` → 401. Trả 200 cả khi bỏ qua (tin trùng, vận đơn lạ) để GHN không gửi lại mãi. |
+| GET `/admin/carrier-simulator` | `SUPPORT` | SHIP-03 | **Chỉ khi chạy MÔ PHỎNG** (có `GHN_TOKEN` → 404). Vận đơn chưa kết thúc, lọc `status`, kèm các bước bấm được tiếp theo. |
+| POST `/admin/carrier-simulator/{shipmentId}/events` | `SUPPORT` | SHIP-03, SHIP-04 | `{ event }` = `PICKED` \| `DELIVERY_FAILED` \| `DELIVERED` \| `RETURN` \| `RETURNED` \| `LOST`. Đi đúng đường xử lý như webhook GHN; giao thất bại đủ `max_delivery_attempts` lần thì tự sang hoàn hàng. Bước không hợp lệ → 409 `INVALID_CARRIER_EVENT`. |
+| POST `/admin/orders/{orderId}/shop-orders/{shopOrderId}/incident` | `SUPPORT` | SHIP-04 | `{ note }`: xác nhận sự cố GHN; chỉ khi `INCIDENT` → `INCIDENT_RESOLVED`; phát `shop_order.incident_confirmed`; ghi nhật ký. Khác → 409 `NO_INCIDENT`. |
+| GET `/admin/orders?tab=INCIDENT` (bổ sung) | `SUPPORT` | SHIP-04 | Thêm tab đơn có sự cố chờ xác nhận. |
+
+### payment-service (`/api/payment/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/wallet` | Chủ shop | FIN-01 | Số dư `pending`, `available`, `locked` của shop người gọi (nhận ra qua chủ shop lưu từ `order.placed`); chưa có đơn nào thì trả số 0. |
+| GET `/shops/me/wallet/transactions` | Chủ shop | FIN-01 | Lịch sử biến động, mới nhất trước, phân trang: loại, số tiền, từ ngăn nào sang ngăn nào, mã đơn con. |
+| GET `/shops/me/earnings` | Chủ shop | FIN-01, FIN-02 | Tiền từng đơn con: tiền hàng, voucher shop, phí sàn, seller nhận, trạng thái (`UNPAID`, `HELD`, `AVAILABLE`, `CANCELLED`, `FAILED`, `COMPENSATED`...), lý do chưa khả dụng (chưa hoàn tất / chưa đối soát COD). Lọc `status`, phân trang. |
+| GET `/admin/cod-reconciliations` | `FINANCE` | COD-02 | Các lần nhập file đối soát: tên file, người tải, số dòng khớp/lệch/trùng/không tìm thấy, tổng tiền COD. |
+| POST `/admin/cod-reconciliations` | `FINANCE` | COD-02, SHIP-05 | Tải file `.xlsx` hoặc `.csv` (tối đa 5 MB). Nhận diện cột theo tiêu đề (mã vận đơn, tiền thu hộ, phí giao, phí hoàn). Mỗi dòng: khớp mã vận đơn và số tiền → **khớp** (tiền COD của đơn con coi là đã về sàn, xét chuyển khả dụng); lệch tiền → **lệch**; vận đơn đã đối soát → **trùng** (không cộng lần nữa); không có → **không tìm thấy**; chưa giao → **chưa giao**. Cùng một file (mã băm) đã nhập → 409 `FILE_ALREADY_IMPORTED`. Thiếu cột bắt buộc → 400 `INVALID_RECONCILIATION_FILE`. Ghi nhật ký. |
+| GET `/admin/cod-reconciliations/{id}` | `FINANCE` | COD-02, SHIP-05 | Các dòng: mã vận đơn, đơn con, tiền COD theo GHN và theo sàn, phí ship đã thu của người mua, phí GHN, phí hoàn, chênh lệch sàn chịu, kết quả, ghi chú xử lý. |
+| POST `/admin/cod-reconciliations/items/{itemId}/resolve` | `FINANCE` | COD-02 | `{ accept, note }`: dòng lệch → `accept = true` thì chấp nhận số GHN, coi tiền đã về; `false` thì chỉ ghi chú. Ghi nhật ký. Dòng không lệch → 409 `ITEM_NOT_MISMATCHED`. |
+| GET `/admin/cod-reconciliations/template` | `FINANCE` | COD-02 | Tải file Excel mẫu (các cột hệ thống đọc được). |
+| GET `/admin/cod-reconciliations/simulated-file` | `FINANCE` | COD-02 | File Excel **MÔ PHỎNG** "GHN chuyển tiền" gồm các đơn COD đã giao chưa đối soát, để demo khi chưa có file thật. |
+| GET `/admin/vnpay-reconciliation` | `FINANCE` | PAY-05 | Các khoản cần xem: giao dịch "chưa rõ", giao dịch tra cứu lại không khớp (số tiền/trạng thái), tiền về muộn/trùng đã tạo khoản hoàn, khoản hoàn chưa rõ hoặc chờ hoàn tay; kèm lần chạy đối soát gần nhất. |
+| POST `/admin/vnpay-reconciliation/run` | `FINANCE` | PAY-05 | Chạy ngay việc đối soát (bình thường chạy mỗi đêm). |
+| POST `/admin/vnpay-reconciliation/payments/{paymentId}/note` | `FINANCE` | PAY-05 | `{ note }`: ghi chú xử lý khoản lệch, đánh dấu đã xử lý. Ghi nhật ký. |
+
+### Luồng P4 dùng các API trên
+
+1. Đơn đã qua kiểm tra (và đã trả nếu trả trước) ở "Chờ shop xác nhận". Seller bấm **Xác nhận và giao cho GHN** → vận đơn được tạo (MÔ PHỎNG khi chưa có token).
+2. Admin `SUPPORT` mở **GHN mô phỏng**, bấm "Đã lấy hàng" → đơn "Đang giao"; bấm "Đã giao" → đơn "Đã giao", người mua thấy nút "Đã nhận hàng". Đơn COD lúc này vào ngăn đang giữ của seller.
+3. Người mua bấm "Đã nhận hàng" (hoặc đủ 7 ngày) → đơn hoàn tất → tiền trả trước chuyển sang khả dụng; tiền COD chờ đối soát.
+4. Admin `FINANCE` tải file đối soát COD (hoặc file MÔ PHỎNG) → các dòng khớp làm tiền COD thành khả dụng; dòng lệch được ghi chú xử lý.
+5. Nhánh lỗi: bấm "Giao thất bại" đủ 3 lần → hoàn kiện, người mua trả trước được hoàn tiền hàng; "Đã hoàn" → seller xác nhận nhận kiện, chọn nhập lại kho. "Thất lạc" → admin xác nhận sự cố, người mua được hoàn, seller được đền.
+
+## 6. Tài liệu API tự sinh (Swagger)
 
 Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 
@@ -387,4 +460,4 @@ Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 - Dữ liệu vào và ra viết bằng **class DTO** (không dùng `any` hay object trơn). Trường vào kiểm bằng `class-validator` (`@IsEmail()`, `@MinLength(8)`...). Plugin Swagger trong `nest-cli.json` tự đọc kiểu và chú thích `/** ... */` của từng trường, nên viết chú thích tiếng Việt cho trường nào không tự giải thích.
 - Mỗi controller có `@ApiTags(...)`; API cần đăng nhập có `@ApiBearerAuth()`.
 - Mỗi mã lỗi riêng của API (ví dụ `EMAIL_TAKEN`) ghi bằng `@ApiResponse({ status: 409, description: 'EMAIL_TAKEN: ...' })`.
-- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–4.
+- Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–5.

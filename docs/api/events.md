@@ -166,7 +166,64 @@ payment-service: đơn con đã thu tiền → tạo khoản hoàn bằng số b
 
 marketplace lưu vào `shop_orders.refund_status` để buyer, seller thấy; chỉ áp trạng thái mới hơn (`updatedAt`).
 
-## 5. Thêm sự kiện mới
+## 5. Sự kiện P4
+
+Kiểu: `packages/shared/src/events/order.ts`. Sự kiện P3 `order.placed` thêm `paymentMethod = COD`; với đơn COD, `total` của đơn con là số GHN thu hộ.
+
+| Sự kiện | Gửi → nhận | Khi nào |
+| --- | --- | --- |
+| `shop_order.delivered` | marketplace → payment | GHN báo giao thành công (SHIP-03) |
+| `shop_order.completed` | marketplace → payment | Đơn con hoàn tất: người mua bấm "Đã nhận" hoặc hết hạn (FIN-02) |
+| `shop_order.delivery_failed` | marketplace → payment | Giao thất bại lần cuối, bắt đầu hoàn kiện (SHIP-04) |
+| `shop_order.incident_confirmed` | marketplace → payment | Admin xác nhận GHN làm mất/hỏng hàng (SHIP-04) |
+
+### `shop_order.delivered` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `shopOrderId` | |
+| `paymentMethod` | `VNPAY` hoặc `COD` |
+| `ghnCode` | Mã vận đơn (dùng để khớp file đối soát COD) |
+| `codAmount` | Số GHN thu hộ (0 với trả trước) |
+| `carrierFee` | Phí GHN tính cho vận đơn (để đối soát phí vận chuyển), `null` nếu chưa biết |
+| `deliveredAt` | |
+
+payment-service: đơn COD → ghi tiền seller vào ngăn đang giữ, lưu mã vận đơn và số thu hộ để chờ đối soát. Đơn trả trước → chỉ lưu mã vận đơn, phí GHN. Nhận trùng thì bỏ qua.
+
+### `shop_order.completed` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `shopOrderId` | |
+| `completedBy` | `BUYER` (bấm "Đã nhận") hoặc `SYSTEM` (hết hạn) |
+| `completedAt` | |
+
+payment-service đánh dấu đơn con hoàn tất; nếu tiền đã về sàn (trả trước đã thu, COD đã đối soát) thì chuyển tiền seller từ đang giữ sang khả dụng. P5 thêm điều kiện "không có trả hàng/tranh chấp đang mở".
+
+### `shop_order.delivery_failed` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `shopOrderId` | |
+| `paymentMethod` | |
+| `refundAmount` | Trả trước: tiền hàng sau voucher (`total - shippingFee`); COD: 0 |
+| `failedAt` | |
+
+payment-service: trừ lại tiền seller ở ngăn đang giữ (nếu có), đơn trả trước tạo khoản hoàn `refundAmount`.
+
+### `shop_order.incident_confirmed` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId`, `shopOrderId` | |
+| `paymentMethod` | |
+| `refundAmount` | Trả trước: `total` (hoàn đủ); COD: 0 |
+| `note` | Ghi chú của admin |
+| `confirmedAt` | |
+
+payment-service: trừ lại ngăn đang giữ (nếu có), ghi khoản đền `sellerAmount` thẳng vào ngăn khả dụng, đơn trả trước tạo khoản hoàn `refundAmount`.
+
+## 6. Thêm sự kiện mới
 
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
 2. Thêm một mục vào file này (bảng sự kiện của phase và bảng trường).

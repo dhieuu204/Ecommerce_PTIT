@@ -7,7 +7,8 @@ Cách làm đã chốt: **khung cả dự án + chi tiết theo phase**. File n�
 | P1 | `services/*/prisma/schema.prisma` và migration đầu tiên `prisma/migrations/*_p1_init` của mỗi service |
 | P2 | `schema.prisma` + migration `*_p2_catalog_cart_voucher` (marketplace), `*_p2_violations` (approval) |
 | P3 | Cột ghi ở các bảng P3 dưới đây; `schema.prisma` + migration `*_p3_orders` (marketplace), `*_p3_payments` (payment), `*_p3_order_checks` (approval) |
-| P4–P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
+| P4 | Cột ghi ở các bảng P4 dưới đây; migration `*_p4_shipping` (marketplace), `*_p4_wallet_reconciliation` (payment) |
+| P5–P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
 
 Sơ đồ (mở file `.excalidraw` trên excalidraw.com để sửa, `.png` để xem): `docs/so-do/09-erd-u-user-service`, `10-erd-m-marketplace-service`, `11-erd-p-payment-service`, `12-erd-a-approval-service`.
 
@@ -97,8 +98,10 @@ Không có bảng `saved_vouchers` (quyết định P3: không có bước lưu 
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `shipments` | P4 | id<br>shop_order_id → shop_orders<br>type: DELIVERY \| RETURN<br>ghn_code (không trùng)<br>status, fee, cod_amount | Vận đơn GHN |
-| `shipment_history` | P4 | id<br>shipment_id → shipments<br>ghn_status, happened_at | Các mốc GHN báo về |
+| `shipments` | P4 | id<br>shop_order_id → shop_orders, type: DELIVERY (RETURN ở P5); mỗi đơn con một vận đơn mỗi loại<br>carrier: GHN \| MOCK<br>client_code (mã đơn con gửi GHN, không trùng), ghn_code (không trùng)<br>status: CREATING \| UNKNOWN \| CREATE_FAILED \| READY_TO_PICK \| PICKED \| DELIVERED \| RETURNING \| RETURNED \| CANCELLED \| LOST<br>cod_amount, weight, fee (phí GHN), failed_attempts<br>picked_at, delivered_at, returned_at, last_event_at, last_error | Vận đơn GHN (hoặc MÔ PHỎNG) |
+| `shipment_history` | P4 | id<br>shipment_id → shipments<br>ghn_status (mã GHN gốc), status (đã quy đổi)<br>source: GHN \| MOCK, event_key (không trùng: bỏ tin lặp)<br>note, happened_at | Các mốc GHN báo về |
+
+Bảng P3 đổi ở P4: `shops` thêm `cod_enabled`; `orders.payment_method` thêm `COD`, `payment_status` thêm `COD`, `pay_before`/`hold_until` để trống với đơn COD; `shop_orders` thêm trạng thái `SHIPPING`, `DELIVERED`, `COMPLETED`, `RETURNING`, `RETURNED`, `FAILED`, `INCIDENT`, `INCIDENT_RESOLVED` và cột `cod_amount`, `handover_before`, `picked_at`, `delivered_at`, `complete_before`, `completed_at`, `returned_at`, `return_close_before`, `incident_note`.
 
 ### Trả hàng (P5)
 
@@ -139,17 +142,19 @@ Sơ đồ: `docs/so-do/11-erd-p-payment-service`
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `seller_earnings` | P3 | id<br>order_id ↗M, order_code<br>shop_order_id ↗M (không trùng), shop_order_code<br>shop_id ↗M, buyer_id ↗U<br>subtotal, shop_discount, platform_discount, shipping_fee<br>buyer_paid (số buyer trả cho đơn con)<br>platform_fee_rate (500 = 5%, chụp lúc nhận đơn), platform_fee, seller_amount<br>status: UNPAID \| HELD \| EXPIRED \| CANCELLED<br>pay_before, paid_at<br>released_at (P4) | Tiền của mỗi đơn con: buyer trả bao nhiêu, sàn thu phí bao nhiêu, seller nhận bao nhiêu. Cũng là bản chép đơn để payment-service biết số tiền cần thu (nhận qua `order.placed`) |
-| `seller_wallets` | P4 | shop_id ↗M<br>pending, available, locked | Ví seller: 3 ngăn tiền |
-| `wallet_transactions` | P4 | id<br>shop_id → seller_wallets<br>type, amount (+/-), from, to<br>shop_order_id?, withdrawal_id? | Lịch sử ví: mỗi biến động 1 dòng |
+| `seller_earnings` | P3 | id<br>order_id ↗M, order_code<br>shop_order_id ↗M (không trùng), shop_order_code<br>shop_id ↗M, buyer_id ↗U<br>subtotal, shop_discount, platform_discount, shipping_fee<br>buyer_paid (số buyer trả cho đơn con)<br>platform_fee_rate (500 = 5%, chụp lúc nhận đơn), platform_fee, seller_amount<br>status: UNPAID \| HELD \| AVAILABLE \| EXPIRED \| CANCELLED \| FAILED \| COMPENSATED<br>pay_before (trống với COD), paid_at<br>P4: payment_method: VNPAY \| COD, cod_amount, ghn_code, carrier_fee, delivered_at, completed_at, money_received_at (trả trước: lúc thu; COD: lúc đối soát khớp), released_at | Tiền của mỗi đơn con: buyer trả bao nhiêu, sàn thu phí bao nhiêu, seller nhận bao nhiêu. Cũng là bản chép đơn để payment-service biết số tiền cần thu (nhận qua `order.placed`) |
+| `seller_wallets` | P4 | shop_id ↗M (khóa chính)<br>owner_id ↗U (chủ shop, không trùng)<br>pending, available, locked (không âm, có ràng buộc trong database) | Ví seller: 3 ngăn tiền |
+| `wallet_transactions` | P4 | id<br>shop_id → seller_wallets<br>type: HELD \| RELEASED \| REVERSED \| COMPENSATION<br>amount (luôn dương), from_bucket, to_bucket: PENDING \| AVAILABLE \| LOCKED (trống = tiền vào/ra ví)<br>shop_order_id? (không trùng theo cặp đơn con + loại), withdrawal_id? (P5), note | Lịch sử ví: mỗi biến động 1 dòng. Test kiểm tổng các dòng khớp số dư |
 | `withdrawals` | P5 | id<br>shop_id → seller_wallets<br>amount (≥ 50.000đ), status<br>tài khoản ngân hàng (chép lại)<br>transfer_code, receipt_url, paid_at | Yêu cầu rút tiền và chi trả |
 
 ### Đối soát COD (P4)
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `cod_reconciliations` | P4 | id<br>file_url, uploaded_by ↗U<br>status, total | File đối soát GHN |
-| `cod_reconciliation_items` | P4 | id<br>reconciliation_id → cod_reconciliations<br>ghn_code, cod_amount, fee<br>shop_order_id? ↗M, matched | Từng dòng trong file |
+| `cod_reconciliations` | P4 | id<br>file_name, file_key (MinIO riêng tư), file_hash (không trùng: mỗi file nhập 1 lần)<br>uploaded_by ↗U, uploaded_by_name<br>total_rows, matched, mismatched, duplicated, not_found, not_delivered<br>total_cod | File đối soát COD của GHN |
+| `cod_reconciliation_items` | P4 | id<br>reconciliation_id → cod_reconciliations, row_number<br>ghn_code, cod_amount, ship_fee, return_fee (theo file)<br>shop_order_id? ↗M, expected_cod, buyer_shipping_fee (theo sàn)<br>result: MATCHED \| MISMATCHED \| DUPLICATE \| NOT_FOUND \| NOT_DELIVERED<br>resolution: ACCEPTED \| NOTED, note, resolved_by ↗U, resolved_at | Từng dòng trong file |
+
+Bảng P3 đổi ở P4: `payments` thêm `reconcile_status` (MATCHED \| MISMATCH \| RESOLVED), `reconcile_note`, `reconciled_at` cho đối soát VNPay; `refunds.reason` thêm `DELIVERY_FAILED`, `INCIDENT`.
 
 ## A: approval-service (approval_db)
 
