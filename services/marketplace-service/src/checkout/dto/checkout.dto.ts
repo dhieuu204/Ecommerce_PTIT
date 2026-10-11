@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -55,6 +56,11 @@ export class PreviewCheckoutDto {
   @IsString({ message: 'Mã voucher phải là chữ.' })
   @MaxLength(20, { message: 'Mã voucher dài tối đa 20 ký tự.' })
   platformVoucherCode?: string | null;
+
+  /** Cách thanh toán: VNPAY (mặc định, trả trước) hoặc COD (trả khi nhận hàng) */
+  @IsOptional()
+  @IsIn(['VNPAY', 'COD'], { message: 'Cách thanh toán không hợp lệ.' })
+  paymentMethod?: 'VNPAY' | 'COD';
 }
 
 export class PlaceOrderDto {

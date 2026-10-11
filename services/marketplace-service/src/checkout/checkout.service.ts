@@ -100,7 +100,10 @@ export interface VoucherError {
 
 /** Bản xem trước (chưa có mã phiên) */
 export interface CheckoutData {
-  paymentMethod: 'VNPAY';
+  /** VNPAY: trả trước; COD: thanh toán khi nhận hàng */
+  paymentMethod: 'VNPAY' | 'COD';
+  /** Mọi shop trong đơn đều nhận COD (COD-01) */
+  codAvailable: boolean;
   address: CheckoutAddress;
   shops: CheckoutShop[];
   platformVoucher: AppliedVoucher | null;
@@ -129,6 +132,7 @@ interface CheckoutInput {
   addressId: string;
   shopVouchers: Record<string, string | null>;
   platformVoucherCode: string | null;
+  paymentMethod: 'VNPAY' | 'COD';
 }
 
 /** Đầu vào của bước tính: undefined = tự chọn voucher giảm nhiều nhất */
@@ -137,13 +141,15 @@ interface ComputeInput {
   shopVouchers?: Record<string, string | null>;
   autoShopVouchers: boolean;
   platformVoucherCode?: string | null;
+  paymentMethod: 'VNPAY' | 'COD';
 }
 
 export interface PlacedOrder {
   orderId: string;
   code: string;
   total: number;
-  payBefore: Date;
+  /** Trống với đơn COD */
+  payBefore: Date | null;
 }
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -182,8 +188,10 @@ export class CheckoutService {
       shopVouchers,
       autoShopVouchers: true,
       platformVoucherCode: dto.platformVoucherCode,
+      paymentMethod: dto.paymentMethod ?? 'VNPAY',
     });
     const input: CheckoutInput = {
+      paymentMethod: data.paymentMethod,
       itemIds: data.shops.flatMap((s) => s.items.map((i) => i.cartItemId)),
       addressId: address.id,
       shopVouchers: Object.fromEntries(
@@ -249,6 +257,7 @@ export class CheckoutService {
           shopVouchers: input.shopVouchers,
           autoShopVouchers: false,
           platformVoucherCode: input.platformVoucherCode,
+          paymentMethod: input.paymentMethod ?? 'VNPAY',
         });
         const changes = diff(snapshot, fresh);
         if (changes.length > 0) {
@@ -282,14 +291,19 @@ export class CheckoutService {
       MarketSetting.stockHoldMinutes,
     ]);
     const now = new Date();
-    const payBefore = new Date(now.getTime() + s[MarketSetting.paymentMinutes]! * 60_000);
+    const cod = d.paymentMethod === 'COD';
+    // COD không có hạn thanh toán; trả trước: hạn thanh toán và hạn giữ tồn
+    const payBefore = cod
+      ? null
+      : new Date(now.getTime() + s[MarketSetting.paymentMinutes]! * 60_000);
     const holdMinutes = Math.max(
       s[MarketSetting.stockHoldMinutes]!,
       s[MarketSetting.paymentMinutes]!,
     );
-    const holdUntil = new Date(now.getTime() + holdMinutes * 60_000);
+    const holdUntil = cod ? null : new Date(now.getTime() + holdMinutes * 60_000);
 
-    // Giữ tồn: một câu SQL có điều kiện cho mỗi biến thể, nên hai người tranh SKU cuối chỉ một người được
+    // Giữ tồn (trả trước) hoặc trừ tồn ngay (COD): một câu SQL có điều kiện cho mỗi biến thể, nên hai
+    // người tranh SKU cuối chỉ một người được
     const needed = new Map<string, { quantity: number; name: string }>();
     for (const line of d.shops.flatMap((x) => x.items)) {
       const cur = needed.get(line.variantId);
@@ -299,9 +313,13 @@ export class CheckoutService {
       });
     }
     for (const [variantId, { quantity, name }] of needed) {
-      const ok = await tx.$executeRaw`
-        UPDATE product_variants SET reserved = reserved + ${quantity}
-        WHERE id = ${variantId}::uuid AND active AND stock - reserved >= ${quantity}`;
+      const ok = cod
+        ? await tx.$executeRaw`
+            UPDATE product_variants SET stock = stock - ${quantity}
+            WHERE id = ${variantId}::uuid AND active AND stock - reserved >= ${quantity}`
+        : await tx.$executeRaw`
+            UPDATE product_variants SET reserved = reserved + ${quantity}
+            WHERE id = ${variantId}::uuid AND active AND stock - reserved >= ${quantity}`;
       if (ok === 0) {
         throw new AppError(409, 'CHECKOUT_CHANGED', `"${name}" không còn đủ hàng.`, {
           problems: [`"${name}" không còn đủ hàng, người khác vừa mua.`],
@@ -350,6 +368,8 @@ export class CheckoutService {
         subtotal: d.subtotal,
         shippingFee: d.shippingFee,
         total: d.total,
+        paymentMethod: d.paymentMethod,
+        paymentStatus: cod ? 'COD' : 'UNPAID',
         payBefore,
         holdUntil,
       },
@@ -381,8 +401,31 @@ export class CheckoutService {
           shippingFee: shop.shippingFee,
           shippingFeeSource: shop.shippingFeeSource,
           total: shop.total,
+          codAmount: cod ? shop.total : 0,
         },
       });
+      if (cod) {
+        // COD: tồn đã trừ hẳn lúc đặt, ghi lịch sử tồn và số đã bán
+        for (const l of shop.items) {
+          const v = await tx.productVariant.findUniqueOrThrow({
+            where: { id: l.variantId },
+            select: { stock: true },
+          });
+          await tx.stockHistory.create({
+            data: {
+              variantId: l.variantId,
+              change: -l.quantity,
+              stockAfter: v.stock,
+              reason: `Bán đơn ${so.code} (COD)`,
+              createdBy: buyer.id,
+              orderId: order.id,
+            },
+          });
+          await tx.$executeRaw`
+            UPDATE products SET sold_count = sold_count + ${l.quantity}
+            WHERE id = ${l.productId}::uuid`;
+        }
+      }
       const discounts = itemDiscounts(
         shop.items.map((l) => l.lineTotal),
         shop.shopDiscount + shop.platformDiscount,
@@ -447,9 +490,9 @@ export class CheckoutService {
       orderId: order.id,
       code,
       buyer: { userId: buyer.id, name: buyer.name, email: buyer.email },
-      paymentMethod: 'VNPAY',
+      paymentMethod: d.paymentMethod,
       total: order.total,
-      payBefore: payBefore.toISOString(),
+      payBefore: payBefore?.toISOString() ?? null,
       shippingProvince: d.address.provinceName,
       shopOrders: placed,
       placedAt: order.createdAt.toISOString(),
@@ -533,6 +576,7 @@ export class CheckoutService {
                     ownerId: true,
                     pickupDistrictId: true,
                     pickupWardCode: true,
+                    codEnabled: true,
                   },
                 },
               },
@@ -726,8 +770,20 @@ export class CheckoutService {
       shops[i]!.platformDiscount = t.platformDiscount;
       shops[i]!.total = t.total;
     });
+
+    // COD-01: chỉ chọn COD được khi mọi shop trong đơn đều nhận COD
+    const noCod = [...groups.values()].filter((g) => !g.shop.codEnabled);
+    if (input.paymentMethod === 'COD') {
+      for (const g of noCod) {
+        problems.push({
+          cartItemId: null,
+          message: `Shop "${g.shop.name ?? ''}" không nhận thanh toán khi nhận hàng (COD).`,
+        });
+      }
+    }
     return {
-      paymentMethod: 'VNPAY',
+      paymentMethod: input.paymentMethod,
+      codAvailable: noCod.length === 0,
       address,
       shops,
       platformVoucher,

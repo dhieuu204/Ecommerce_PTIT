@@ -98,6 +98,8 @@ model Shop {
   bankAccountName   String?    @map("bank_account_name") @db.VarChar(100)
   /// Lý do đình chỉ gần nhất (hiện cho seller), xóa khi khôi phục
   suspendReason     String?    @map("suspend_reason") @db.VarChar(500)
+  /// Nhận thanh toán khi nhận hàng (COD, P4)
+  codEnabled        Boolean    @default(true) @map("cod_enabled")
   /// Thời điểm của quyết định đình chỉ/khôi phục đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua
   moderatedAt       DateTime?  @map("moderated_at") @db.Timestamptz(3)
   createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -219,7 +221,7 @@ model ProductVariant {
   /// false = seller đã bỏ tổ hợp này; giữ dòng vì giỏ hàng và đơn cũ còn trỏ tới
   active        Boolean @default(true)
 
-  product   Product        @relation(fields: [productId], references: [id])
+  product    Product        @relation(fields: [productId], references: [id])
   stockLogs  StockHistory[]
   cartItems  CartItem[]
   orderItems OrderItem[]
@@ -378,11 +380,15 @@ model Checkout {
 
 enum PaymentMethod {
   VNPAY
+  /// Thanh toán khi nhận hàng (P4)
+  COD
 }
 
 enum OrderPaymentStatus {
   UNPAID
   PAID
+  /// Thanh toán khi nhận hàng: GHN thu hộ, không có hạn thanh toán
+  COD
 }
 
 enum OrderCheckStatus {
@@ -420,10 +426,10 @@ model Order {
   total               Int
   paymentStatus       OrderPaymentStatus @default(UNPAID) @map("payment_status")
   checkStatus         OrderCheckStatus   @default(PENDING) @map("check_status")
-  /// Hạn thanh toán
-  payBefore           DateTime           @map("pay_before") @db.Timestamptz(3)
-  /// Hết giữ tồn: chưa trả tới lúc này thì hủy cả đơn
-  holdUntil           DateTime           @map("hold_until") @db.Timestamptz(3)
+  /// Hạn thanh toán (trống với COD)
+  payBefore           DateTime?          @map("pay_before") @db.Timestamptz(3)
+  /// Hết giữ tồn: chưa trả tới lúc này thì hủy cả đơn (trống với COD)
+  holdUntil           DateTime?          @map("hold_until") @db.Timestamptz(3)
   paidAt              DateTime?          @map("paid_at") @db.Timestamptz(3)
   createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -448,6 +454,21 @@ enum ShopOrderStatus {
   /// Buyer xin hủy, chờ shop trả lời
   CANCEL_REQUESTED
   CANCELLED
+  /// GHN đã lấy hàng, đang giao (P4)
+  SHIPPING
+  /// GHN giao thành công; đếm ngày tới hoàn tất
+  DELIVERED
+  COMPLETED
+  /// Giao thất bại lần cuối, GHN đang hoàn kiện về shop
+  RETURNING
+  /// GHN báo đã hoàn kiện, chờ shop xác nhận đã nhận
+  RETURNED
+  /// Đóng: giao thất bại
+  FAILED
+  /// GHN báo thất lạc/hư hỏng, chờ admin xác nhận
+  INCIDENT
+  /// Đóng: sự cố đã xác nhận
+  INCIDENT_RESOLVED
 }
 
 enum CancelActor {
@@ -514,6 +535,22 @@ model ShopOrder {
   /// Trạng thái hoàn tiền (nhận từ payment-service)
   refundStatus        RefundStatus      @default(NONE) @map("refund_status")
   refundUpdatedAt     DateTime?         @map("refund_updated_at") @db.Timestamptz(3)
+  // ----- P4: giao hàng -----
+  /// Số GHN thu hộ (COD), 0 với trả trước
+  codAmount           Int               @default(0) @map("cod_amount")
+  /// Hạn bàn giao cho GHN (tính từ lúc sang TO_CONFIRM)
+  handoverBefore      DateTime?         @map("handover_before") @db.Timestamptz(3)
+  pickedAt            DateTime?         @map("picked_at") @db.Timestamptz(3)
+  deliveredAt         DateTime?         @map("delivered_at") @db.Timestamptz(3)
+  /// Tự hoàn tất lúc này nếu người mua chưa bấm "Đã nhận"
+  completeBefore      DateTime?         @map("complete_before") @db.Timestamptz(3)
+  completedAt         DateTime?         @map("completed_at") @db.Timestamptz(3)
+  /// GHN báo đã hoàn kiện về shop
+  returnedAt          DateTime?         @map("returned_at") @db.Timestamptz(3)
+  /// Shop chưa xác nhận nhận kiện tới lúc này thì tự đóng, không cộng kho
+  returnCloseBefore   DateTime?         @map("return_close_before") @db.Timestamptz(3)
+  /// Ghi chú khi admin xác nhận sự cố GHN
+  incidentNote        String?           @map("incident_note") @db.VarChar(500)
   createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -522,6 +559,7 @@ model ShopOrder {
   items         OrderItem[]
   history       OrderHistory[]
   voucherUsages VoucherUsage[]
+  shipments     Shipment[]
 
   @@index([orderId])
   @@index([shopId, status, createdAt])
@@ -571,6 +609,100 @@ model OrderHistory {
 
   @@index([shopOrderId, createdAt])
   @@map("order_history")
+}
+
+// ===== Giao hàng (P4) =====
+
+enum ShipmentType {
+  DELIVERY
+  /// Hàng trả của người mua (P5)
+  RETURN
+}
+
+enum Carrier {
+  GHN
+  /// Đơn vị vận chuyển mô phỏng (chưa có GHN_TOKEN)
+  MOCK
+}
+
+enum ShipmentStatus {
+  /// Đang gọi GHN tạo vận đơn
+  CREATING
+  /// Tạo vận đơn bị lỗi mạng: tra cứu GHN theo mã đơn con, không gửi lại mù quáng
+  UNKNOWN
+  /// GHN từ chối tạo: seller bấm tạo lại
+  CREATE_FAILED
+  READY_TO_PICK
+  /// GHN đã lấy hàng, đang giao
+  PICKED
+  DELIVERED
+  RETURNING
+  RETURNED
+  /// Đã hủy phía sàn, chờ báo hủy với GHN (job thử lại)
+  CANCELLING
+  CANCELLED
+  /// Thất lạc, hư hỏng
+  LOST
+}
+
+/// Vận đơn GHN (SHIP-02). Mỗi đơn con một vận đơn mỗi loại; mã gửi GHN là mã đơn con nên gửi lại không tạo trùng
+model Shipment {
+  id             String         @id @default(uuid()) @db.Uuid
+  shopOrderId    String         @map("shop_order_id") @db.Uuid
+  type           ShipmentType   @default(DELIVERY)
+  carrier        Carrier
+  /// client_order_code gửi GHN (= mã đơn con)
+  clientCode     String         @unique @map("client_code") @db.VarChar(40)
+  /// Mã vận đơn GHN trả về
+  ghnCode        String?        @unique @map("ghn_code") @db.VarChar(40)
+  status         ShipmentStatus @default(CREATING)
+  codAmount      Int            @default(0) @map("cod_amount")
+  /// gram
+  weight         Int
+  /// Phí GHN tính cho vận đơn
+  fee            Int?
+  failedAttempts Int            @default(0) @map("failed_attempts")
+  pickedAt       DateTime?      @map("picked_at") @db.Timestamptz(3)
+  deliveredAt    DateTime?      @map("delivered_at") @db.Timestamptz(3)
+  returnedAt     DateTime?      @map("returned_at") @db.Timestamptz(3)
+  /// Thời điểm của tin GHN mới nhất đã áp
+  lastEventAt    DateTime?      @map("last_event_at") @db.Timestamptz(3)
+  lastError      String?        @map("last_error") @db.VarChar(500)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  shopOrder ShopOrder         @relation(fields: [shopOrderId], references: [id])
+  history   ShipmentHistory[]
+
+  @@unique([shopOrderId, type])
+  @@index([status])
+  @@map("shipments")
+}
+
+enum EventSource {
+  GHN
+  MOCK
+}
+
+/// Các mốc GHN báo về (SHIP-03). Chỉ thêm, không sửa; tin trùng bị chặn bởi event_key
+model ShipmentHistory {
+  id         String         @id @default(uuid()) @db.Uuid
+  shipmentId String         @map("shipment_id") @db.Uuid
+  /// Mã trạng thái gốc của GHN, ví dụ delivering, delivery_fail
+  ghnStatus  String         @map("ghn_status") @db.VarChar(40)
+  /// Trạng thái vận đơn sau khi quy đổi
+  status     ShipmentStatus
+  source     EventSource
+  /// Chống tin lặp: mã vận đơn + mã trạng thái + thời điểm
+  eventKey   String         @unique @map("event_key") @db.VarChar(120)
+  note       String?        @db.VarChar(300)
+  happenedAt DateTime       @map("happened_at") @db.Timestamptz(3)
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id])
+
+  @@index([shipmentId, happenedAt])
+  @@map("shipment_history")
 }
 
 /// Cấu hình có phiên bản (ADM-01): hạn thanh toán, giữ tồn, hạn xác nhận, phí ship cố định.

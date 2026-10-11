@@ -176,6 +176,7 @@ Kiểu: `packages/shared/src/events/order.ts`. Sự kiện P3 `order.placed` th�
 | `shop_order.completed` | marketplace → payment | Đơn con hoàn tất: người mua bấm "Đã nhận" hoặc hết hạn (FIN-02) |
 | `shop_order.delivery_failed` | marketplace → payment | Giao thất bại lần cuối, bắt đầu hoàn kiện (SHIP-04) |
 | `shop_order.incident_confirmed` | marketplace → payment | Admin xác nhận GHN làm mất/hỏng hàng (SHIP-04) |
+| `seller_earnings.recorded` | payment → marketplace | Đã ghi tiền seller dự kiến của đơn (cả COD), kèm phí sàn |
 
 ### `shop_order.delivered` (version 1)
 
@@ -217,11 +218,23 @@ payment-service: trừ lại tiền seller ở ngăn đang giữ (nếu có), đ
 | --- | --- |
 | `orderId`, `shopOrderId` | |
 | `paymentMethod` | |
-| `refundAmount` | Trả trước: `total` (hoàn đủ); COD: 0 |
+| `refundAmount` | Trả trước: `total` (hoàn đủ); COD: 0. Mất lúc đang hoàn về (đã hoàn khi giao thất bại): 0 |
 | `note` | Ghi chú của admin |
 | `confirmedAt` | |
 
 payment-service: trừ lại ngăn đang giữ (nếu có), ghi khoản đền `sellerAmount` thẳng vào ngăn khả dụng, đơn trả trước tạo khoản hoàn `refundAmount`.
+
+
+### `seller_earnings.recorded` (version 1)
+
+payment → marketplace. Kiểu ở `packages/shared/src/events/payment.ts`. Gửi khi payment-service nhận `order.placed` và đã ghi tiền seller dự kiến của các đơn con (cả trả trước lẫn COD). Đơn COD không có bước "thanh toán thành công" nên marketplace lấy phí sàn từ đây.
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `orderId` | |
+| `shopOrders[]` | `shopOrderId`, `platformFeeRate` (phần vạn), `platformFee`, `sellerAmount` (giống `payment.succeeded`) |
+
+marketplace-service: lưu phí sàn và số seller dự kiến nhận vào đơn con. Nhận lại thì ghi đè cùng giá trị. Tới trước khi có đơn con (không thể xảy ra vì đơn tạo trước khi gửi `order.placed`) thì báo lỗi để thử lại.
 
 ## 6. Thêm sự kiện mới
 

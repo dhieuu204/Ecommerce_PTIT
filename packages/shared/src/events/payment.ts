@@ -43,3 +43,13 @@ export interface RefundUpdatedPayload {
   /** marketplace chỉ áp trạng thái mới hơn */
   updatedAt: string;
 }
+
+/**
+ * payment-service → marketplace-service: đã ghi tiền seller của các đơn con khi nhận đơn (P4). Đơn COD không
+ * có bước "thanh toán thành công" nên marketplace lấy phí sàn và số seller dự kiến nhận từ sự kiện này.
+ */
+export const SELLER_EARNINGS_RECORDED = 'seller_earnings.recorded';
+export interface SellerEarningsRecordedPayload {
+  orderId: string;
+  shopOrders: ShopOrderEarning[];
+}

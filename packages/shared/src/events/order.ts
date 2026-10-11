@@ -1,7 +1,7 @@
 /** Sự kiện của luồng đặt hàng và kiểm tra đơn (P3: ORD-01, ORD-05, RSK-01). */
 
-/** P3 chỉ có trả trước qua VNPay; COD thêm ở P4 */
-export type PaymentMethod = 'VNPAY';
+/** Trả trước qua VNPay, hoặc thanh toán khi nhận hàng (COD, từ P4) */
+export type PaymentMethod = 'VNPAY' | 'COD';
 
 /** Ai hủy đơn con */
 export type CancelActor = 'BUYER' | 'SELLER' | 'ADMIN' | 'SYSTEM';
@@ -44,8 +44,8 @@ export interface OrderPlacedPayload {
   paymentMethod: PaymentMethod;
   /** Tổng buyer phải trả (đồng) = tổng total các đơn con */
   total: number;
-  /** Hạn thanh toán */
-  payBefore: string;
+  /** Hạn thanh toán; null với đơn COD */
+  payBefore: string | null;
   /** Tên tỉnh/thành nhận hàng */
   shippingProvince: string;
   shopOrders: PlacedShopOrder[];
@@ -78,4 +78,54 @@ export interface OrderCheckDecidedPayload {
   /** null khi tự động (không chạm luật, quá hạn) */
   decidedBy: { userId: string; name: string } | null;
   decidedAt: string;
+}
+
+// ----- P4: giao hàng -----
+
+/** marketplace-service → payment-service: GHN giao thành công một đơn con. */
+export const SHOP_ORDER_DELIVERED = 'shop_order.delivered';
+export interface ShopOrderDeliveredPayload {
+  orderId: string;
+  shopOrderId: string;
+  paymentMethod: PaymentMethod;
+  /** Mã vận đơn GHN (khớp file đối soát COD) */
+  ghnCode: string;
+  /** Số GHN thu hộ; 0 với trả trước */
+  codAmount: number;
+  /** Phí GHN tính cho vận đơn; null nếu chưa biết */
+  carrierFee: number | null;
+  deliveredAt: string;
+}
+
+/** marketplace-service → payment-service: đơn con hoàn tất. */
+export const SHOP_ORDER_COMPLETED = 'shop_order.completed';
+export interface ShopOrderCompletedPayload {
+  orderId: string;
+  shopOrderId: string;
+  /** BUYER: người mua bấm "Đã nhận"; SYSTEM: hết hạn */
+  completedBy: 'BUYER' | 'SYSTEM';
+  completedAt: string;
+}
+
+/** marketplace-service → payment-service: giao thất bại lần cuối, bắt đầu hoàn kiện. */
+export const SHOP_ORDER_DELIVERY_FAILED = 'shop_order.delivery_failed';
+export interface ShopOrderDeliveryFailedPayload {
+  orderId: string;
+  shopOrderId: string;
+  paymentMethod: PaymentMethod;
+  /** Trả trước: tiền hàng sau voucher (không hoàn phí ship chiều đi); COD: 0 */
+  refundAmount: number;
+  failedAt: string;
+}
+
+/** marketplace-service → payment-service: admin xác nhận GHN làm mất/hỏng hàng. */
+export const SHOP_ORDER_INCIDENT_CONFIRMED = 'shop_order.incident_confirmed';
+export interface ShopOrderIncidentConfirmedPayload {
+  orderId: string;
+  shopOrderId: string;
+  paymentMethod: PaymentMethod;
+  /** Trả trước: hoàn đủ số đã trả cho đơn con; COD: 0 */
+  refundAmount: number;
+  note: string;
+  confirmedAt: string;
 }

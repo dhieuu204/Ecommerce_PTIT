@@ -63,4 +63,12 @@ export class AppConfig {
   readonly paymentApiUrl = text('PAYMENT_API_URL', 'http://localhost:3003/api/payment/v1');
   /** Bản xem trước checkout dùng được trong bao nhiêu phút (kỹ thuật, không phải luật nghiệp vụ) */
   readonly checkoutPreviewMinutes = num('CHECKOUT_PREVIEW_MINUTES', 30);
+
+  // ----- P4: giao hàng -----
+  /** Mã bí mật trong đường dẫn webhook GHN (GHN không ký dữ liệu). Bí mật: chỉ để trong .env */
+  readonly ghnWebhookToken = text('GHN_WEBHOOK_TOKEN');
+  /** Kích thước kiện mặc định gửi GHN (cm) */
+  readonly packageLengthCm = num('PACKAGE_LENGTH_CM', 20);
+  readonly packageWidthCm = num('PACKAGE_WIDTH_CM', 15);
+  readonly packageHeightCm = num('PACKAGE_HEIGHT_CM', 10);
 }

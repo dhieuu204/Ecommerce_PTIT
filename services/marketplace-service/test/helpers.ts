@@ -17,6 +17,12 @@ import { PrismaService } from '../src/prisma.service';
 import { StorageService } from '../src/uploads/storage.service';
 import { PaymentClient } from '../src/clients/payment.client';
 import { UserClient } from '../src/clients/user.client';
+import {
+  SHIPPING_CARRIER,
+  type CarrierShipment,
+  type CreateShipmentInput,
+  type ShippingCarrier,
+} from '../src/shipping/carrier';
 
 export const API = '/api/market/v1';
 export const describeDb = process.env.TEST_DB ? describe : describe.skip;
@@ -48,6 +54,57 @@ export class FakeStorage {
   }
 }
 
+/**
+ * Đơn vị vận chuyển giả cho test (đóng vai bản MÔ PHỎNG). Đặt `createError` để giả GHN từ chối/lỗi mạng,
+ * `loseResponse` để giả "GHN đã tạo nhưng sàn không nhận được trả lời", `cancelResult` cho lúc hủy.
+ */
+export class FakeCarrier implements ShippingCarrier {
+  readonly kind = 'MOCK' as const;
+  /** Mọi lần gọi tạo vận đơn (kể cả lần lỗi) */
+  calls: CreateShipmentInput[] = [];
+  /** Vận đơn GHN đang có, theo mã đơn con: GHN không cho trùng client_order_code */
+  orders = new Map<string, CarrierShipment>();
+  cancelled: string[] = [];
+  createError: Error | null = null;
+  loseResponse = false;
+  cancelResult: 'CANCELLED' | 'ALREADY_PICKED' = 'CANCELLED';
+  cancelError: Error | null = null;
+  private seq = 0;
+
+  reset(): void {
+    this.calls = [];
+    this.orders.clear();
+    this.cancelled = [];
+    this.createError = null;
+    this.loseResponse = false;
+    this.cancelResult = 'CANCELLED';
+    this.cancelError = null;
+    this.seq = 0;
+  }
+
+  async createOrder(input: CreateShipmentInput): Promise<CarrierShipment> {
+    this.calls.push(input);
+    if (this.createError) throw this.createError;
+    let found = this.orders.get(input.clientCode);
+    if (!found) {
+      found = { ghnCode: `SIMTEST${++this.seq}`, fee: 25_000 };
+      this.orders.set(input.clientCode, found);
+    }
+    if (this.loseResponse) throw new Error('Hết thời gian chờ GHN (giả)');
+    return found;
+  }
+
+  async findByClientCode(clientCode: string): Promise<CarrierShipment | null> {
+    return this.orders.get(clientCode) ?? null;
+  }
+
+  async cancelOrder(ghnCode: string): Promise<'CANCELLED' | 'ALREADY_PICKED'> {
+    if (this.cancelError) throw this.cancelError;
+    if (this.cancelResult === 'CANCELLED') this.cancelled.push(ghnCode);
+    return this.cancelResult;
+  }
+}
+
 export interface TestApp {
   app: INestApplication;
   prisma: PrismaService;
@@ -63,6 +120,8 @@ export interface TestApp {
   users: { addresses: jest.Mock };
   /** payment-service giả */
   payments: { createPayment: jest.Mock };
+  /** GHN giả */
+  carrier: FakeCarrier;
   http: () => ReturnType<typeof request>;
 }
 
@@ -77,6 +136,7 @@ export async function createTestApp(): Promise<TestApp> {
   };
   const users = { addresses: jest.fn(async () => [BUYER_ADDRESS]) };
   const payments = { createPayment: jest.fn() };
+  const carrier = new FakeCarrier();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(JwtVerifier)
     .useValue(new JwtVerifier({ privateKey }))
@@ -88,6 +148,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(users)
     .overrideProvider(PaymentClient)
     .useValue(payments)
+    .overrideProvider(SHIPPING_CARRIER)
+    .useValue(carrier)
     .compile();
   const app = moduleRef.createNestApplication({ logger: false });
   setupApp(app, { apiPrefix: 'api/market/v1', title: 'test', description: 'test' });
@@ -99,13 +161,14 @@ export async function createTestApp(): Promise<TestApp> {
     ghn,
     users,
     payments,
+    carrier,
     http: () => request(app.getHttpServer()),
   };
 }
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, settings CASCADE',
+    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, shipments, shipment_history, settings CASCADE',
   );
 }
 

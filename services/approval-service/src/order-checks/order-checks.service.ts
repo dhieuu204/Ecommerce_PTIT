@@ -54,7 +54,7 @@ export function evaluateRules(
 ): RuleHit[] {
   const hits: RuleHit[] = [];
   if (order.total >= t.total) hits.push({ rule: 'TOTAL', threshold: t.total });
-  if ((order.paymentMethod as string) === 'COD' && order.total >= t.cod) {
+  if (order.paymentMethod === 'COD' && order.total >= t.cod) {
     hits.push({ rule: 'COD', threshold: t.cod });
   }
   return hits;

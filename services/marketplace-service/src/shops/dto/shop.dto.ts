@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -137,6 +138,11 @@ export class UpdateShopDto {
   @ValidateNested()
   @Type(() => PickupAddressDto)
   pickupAddress?: PickupAddressDto;
+
+  /** Nhận thanh toán khi nhận hàng (COD-01) */
+  @IsOptional()
+  @IsBoolean({ message: 'Lựa chọn COD không hợp lệ.' })
+  codEnabled?: boolean;
 }
 
 /** Đổi tên shop và/hoặc tài khoản ngân hàng: phải duyệt lại (SHP-03). Gửi ít nhất một mục. */

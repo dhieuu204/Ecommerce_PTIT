@@ -37,6 +37,7 @@ Kết quả cần đạt: theo dõi đầy đủ hàng và tiền; tiền COD ch
 | 9 | Kích thước kiện gửi GHN (dài, rộng, cao) dùng giá trị mặc định trong `.env`; khối lượng cộng từ sản phẩm. Phiếu in nhãn giao hàng chưa làm ở P4. |
 | 10 | Bảng điều khiển GHN mô phỏng và xác nhận sự cố dùng bộ quyền `SUPPORT`. |
 | 11 | Đơn COD không có hạn thanh toán; kiểm tra đơn qua là sang "Chờ shop xác nhận". Hủy đơn COD không phát sinh hoàn tiền; tồn kho (đã trừ lúc đặt) được cộng lại. |
+| 12 | GHN báo thất lạc khi kiện **đang hoàn về** (đơn trả trước đã được hoàn tiền hàng lúc giao thất bại): xác nhận sự cố không hoàn thêm cho người mua; seller vẫn được đền. |
 
 ## 3. Con số cấu hình mới (bảng `settings`)
 

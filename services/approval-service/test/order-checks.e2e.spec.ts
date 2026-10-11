@@ -14,6 +14,18 @@ describe('Luật kiểm tra đơn (RSK-01)', () => {
       { rule: 'TOTAL', threshold: 10_000_000 },
     ]);
   });
+
+  it('đơn COD có ngưỡng thấp hơn riêng (P4)', () => {
+    expect(evaluateRules({ total: 2_999_999, paymentMethod: 'COD' }, t)).toEqual([]);
+    expect(evaluateRules({ total: 3_000_000, paymentMethod: 'COD' }, t)).toEqual([
+      { rule: 'COD', threshold: 3_000_000 },
+    ]);
+    expect(evaluateRules({ total: 3_000_000, paymentMethod: 'VNPAY' }, t)).toEqual([]);
+    expect(evaluateRules({ total: 10_000_000, paymentMethod: 'COD' }, t)).toEqual([
+      { rule: 'TOTAL', threshold: 10_000_000 },
+      { rule: 'COD', threshold: 3_000_000 },
+    ]);
+  });
 });
 
 describeDb('Kiểm tra đơn (RSK-01)', () => {

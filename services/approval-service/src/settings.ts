@@ -21,7 +21,7 @@ export const APPROVAL_SETTINGS: SettingDefinition[] = [
     key: ApprovalSetting.codThreshold,
     label: 'Đơn COD từ mức này cần admin duyệt',
     unit: 'đồng',
-    description: 'Áp dụng khi có COD (P4).',
+    description: 'Đơn thanh toán khi nhận hàng có tổng từ mức này thì chờ admin duyệt.',
     min: 100_000,
     max: 1_000_000_000,
     defaultValue: 3_000_000,

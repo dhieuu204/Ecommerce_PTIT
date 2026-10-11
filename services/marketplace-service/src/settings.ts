@@ -6,6 +6,10 @@ export const MarketSetting = {
   stockHoldMinutes: 'stock_hold_minutes',
   confirmHours: 'confirm_hours',
   shippingFixedFee: 'shipping_fixed_fee',
+  handoverHours: 'handover_hours',
+  maxDeliveryAttempts: 'max_delivery_attempts',
+  completeDays: 'complete_days',
+  returnCloseDays: 'return_close_days',
 } as const;
 
 export const MARKET_SETTINGS: SettingDefinition[] = [
@@ -52,5 +56,44 @@ export const MARKET_SETTINGS: SettingDefinition[] = [
     min: 0,
     max: 500_000,
     defaultValue: 30_000,
+  },
+  {
+    key: MarketSetting.handoverHours,
+    label: 'Hạn bàn giao cho GHN',
+    unit: 'giờ',
+    description:
+      'Tính từ lúc đơn sang Chờ shop xác nhận. Quá hạn mà GHN chưa lấy hàng thì tự hủy, hoàn tiền.',
+    min: 1,
+    max: 336,
+    defaultValue: 48,
+  },
+  {
+    key: MarketSetting.maxDeliveryAttempts,
+    label: 'Số lần giao thất bại tối đa',
+    unit: 'lần',
+    description: 'Giao thất bại đủ số lần này thì hoàn hàng về shop (áp dụng cho GHN mô phỏng).',
+    min: 1,
+    max: 10,
+    defaultValue: 3,
+  },
+  {
+    key: MarketSetting.completeDays,
+    label: 'Tự hoàn tất đơn sau khi giao',
+    unit: 'ngày',
+    description:
+      'Cũng là hạn người mua yêu cầu trả hàng. Người mua bấm Đã nhận thì hoàn tất sớm hơn.',
+    min: 1,
+    max: 30,
+    defaultValue: 7,
+  },
+  {
+    key: MarketSetting.returnCloseDays,
+    label: 'Tự đóng đơn hoàn kiện',
+    unit: 'ngày',
+    description:
+      'Sau khi GHN báo đã hoàn kiện mà shop chưa xác nhận đã nhận thì tự đóng, không cộng kho.',
+    min: 1,
+    max: 30,
+    defaultValue: 7,
   },
 ];

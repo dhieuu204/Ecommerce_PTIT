@@ -818,7 +818,7 @@ describeDb('Đặt hàng và đơn (P3: ORD-01..05, INV-02, VCH-02/03)', () => {
 
       const { orderId } = await placeTwoShops();
       const o = await order(orderId);
-      const minutes = (o.payBefore.getTime() - o.createdAt.getTime()) / 60_000;
+      const minutes = (o.payBefore!.getTime() - o.createdAt.getTime()) / 60_000;
       expect(Math.round(minutes)).toBe(2);
     });
   });

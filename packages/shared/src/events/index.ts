@@ -3,17 +3,27 @@ import {
   ORDER_CHECK_DECIDED,
   ORDER_PLACED,
   SHOP_ORDER_CANCELLED,
+  SHOP_ORDER_COMPLETED,
+  SHOP_ORDER_DELIVERED,
+  SHOP_ORDER_DELIVERY_FAILED,
+  SHOP_ORDER_INCIDENT_CONFIRMED,
   type OrderCheckDecidedPayload,
   type OrderPlacedPayload,
   type ShopOrderCancelledPayload,
+  type ShopOrderCompletedPayload,
+  type ShopOrderDeliveredPayload,
+  type ShopOrderDeliveryFailedPayload,
+  type ShopOrderIncidentConfirmedPayload,
 } from './order';
 import {
   PAYMENT_EXPIRED,
   PAYMENT_SUCCEEDED,
   REFUND_UPDATED,
+  SELLER_EARNINGS_RECORDED,
   type PaymentExpiredPayload,
   type PaymentSucceededPayload,
   type RefundUpdatedPayload,
+  type SellerEarningsRecordedPayload,
 } from './payment';
 import {
   SHOP_APPLICATION_DECIDED,
@@ -43,6 +53,11 @@ export interface EventPayloads {
   [PAYMENT_SUCCEEDED]: PaymentSucceededPayload;
   [PAYMENT_EXPIRED]: PaymentExpiredPayload;
   [REFUND_UPDATED]: RefundUpdatedPayload;
+  [SHOP_ORDER_DELIVERED]: ShopOrderDeliveredPayload;
+  [SHOP_ORDER_COMPLETED]: ShopOrderCompletedPayload;
+  [SHOP_ORDER_DELIVERY_FAILED]: ShopOrderDeliveryFailedPayload;
+  [SHOP_ORDER_INCIDENT_CONFIRMED]: ShopOrderIncidentConfirmedPayload;
+  [SELLER_EARNINGS_RECORDED]: SellerEarningsRecordedPayload;
 }
 
 export type EventType = keyof EventPayloads;

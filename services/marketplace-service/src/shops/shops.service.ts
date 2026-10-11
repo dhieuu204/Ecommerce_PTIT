@@ -41,6 +41,8 @@ export interface ShopView {
   bankAccount: BankAccount | null;
   /** Lý do admin đình chỉ shop (status = SUSPENDED), để seller xem (SHP-04) */
   suspendReason: string | null;
+  /** Shop nhận thanh toán khi nhận hàng (COD-01) */
+  codEnabled: boolean;
   createdAt: Date;
 }
 
@@ -169,6 +171,7 @@ export class ShopsService implements OnModuleInit {
       description: dto.description,
       logoUrl: dto.logoUrl,
       phone: dto.phone,
+      codEnabled: dto.codEnabled,
     };
     if (dto.pickupAddress) {
       const p = await this.resolvePickup(dto.pickupAddress, 'pickupAddress.');
@@ -485,6 +488,7 @@ export class ShopsService implements OnModuleInit {
           }
         : null,
       suspendReason: shop.suspendReason,
+      codEnabled: shop.codEnabled,
       createdAt: shop.createdAt,
     };
   }
