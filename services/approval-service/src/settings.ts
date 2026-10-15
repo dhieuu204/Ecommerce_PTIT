@@ -5,6 +5,7 @@ export const ApprovalSetting = {
   totalThreshold: 'review_total_threshold',
   codThreshold: 'review_cod_threshold',
   timeoutHours: 'review_timeout_hours',
+  disputeSlaHours: 'dispute_sla_hours',
 } as const;
 
 export const APPROVAL_SETTINGS: SettingDefinition[] = [
@@ -34,5 +35,15 @@ export const APPROVAL_SETTINGS: SettingDefinition[] = [
     min: 1,
     max: 168,
     defaultValue: 24,
+  },
+  {
+    key: ApprovalSetting.disputeSlaHours,
+    label: 'Hạn admin phân xử tranh chấp trả hàng',
+    unit: 'giờ',
+    description:
+      'Chỉ để nhắc: quá hạn thì lên đầu danh sách và tô đỏ. Không bao giờ tự quyết; tiền seller giữ tới khi có quyết định.',
+    min: 1,
+    max: 336,
+    defaultValue: 72,
   },
 ];

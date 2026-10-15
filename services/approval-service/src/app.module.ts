@@ -6,6 +6,8 @@ import { PrismaService } from './prisma.service';
 import { APPROVAL_SETTINGS } from './settings';
 import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
 import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { WithdrawalApprovalsModule } from './withdrawal-approvals/withdrawal-approvals.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -23,6 +25,8 @@ import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
     ShopApprovalsModule,
     ShopModerationModule,
     OrderChecksModule,
+    DisputesModule,
+    WithdrawalApprovalsModule,
   ],
   controllers: [HealthController],
 })

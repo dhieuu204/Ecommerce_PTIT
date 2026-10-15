@@ -1,6 +1,7 @@
 // Schema của approval-service [A]. Chỉ service này được đọc/ghi database approval_db.
 // A chỉ lưu hồ sơ và quyết định; marketplace và payment tự áp dụng quyết định.
-// Bảng P1, P2 đã đủ cột. Khung các phase sau: docs/erd/README.md.
+// P1: duyệt shop. P2: đình chỉ shop. P3: kiểm tra đơn. P5: tranh chấp, điều chỉnh, duyệt rút tiền.
+// Khung các phase sau: docs/erd/README.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -126,6 +127,142 @@ model OrderCheck {
   @@index([status, deadline])
   @@index([buyerId])
   @@map("order_checks")
+}
+
+// ===== Tranh chấp, điều chỉnh, rút tiền (P5) =====
+
+enum DisputeType {
+  /// Tranh chấp trả hàng: admin hỗ trợ phân xử (DIS-01)
+  RETURN
+  /// Điều chỉnh tiền sau giải ngân: admin tài chính lập, admin tài chính khác duyệt (DIS-02)
+  ADJUSTMENT
+}
+
+enum DisputeStage {
+  /// Shop từ chối yêu cầu trả hàng, người mua khiếu nại
+  REQUEST_REJECTED
+  /// Shop báo hàng trả về không đúng
+  GOODS_PROBLEM
+}
+
+enum DisputeStatus {
+  /// Chờ admin quyết (RETURN) / chờ admin thứ hai duyệt (ADJUSTMENT)
+  PENDING
+  /// RETURN: đã phân xử
+  RESOLVED
+  /// ADJUSTMENT: đã duyệt, chờ payment-service thực thi
+  APPROVED
+  /// ADJUSTMENT: không duyệt
+  REJECTED
+  /// ADJUSTMENT: payment-service đã thực thi
+  EXECUTED
+  /// ADJUSTMENT: payment-service không thực thi được (ví dụ không đủ số dư)
+  FAILED
+}
+
+enum DisputeDecision {
+  /// RETURN giai đoạn 1: người mua gửi hàng về, shop kiểm như thường
+  ACCEPT_RETURN
+  /// RETURN: hoàn refund_amount (toàn bộ hoặc một phần)
+  REFUND
+  /// RETURN: không hoàn; ADJUSTMENT: không duyệt
+  REJECT
+  /// ADJUSTMENT: duyệt
+  APPROVE
+}
+
+/// Hồ sơ cần admin quyết: tranh chấp trả hàng (DIS-01) và đề nghị điều chỉnh tiền sau giải ngân (DIS-02),
+/// gộp một bảng theo vòng ERD (lời hai bên và điều chỉnh tiền là cột của tranh chấp)
+model Dispute {
+  id              String           @id @default(uuid()) @db.Uuid
+  type            DisputeType
+  /// RETURN: yêu cầu trả hàng bên marketplace
+  returnId        String?          @map("return_id") @db.Uuid
+  returnCode      String?          @map("return_code") @db.VarChar(28)
+  stage           DisputeStage?
+  orderId         String           @map("order_id") @db.Uuid
+  orderCode       String           @map("order_code") @db.VarChar(20)
+  shopOrderId     String           @map("shop_order_id") @db.Uuid
+  shopOrderCode   String           @map("shop_order_code") @db.VarChar(24)
+  shopId          String           @map("shop_id") @db.Uuid
+  shopName        String           @map("shop_name") @db.VarChar(100)
+  /// Chủ shop: admin trùng người này không được quyết
+  ownerId         String           @map("owner_id") @db.Uuid
+  /// Người mua: admin trùng người này không được quyết
+  buyerId         String           @map("buyer_id") @db.Uuid
+  buyerName       String           @map("buyer_name") @db.VarChar(100)
+  /// RETURN: hồ sơ trả hàng nhận qua sự kiện (lý do, mô tả, ảnh, món, phương thức thanh toán)
+  data            Json?
+  buyerStatement  String?          @map("buyer_statement") @db.VarChar(1000)
+  buyerImages     String[]         @map("buyer_images")
+  sellerStatement String?          @map("seller_statement") @db.VarChar(1000)
+  sellerImages    String[]         @map("seller_images")
+  /// RETURN: số hoàn tối đa
+  maxRefund       Int?             @map("max_refund")
+  status          DisputeStatus    @default(PENDING)
+  decision        DisputeDecision?
+  /// RETURN: số hoàn đã quyết; ADJUSTMENT: hoàn thêm cho người mua
+  refundAmount    Int?             @map("refund_amount")
+  /// ADJUSTMENT: cộng (dương) hoặc trừ (âm) ngăn khả dụng của shop
+  sellerChange    Int?             @map("seller_change")
+  /// ADJUSTMENT: tài khoản nhận tiền hoàn của người mua { bankName, accountNumber, accountName }
+  bankAccount     Json?            @map("bank_account")
+  /// ADJUSTMENT: lý do đề nghị
+  reason          String?          @db.VarChar(500)
+  /// ADJUSTMENT: admin lập đề nghị (không được tự duyệt)
+  createdBy       String?          @map("created_by") @db.Uuid
+  createdByName   String?          @map("created_by_name") @db.VarChar(100)
+  /// ADJUSTMENT: Idempotency-Key lúc lập
+  requestKey      String?          @unique @map("request_key") @db.VarChar(64)
+  /// RETURN: hạn phân xử (chỉ để nhắc, không tự quyết)
+  deadline        DateTime?        @db.Timestamptz(3)
+  decisionNote    String?          @map("decision_note") @db.VarChar(500)
+  decidedBy       String?          @map("decided_by") @db.Uuid
+  decidedByName   String?          @map("decided_by_name") @db.VarChar(100)
+  decidedAt       DateTime?        @map("decided_at") @db.Timestamptz(3)
+  /// ADJUSTMENT: kết quả payment-service thực thi (lý do khi không thực thi được)
+  executionNote   String?          @map("execution_note") @db.VarChar(500)
+  executedAt      DateTime?        @map("executed_at") @db.Timestamptz(3)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([returnId, stage])
+  @@index([type, status, createdAt])
+  @@map("disputes")
+}
+
+enum WithdrawalApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  /// Seller hủy trước khi duyệt
+  CANCELLED
+}
+
+/// Hồ sơ duyệt rút tiền (FIN-05). Tạo khi nhận withdrawal.requested; mọi yêu cầu rút đều phải duyệt
+model WithdrawalApproval {
+  id            String                   @id @default(uuid()) @db.Uuid
+  /// Yêu cầu rút bên payment-service
+  withdrawalId  String                   @unique @map("withdrawal_id") @db.Uuid
+  shopId        String                   @map("shop_id") @db.Uuid
+  shopName      String                   @map("shop_name") @db.VarChar(100)
+  /// Chủ shop: admin trùng người này không được tự duyệt
+  ownerId       String                   @map("owner_id") @db.Uuid
+  ownerName     String                   @map("owner_name") @db.VarChar(100)
+  amount        Int
+  /// Tài khoản nhận (chỉ 4 số cuối) { bankName, accountNumberMasked, accountName }
+  bankAccount   Json                     @map("bank_account")
+  /// Số dư ví lúc yêu cầu (sau khi khóa) { pending, available, locked }
+  wallet        Json
+  status        WithdrawalApprovalStatus @default(PENDING)
+  reason        String?                  @db.VarChar(500)
+  decidedBy     String?                  @map("decided_by") @db.Uuid
+  decidedByName String?                  @map("decided_by_name") @db.VarChar(100)
+  decidedAt     DateTime?                @map("decided_at") @db.Timestamptz(3)
+  requestedAt   DateTime                 @map("requested_at") @db.Timestamptz(3)
+  createdAt     DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([status, requestedAt])
+  @@map("withdrawal_approvals")
 }
 
 /// Cấu hình có phiên bản (ADM-01): ngưỡng duyệt, hạn duyệt. Phiên bản lớn nhất đang dùng

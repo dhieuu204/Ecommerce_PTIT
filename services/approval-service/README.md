@@ -11,13 +11,17 @@ cp .env.example .env
 pnpm --filter @san/approval-service dev
 ```
 
-Tài liệu API (tự sinh): http://localhost:3004/api/approval/v1/docs. Danh sách API và quy tắc đã chốt: `docs/api/README.md` mục 2.
+Tài liệu API (tự sinh): http://localhost:3004/api/approval/v1/docs. Danh sách API và quy tắc đã chốt: `docs/api/README.md` mục 2–6.
 
 ## Các module
 
-| Thư mục              | Việc                                                                                                                                                                             | Mã     |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `src/shop-approvals` | Nhận `shop_application.submitted` → lưu hồ sơ chờ duyệt (bản cũ đang chờ thành `REPLACED`). Admin `MODERATION` xem, duyệt/từ chối → phát `shop_application.decided`, ghi nhật ký | SHP-02 |
+| Thư mục                    | Việc                                                                                                                                                                             | Mã             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `src/shop-approvals`       | Nhận `shop_application.submitted` → lưu hồ sơ chờ duyệt (bản cũ đang chờ thành `REPLACED`). Admin `MODERATION` xem, duyệt/từ chối → phát `shop_application.decided`, ghi nhật ký | SHP-02         |
+| `src/shop-moderation`      | Admin `MODERATION` đình chỉ/khôi phục shop → phát `shop_suspension.decided`                                                                                                      | SHP-04         |
+| `src/order-checks`         | Kiểm tra đơn theo luật (ngưỡng đơn lớn, COD); admin `FINANCE` duyệt/từ chối; quá hạn thì tự hủy, không bao giờ tự duyệt                                                          | RSK-01         |
+| `src/disputes`             | Tranh chấp trả hàng (admin `SUPPORT` phân xử) và điều chỉnh ví sau giải ngân (một admin `FINANCE` lập, admin `FINANCE` khác duyệt)                                               | DIS-01, DIS-02 |
+| `src/withdrawal-approvals` | Nhận `withdrawal.requested`; admin `FINANCE` duyệt/từ chối yêu cầu rút → phát `withdrawal_approval.decided`                                                                      | FIN-05         |
 
 `GET /admin/audit-logs` có sẵn từ `packages/nest-common`.
 
