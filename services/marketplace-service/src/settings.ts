@@ -10,6 +10,10 @@ export const MarketSetting = {
   maxDeliveryAttempts: 'max_delivery_attempts',
   completeDays: 'complete_days',
   returnCloseDays: 'return_close_days',
+  returnResponseHours: 'return_response_hours',
+  returnShipDays: 'return_ship_days',
+  returnInspectHours: 'return_inspect_hours',
+  returnDisputeHours: 'return_dispute_hours',
 } as const;
 
 export const MARKET_SETTINGS: SettingDefinition[] = [
@@ -95,5 +99,43 @@ export const MARKET_SETTINGS: SettingDefinition[] = [
     min: 1,
     max: 30,
     defaultValue: 7,
+  },
+  {
+    key: MarketSetting.returnResponseHours,
+    label: 'Hạn shop trả lời yêu cầu trả hàng',
+    unit: 'giờ',
+    description: 'Quá hạn thì tự chấp nhận: tạo vận đơn trả (thiếu hàng thì hoàn tiền ngay).',
+    min: 1,
+    max: 168,
+    defaultValue: 48,
+  },
+  {
+    key: MarketSetting.returnShipDays,
+    label: 'Hạn người mua giao hàng trả cho GHN',
+    unit: 'ngày',
+    description:
+      'Tính từ lúc yêu cầu được chấp nhận. Quá hạn mà GHN chưa lấy hàng thì yêu cầu tự hủy.',
+    min: 1,
+    max: 30,
+    defaultValue: 3,
+  },
+  {
+    key: MarketSetting.returnInspectHours,
+    label: 'Hạn shop kiểm hàng trả',
+    unit: 'giờ',
+    description: 'Tính từ lúc hàng trả về tới shop. Quá hạn thì tự hoàn tiền, không cộng kho.',
+    min: 1,
+    max: 168,
+    defaultValue: 48,
+  },
+  {
+    key: MarketSetting.returnDisputeHours,
+    label: 'Hạn người mua khiếu nại',
+    unit: 'giờ',
+    description:
+      'Tính từ lúc shop từ chối yêu cầu trả hàng. Quá hạn không khiếu nại thì đóng yêu cầu.',
+    min: 1,
+    max: 168,
+    defaultValue: 48,
   },
 ];

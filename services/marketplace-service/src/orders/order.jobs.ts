@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { JobService } from '@san/nest-common';
 import { PrismaService } from '../prisma.service';
+import { OPEN_RETURN_STATUSES } from '../returns/return-state';
 import { ShipmentsService } from '../shipping/shipments.service';
 import { OrderLifecycle, SYSTEM } from './order-lifecycle.service';
 
@@ -37,6 +38,7 @@ export class OrderJobs implements OnModuleInit {
       await this.closeReturns();
     });
     this.jobs.define('shipments-sync', { cron: '* * * * *' }, async () => {
+      await this.shipments.syncCreating();
       await this.shipments.syncUnknown();
       await this.shipments.syncCancelling();
     });
@@ -128,10 +130,20 @@ export class OrderJobs implements OnModuleInit {
     return done;
   }
 
-  /** Đã giao đủ số ngày cấu hình mà người mua chưa bấm "Đã nhận": tự hoàn tất */
+  /**
+   * Đã giao đủ số ngày cấu hình mà người mua chưa bấm "Đã nhận": tự hoàn tất. Đơn có yêu cầu trả hàng
+   * đang mở thì chờ yêu cầu kết thúc (P5).
+   */
   async autoComplete(now = new Date()): Promise<number> {
     const due = await this.prisma.shopOrder.findMany({
-      where: { status: 'DELIVERED', completeBefore: { lt: now } },
+      where: {
+        status: 'DELIVERED',
+        completeBefore: { lt: now },
+        OR: [
+          { returnRequest: { is: null } },
+          { returnRequest: { is: { status: { notIn: OPEN_RETURN_STATUSES } } } },
+        ],
+      },
       select: { id: true },
       take: 200,
     });

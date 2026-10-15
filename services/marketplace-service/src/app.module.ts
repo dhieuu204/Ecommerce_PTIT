@@ -14,6 +14,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { ReturnsModule } from './returns/returns.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -31,6 +32,7 @@ import { CatalogModule } from './catalog/catalog.module';
     CoreModule,
     LocationsModule,
     OrdersModule,
+    ReturnsModule,
     UploadsModule,
     ShopsModule,
     ShopAdminModule,

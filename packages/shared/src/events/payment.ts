@@ -38,6 +38,8 @@ export interface RefundUpdatedPayload {
   orderId: string;
   /** null: hoàn cả khoản trả muộn/trả trùng, không gắn đơn con */
   shopOrderId: string | null;
+  /** P5: khoản hoàn của một yêu cầu trả hàng. Thiếu (bản cũ) hoặc null: không phải trả hàng */
+  returnId?: string | null;
   amount: number;
   status: RefundDisplayStatus;
   /** marketplace chỉ áp trạng thái mới hơn */

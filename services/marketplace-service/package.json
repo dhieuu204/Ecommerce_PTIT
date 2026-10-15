@@ -57,6 +57,7 @@
       "^.+\\.ts$": "ts-jest"
     },
     "testEnvironment": "node",
+    "testTimeout": 30000,
     "globalSetup": "<rootDir>/test/global-setup.ts"
   }
 }

@@ -9,6 +9,7 @@ import {
   type AuthUser,
 } from '@san/nest-common';
 import { randomUUID } from 'node:crypto';
+import { Readable } from 'node:stream';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { GhnClient } from '../src/locations/ghn.client';
@@ -43,6 +44,8 @@ export function makeUser(name = 'Nguyễn Văn An', permissions: AuthUser['permi
 /** Kho ảnh giả: giữ file trong bộ nhớ */
 export class FakeStorage {
   files = new Map<string, Buffer>();
+  /** Bucket riêng tư (ảnh bằng chứng trả hàng, P5) */
+  privateFiles = new Map<string, Buffer>();
   fail = false;
   async putPublic(key: string, body: Buffer): Promise<string> {
     if (this.fail) throw new Error('MinIO lỗi (giả)');
@@ -51,6 +54,15 @@ export class FakeStorage {
   }
   publicUrl(key: string): string {
     return `http://localhost:9000/san-public/${key}`;
+  }
+  async putPrivate(key: string, body: Buffer): Promise<void> {
+    if (this.fail) throw new Error('MinIO lỗi (giả)');
+    this.privateFiles.set(key, body);
+  }
+  async getPrivate(key: string): Promise<Readable> {
+    const body = this.privateFiles.get(key);
+    if (!body) throw new Error('Không có file (giả)');
+    return Readable.from(body);
   }
 }
 
@@ -69,6 +81,8 @@ export class FakeCarrier implements ShippingCarrier {
   loseResponse = false;
   cancelResult: 'CANCELLED' | 'ALREADY_PICKED' = 'CANCELLED';
   cancelError: Error | null = null;
+  /** Có thì lần tạo vận đơn chờ tới khi promise này xong (giả lập GHN trả lời chậm) */
+  gate: Promise<void> | null = null;
   private seq = 0;
 
   reset(): void {
@@ -79,11 +93,13 @@ export class FakeCarrier implements ShippingCarrier {
     this.loseResponse = false;
     this.cancelResult = 'CANCELLED';
     this.cancelError = null;
+    this.gate = null;
     this.seq = 0;
   }
 
   async createOrder(input: CreateShipmentInput): Promise<CarrierShipment> {
     this.calls.push(input);
+    if (this.gate) await this.gate;
     if (this.createError) throw this.createError;
     let found = this.orders.get(input.clientCode);
     if (!found) {
@@ -168,7 +184,7 @@ export async function createTestApp(): Promise<TestApp> {
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, shipments, shipment_history, settings CASCADE',
+    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, shipments, shipment_history, returns, return_items, settings CASCADE',
   );
 }
 

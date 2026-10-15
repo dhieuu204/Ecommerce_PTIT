@@ -4,8 +4,9 @@ import type { Page } from '@san/shared';
 import { PaymentClient, type PaymentLink } from '../clients/payment.client';
 import { PrismaService } from '../prisma.service';
 import { requireSellerShop } from '../products/seller-shop';
+import { OPEN_RETURN_STATUSES } from '../returns/return-state';
 import { ShipmentsService } from '../shipping/shipments.service';
-import type { Prisma, ShopOrderStatus } from '../../generated/prisma';
+import type { Prisma, ReturnStatus, ShopOrderStatus } from '../../generated/prisma';
 import type {
   AdminOrdersQuery,
   BuyerOrdersQuery,
@@ -51,6 +52,17 @@ export interface ShipmentView {
   tracking?: Array<{ ghnStatus: string; note: string | null; happenedAt: Date }>;
 }
 
+/** Yêu cầu trả hàng của đơn con, tóm tắt cho trang đơn (P5) */
+export interface ReturnSummary {
+  id: string;
+  code: string;
+  status: ReturnStatus;
+  /** Số hoàn tối đa người mua yêu cầu */
+  refundAmount: number;
+  /** Số đã quyết hoàn (null khi chưa quyết) */
+  decidedRefund: number | null;
+}
+
 /** Đơn con trong đơn của buyer/admin */
 export interface ShopOrderView {
   id: string;
@@ -81,8 +93,11 @@ export interface ShopOrderView {
   incidentNote: string | null;
   /** Buyer làm được gì: NOW = hủy ngay, REQUEST = gửi yêu cầu hủy, null = không hủy được */
   cancelAction: 'NOW' | 'REQUEST' | null;
-  /** Buyer bấm được "Đã nhận hàng" */
+  /** Buyer bấm được "Đã nhận hàng" (đã giao, không có yêu cầu trả hàng đang mở) */
   canConfirmReceived: boolean;
+  /** Buyer gửi được yêu cầu trả hàng: đã giao, còn hạn, chưa có yêu cầu (P5) */
+  canRequestReturn: boolean;
+  returnRequest: ReturnSummary | null;
   shipment: ShipmentView | null;
   items: OrderItemView[];
   /** Chỉ có ở trang chi tiết */
@@ -162,6 +177,7 @@ export interface SellerOrderView {
   cancelRequestedAt: Date | null;
   refundStatus: string;
   incidentNote: string | null;
+  returnRequest: ReturnSummary | null;
   shipment: ShipmentView | null;
   history?: HistoryView[];
 }
@@ -199,6 +215,10 @@ const shipmentInclude = (detail: boolean) =>
       : {}),
   }) as const;
 
+const returnSelect = {
+  select: { id: true, code: true, status: true, refundAmount: true, decidedRefund: true },
+} as const;
+
 const orderInclude = (detail: boolean) =>
   ({
     shopOrders: {
@@ -207,6 +227,7 @@ const orderInclude = (detail: boolean) =>
         shop: { select: { id: true, name: true, logoUrl: true } },
         items: { orderBy: { id: 'asc' } },
         shipments: shipmentInclude(detail),
+        returnRequest: returnSelect,
         ...(detail ? { history: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } } : {}),
       },
     },
@@ -226,6 +247,7 @@ const sellerInclude = (detail: boolean) =>
     order: true,
     items: { orderBy: { id: 'asc' } },
     shipments: shipmentInclude(detail),
+    returnRequest: returnSelect,
     ...(detail ? { history: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } } : {}),
   }) satisfies Prisma.ShopOrderInclude;
 
@@ -350,12 +372,18 @@ export class OrdersService {
       where: { id: shopOrderId, orderId, order: { buyerId: user.id } },
     });
     if (!so) throw notFound();
-    const done = await this.prisma.$transaction((tx) =>
-      this.lifecycle.complete(tx, so.id, buyerActor(user)),
-    );
-    if (!done) {
+    await this.prisma.$transaction(async (tx) => {
+      if (await this.lifecycle.complete(tx, so.id, buyerActor(user))) return;
+      const ret = await tx.returnRequest.findUnique({ where: { shopOrderId: so.id } });
+      if (ret && OPEN_RETURN_STATUSES.includes(ret.status)) {
+        throw new AppError(
+          409,
+          'RETURN_IN_PROGRESS',
+          'Đơn đang có yêu cầu trả hàng, chưa xác nhận đã nhận được.',
+        );
+      }
       throw new AppError(409, 'ORDER_NOT_DELIVERED', 'Đơn chưa giao xong hoặc đã hoàn tất.');
-    }
+    });
     return this.buyerDetail(user.id, orderId);
   }
 
@@ -727,6 +755,7 @@ export class OrdersService {
   private orderView(o: OrderRow): OrderView {
     const unpaid = o.paymentStatus === 'UNPAID';
     const allCancelled = o.shopOrders.every((so) => so.status === 'CANCELLED');
+    const now = new Date();
     return {
       id: o.id,
       code: o.code,
@@ -778,7 +807,15 @@ export class OrdersService {
             : so.status === 'CONFIRMED' && !so.cancelRequestUsed
               ? 'REQUEST'
               : null,
-        canConfirmReceived: so.status === 'DELIVERED',
+        canConfirmReceived:
+          so.status === 'DELIVERED' &&
+          !(so.returnRequest && OPEN_RETURN_STATUSES.includes(so.returnRequest.status)),
+        canRequestReturn:
+          so.status === 'DELIVERED' &&
+          !so.returnRequest &&
+          !!so.completeBefore &&
+          so.completeBefore > now,
+        returnRequest: so.returnRequest,
         shipment: this.shipmentView(so.shipments),
         items: so.items.map(itemView),
         ...(so.history ? { history: so.history.map(historyView) } : {}),
@@ -830,6 +867,7 @@ export class OrdersService {
       cancelRequestedAt: so.cancelRequestedAt,
       refundStatus: so.refundStatus,
       incidentNote: so.incidentNote,
+      returnRequest: so.returnRequest,
       shipment: this.shipmentView(so.shipments),
       ...(so.history ? { history: so.history.map(historyView) } : {}),
     };

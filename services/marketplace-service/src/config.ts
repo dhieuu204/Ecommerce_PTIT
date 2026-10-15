@@ -29,6 +29,8 @@ export class AppConfig {
   readonly minioSecretKey = text('MINIO_SECRET_KEY', 'minio12345');
   /** Bucket ảnh công khai (logo, ảnh sản phẩm); ai có đường dẫn cũng xem được */
   readonly publicBucket = text('MINIO_PUBLIC_BUCKET', 'san-public');
+  /** Bucket riêng tư (ảnh bằng chứng trả hàng): chỉ xem qua API có kiểm quyền */
+  readonly privateBucket = text('MINIO_PRIVATE_BUCKET', 'san-market-private');
   /** Địa chỉ trình duyệt mở ảnh, ví dụ http://localhost:9000 */
   readonly publicFileUrl = text('PUBLIC_FILE_URL', 'http://localhost:9000');
 
@@ -71,4 +73,9 @@ export class AppConfig {
   readonly packageLengthCm = num('PACKAGE_LENGTH_CM', 20);
   readonly packageWidthCm = num('PACKAGE_WIDTH_CM', 15);
   readonly packageHeightCm = num('PACKAGE_HEIGHT_CM', 10);
+
+  // ----- P5: trả hàng -----
+  /** Ảnh bằng chứng trả hàng/khiếu nại tối đa (MB) và số ảnh mỗi lần gửi */
+  readonly returnImageMaxMb = num('RETURN_IMAGE_MAX_MB', 5);
+  readonly returnMaxImages = num('RETURN_MAX_IMAGES', 6);
 }

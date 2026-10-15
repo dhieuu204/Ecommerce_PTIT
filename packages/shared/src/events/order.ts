@@ -102,8 +102,13 @@ export const SHOP_ORDER_COMPLETED = 'shop_order.completed';
 export interface ShopOrderCompletedPayload {
   orderId: string;
   shopOrderId: string;
-  /** BUYER: người mua bấm "Đã nhận"; SYSTEM: hết hạn */
+  /** BUYER: người mua bấm "Đã nhận"; SYSTEM: hết hạn, hoặc yêu cầu trả hàng đã kết thúc */
   completedBy: 'BUYER' | 'SYSTEM';
+  /**
+   * P5: yêu cầu trả hàng của đơn con (nếu có). payment-service chưa nhận return.resolved của yêu cầu này
+   * thì chưa chuyển tiền sang khả dụng. Thiếu (bản cũ) = null.
+   */
+  returnId?: string | null;
   completedAt: string;
 }
 

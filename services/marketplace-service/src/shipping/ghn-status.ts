@@ -53,8 +53,19 @@ export const SIMULATOR_EVENTS = {
 } as const;
 export type SimulatorEvent = keyof typeof SIMULATOR_EVENTS;
 
-/** Các nút bấm được với một trạng thái vận đơn */
-export function nextSimulatorEvents(status: string): SimulatorEvent[] {
+/**
+ * Các nút bấm được với một trạng thái vận đơn. Vận đơn trả hàng (P5, người mua gửi về shop) chỉ có
+ * lấy hàng, giao tới shop và thất lạc.
+ */
+export function nextSimulatorEvents(
+  status: string,
+  type: 'DELIVERY' | 'RETURN' = 'DELIVERY',
+): SimulatorEvent[] {
+  if (type === 'RETURN') {
+    if (status === 'READY_TO_PICK') return ['PICKED'];
+    if (status === 'PICKED') return ['DELIVERED', 'LOST'];
+    return [];
+  }
   switch (status) {
     case 'READY_TO_PICK':
       return ['PICKED'];

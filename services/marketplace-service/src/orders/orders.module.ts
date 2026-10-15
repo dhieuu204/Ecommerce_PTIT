@@ -61,6 +61,6 @@ import { OrdersService } from './orders.service';
     OrderEvents,
     OrderJobs,
   ],
-  exports: [OrderLifecycle],
+  exports: [OrderLifecycle, ShipmentsService],
 })
 export class OrdersModule {}

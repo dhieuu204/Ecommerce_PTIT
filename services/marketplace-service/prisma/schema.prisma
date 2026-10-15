@@ -560,6 +560,8 @@ model ShopOrder {
   history       OrderHistory[]
   voucherUsages VoucherUsage[]
   shipments     Shipment[]
+  /// Yêu cầu trả hàng (P5), mỗi đơn con tối đa một
+  returnRequest ReturnRequest?
 
   @@index([orderId])
   @@index([shopId, status, createdAt])
@@ -583,10 +585,13 @@ model OrderItem {
   /// Khối lượng 1 sản phẩm (gram), để tính lại phí ship
   weight        Int
   /// Phần voucher shop + sàn chia cho dòng này (dùng khi trả hàng ở P5)
-  discount      Int     @default(0)
+  discount         Int     @default(0)
+  /// Số món đã được hoàn đủ tiền do trả hàng (P5)
+  returnedQuantity Int     @default(0) @map("returned_quantity")
 
-  shopOrder ShopOrder      @relation(fields: [shopOrderId], references: [id])
-  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  shopOrder   ShopOrder      @relation(fields: [shopOrderId], references: [id])
+  variant     ProductVariant @relation(fields: [variantId], references: [id])
+  returnItems ReturnItem[]
 
   @@index([shopOrderId])
   @@map("order_items")
@@ -703,6 +708,133 @@ model ShipmentHistory {
 
   @@index([shipmentId, happenedAt])
   @@map("shipment_history")
+}
+
+// ===== Trả hàng (P5) =====
+
+/// Vòng đời yêu cầu trả hàng (STATE-03, docs/phan-tich/12-quyet-dinh-p5.md mục 3)
+enum ReturnStatus {
+  /// Chờ shop trả lời; quá hạn thì tự chấp nhận
+  REQUESTED
+  /// Shop từ chối, người mua còn khiếu nại được tới hạn
+  REJECTED
+  /// Đang khiếu nại, chờ admin hỗ trợ phân xử (approval-service)
+  DISPUTED
+  /// Đã chấp nhận: chờ GHN lấy hàng ở nhà người mua và chuyển về shop
+  SHIPPING_BACK
+  /// Hàng trả đã về shop, chờ shop kiểm
+  RECEIVED
+  /// Đã quyết hoàn tiền, payment-service đang hoàn
+  REFUNDING
+  /// Đã hoàn xong
+  REFUNDED
+  /// Đóng, không hoàn tiền
+  CLOSED
+  /// Người mua hủy, hoặc quá hạn giao hàng trả
+  CANCELLED
+}
+
+/// Lý do trả hàng: chỉ lỗi hàng hoặc lỗi shop
+enum ReturnReason {
+  /// Hàng lỗi, không hoạt động
+  DEFECTIVE
+  /// Hàng bị hư hỏng, bể vỡ
+  DAMAGED
+  /// Giao sai mẫu, màu, size
+  WRONG_ITEM
+  /// Thiếu hàng, thiếu phụ kiện
+  MISSING
+  /// Không đúng mô tả
+  NOT_AS_DESCRIBED
+  /// Hàng giả, hàng nhái
+  COUNTERFEIT
+}
+
+enum DisputeStage {
+  /// Shop từ chối yêu cầu, người mua khiếu nại
+  REQUEST_REJECTED
+  /// Shop báo hàng trả về không đúng
+  GOODS_PROBLEM
+}
+
+/// Yêu cầu trả hàng (RET-01..04). Mỗi đơn con tối đa một yêu cầu
+model ReturnRequest {
+  id                  String        @id @default(uuid()) @db.Uuid
+  /// Mã đơn con + "-TH"; cũng là mã gửi GHN của vận đơn trả
+  code                String        @unique @db.VarChar(28)
+  shopOrderId         String        @unique @map("shop_order_id") @db.Uuid
+  orderId             String        @map("order_id") @db.Uuid
+  shopId              String        @map("shop_id") @db.Uuid
+  /// Người mua (userId)
+  buyerId             String        @map("buyer_id") @db.Uuid
+  status              ReturnStatus  @default(REQUESTED)
+  reason              ReturnReason
+  description         String        @db.VarChar(1000)
+  /// Ảnh bằng chứng của người mua (khóa file trong bucket riêng tư)
+  images              String[]
+  /// Số hoàn tối đa = tổng số người mua đã trả cho các món trả
+  refundAmount        Int           @map("refund_amount")
+  /// Tiền hàng sau voucher shop của các món trả (payment-service tính phần trừ tiền seller)
+  sellerBase          Int           @map("seller_base")
+  /// Shop (hoặc admin) chọn hoàn tiền không cần gửi hàng về
+  refundWithoutReturn Boolean       @default(false) @map("refund_without_return")
+  // Tài khoản nhận tiền hoàn (chỉ đơn COD)
+  bankName            String?       @map("bank_name") @db.VarChar(100)
+  bankAccountNumber   String?       @map("bank_account_number") @db.VarChar(30)
+  bankAccountName     String?       @map("bank_account_name") @db.VarChar(100)
+  /// Lời shop khi từ chối, hoặc khi báo hàng trả về không đúng
+  sellerNote          String?       @map("seller_note") @db.VarChar(1000)
+  sellerImages        String[]      @map("seller_images")
+  /// Lời người mua khi khiếu nại
+  disputeNote         String?       @map("dispute_note") @db.VarChar(1000)
+  disputeImages       String[]      @map("dispute_images")
+  /// Giai đoạn tranh chấp gần nhất
+  disputeStage        DisputeStage? @map("dispute_stage")
+  /// Hạn của bước đang chờ (shop trả lời / GHN lấy hàng / shop kiểm hàng / người mua khiếu nại)
+  deadline            DateTime?     @db.Timestamptz(3)
+  /// Số tiền đã quyết hoàn (nhỏ hơn refund_amount khi admin quyết hoàn một phần)
+  decidedRefund       Int?          @map("decided_refund")
+  /// Sàn chịu, seller không bị trừ tiền (kiện trả bị GHN làm thất lạc)
+  platformCovers      Boolean       @default(false) @map("platform_covers")
+  /// Trạng thái khoản hoàn (nhận từ payment-service)
+  refundStatus        RefundStatus  @default(NONE) @map("refund_status")
+  refundUpdatedAt     DateTime?     @map("refund_updated_at") @db.Timestamptz(3)
+  /// Các bước đã qua: [{ at, actorType, actorName, action, note }]
+  history             Json          @default("[]")
+  /// Idempotency-Key lúc gửi yêu cầu
+  requestKey          String        @unique @map("request_key") @db.VarChar(64)
+  /// Lúc có kết quả (quyết hoàn tiền, đóng, hủy)
+  resolvedAt          DateTime?     @map("resolved_at") @db.Timestamptz(3)
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  shopOrder ShopOrder    @relation(fields: [shopOrderId], references: [id])
+  items     ReturnItem[]
+
+  @@index([buyerId, createdAt])
+  @@index([shopId, status, createdAt])
+  @@index([status, deadline])
+  @@map("returns")
+}
+
+/// Món trả trong một yêu cầu: dòng hàng, số lượng, tiền
+model ReturnItem {
+  id           String  @id @default(uuid()) @db.Uuid
+  returnId     String  @map("return_id") @db.Uuid
+  orderItemId  String  @map("order_item_id") @db.Uuid
+  quantity     Int
+  /// Người mua đã trả cho số món này (giá trừ phần giảm giá của dòng chia theo số lượng)
+  refundAmount Int     @map("refund_amount")
+  /// Tiền hàng sau voucher shop của số món này
+  sellerBase   Int     @map("seller_base")
+  /// Shop chọn nhập lại kho lúc kiểm hàng
+  restocked    Boolean @default(false)
+
+  returnRequest ReturnRequest @relation(fields: [returnId], references: [id])
+  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id])
+
+  @@unique([returnId, orderItemId])
+  @@map("return_items")
 }
 
 /// Cấu hình có phiên bản (ADM-01): hạn thanh toán, giữ tồn, hạn xác nhận, phí ship cố định.

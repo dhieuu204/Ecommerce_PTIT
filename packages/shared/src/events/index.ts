@@ -1,5 +1,17 @@
 import type { EventEnvelope } from './envelope';
 import {
+  ADJUSTMENT_APPROVED,
+  ADJUSTMENT_EXECUTED,
+  WITHDRAWAL_APPROVAL_DECIDED,
+  WITHDRAWAL_CANCELLED,
+  WITHDRAWAL_REQUESTED,
+  type AdjustmentApprovedPayload,
+  type AdjustmentExecutedPayload,
+  type WithdrawalApprovalDecidedPayload,
+  type WithdrawalCancelledPayload,
+  type WithdrawalRequestedPayload,
+} from './finance';
+import {
   ORDER_CHECK_DECIDED,
   ORDER_PLACED,
   SHOP_ORDER_CANCELLED,
@@ -26,6 +38,16 @@ import {
   type SellerEarningsRecordedPayload,
 } from './payment';
 import {
+  DISPUTE_DECIDED,
+  DISPUTE_OPENED,
+  RETURN_REQUESTED,
+  RETURN_RESOLVED,
+  type DisputeDecidedPayload,
+  type DisputeOpenedPayload,
+  type ReturnRequestedPayload,
+  type ReturnResolvedPayload,
+} from './return';
+import {
   SHOP_APPLICATION_DECIDED,
   SHOP_APPLICATION_SUBMITTED,
   SHOP_SUSPENSION_DECIDED,
@@ -35,8 +57,10 @@ import {
 } from './shop';
 
 export * from './envelope';
+export * from './finance';
 export * from './order';
 export * from './payment';
+export * from './return';
 export * from './shop';
 
 /**
@@ -58,6 +82,15 @@ export interface EventPayloads {
   [SHOP_ORDER_DELIVERY_FAILED]: ShopOrderDeliveryFailedPayload;
   [SHOP_ORDER_INCIDENT_CONFIRMED]: ShopOrderIncidentConfirmedPayload;
   [SELLER_EARNINGS_RECORDED]: SellerEarningsRecordedPayload;
+  [RETURN_REQUESTED]: ReturnRequestedPayload;
+  [RETURN_RESOLVED]: ReturnResolvedPayload;
+  [DISPUTE_OPENED]: DisputeOpenedPayload;
+  [DISPUTE_DECIDED]: DisputeDecidedPayload;
+  [WITHDRAWAL_REQUESTED]: WithdrawalRequestedPayload;
+  [WITHDRAWAL_CANCELLED]: WithdrawalCancelledPayload;
+  [WITHDRAWAL_APPROVAL_DECIDED]: WithdrawalApprovalDecidedPayload;
+  [ADJUSTMENT_APPROVED]: AdjustmentApprovedPayload;
+  [ADJUSTMENT_EXECUTED]: AdjustmentExecutedPayload;
 }
 
 export type EventType = keyof EventPayloads;

@@ -29,4 +29,10 @@ describe('Quy đổi trạng thái GHN', () => {
     expect(nextSimulatorEvents('PICKED')).toContain('DELIVERY_FAILED');
     expect(nextSimulatorEvents('DELIVERED')).toEqual([]);
   });
+
+  it('vận đơn trả hàng chỉ có lấy hàng, giao tới shop và thất lạc (P5)', () => {
+    expect(nextSimulatorEvents('READY_TO_PICK', 'RETURN')).toEqual(['PICKED']);
+    expect(nextSimulatorEvents('PICKED', 'RETURN')).toEqual(['DELIVERED', 'LOST']);
+    expect(nextSimulatorEvents('DELIVERED', 'RETURN')).toEqual([]);
+  });
 });

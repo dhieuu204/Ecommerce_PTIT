@@ -10,6 +10,7 @@ import {
   type PaymentSucceededPayload,
   type RefundUpdatedPayload,
 } from '@san/shared';
+import { applyReturnRefund, OPEN_RETURN_STATUSES } from '../returns/return-state';
 import { MarketSetting } from '../settings';
 import type { CancelActor, Prisma, ShopOrder, ShopOrderStatus } from '../../generated/prisma';
 
@@ -261,8 +262,9 @@ export class OrderLifecycle {
     return this.cancel(tx, orderId, 'ALL', SYSTEM, reason);
   }
 
-  /** Cập nhật trạng thái hoàn tiền (refund.updated); chỉ áp tin mới hơn */
+  /** Cập nhật trạng thái hoàn tiền (refund.updated); chỉ áp tin mới hơn. Khoản hoàn trả hàng (P5) áp vào yêu cầu */
   async applyRefund(tx: Tx, p: RefundUpdatedPayload): Promise<void> {
+    if (p.returnId) return applyReturnRefund(tx, p);
     if (!p.shopOrderId) return;
     const updatedAt = new Date(p.updatedAt);
     await tx.shopOrder.updateMany({
@@ -392,12 +394,21 @@ export class OrderLifecycle {
     await this.history(tx, so.id, so.status, 'INCIDENT', { type: 'SYSTEM', name: 'GHN' }, note);
   }
 
-  /** Đơn hoàn tất (người mua bấm "Đã nhận" hoặc hết hạn): báo payment-service xét chuyển tiền khả dụng */
-  async complete(tx: Tx, shopOrderId: string, actor: Actor): Promise<boolean> {
+  /**
+   * Đơn hoàn tất (người mua bấm "Đã nhận", hết hạn, hoặc yêu cầu trả hàng đã kết thúc): báo payment-service
+   * xét chuyển tiền khả dụng. Còn yêu cầu trả hàng đang mở thì chưa hoàn tất (P5). Sự kiện mang mã yêu cầu
+   * trả hàng (nếu có) để payment-service chờ kết quả của yêu cầu đó rồi mới chuyển tiền.
+   */
+  async complete(tx: Tx, shopOrderId: string, actor: Actor, note?: string): Promise<boolean> {
     const so = await tx.shopOrder.findUniqueOrThrow({ where: { id: shopOrderId } });
     await this.lock(tx, so.orderId);
-    const fresh = await tx.shopOrder.findUniqueOrThrow({ where: { id: shopOrderId } });
+    const fresh = await tx.shopOrder.findUniqueOrThrow({
+      where: { id: shopOrderId },
+      include: { returnRequest: { select: { id: true, status: true } } },
+    });
     if (fresh.status !== 'DELIVERED') return false;
+    const ret = fresh.returnRequest;
+    if (ret && OPEN_RETURN_STATUSES.includes(ret.status)) return false;
     const now = new Date();
     await tx.shopOrder.update({
       where: { id: so.id },
@@ -409,12 +420,14 @@ export class OrderLifecycle {
       'DELIVERED',
       'COMPLETED',
       actor,
-      actor.type === 'BUYER' ? 'Người mua xác nhận đã nhận hàng' : 'Hết hạn, đơn tự hoàn tất',
+      note ??
+        (actor.type === 'BUYER' ? 'Người mua xác nhận đã nhận hàng' : 'Hết hạn, đơn tự hoàn tất'),
     );
     await this.events.publish(tx, SHOP_ORDER_COMPLETED, {
       orderId: so.orderId,
       shopOrderId: so.id,
       completedBy: actor.type === 'BUYER' ? 'BUYER' : 'SYSTEM',
+      returnId: ret?.id ?? null,
       completedAt: now.toISOString(),
     });
     return true;
