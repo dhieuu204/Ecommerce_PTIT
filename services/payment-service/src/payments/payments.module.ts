@@ -1,4 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
+import { AdjustmentsService } from '../adjustments/adjustments.service';
+import { MarketplaceClient } from '../clients/marketplace.client';
 import { AppConfig } from '../config';
 import { PAYMENT_GATEWAY, type PaymentGateway } from '../gateway/gateway';
 import { MockGateway } from '../gateway/mock.gateway';
@@ -10,22 +12,33 @@ import { CodReconciliationService } from '../reconciliation/cod-reconciliation.s
 import { ReconciliationController } from '../reconciliation/reconciliation.controller';
 import { VnpayReconciliationService } from '../reconciliation/vnpay-reconciliation.service';
 import { SellerWalletService } from '../wallet/seller-wallet.service';
-import { WalletController } from '../wallet/wallet.controller';
+import { AdminWalletController, WalletController } from '../wallet/wallet.controller';
 import { WalletService } from '../wallet/wallet.service';
+import {
+  AdminWithdrawalsController,
+  SellerWithdrawalsController,
+} from '../withdrawals/withdrawals.controller';
+import { WithdrawalsService } from '../withdrawals/withdrawals.service';
 import { CallbacksService } from './callbacks.service';
 import { PaymentOrderEvents } from './order.events';
 import { PaymentJobs } from './payment.jobs';
 import { AdminPaymentsController, PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 
-/** Thu tiền VNPay, hoàn tiền (P3: PAY-01..04, REF-01, FIN-03), ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05) */
+/**
+ * Thu tiền VNPay, hoàn tiền (P3: PAY-01..04, REF-01, FIN-03), ví seller và đối soát (P4: FIN-01/02, COD-02,
+ * PAY-05), hoàn tiền trả hàng, rút tiền và chi trả, điều chỉnh sau giải ngân (P5: REF-02, FIN-04..06, DIS-02)
+ */
 @Module({
   controllers: [
     PaymentsController,
     AdminPaymentsController,
     RefundsController,
     WalletController,
+    AdminWalletController,
     ReconciliationController,
+    SellerWithdrawalsController,
+    AdminWithdrawalsController,
   ],
   providers: [
     {
@@ -54,6 +67,9 @@ import { PaymentsService } from './payments.service';
     SellerWalletService,
     CodReconciliationService,
     VnpayReconciliationService,
+    MarketplaceClient,
+    WithdrawalsService,
+    AdjustmentsService,
   ],
 })
 export class PaymentsModule {}

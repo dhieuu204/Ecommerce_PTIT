@@ -12,6 +12,7 @@ import type { OrderPlacedPayload, SanEvent } from '@san/shared';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { MarketplaceClient, type MyShopInfo } from '../src/clients/marketplace.client';
 import { PAYMENT_GATEWAY, type PaymentGateway } from '../src/gateway/gateway';
 import { PrismaService } from '../src/prisma.service';
 import { ReceiptStorage } from '../src/refunds/receipt-storage.service';
@@ -37,23 +38,32 @@ export class FakeReceipts {
   async put(key: string, body: Buffer): Promise<void> {
     this.files.set(key, body);
   }
+  async exists(key: string): Promise<boolean> {
+    return this.files.has(key);
+  }
+  assertUsable = ReceiptStorage.prototype.assertUsable;
 }
 
 export interface TestApp {
   app: INestApplication;
   prisma: PrismaService;
   receipts: FakeReceipts;
+  /** marketplace-service giả: hồ sơ shop của seller khi rút tiền (P5) */
+  marketplace: { myShop: jest.Mock<Promise<MyShopInfo>, [string]> };
   http: () => ReturnType<typeof request>;
 }
 
 /** Chạy cả app với database thật; mặc định cổng MÔ PHỎNG (không có khóa VNPay) */
 export async function createTestApp(gateway?: PaymentGateway): Promise<TestApp> {
   const receipts = new FakeReceipts();
+  const marketplace = { myShop: jest.fn<Promise<MyShopInfo>, [string]>() };
   let builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(JwtVerifier)
     .useValue(new JwtVerifier({ privateKey }))
     .overrideProvider(ReceiptStorage)
-    .useValue(receipts);
+    .useValue(receipts)
+    .overrideProvider(MarketplaceClient)
+    .useValue(marketplace);
   if (gateway) builder = builder.overrideProvider(PAYMENT_GATEWAY).useValue(gateway);
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ logger: false });
@@ -63,13 +73,14 @@ export async function createTestApp(gateway?: PaymentGateway): Promise<TestApp> 
     app,
     prisma: app.get(PrismaService),
     receipts,
+    marketplace,
     http: () => request(app.getHttpServer()),
   };
 }
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE cod_reconciliation_items, cod_reconciliations, wallet_transactions, seller_wallets, refunds, payments, seller_earnings, settings, audit_logs, outbox_events, inbox_events CASCADE',
+    'TRUNCATE cod_reconciliation_items, cod_reconciliations, wallet_transactions, withdrawals, seller_wallets, refunds, payments, seller_earnings, settings, audit_logs, outbox_events, inbox_events CASCADE',
   );
 }
 

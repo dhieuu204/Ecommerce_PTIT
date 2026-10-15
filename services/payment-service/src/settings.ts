@@ -5,6 +5,7 @@ export const PaymentSetting = {
   platformFeeRate: 'platform_fee_percent_x100',
   maxPaymentAttempts: 'max_payment_attempts',
   refundMaxTries: 'refund_max_tries',
+  withdrawMinAmount: 'withdraw_min_amount',
 } as const;
 
 export const PAYMENT_SETTINGS: SettingDefinition[] = [
@@ -35,5 +36,15 @@ export const PAYMENT_SETTINGS: SettingDefinition[] = [
     min: 1,
     max: 10,
     defaultValue: 3,
+  },
+  {
+    key: PaymentSetting.withdrawMinAmount,
+    label: 'Số tiền rút tối thiểu mỗi lần',
+    unit: 'đồng',
+    description:
+      'Seller rút từ mức này tới toàn bộ số dư khả dụng; mỗi lúc một yêu cầu, không thu phí rút.',
+    min: 10_000,
+    max: 10_000_000,
+    defaultValue: 50_000,
   },
 ];

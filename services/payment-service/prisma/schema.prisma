@@ -1,5 +1,6 @@
 // Schema của payment-service [P]. Chỉ service này được đọc/ghi database payment_db.
 // P3: thu tiền VNPay, hoàn tiền, tiền seller của mỗi đơn con. P4: ví seller, đối soát COD và VNPay.
+// P5: hoàn tiền trả hàng, giữ tiền khi có yêu cầu trả hàng, rút tiền và chi trả, điều chỉnh sau giải ngân.
 
 generator client {
   provider = "prisma-client-js"
@@ -35,6 +36,17 @@ enum EarningStatus {
   FAILED
   /// Sự cố GHN đã xác nhận, seller được đền vào ngăn khả dụng
   COMPENSATED
+  /// Trả hàng hoàn toàn bộ: seller không còn tiền của đơn con này (P5)
+  REFUNDED
+}
+
+/// Yêu cầu trả hàng của đơn con (P5, FIN-02): đang mở thì không chuyển tiền sang khả dụng
+enum ReturnState {
+  NONE
+  /// Có yêu cầu trả hàng chưa có kết quả
+  OPEN
+  /// Đã nhận kết quả (return.resolved) và đã áp vào tiền seller
+  RESOLVED
 }
 
 /// Tiền của mỗi đơn con (PAY-04, FIN-03): buyer trả bao nhiêu, phí sàn, seller nhận bao nhiêu.
@@ -78,6 +90,16 @@ model SellerEarning {
   moneyReceivedAt  DateTime?     @map("money_received_at") @db.Timestamptz(3)
   /// Lúc chuyển sang ngăn khả dụng
   releasedAt       DateTime?     @map("released_at") @db.Timestamptz(3)
+  // ----- P5: trả hàng -----
+  /// Yêu cầu trả hàng của đơn con (bên marketplace), mỗi đơn con tối đa một
+  returnId         String?       @map("return_id") @db.Uuid
+  returnState      ReturnState   @default(NONE) @map("return_state")
+  /// Đã hoàn cho người mua do trả hàng
+  returnRefund     Int           @default(0) @map("return_refund")
+  /// Seller bị trừ do trả hàng; seller nhận cuối cùng = seller_amount - return_deduction
+  returnDeduction  Int           @default(0) @map("return_deduction")
+  /// Phí sàn được giảm vì tiền hàng còn lại ít đi (FIN-03)
+  returnFeeReversed Int          @default(0) @map("return_fee_reversed")
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -105,6 +127,7 @@ model SellerWallet {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   transactions WalletTransaction[]
+  withdrawals  Withdrawal[]
 
   @@map("seller_wallets")
 }
@@ -118,6 +141,16 @@ enum WalletTxType {
   REVERSED
   /// Đền cho seller khi GHN làm mất/hỏng hàng, vào thẳng ngăn khả dụng
   COMPENSATION
+  /// Trừ ngăn đang giữ phần tiền của hàng trả (P5)
+  RETURN_DEDUCTED
+  /// Khả dụng → đang khóa: seller gửi yêu cầu rút (P5)
+  LOCKED
+  /// Đang khóa → khả dụng: yêu cầu rút bị từ chối, bị hủy hoặc chuyển khoản lỗi
+  UNLOCKED
+  /// Ra khỏi ngăn đang khóa: đã chuyển khoản cho seller
+  WITHDRAWN
+  /// Điều chỉnh ngăn khả dụng sau giải ngân (DIS-02), có người duyệt
+  ADJUSTMENT
 }
 
 enum WalletBucket {
@@ -126,26 +159,90 @@ enum WalletBucket {
   LOCKED
 }
 
-/// Lịch sử ví: mỗi biến động một dòng, không sửa không xóa. Mỗi đơn con mỗi loại tối đa một dòng
+/// Lịch sử ví: mỗi biến động một dòng, không sửa không xóa. Mỗi đơn con (yêu cầu rút, điều chỉnh) mỗi loại
+/// tối đa một dòng, nên nhận trùng sự kiện không ghi tiền hai lần
 model WalletTransaction {
-  id          String        @id @default(uuid()) @db.Uuid
-  shopId      String        @map("shop_id") @db.Uuid
-  type        WalletTxType
+  id           String        @id @default(uuid()) @db.Uuid
+  shopId       String        @map("shop_id") @db.Uuid
+  type         WalletTxType
   /// Luôn dương
-  amount      Int
+  amount       Int
   /// Trống = tiền vào ví từ ngoài
-  fromBucket  WalletBucket? @map("from_bucket")
+  fromBucket   WalletBucket? @map("from_bucket")
   /// Trống = tiền ra khỏi ví
-  toBucket    WalletBucket? @map("to_bucket")
-  shopOrderId String?       @map("shop_order_id") @db.Uuid
-  note        String?       @db.VarChar(300)
-  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  toBucket     WalletBucket? @map("to_bucket")
+  shopOrderId  String?       @map("shop_order_id") @db.Uuid
+  /// Yêu cầu rút tiền (P5)
+  withdrawalId String?       @map("withdrawal_id") @db.Uuid
+  /// Đề nghị điều chỉnh bên approval-service (P5, DIS-02)
+  adjustmentId String?       @map("adjustment_id") @db.Uuid
+  note         String?       @db.VarChar(300)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  wallet SellerWallet @relation(fields: [shopId], references: [shopId])
+  wallet     SellerWallet @relation(fields: [shopId], references: [shopId])
+  withdrawal Withdrawal?  @relation(fields: [withdrawalId], references: [id])
 
   @@unique([shopOrderId, type])
+  @@unique([withdrawalId, type])
+  @@unique([adjustmentId, type])
   @@index([shopId, createdAt])
   @@map("wallet_transactions")
+}
+
+// ===== Rút tiền (P5: FIN-04..06) =====
+
+enum WithdrawalStatus {
+  /// Đã khóa tiền, chờ admin tài chính duyệt (approval-service)
+  PENDING
+  /// Đã duyệt, chờ admin tài chính chuyển khoản
+  APPROVED
+  /// Đã chuyển khoản, có mã giao dịch và biên lai
+  PAID
+  REJECTED
+  /// Seller hủy khi chưa duyệt
+  CANCELLED
+  /// Chuyển khoản không thành công: đã mở khóa, seller gửi yêu cầu mới
+  FAILED
+}
+
+/// Yêu cầu rút tiền và chi trả. Mỗi shop tối đa một yêu cầu đang xử lý (PENDING/APPROVED, ràng buộc viết tay)
+model Withdrawal {
+  id                String           @id @default(uuid()) @db.Uuid
+  shopId            String           @map("shop_id") @db.Uuid
+  /// Chủ shop lúc yêu cầu (userId): admin trùng người này không được tự chi
+  ownerId           String           @map("owner_id") @db.Uuid
+  ownerName         String           @map("owner_name") @db.VarChar(100)
+  shopName          String           @map("shop_name") @db.VarChar(100)
+  amount            Int
+  status            WithdrawalStatus @default(PENDING)
+  // Tài khoản nhận (chép từ hồ sơ shop lúc yêu cầu)
+  bankName          String           @map("bank_name") @db.VarChar(100)
+  bankAccountNumber String           @map("bank_account_number") @db.VarChar(30)
+  bankAccountName   String           @map("bank_account_name") @db.VarChar(100)
+  /// Idempotency-Key lúc gửi yêu cầu
+  requestKey        String           @unique @map("request_key") @db.VarChar(64)
+  /// Lý do từ chối / chuyển khoản lỗi
+  reason            String?          @db.VarChar(500)
+  /// Admin duyệt hoặc từ chối (nhận từ approval-service)
+  decidedByName     String?          @map("decided_by_name") @db.VarChar(100)
+  decidedAt         DateTime?        @map("decided_at") @db.Timestamptz(3)
+  // Chi trả (admin tài chính chuyển khoản tay)
+  transferCode      String?          @map("transfer_code") @db.VarChar(60)
+  /// Ảnh biên lai trong MinIO (bucket riêng tư)
+  receiptKey        String?          @map("receipt_key") @db.VarChar(200)
+  paidBy            String?          @map("paid_by") @db.Uuid
+  paidByName        String?          @map("paid_by_name") @db.VarChar(100)
+  paidAt            DateTime?        @map("paid_at") @db.Timestamptz(3)
+  note              String?          @db.VarChar(500)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wallet       SellerWallet        @relation(fields: [shopId], references: [shopId])
+  transactions WalletTransaction[]
+
+  @@index([shopId, createdAt])
+  @@index([status, createdAt])
+  @@map("withdrawals")
 }
 
 // ===== Đối soát COD (P4: COD-02, SHIP-05) =====
@@ -296,6 +393,17 @@ enum RefundReason {
   DELIVERY_FAILED
   /// GHN làm mất/hỏng hàng: hoàn đủ (P4)
   INCIDENT
+  /// Trả hàng: hoàn tiền phần hàng trả (P5)
+  RETURN
+  /// Hoàn thêm cho người mua theo đề nghị điều chỉnh đã duyệt (P5, DIS-02)
+  ADJUSTMENT
+}
+
+enum RefundMethod {
+  /// Hoàn qua cổng thanh toán (VNPay hoàn một phần/toàn phần giao dịch)
+  GATEWAY
+  /// Admin tài chính chuyển khoản tay cho người mua (đơn COD, điều chỉnh)
+  BANK_TRANSFER
 }
 
 enum RefundStatus {
@@ -312,15 +420,26 @@ enum RefundStatus {
   MANUAL_DONE
 }
 
-/// Hoàn tiền cho buyer (REF-01). Mỗi đơn con tối đa một khoản hoàn ở P3
+/// Hoàn tiền cho buyer (REF-01, REF-02). Khoản hoàn do hủy/giao thất bại/sự cố: mỗi đơn con tối đa một
+/// (ràng buộc viết tay); trả hàng: mỗi yêu cầu một; điều chỉnh: mỗi đề nghị một
 model Refund {
   id              String       @id @default(uuid()) @db.Uuid
-  paymentId       String       @map("payment_id") @db.Uuid
+  /// Lần thanh toán được hoàn; trống khi hoàn bằng chuyển khoản không gắn giao dịch (đơn COD, điều chỉnh)
+  paymentId       String?      @map("payment_id") @db.Uuid
   orderId         String       @map("order_id") @db.Uuid
   /// Trống = hoàn cả khoản trả muộn/trả trùng
-  shopOrderId     String?      @unique @map("shop_order_id") @db.Uuid
+  shopOrderId     String?      @map("shop_order_id") @db.Uuid
   amount          Int
   reason          RefundReason
+  method          RefundMethod @default(GATEWAY)
+  /// Yêu cầu trả hàng bên marketplace (P5)
+  returnId        String?      @unique @map("return_id") @db.Uuid
+  /// Đề nghị điều chỉnh bên approval-service (P5, DIS-02)
+  adjustmentId    String?      @unique @map("adjustment_id") @db.Uuid
+  // Tài khoản nhận của người mua (chỉ BANK_TRANSFER)
+  bankName          String?    @map("bank_name") @db.VarChar(100)
+  bankAccountNumber String?    @map("bank_account_number") @db.VarChar(30)
+  bankAccountName   String?    @map("bank_account_name") @db.VarChar(100)
   status          RefundStatus @default(PENDING)
   /// Số lần đã gửi lệnh hoàn qua cổng
   tries           Int          @default(0)
@@ -339,10 +458,11 @@ model Refund {
   createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  payment Payment @relation(fields: [paymentId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [id])
 
   @@index([status, nextTryAt])
   @@index([orderId])
+  @@index([shopOrderId])
   @@map("refunds")
 }
 

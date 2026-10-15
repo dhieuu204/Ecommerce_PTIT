@@ -46,6 +46,9 @@ export class AppConfig {
   /** Ảnh biên lai tối đa (MB) */
   readonly receiptMaxMb = num('RECEIPT_MAX_MB', 5);
 
+  /** marketplace-service: lấy tài khoản ngân hàng của shop khi seller rút tiền (P5) */
+  readonly marketplaceApiUrl = text('MARKETPLACE_API_URL', 'http://localhost:3002/api/market/v1');
+
   get vnpayConfigured(): boolean {
     return Boolean(this.vnpayTmnCode && this.vnpayHashSecret);
   }

@@ -111,6 +111,7 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
       JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
       WEB_URL: http://localhost:${WEB_PORT:-8080}
+      MARKETPLACE_API_URL: http://marketplace-service:3002/api/market/v1
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}

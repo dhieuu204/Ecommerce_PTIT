@@ -333,6 +333,33 @@ describeDb('Thanh toán và hoàn tiền (PAY-01..04, REF-01) — cổng MÔ PH�
     expect(r).toMatchObject({ status: 'FAILED', tries: 1 });
   });
 
+  it('tra cứu báo "đã có hoàn" mà cùng giao dịch đã có khoản hoàn khác: không ghi đã hoàn, chuyển hoàn tay', async () => {
+    const config = t.app.get(AppConfig) as { mockRefundResult: string };
+    config.mockRefundResult = 'UNKNOWN';
+    const p = await paidOrder();
+    await cancelled(p, 0);
+    const svc = t.app.get(RefundsService);
+    await svc.processDue();
+    const r = await t.prisma.refund.findFirstOrThrow();
+    expect(r.status).toBe('UNKNOWN');
+    // Khoản hoàn khác của cùng giao dịch đã thành công (ví dụ trả hàng của shop kia)
+    await t.prisma.refund.create({
+      data: {
+        paymentId: r.paymentId,
+        orderId: r.orderId,
+        amount: 1_000,
+        reason: 'RETURN',
+        status: 'SUCCEEDED',
+        completedAt: new Date(),
+      },
+    });
+    config.mockRefundResult = 'SUCCEEDED'; // tra cứu chỉ biết "giao dịch đã có hoàn"
+    await svc.processDue();
+    expect(await t.prisma.refund.findUniqueOrThrow({ where: { id: r.id } })).toMatchObject({
+      status: 'NEEDS_MANUAL',
+    });
+  });
+
   it('đơn đã hủy khi chưa trả, buyer vẫn trả nhưng mất tin báo → job tra cứu sau hạn, tự tạo khoản hoàn', async () => {
     const p = placedOrder(buyer, { payBefore: new Date(Date.now() + 60_000).toISOString() });
     await placed(p);

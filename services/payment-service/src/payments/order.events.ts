@@ -2,6 +2,8 @@ import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { EventBus, SettingsService } from '@san/nest-common';
 import {
   ORDER_PLACED,
+  RETURN_REQUESTED,
+  RETURN_RESOLVED,
   SELLER_EARNINGS_RECORDED,
   SHOP_ORDER_CANCELLED,
   SHOP_ORDER_COMPLETED,
@@ -9,6 +11,8 @@ import {
   SHOP_ORDER_DELIVERY_FAILED,
   SHOP_ORDER_INCIDENT_CONFIRMED,
   type OrderPlacedPayload,
+  type ReturnRequestedPayload,
+  type ReturnResolvedPayload,
   type ShopOrderCancelledPayload,
   type ShopOrderCompletedPayload,
   type ShopOrderDeliveredPayload,
@@ -17,6 +21,7 @@ import {
 } from '@san/shared';
 import { RefundsService } from '../refunds/refunds.service';
 import { PaymentSetting } from '../settings';
+import { settleReturn } from '../wallet/return-money';
 import { WalletService } from '../wallet/wallet.service';
 import type { Prisma, SellerEarning } from '../../generated/prisma';
 import { PaymentsService } from './payments.service';
@@ -52,6 +57,8 @@ export class PaymentOrderEvents implements OnModuleInit {
     this.events.subscribe(SHOP_ORDER_COMPLETED, (p, tx: Tx) => this.completed(p, tx));
     this.events.subscribe(SHOP_ORDER_DELIVERY_FAILED, (p, tx: Tx) => this.deliveryFailed(p, tx));
     this.events.subscribe(SHOP_ORDER_INCIDENT_CONFIRMED, (p, tx: Tx) => this.incident(p, tx));
+    this.events.subscribe(RETURN_REQUESTED, (p, tx: Tx) => this.returnRequested(p, tx));
+    this.events.subscribe(RETURN_RESOLVED, (p, tx: Tx) => this.returnResolved(p, tx));
   }
 
   /**
@@ -132,15 +139,87 @@ export class PaymentOrderEvents implements OnModuleInit {
     await this.wallet.tryRelease(tx, p.shopOrderId);
   }
 
-  /** Đơn con hoàn tất: xét chuyển tiền sang khả dụng */
+  /**
+   * Đơn con hoàn tất: xét chuyển tiền sang khả dụng. Đơn có yêu cầu trả hàng (P5) mà chưa nhận kết quả của
+   * yêu cầu đó (sự kiện tới sai thứ tự) thì đánh dấu đang mở và chờ, không chuyển tiền theo số cũ (SEQ-04).
+   */
   async completed(p: ShopOrderCompletedPayload, tx: Tx): Promise<void> {
     const row = await this.row(tx, p.orderId, p.shopOrderId);
-    if (!row.completedAt) {
-      await tx.sellerEarning.update({
-        where: { id: row.id },
-        data: { completedAt: new Date(p.completedAt) },
-      });
+    const data: Prisma.SellerEarningUpdateInput = {};
+    if (!row.completedAt) data.completedAt = new Date(p.completedAt);
+    if (p.returnId && row.returnState !== 'RESOLVED') {
+      data.returnId = p.returnId;
+      data.returnState = 'OPEN';
     }
+    if (Object.keys(data).length) {
+      await tx.sellerEarning.update({ where: { id: row.id }, data });
+    }
+    await this.wallet.tryRelease(tx, p.shopOrderId);
+  }
+
+  /** Người mua gửi yêu cầu trả hàng (P5, FIN-02): giữ tiền seller của đơn con tới khi có kết quả */
+  async returnRequested(p: ReturnRequestedPayload, tx: Tx): Promise<void> {
+    const row = await this.row(tx, p.orderId, p.shopOrderId);
+    if (row.returnState === 'RESOLVED') return; // kết quả đã tới trước
+    await tx.sellerEarning.update({
+      where: { id: row.id },
+      data: { returnId: p.returnId, returnState: 'OPEN' },
+    });
+  }
+
+  /**
+   * Yêu cầu trả hàng có kết quả (REF-02, FIN-03). Hoàn tiền: tạo khoản hoàn (qua cổng, hoặc chuyển khoản
+   * với đơn COD), không cho tổng tiền hoàn của đơn con vượt số người mua đã trả; trừ phần tiền seller của
+   * hàng trả khỏi ngăn đang giữ, phí sàn tính lại trên phần còn lại. Rồi bỏ giữ tiền, xét chuyển khả dụng.
+   * Mỗi yêu cầu chỉ áp một lần.
+   */
+  async returnResolved(p: ReturnResolvedPayload, tx: Tx): Promise<void> {
+    const row = await this.row(tx, p.orderId, p.shopOrderId);
+    if (row.returnState === 'RESOLVED') return;
+    const data: Prisma.SellerEarningUpdateInput = {
+      returnId: p.returnId,
+      returnState: 'RESOLVED',
+    };
+    if (p.outcome === 'REFUND' && p.refundAmount > 0) {
+      // Không hoàn quá tiền hàng của phần trả (phí ship chiều đi không hoàn) và quá số đơn con còn lại
+      const room = row.buyerPaid - (await this.refunds.refundedFor(tx, p.shopOrderId));
+      const amount = Math.min(p.refundAmount, p.maxRefundAmount, Math.max(0, room));
+      if (amount < p.refundAmount) {
+        this.logger.error(
+          `Yêu cầu trả hàng ${p.code} xin hoàn ${p.refundAmount}đ nhưng đơn con chỉ còn ${room}đ: hoàn ${amount}đ.`,
+        );
+      }
+      await this.refunds.createExtra(tx, {
+        orderId: p.orderId,
+        shopOrderId: p.shopOrderId,
+        amount,
+        reason: 'RETURN',
+        returnId: p.returnId,
+        bankAccount: row.paymentMethod === 'COD' ? p.bankAccount : null,
+      });
+      const s = settleReturn(row, { ...p, refundAmount: amount });
+      // HELD: trừ ngay ở ngăn đang giữ. UNPAID (COD chưa giao tới sổ): lúc vào ngăn đang giữ sẽ giữ số
+      // đã trừ. Trạng thái khác (đã khả dụng, đã hủy...) thì ví không bị trừ: không ghi khoản trừ để sổ
+      // tiền đơn con khớp ví; phần chênh xử lý bằng điều chỉnh ví (DIS-02).
+      const applied = row.status === 'HELD' || row.status === 'UNPAID';
+      if (s.deduction > 0 && row.status === 'HELD') {
+        await this.wallet.deductReturn(tx, row, s.deduction, `Trả hàng ${p.code}`);
+      } else if (s.deduction > 0 && !applied) {
+        this.logger.error(
+          `Tiền đơn con ${row.shopOrderCode} đang ${row.status}, không trừ được trả hàng ${p.code} (${s.deduction}đ): cần điều chỉnh ví.`,
+        );
+      }
+      Object.assign(data, {
+        returnRefund: amount,
+        returnDeduction: applied ? s.deduction : 0,
+        returnFeeReversed: applied ? s.feeReversed : 0,
+        ...(s.newSellerAmount === 0 && applied ? { status: 'REFUNDED' as const } : {}),
+      });
+      this.logger.log(
+        `Trả hàng ${p.code}: hoàn người mua ${amount}đ, trừ seller ${s.deduction}đ, giảm phí sàn ${s.feeReversed}đ.`,
+      );
+    }
+    await tx.sellerEarning.update({ where: { id: row.id }, data });
     await this.wallet.tryRelease(tx, p.shopOrderId);
   }
 

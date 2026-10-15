@@ -10,10 +10,26 @@ const COLUMN: Record<WalletBucket, 'pending' | 'available' | 'locked'> = {
 };
 
 /**
+ * Một biến động ví gắn với nguồn của nó: đơn con, yêu cầu rút, hoặc đề nghị điều chỉnh. Mỗi nguồn mỗi loại
+ * tối đa một dòng lịch sử (ràng buộc không trùng trong database).
+ */
+export interface WalletEntry {
+  shopId: string;
+  shopOrderId?: string | null;
+  withdrawalId?: string | null;
+  adjustmentId?: string | null;
+  /** Mã hiện trong ghi chú, ví dụ mã đơn con */
+  label: string;
+}
+
+/** Tiền seller của đơn con sau khi đã trừ phần trả hàng (P5) */
+export const finalSellerAmount = (e: SellerEarning) => e.sellerAmount - e.returnDeduction;
+
+/**
  * Ví seller (FIN-01, FIN-02, STATE-02): 3 ngăn đang giữ / khả dụng / đang khóa. Mọi biến động đi qua `move`:
- * ghi một dòng lịch sử (mỗi đơn con mỗi loại tối đa một dòng, nên nhận trùng sự kiện không ghi tiền hai lần)
+ * ghi một dòng lịch sử (mỗi nguồn mỗi loại tối đa một dòng, nên nhận trùng sự kiện không ghi tiền hai lần)
  * rồi đổi số dư bằng câu lệnh có điều kiện "đủ tiền" (database còn có CHECK không âm).
- * Mọi hàm chạy trong giao dịch của người gọi (đã khóa theo đơn).
+ * Mọi hàm chạy trong giao dịch của người gọi (đã khóa theo đơn hoặc theo shop).
  */
 @Injectable()
 export class WalletService {
@@ -28,23 +44,29 @@ export class WalletService {
     });
   }
 
-  /** Tiền đơn con vào ngăn đang giữ: trả trước khi đã thu, COD khi đã giao */
+  /** Khóa ví một shop tới hết giao dịch (rút tiền, điều chỉnh cùng lúc chạy lần lượt) */
+  async lockShop(tx: Tx, shopId: string): Promise<void> {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`wallet:${shopId}`}))`;
+  }
+
+  /** Tiền đơn con vào ngăn đang giữ: trả trước khi đã thu, COD khi đã giao (đã trừ phần trả hàng nếu có) */
   async hold(tx: Tx, e: SellerEarning, note: string): Promise<boolean> {
-    return this.move(tx, e, 'HELD', e.sellerAmount, null, 'PENDING', note);
+    return this.move(tx, earningEntry(e), 'HELD', finalSellerAmount(e), null, 'PENDING', note);
   }
 
   /**
-   * Chuyển sang khả dụng nếu đủ điều kiện: đang giữ, đơn con đã hoàn tất và tiền đã về sàn
-   * (trả trước: đã thu; COD: đã đối soát). P5 thêm điều kiện không có trả hàng/tranh chấp đang mở.
+   * Chuyển sang khả dụng nếu đủ điều kiện (FIN-02): đang giữ, đơn con đã hoàn tất, tiền đã về sàn (trả
+   * trước: đã thu; COD: đã đối soát) và không còn yêu cầu trả hàng đang mở (P5).
    */
   async tryRelease(tx: Tx, shopOrderId: string, now = new Date()): Promise<boolean> {
     const e = await tx.sellerEarning.findUniqueOrThrow({ where: { shopOrderId } });
     if (e.status !== 'HELD' || !e.completedAt || !e.moneyReceivedAt) return false;
+    if (e.returnState === 'OPEN') return false;
     const moved = await this.move(
       tx,
-      e,
+      earningEntry(e),
       'RELEASED',
-      e.sellerAmount,
+      finalSellerAmount(e),
       'PENDING',
       'AVAILABLE',
       'Đơn hoàn tất, tiền đã về sàn',
@@ -59,17 +81,26 @@ export class WalletService {
   /** Trừ lại ngăn đang giữ (đơn hủy, giao thất bại, sự cố) khi tiền đơn con đang ở đó */
   async reverse(tx: Tx, e: SellerEarning, note: string): Promise<boolean> {
     if (e.status !== 'HELD') return false;
-    return this.move(tx, e, 'REVERSED', e.sellerAmount, 'PENDING', null, note);
+    return this.move(tx, earningEntry(e), 'REVERSED', finalSellerAmount(e), 'PENDING', null, note);
   }
 
   /** Đền cho seller khi GHN làm mất/hỏng hàng: vào thẳng ngăn khả dụng */
   async compensate(tx: Tx, e: SellerEarning, note: string): Promise<boolean> {
-    return this.move(tx, e, 'COMPENSATION', e.sellerAmount, null, 'AVAILABLE', note);
+    return this.move(tx, earningEntry(e), 'COMPENSATION', e.sellerAmount, null, 'AVAILABLE', note);
   }
 
-  private async move(
+  /** Trả hàng (P5): trừ phần tiền của hàng trả khỏi ngăn đang giữ */
+  async deductReturn(tx: Tx, e: SellerEarning, amount: number, note: string): Promise<boolean> {
+    return this.move(tx, earningEntry(e), 'RETURN_DEDUCTED', amount, 'PENDING', null, note);
+  }
+
+  /**
+   * Biến động chung (rút tiền, điều chỉnh). Trả false nếu nguồn này đã ghi loại này rồi (nhận trùng).
+   * Không đủ tiền ở ngăn nguồn thì ném InsufficientBalanceError (hủy cả giao dịch của người gọi).
+   */
+  async move(
     tx: Tx,
-    e: SellerEarning,
+    entry: WalletEntry,
     type: WalletTxType,
     amount: number,
     from: WalletBucket | null,
@@ -80,19 +111,21 @@ export class WalletService {
     const { count } = await tx.walletTransaction.createMany({
       data: [
         {
-          shopId: e.shopId,
-          shopOrderId: e.shopOrderId,
+          shopId: entry.shopId,
+          shopOrderId: entry.shopOrderId ?? null,
+          withdrawalId: entry.withdrawalId ?? null,
+          adjustmentId: entry.adjustmentId ?? null,
           type,
           amount,
           fromBucket: from,
           toBucket: to,
-          note: `${note} (${e.shopOrderCode})`.slice(0, 300),
+          note: `${note} (${entry.label})`.slice(0, 300),
         },
       ],
       skipDuplicates: true,
     });
     if (count === 0) return false;
-    const where: Prisma.SellerWalletWhereInput = { shopId: e.shopId };
+    const where: Prisma.SellerWalletWhereInput = { shopId: entry.shopId };
     const data: Prisma.SellerWalletUpdateManyMutationInput = {};
     if (from) {
       where[COLUMN[from]] = { gte: amount };
@@ -101,13 +134,22 @@ export class WalletService {
     if (to) data[COLUMN[to]] = { increment: amount };
     const updated = await tx.sellerWallet.updateMany({ where, data });
     if (updated.count === 0) {
-      if (!(await tx.sellerWallet.findUnique({ where: { shopId: e.shopId } }))) {
-        throw new Error(`Chưa có ví của shop ${e.shopId} (đơn nhận trước P4?)`);
+      if (!(await tx.sellerWallet.findUnique({ where: { shopId: entry.shopId } }))) {
+        throw new Error(`Chưa có ví của shop ${entry.shopId} (đơn nhận trước P4?)`);
       }
-      // Không bao giờ để số dư âm: hủy cả giao dịch (sự kiện sẽ được xử lý lại), ghi log để kiểm tra
-      this.logger.error(`Ví shop ${e.shopId} không đủ ${amount}đ ở ngăn ${from} cho ${type}.`);
-      throw new Error(`Số dư ví shop ${e.shopId} không đủ cho ${type} ${e.shopOrderCode}`);
+      // Không bao giờ để số dư âm: hủy cả giao dịch, ghi log để kiểm tra
+      this.logger.error(`Ví shop ${entry.shopId} không đủ ${amount}đ ở ngăn ${from} cho ${type}.`);
+      throw new InsufficientBalanceError(
+        `Số dư ví shop ${entry.shopId} không đủ cho ${type} ${entry.label}`,
+      );
     }
     return true;
   }
+}
+
+/** Ngăn nguồn không đủ tiền cho một biến động (người gọi có thể bắt để trả lỗi nghiệp vụ) */
+export class InsufficientBalanceError extends Error {}
+
+function earningEntry(e: SellerEarning): WalletEntry {
+  return { shopId: e.shopId, shopOrderId: e.shopOrderId, label: e.shopOrderCode };
 }
