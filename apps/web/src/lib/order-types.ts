@@ -3,6 +3,7 @@
  * docs/api/README.md mục 4 và 5. Thời gian là chuỗi ISO (UTC).
  */
 
+import type { BankAccount, ReturnSummary } from './after-sales-types';
 import type { EarningStatus } from './finance-types';
 
 export type ShopOrderStatus =
@@ -214,6 +215,9 @@ export interface ShopOrder {
   completedAt: string | null;
   incidentNote: string | null;
   canConfirmReceived: boolean;
+  /** Gửi được yêu cầu trả hàng: đã giao, còn hạn, chưa có yêu cầu (P5) */
+  canRequestReturn: boolean;
+  returnRequest: ReturnSummary | null;
   shipment: Shipment | null;
   cancelledBy: CancelActor | null;
   cancelReason: string | null;
@@ -296,6 +300,7 @@ export interface SellerOrder {
   cancelRequestedAt: string | null;
   refundStatus: RefundStatus;
   incidentNote: string | null;
+  returnRequest: ReturnSummary | null;
   shipment: Shipment | null;
   history?: OrderHistoryRow[];
 }
@@ -354,10 +359,23 @@ export interface AdminRefund {
   orderCode: string | null;
   shopOrderId: string | null;
   shopOrderCode: string | null;
-  paymentRef: string;
-  gateway: 'VNPAY' | 'MOCK';
+  /** null khi hoàn bằng chuyển khoản không gắn giao dịch (P5) */
+  paymentRef: string | null;
+  gateway: 'VNPAY' | 'MOCK' | null;
   amount: number;
-  reason: 'CANCELLED' | 'LATE_PAYMENT' | 'DUPLICATE_PAYMENT' | 'DELIVERY_FAILED' | 'INCIDENT';
+  reason:
+    | 'CANCELLED'
+    | 'LATE_PAYMENT'
+    | 'DUPLICATE_PAYMENT'
+    | 'DELIVERY_FAILED'
+    | 'INCIDENT'
+    | 'RETURN'
+    | 'ADJUSTMENT';
+  /** GATEWAY: qua cổng; BANK_TRANSFER: chuyển khoản tay (P5) */
+  method: 'GATEWAY' | 'BANK_TRANSFER';
+  bankAccount: BankAccount | null;
+  returnId: string | null;
+  adjustmentId: string | null;
   status: AdminRefundStatus;
   tries: number;
   nextTryAt: string | null;

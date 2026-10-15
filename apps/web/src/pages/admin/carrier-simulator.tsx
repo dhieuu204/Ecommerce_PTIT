@@ -118,6 +118,11 @@ export function CarrierSimulatorPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-semibold text-navy">{r.ghnCode}</span>
                     <ShipmentStatusBadge status={r.status} />
+                    {r.type === 'RETURN' && (
+                      <span className="rounded-md bg-champagne-50 px-1.5 text-xs font-semibold text-champagne-600">
+                        Hàng trả về shop
+                      </span>
+                    )}
                     {r.failedAttempts > 0 && (
                       <span className="text-xs text-amber-700">
                         thất bại {r.failedAttempts} lần
@@ -125,8 +130,8 @@ export function CarrierSimulatorPage() {
                     )}
                   </div>
                   <div className="mt-0.5 truncate text-ink/70">
-                    {r.shopName} → <span className="font-medium text-ink">{r.receiverName}</span>,{' '}
-                    {r.address}
+                    {r.type === 'RETURN' ? 'Người mua' : r.shopName} →{' '}
+                    <span className="font-medium text-ink">{r.receiverName}</span>, {r.address}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Đơn{' '}

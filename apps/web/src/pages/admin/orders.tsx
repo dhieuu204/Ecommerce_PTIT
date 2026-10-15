@@ -16,6 +16,7 @@ import {
   ShopOrderStatusBadge,
 } from '@/components/orders/order-parts';
 import { ShipmentPanel } from '@/components/orders/shipment-parts';
+import { ReturnStatusBadge } from '@/components/returns/return-parts';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -288,6 +289,19 @@ export function AdminOrderDetailPage() {
                 <p className="mt-2 rounded-lg bg-ivory px-3 py-2 text-sm text-ink/70">
                   Đã xác nhận sự cố: {so.incidentNote}
                 </p>
+              )}
+              {so.returnRequest && (
+                <Link
+                  to={`/quan-tri/tra-hang/${so.returnRequest.id}`}
+                  className="mt-2 flex items-center gap-2 rounded-lg bg-champagne-50 px-3 py-2 text-sm text-navy"
+                >
+                  <span className="min-w-0 flex-1">
+                    Yêu cầu trả hàng {so.returnRequest.code} · hoàn tối đa{' '}
+                    {formatMoney(so.returnRequest.refundAmount)}
+                  </span>
+                  <ReturnStatusBadge status={so.returnRequest.status} />
+                  <ChevronRight className="size-4 opacity-50" />
+                </Link>
               )}
               {so.shipment && <ShipmentPanel shipment={so.shipment} forSeller className="mt-3" />}
               {so.history && (

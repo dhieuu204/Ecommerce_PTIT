@@ -6,10 +6,28 @@
 import type { AdminRefund, AdminRefundStatus, ShipmentStatus } from './order-types';
 
 export type EarningStatus =
-  'UNPAID' | 'HELD' | 'AVAILABLE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'COMPENSATED';
+  | 'UNPAID'
+  | 'HELD'
+  | 'AVAILABLE'
+  | 'EXPIRED'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'COMPENSATED'
+  // P5: trả hàng hoàn toàn bộ
+  | 'REFUNDED';
 
 export type WalletBucket = 'PENDING' | 'AVAILABLE' | 'LOCKED';
-export type WalletTxType = 'HELD' | 'RELEASED' | 'REVERSED' | 'COMPENSATION';
+export type WalletTxType =
+  | 'HELD'
+  | 'RELEASED'
+  | 'REVERSED'
+  | 'COMPENSATION'
+  // P5
+  | 'RETURN_DEDUCTED'
+  | 'LOCKED'
+  | 'UNLOCKED'
+  | 'WITHDRAWN'
+  | 'ADJUSTMENT';
 
 export interface Wallet {
   /** null: shop chưa có đơn nào */
@@ -19,6 +37,17 @@ export interface Wallet {
   locked: number;
   pendingWaitingCompletion: number;
   pendingWaitingCod: number;
+  /** Đang giữ vì có yêu cầu trả hàng chưa có kết quả (P5) */
+  pendingWaitingReturn: number;
+  /** Số tiền rút tối thiểu (P5) */
+  withdrawMin: number;
+  /** Yêu cầu rút đang xử lý (P5) */
+  openWithdrawal: {
+    id: string;
+    amount: number;
+    status: 'PENDING' | 'APPROVED';
+    createdAt: string;
+  } | null;
 }
 
 export interface WalletTransaction {
@@ -29,6 +58,8 @@ export interface WalletTransaction {
   toBucket: WalletBucket | null;
   shopOrderId: string | null;
   shopOrderCode: string | null;
+  withdrawalId: string | null;
+  adjustmentId: string | null;
   note: string | null;
   createdAt: string;
 }
@@ -43,6 +74,11 @@ export interface Earning {
   platformFeeRate: number;
   platformFee: number;
   sellerAmount: number;
+  /** P5: đã hoàn người mua do trả hàng, seller bị trừ, phí sàn được giảm, seller nhận cuối cùng */
+  returnRefund: number;
+  returnDeduction: number;
+  returnFeeReversed: number;
+  sellerReceives: number;
   status: EarningStatus;
   waitingFor: string | null;
   deliveredAt: string | null;
@@ -137,6 +173,8 @@ export type SimulatorEvent =
 
 export interface SimulatorRow {
   id: string;
+  /** DELIVERY: giao cho người mua; RETURN: hàng trả của người mua gửi về shop (P5) */
+  type: 'DELIVERY' | 'RETURN';
   ghnCode: string | null;
   status: ShipmentStatus;
   failedAttempts: number;

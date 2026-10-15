@@ -15,7 +15,7 @@ type AdminMenuGroup = {
   items: Array<{ to: string; label: string; any: Permission[] }>;
 };
 
-/** Menu theo bộ quyền: admin chỉ thấy mục mình có quyền. Mục của các giai đoạn sau thêm khi tới giai đoạn. */
+/** Menu theo bộ quyền: admin chỉ thấy mục mình có quyền */
 const GROUPS: AdminMenuGroup[] = [
   {
     title: 'Kiểm duyệt',
@@ -29,6 +29,8 @@ const GROUPS: AdminMenuGroup[] = [
     title: 'Hỗ trợ',
     items: [
       { to: '/quan-tri/don-hang', label: 'Đơn hàng', any: ['SUPPORT'] },
+      { to: '/quan-tri/tra-hang', label: 'Trả hàng', any: ['SUPPORT'] },
+      { to: '/quan-tri/tranh-chap', label: 'Tranh chấp', any: ['SUPPORT'] },
       { to: '/quan-tri/ghn-mo-phong', label: 'GHN mô phỏng', any: ['SUPPORT'] },
     ],
   },
@@ -37,6 +39,8 @@ const GROUPS: AdminMenuGroup[] = [
     items: [
       { to: '/quan-tri/duyet-don', label: 'Duyệt đơn lớn', any: ['FINANCE'] },
       { to: '/quan-tri/hoan-tien', label: 'Hoàn tiền', any: ['FINANCE'] },
+      { to: '/quan-tri/rut-tien', label: 'Rút tiền', any: ['FINANCE'] },
+      { to: '/quan-tri/dieu-chinh-vi', label: 'Điều chỉnh ví', any: ['FINANCE'] },
       { to: '/quan-tri/doi-soat-cod', label: 'Đối soát COD', any: ['FINANCE'] },
       { to: '/quan-tri/doi-soat-vnpay', label: 'Đối soát VNPay', any: ['FINANCE'] },
       { to: '/quan-tri/voucher', label: 'Voucher sàn', any: ['FINANCE'] },
@@ -74,7 +78,6 @@ export function AdminLayout() {
       tone="admin"
       menu={menuFor(perms)}
       headerInfo={<>Quyền: {perms.map((p) => PERMISSION_LABELS[p]).join(' · ')}</>}
-      menuNote="Rút tiền, trả hàng, tranh chấp có từ giai đoạn sau."
     />
   );
 }

@@ -3,12 +3,14 @@ import {
   Banknote,
   CheckCircle2,
   ChevronLeft,
+  ChevronRight,
   Clock,
   CreditCard,
   Loader2,
   MapPin,
   PackageCheck,
   ShieldCheck,
+  Undo2,
   XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -30,6 +32,7 @@ import {
   useCountdown,
 } from '@/components/orders/order-parts';
 import { PAYMENT_METHOD, ShipmentPanel } from '@/components/orders/shipment-parts';
+import { ReturnStatusBadge } from '@/components/returns/return-parts';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, api } from '@/lib/api';
@@ -162,6 +165,7 @@ export function OrderDetailPage() {
       {o.shopOrders.map((so) => (
         <ShopOrderCard
           key={so.id}
+          orderId={o.id}
           so={so}
           paid={paid}
           cod={o.paymentMethod === 'COD'}
@@ -198,7 +202,7 @@ export function OrderDetailPage() {
         open={receiveTarget !== null}
         onOpenChange={(open) => !open && setReceiveTarget(null)}
         title="Bạn đã nhận được hàng?"
-        description={`Xác nhận đã nhận đủ hàng của ${receiveTarget?.shop.name ?? ''} và hàng không có vấn đề. Sau khi xác nhận, đơn hoàn tất và shop nhận được tiền.`}
+        description={`Xác nhận đã nhận đủ hàng của ${receiveTarget?.shop.name ?? ''} và hàng không có vấn đề. Sau khi xác nhận, đơn hoàn tất, shop nhận được tiền và bạn không gửi yêu cầu trả hàng được nữa.`}
         confirmLabel="Đã nhận hàng"
         onConfirm={() => received.mutateAsync(receiveTarget!)}
       />
@@ -362,11 +366,13 @@ function DeliveryNote({ so, cod }: { so: ShopOrder; cod: boolean }) {
   );
   switch (so.status) {
     case 'DELIVERED':
+      if (so.returnRequest) return null;
       return box(
         'info',
         <>
           Đã giao lúc {formatDateTime(so.deliveredAt)}. Kiểm tra hàng rồi bấm <b>"Đã nhận hàng"</b>;
-          nếu không, đơn tự hoàn tất lúc {formatDateTime(so.completeBefore)}.
+          hàng lỗi hoặc giao sai thì bấm <b>"Trả hàng/Hoàn tiền"</b> trước{' '}
+          {formatDateTime(so.completeBefore)} (lúc này đơn tự hoàn tất).
         </>,
       );
     case 'RETURNING':
@@ -425,12 +431,14 @@ function Panel({
 }
 
 function ShopOrderCard({
+  orderId,
   so,
   paid,
   cod,
   onCancel,
   onReceived,
 }: {
+  orderId: string;
   so: ShopOrder;
   paid: boolean;
   cod: boolean;
@@ -477,6 +485,22 @@ function ShopOrderCard({
           </p>
         )}
         <DeliveryNote so={so} cod={cod} />
+        {so.returnRequest && (
+          <Link
+            to={`/tai-khoan/tra-hang/${so.returnRequest.id}`}
+            className="mb-2 flex items-center gap-2 rounded-lg bg-champagne-50 px-3 py-2 text-sm text-navy ring-1 ring-transparent transition hover:ring-champagne/60"
+          >
+            <Undo2 className="size-4 shrink-0 text-champagne-600" />
+            <span className="min-w-0 flex-1">
+              Yêu cầu trả hàng {so.returnRequest.code} ·{' '}
+              {so.returnRequest.decidedRefund !== null
+                ? `hoàn ${formatMoney(so.returnRequest.decidedRefund)}`
+                : `hoàn tối đa ${formatMoney(so.returnRequest.refundAmount)}`}
+            </span>
+            <ReturnStatusBadge status={so.returnRequest.status} />
+            <ChevronRight className="size-4 shrink-0 opacity-50" />
+          </Link>
+        )}
         {so.shipment && SHIPPED.includes(so.status) && (
           <ShipmentPanel shipment={so.shipment} className="mb-3" />
         )}
@@ -512,6 +536,13 @@ function ShopOrderCard({
           {so.cancelAction && (
             <Button variant="outline" size="sm" onClick={onCancel} className="rounded-lg">
               {so.cancelAction === 'REQUEST' ? 'Yêu cầu hủy' : 'Hủy đơn của shop này'}
+            </Button>
+          )}
+          {so.canRequestReturn && (
+            <Button asChild variant="outline" size="sm" className="rounded-lg">
+              <Link to={`/tai-khoan/don-mua/${orderId}/tra-hang/${so.id}`}>
+                <Undo2 className="size-4" /> Trả hàng/Hoàn tiền
+              </Link>
             </Button>
           )}
           {so.canConfirmReceived && (

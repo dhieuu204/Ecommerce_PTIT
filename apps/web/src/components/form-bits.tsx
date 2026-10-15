@@ -49,6 +49,23 @@ export function Field({ id, label, error, hint, aside, className, children }: Fi
   );
 }
 
+/** Ô chỉ nhận chữ số (dán "0011 0044 55667" thành "0011004455667"), ví dụ số tài khoản ngân hàng */
+export function DigitsInput({ onChange, ...props }: React.ComponentProps<'input'>) {
+  return (
+    <input
+      inputMode="numeric"
+      autoComplete="off"
+      className={inputClass}
+      maxLength={20}
+      {...props}
+      onChange={(e) => {
+        e.target.value = e.target.value.replace(/\D/g, '');
+        onChange?.(e);
+      }}
+    />
+  );
+}
+
 type PasswordInputProps = Omit<React.ComponentProps<'input'>, 'type'> & { pill?: boolean };
 
 /** Ô mật khẩu có nút hiện/ẩn bên phải */

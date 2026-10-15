@@ -27,11 +27,21 @@ const SOURCES = [
   {
     key: 'market',
     prefix: API.market,
-    title: 'Đơn hàng và vận chuyển',
+    title: 'Đơn hàng, vận chuyển và trả hàng',
     note: 'marketplace-service',
   },
-  { key: 'payment', prefix: API.payment, title: 'Thanh toán và phí sàn', note: 'payment-service' },
-  { key: 'approval', prefix: API.approval, title: 'Kiểm tra đơn', note: 'approval-service' },
+  {
+    key: 'payment',
+    prefix: API.payment,
+    title: 'Thanh toán, phí sàn và rút tiền',
+    note: 'payment-service',
+  },
+  {
+    key: 'approval',
+    prefix: API.approval,
+    title: 'Kiểm tra đơn và tranh chấp',
+    note: 'approval-service',
+  },
 ] as const;
 
 type Source = (typeof SOURCES)[number];

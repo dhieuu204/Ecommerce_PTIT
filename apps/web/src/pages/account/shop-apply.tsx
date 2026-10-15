@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useController, useForm } from 'react-hook-form';
 import { Navigate, useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import { Field, inputClass, PHONE_PATTERN, SubmitButton } from '@/components/form-bits';
+import {
+  DigitsInput,
+  Field,
+  inputClass,
+  PHONE_PATTERN,
+  SubmitButton,
+} from '@/components/form-bits';
 import { LocationFields } from '@/components/location-fields';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -471,23 +477,6 @@ function useActiveSection() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   return active;
-}
-
-/** Ô chỉ nhận chữ số (dán "0011 0044 55667" thành "0011004455667") */
-function DigitsInput({ onChange, ...props }: React.ComponentProps<'input'>) {
-  return (
-    <input
-      inputMode="numeric"
-      autoComplete="off"
-      className={inputClass}
-      maxLength={20}
-      {...props}
-      onChange={(e) => {
-        e.target.value = e.target.value.replace(/\D/g, '');
-        onChange?.(e);
-      }}
-    />
-  );
 }
 
 /** Ô tên chủ tài khoản: tự viết hoa, bỏ dấu, giữ vị trí con trỏ */

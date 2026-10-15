@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 const MENU = [
   { to: '/tai-khoan/don-mua', label: 'Đơn mua' },
+  { to: '/tai-khoan/tra-hang', label: 'Trả hàng/Hoàn tiền' },
   { to: '/tai-khoan/ho-so', label: 'Hồ sơ của tôi' },
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu' },
   { to: '/tai-khoan/dia-chi', label: 'Sổ địa chỉ' },

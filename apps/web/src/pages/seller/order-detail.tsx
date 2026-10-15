@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronRight,
   Clock,
   Loader2,
   MapPin,
@@ -31,6 +32,7 @@ import {
   ShopOrderStatusBadge,
 } from '@/components/orders/order-parts';
 import { ShipmentPanel } from '@/components/orders/shipment-parts';
+import { ReturnStatusBadge } from '@/components/returns/return-parts';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -150,6 +152,21 @@ export function SellerOrderDetailPage() {
         onDecline={() => setDialog('DECLINE')}
         onReturnReceived={() => setDialog('RETURN')}
       />
+
+      {o.returnRequest && (
+        <Link
+          to={`/kenh-nguoi-ban/tra-hang/${o.returnRequest.id}`}
+          className="mb-4 flex items-center gap-3 rounded-2xl border border-champagne/50 bg-champagne-50 px-4 py-3 text-sm text-navy transition hover:border-champagne md:px-5"
+        >
+          <Undo2 className="size-5 shrink-0 text-champagne-600" />
+          <span className="min-w-0 flex-1">
+            Người mua yêu cầu trả hàng <b>{o.returnRequest.code}</b> (hoàn tối đa{' '}
+            {formatMoney(o.returnRequest.refundAmount)})
+          </span>
+          <ReturnStatusBadge status={o.returnRequest.status} />
+          <ChevronRight className="size-4 shrink-0 opacity-50" />
+        </Link>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">

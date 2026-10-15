@@ -2,11 +2,14 @@ import { ShieldAlert } from 'lucide-react';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { ConsoleLayout, type ConsoleMenuGroup } from './console-layout';
 
-/** Menu Kênh người bán. Rút tiền thêm khi tới giai đoạn */
+/** Menu Kênh người bán */
 const MENU: ConsoleMenuGroup[] = [
   {
     title: 'Đơn hàng',
-    items: [{ to: '/kenh-nguoi-ban/don-hang', label: 'Tất cả đơn' }],
+    items: [
+      { to: '/kenh-nguoi-ban/don-hang', label: 'Tất cả đơn' },
+      { to: '/kenh-nguoi-ban/tra-hang', label: 'Trả hàng/Hoàn tiền' },
+    ],
   },
   {
     title: 'Sản phẩm',
@@ -21,7 +24,7 @@ const MENU: ConsoleMenuGroup[] = [
   },
   {
     title: 'Tài chính',
-    items: [{ to: '/kenh-nguoi-ban/tai-chinh', label: 'Ví của shop' }],
+    items: [{ to: '/kenh-nguoi-ban/tai-chinh', label: 'Ví và rút tiền' }],
   },
   {
     title: 'Shop',

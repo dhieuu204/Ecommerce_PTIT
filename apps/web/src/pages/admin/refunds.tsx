@@ -43,6 +43,8 @@ export const REFUND_REASON: Record<AdminRefund['reason'], string> = {
   DUPLICATE_PAYMENT: 'Trả trùng',
   DELIVERY_FAILED: 'Giao không thành công',
   INCIDENT: 'Sự cố vận chuyển',
+  RETURN: 'Trả hàng',
+  ADJUSTMENT: 'Điều chỉnh sau giải ngân',
 };
 
 const TABS: Array<{ value: AdminRefundStatus | 'ALL'; label: string }> = [
@@ -136,9 +138,17 @@ export function RefundsPage() {
                         {r.shopOrderCode ?? r.orderCode ?? r.orderId}
                       </Link>
                       <div className="text-muted-foreground">
-                        {REFUND_REASON[r.reason]} · {r.gateway === 'MOCK' ? 'MÔ PHỎNG' : 'VNPay'}{' '}
-                        {r.paymentRef}
+                        {REFUND_REASON[r.reason]} ·{' '}
+                        {r.method === 'BANK_TRANSFER'
+                          ? 'Chuyển khoản tay'
+                          : `${r.gateway === 'MOCK' ? 'MÔ PHỎNG' : 'VNPay'} ${r.paymentRef ?? ''}`}
                       </div>
+                      {r.bankAccount && (
+                        <div className="text-xs text-navy">
+                          Chuyển tới: {r.bankAccount.bankName} · {r.bankAccount.accountNumber} ·{' '}
+                          {r.bankAccount.accountName}
+                        </div>
+                      )}
                       <div className="text-xs text-muted-foreground">
                         Tạo {formatDateTime(r.createdAt)} · đã thử {r.tries} lần
                         {r.lastError && <span className="text-red-600"> · {r.lastError}</span>}

@@ -124,6 +124,25 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'don-mua/:orderId/tra-hang/:shopOrderId',
+                lazy: () =>
+                  import('@/pages/account/return-request').then((m) => ({
+                    Component: m.ReturnRequestPage,
+                  })),
+              },
+              {
+                path: 'tra-hang',
+                lazy: () =>
+                  import('@/pages/account/returns').then((m) => ({ Component: m.ReturnsPage })),
+              },
+              {
+                path: 'tra-hang/:returnId',
+                lazy: () =>
+                  import('@/pages/account/return-detail').then((m) => ({
+                    Component: m.ReturnDetailPage,
+                  })),
+              },
+              {
                 path: 'shop',
                 lazy: () =>
                   import('@/pages/account/my-shop').then((m) => ({ Component: m.MyShopPage })),
@@ -192,6 +211,20 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/seller/order-detail').then((m) => ({
                     Component: m.SellerOrderDetailPage,
+                  })),
+              },
+              {
+                path: 'tra-hang',
+                lazy: () =>
+                  import('@/pages/seller/returns').then((m) => ({
+                    Component: m.SellerReturnsPage,
+                  })),
+              },
+              {
+                path: 'tra-hang/:returnId',
+                lazy: () =>
+                  import('@/pages/seller/return-detail').then((m) => ({
+                    Component: m.SellerReturnDetailPage,
                   })),
               },
               {
@@ -308,6 +341,20 @@ export const router = createBrowserRouter([
                         Component: m.VnpayReconciliationPage,
                       })),
                   },
+                  {
+                    path: 'rut-tien',
+                    lazy: () =>
+                      import('@/pages/admin/withdrawals').then((m) => ({
+                        Component: m.WithdrawalsPage,
+                      })),
+                  },
+                  {
+                    path: 'dieu-chinh-vi',
+                    lazy: () =>
+                      import('@/pages/admin/adjustments').then((m) => ({
+                        Component: m.AdjustmentsPage,
+                      })),
+                  },
                 ],
               },
               {
@@ -325,6 +372,34 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/orders').then((m) => ({
                         Component: m.AdminOrderDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'tra-hang',
+                    lazy: () =>
+                      import('@/pages/admin/returns').then((m) => ({
+                        Component: m.AdminReturnsPage,
+                      })),
+                  },
+                  {
+                    path: 'tra-hang/:returnId',
+                    lazy: () =>
+                      import('@/pages/admin/returns').then((m) => ({
+                        Component: m.AdminReturnDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'tranh-chap',
+                    lazy: () =>
+                      import('@/pages/admin/disputes').then((m) => ({
+                        Component: m.DisputesPage,
+                      })),
+                  },
+                  {
+                    path: 'tranh-chap/:disputeId',
+                    lazy: () =>
+                      import('@/pages/admin/disputes').then((m) => ({
+                        Component: m.DisputeDetailPage,
                       })),
                   },
                   {

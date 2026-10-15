@@ -1,24 +1,36 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowDownLeft,
   ArrowRightLeft,
   ArrowUpRight,
   Banknote,
   CircleDollarSign,
+  HandCoins,
   Hourglass,
+  Landmark,
   Lock,
+  LockOpen,
   ReceiptText,
+  Scale,
   ShieldCheck,
+  Undo2,
   Wallet as WalletIcon,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
+import { toast } from 'sonner';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
+import { NumberInput } from '@/components/console/money-input';
 import { Pager } from '@/components/console/pager';
 import { PageHeader } from '@/components/layout/page-header';
+import { ConfirmDialog } from '@/components/orders/order-parts';
 import { StatusBadge } from '@/components/status-badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMyShop } from '@/hooks/use-my-shop';
 import { API, api } from '@/lib/api';
-import { formatDateTime, formatMoney } from '@/lib/format';
+import type { Withdrawal, WithdrawalStatus } from '@/lib/after-sales-types';
+import { formatDateTime, formatMoney, maskAccount } from '@/lib/format';
 import type {
   Earning,
   EarningStatus,
@@ -43,6 +55,7 @@ export const EARNING_STATUS: Record<EarningStatus, { label: string; tone: Tone }
   CANCELLED: { label: 'Đơn đã hủy', tone: 'neutral' },
   FAILED: { label: 'Giao thất bại', tone: 'danger' },
   COMPENSATED: { label: 'Đã đền sự cố', tone: 'info' },
+  REFUNDED: { label: 'Trả hàng, hoàn toàn bộ', tone: 'neutral' },
 };
 
 const TX_TYPE: Record<WalletTxType, { label: string; icon: typeof ArrowDownLeft }> = {
@@ -50,6 +63,20 @@ const TX_TYPE: Record<WalletTxType, { label: string; icon: typeof ArrowDownLeft 
   RELEASED: { label: 'Chuyển sang khả dụng', icon: ArrowRightLeft },
   REVERSED: { label: 'Trừ lại', icon: ArrowUpRight },
   COMPENSATION: { label: 'Đền hàng thất lạc / hư hỏng', icon: ShieldCheck },
+  RETURN_DEDUCTED: { label: 'Trừ phần hàng trả', icon: Undo2 },
+  LOCKED: { label: 'Khóa tiền cho yêu cầu rút', icon: Lock },
+  UNLOCKED: { label: 'Mở khóa tiền (yêu cầu rút không thực hiện)', icon: LockOpen },
+  WITHDRAWN: { label: 'Sàn đã chuyển khoản cho shop', icon: Landmark },
+  ADJUSTMENT: { label: 'Điều chỉnh của sàn', icon: Scale },
+};
+
+export const WITHDRAWAL_STATUS: Record<WithdrawalStatus, { label: string; tone: Tone }> = {
+  PENDING: { label: 'Chờ sàn duyệt', tone: 'pending' },
+  APPROVED: { label: 'Đã duyệt, chờ chuyển khoản', tone: 'info' },
+  PAID: { label: 'Đã chuyển khoản', tone: 'success' },
+  REJECTED: { label: 'Bị từ chối', tone: 'danger' },
+  CANCELLED: { label: 'Đã hủy', tone: 'neutral' },
+  FAILED: { label: 'Chuyển khoản lỗi', tone: 'danger' },
 };
 
 const BUCKET: Record<WalletBucket, string> = {
@@ -64,16 +91,30 @@ const EARNING_FILTERS: Array<{ value: EarningStatus | 'ALL'; label: string }> = 
   { value: 'AVAILABLE', label: 'Khả dụng' },
   { value: 'UNPAID', label: 'Chưa có tiền' },
   { value: 'FAILED', label: 'Giao thất bại' },
+  { value: 'REFUNDED', label: 'Trả hàng' },
   { value: 'CANCELLED', label: 'Đã hủy' },
 ];
 
+type Tab = 'EARNINGS' | 'HISTORY' | 'WITHDRAWALS';
+const TAB_PARAM: Record<Tab, string | null> = {
+  EARNINGS: null,
+  HISTORY: 'lich-su',
+  WITHDRAWALS: 'rut-tien',
+};
+
 /**
- * Kênh người bán › Tài chính (FIN-01, FIN-02): số dư ví 3 ngăn, tiền từng đơn kèm lý do chưa khả dụng,
- * lịch sử biến động. Rút tiền có ở giai đoạn sau nên chưa có nút.
+ * Kênh người bán › Tài chính (FIN-01, FIN-02, FIN-04): số dư ví 3 ngăn, tiền từng đơn kèm lý do chưa khả
+ * dụng, lịch sử biến động, rút tiền (khóa tiền, chờ sàn duyệt và chuyển khoản)
  */
 export function SellerFinancePage() {
   const [params, setParams] = useSearchParams();
-  const tab = params.get('tab') === 'lich-su' ? 'HISTORY' : 'EARNINGS';
+  const tab: Tab =
+    params.get('tab') === 'lich-su'
+      ? 'HISTORY'
+      : params.get('tab') === 'rut-tien'
+        ? 'WITHDRAWALS'
+        : 'EARNINGS';
+  const [withdrawing, setWithdrawing] = useState(false);
   const status = (params.get('status') ?? 'ALL') as EarningStatus | 'ALL';
   const page = Math.max(1, Number(params.get('page')) || 1);
 
@@ -97,7 +138,7 @@ export function SellerFinancePage() {
       <PageHeader
         crumbs={[{ label: 'Tài chính' }]}
         title="Tài chính"
-        description="Tiền của shop sau phí sàn. Tiền vào ngăn Đang giữ, sang Khả dụng khi đơn hoàn tất và sàn đã nhận được tiền."
+        description="Tiền của shop sau phí sàn. Tiền vào ngăn Đang giữ, sang Khả dụng khi đơn hoàn tất và sàn đã nhận được tiền; tiền khả dụng rút về tài khoản ngân hàng của shop."
       />
 
       {wallet.isPending ? (
@@ -112,7 +153,11 @@ export function SellerFinancePage() {
           onRetry={() => wallet.refetch()}
         />
       ) : (
-        <Balances wallet={wallet.data} />
+        <Balances
+          wallet={wallet.data}
+          onWithdraw={() => setWithdrawing(true)}
+          onOpenWithdrawals={() => update({ tab: 'rut-tien', status: null })}
+        />
       )}
 
       <FlowSteps />
@@ -123,12 +168,13 @@ export function SellerFinancePage() {
             [
               ['EARNINGS', 'Tiền theo đơn'],
               ['HISTORY', 'Lịch sử ví'],
+              ['WITHDRAWALS', 'Rút tiền'],
             ] as const
           ).map(([value, label]) => (
             <button
               key={value}
               type="button"
-              onClick={() => update({ tab: value === 'HISTORY' ? 'lich-su' : null, status: null })}
+              onClick={() => update({ tab: TAB_PARAM[value], status: null })}
               className={cn(
                 '-mb-px shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                 tab === value
@@ -147,15 +193,35 @@ export function SellerFinancePage() {
             onStatus={(s) => update({ status: s === 'ALL' ? null : s })}
             onPage={(p) => update({ page: String(p) })}
           />
-        ) : (
+        ) : tab === 'HISTORY' ? (
           <HistoryList page={page} onPage={(p) => update({ page: String(p) })} />
+        ) : (
+          <WithdrawalsList page={page} onPage={(p) => update({ page: String(p) })} />
         )}
       </div>
+
+      {wallet.data && (
+        <WithdrawDialog
+          open={withdrawing}
+          onOpenChange={setWithdrawing}
+          wallet={wallet.data}
+          onDone={() => update({ tab: 'rut-tien', status: null })}
+        />
+      )}
     </div>
   );
 }
 
-function Balances({ wallet: w }: { wallet: Wallet }) {
+function Balances({
+  wallet: w,
+  onWithdraw,
+  onOpenWithdrawals,
+}: {
+  wallet: Wallet;
+  onWithdraw: () => void;
+  onOpenWithdrawals: () => void;
+}) {
+  const canWithdraw = !w.openWithdrawal && w.available >= w.withdrawMin;
   return (
     <div className={cn('mb-6 grid gap-4', w.locked > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2')}>
       <div className="relative overflow-hidden rounded-2xl bg-navy p-5 text-white shadow-lg shadow-navy/20">
@@ -172,6 +238,32 @@ function Balances({ wallet: w }: { wallet: Wallet }) {
         <p className="relative mt-2 text-xs text-white/65">
           Đơn đã hoàn tất và sàn đã nhận được tiền.
         </p>
+        <div className="relative mt-3">
+          {w.openWithdrawal ? (
+            <button
+              type="button"
+              onClick={onOpenWithdrawals}
+              className="text-left text-xs text-white/85 underline-offset-2 hover:underline"
+            >
+              Đang có yêu cầu rút {formatMoney(w.openWithdrawal.amount)} (
+              {WITHDRAWAL_STATUS[w.openWithdrawal.status].label.toLowerCase()})
+            </button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={onWithdraw}
+              disabled={!canWithdraw}
+              className="rounded-lg bg-champagne text-navy hover:bg-champagne/90"
+            >
+              <HandCoins className="size-4" /> Rút tiền
+            </Button>
+          )}
+          {!w.openWithdrawal && !canWithdraw && (
+            <p className="mt-1 text-xs text-white/60">
+              Rút tối thiểu {formatMoney(w.withdrawMin)} mỗi lần.
+            </p>
+          )}
+        </div>
       </div>
       <div className="rounded-2xl border border-champagne/50 bg-card p-5">
         <div className="flex items-center gap-2 text-sm text-ink/65">
@@ -189,6 +281,12 @@ function Balances({ wallet: w }: { wallet: Wallet }) {
             <dt>Chờ đối soát tiền COD với GHN</dt>
             <dd className="tabular-nums">{formatMoney(w.pendingWaitingCod)}</dd>
           </div>
+          {w.pendingWaitingReturn > 0 && (
+            <div className="flex justify-between gap-3">
+              <dt>Chờ xử lý yêu cầu trả hàng</dt>
+              <dd className="tabular-nums">{formatMoney(w.pendingWaitingReturn)}</dd>
+            </div>
+          )}
         </dl>
       </div>
       {w.locked > 0 && (
@@ -199,6 +297,7 @@ function Balances({ wallet: w }: { wallet: Wallet }) {
           <div className="mt-2 text-3xl font-bold tabular-nums text-ink">
             {formatMoney(w.locked)}
           </div>
+          <p className="mt-2 text-xs text-ink/60">Tiền của yêu cầu rút đang chờ sàn xử lý.</p>
         </div>
       )}
     </div>
@@ -221,11 +320,16 @@ function FlowSteps() {
     {
       icon: CircleDollarSign,
       title: 'Khả dụng',
-      text: 'Đơn hoàn tất và tiền đã về sàn (COD: sau khi đối soát với GHN).',
+      text: 'Đơn hoàn tất, không còn yêu cầu trả hàng, tiền đã về sàn (COD: sau đối soát GHN).',
+    },
+    {
+      icon: Landmark,
+      title: 'Rút tiền',
+      text: 'Gửi yêu cầu (tiền bị khóa), sàn duyệt rồi chuyển khoản kèm biên lai.',
     },
   ];
   return (
-    <ol className="mb-6 grid gap-2 rounded-2xl border border-ivory-200 bg-ivory/50 p-3 sm:grid-cols-3">
+    <ol className="mb-6 grid gap-2 rounded-2xl border border-ivory-200 bg-ivory/50 p-3 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((s, i) => (
         <li key={s.title} className="flex gap-3 rounded-xl bg-card px-3 py-2.5">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-champagne-50 text-champagne-600">
@@ -341,11 +445,17 @@ function EarningRow({ e }: { e: Earning }) {
         value={`−${formatMoney(e.platformFee)}`}
         className="text-ink/60"
       />
-      <Cell
-        label="Shop nhận"
-        value={formatMoney(e.sellerAmount)}
-        className="font-semibold text-navy"
-      />
+      <div className="flex justify-between text-sm lg:block lg:text-right">
+        <span className="text-xs text-muted-foreground lg:hidden">Shop nhận</span>
+        <span className="font-semibold text-navy tabular-nums">
+          {formatMoney(e.sellerReceives)}
+        </span>
+        {e.returnDeduction > 0 && (
+          <span className="block text-xs text-champagne-600">
+            đã trừ trả hàng {formatMoney(e.returnDeduction)}
+          </span>
+        )}
+      </div>
       <div className="flex flex-col items-start gap-0.5">
         <StatusBadge tone={s.tone}>{s.label}</StatusBadge>
         {e.waitingFor && <span className="text-xs text-muted-foreground">{e.waitingFor}</span>}
@@ -413,6 +523,7 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
                 <div className="text-xs text-muted-foreground">
                   {t.fromBucket ? BUCKET[t.fromBucket] : 'Ngoài ví'} →{' '}
                   {t.toBucket ? BUCKET[t.toBucket] : 'Ra khỏi ví'}
+                  {t.type === 'ADJUSTMENT' && t.note && <> · {t.note}</>}
                   {t.shopOrderCode && (
                     <>
                       {' · '}
@@ -448,6 +559,193 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
         onChange={onPage}
       />
     </>
+  );
+}
+
+/** Lịch sử yêu cầu rút: trạng thái, tài khoản nhận, mã giao dịch; hủy được khi sàn chưa duyệt */
+function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) => void }) {
+  const qc = useQueryClient();
+  const [cancelling, setCancelling] = useState<Withdrawal | null>(null);
+  const list = useQuery({
+    queryKey: [...walletKey, 'withdrawals', page],
+    queryFn: () =>
+      api<Page<Withdrawal>>(`${API.payment}/shops/me/withdrawals`, {
+        query: { page, pageSize: PAGE_SIZE },
+      }),
+    placeholderData: keepPreviousData,
+  });
+  const cancel = useMutation({
+    mutationFn: (w: Withdrawal) =>
+      api<Withdrawal>(`${API.payment}/shops/me/withdrawals/${w.id}/cancel`, { method: 'POST' }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: walletKey });
+      toast.success('Đã hủy yêu cầu rút, tiền trở lại ngăn khả dụng.');
+    },
+    onError: (e) => {
+      toast.error(e.message);
+      void qc.invalidateQueries({ queryKey: walletKey });
+    },
+  });
+  if (list.isPending) return <ListSkeleton />;
+  if (list.isError)
+    return <LoadError message={list.error.message} onRetry={() => list.refetch()} />;
+  if (list.data.items.length === 0) {
+    return (
+      <EmptyState
+        icon={Landmark}
+        title="Chưa có yêu cầu rút tiền"
+        text="Bấm Rút tiền ở ô Khả dụng. Mỗi lúc một yêu cầu, sàn duyệt rồi chuyển khoản."
+      />
+    );
+  }
+  return (
+    <>
+      <ul className="divide-y">
+        {list.data.items.map((w) => {
+          const st = WITHDRAWAL_STATUS[w.status];
+          return (
+            <li key={w.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5 md:px-5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
+                <Landmark className="size-4" />
+              </span>
+              <div className="min-w-0 flex-1 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <b className="tabular-nums text-navy">{formatMoney(w.amount)}</b>
+                  <StatusBadge tone={st.tone}>{st.label}</StatusBadge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {w.bankAccount.bankName} · {w.bankAccount.accountNumber} ·{' '}
+                  {w.bankAccount.accountName} · gửi {formatDateTime(w.createdAt)}
+                </div>
+                {w.reason && <div className="text-xs text-red-700">Lý do: {w.reason}</div>}
+                {w.status === 'PAID' && (
+                  <div className="text-xs text-emerald-700">
+                    Đã chuyển lúc {formatDateTime(w.paidAt)} · mã giao dịch {w.transferCode}
+                  </div>
+                )}
+              </div>
+              {w.canCancel && (
+                <Button variant="outline" size="sm" onClick={() => setCancelling(w)}>
+                  Hủy yêu cầu
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <Pager
+        className="border-t px-5 py-3"
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={list.data.total}
+        onChange={onPage}
+      />
+      <ConfirmDialog
+        open={cancelling !== null}
+        onOpenChange={(o) => !o && setCancelling(null)}
+        title="Hủy yêu cầu rút tiền?"
+        description={`${formatMoney(cancelling?.amount ?? 0)} được mở khóa, trở lại ngăn khả dụng.`}
+        confirmLabel="Hủy yêu cầu"
+        onConfirm={() => cancel.mutateAsync(cancelling!)}
+      />
+    </>
+  );
+}
+
+/** Rút tiền (FIN-04): số tiền từ mức tối thiểu tới toàn bộ số khả dụng, về tài khoản trong hồ sơ shop */
+function WithdrawDialog({
+  open,
+  onOpenChange,
+  wallet,
+  onDone,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  wallet: Wallet;
+  onDone: () => void;
+}) {
+  const qc = useQueryClient();
+  const shop = useMyShop();
+  const [amount, setAmount] = useState<number | null>(wallet.available);
+  // Mỗi lần mở hộp một mã chống gửi lặp
+  const [key, setKey] = useState(() => crypto.randomUUID());
+  const bank = shop.data?.shop?.bankAccount;
+  const tooSmall = (amount ?? 0) < wallet.withdrawMin;
+  const tooBig = (amount ?? 0) > wallet.available;
+  const submit = useMutation({
+    mutationFn: () =>
+      api<Withdrawal>(`${API.payment}/shops/me/withdrawals`, {
+        method: 'POST',
+        idempotencyKey: key,
+        body: { amount },
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: walletKey });
+      toast.success('Đã gửi yêu cầu rút tiền, chờ sàn duyệt.');
+      onDone();
+    },
+    onError: (e) => {
+      toast.error(e.message);
+      void qc.invalidateQueries({ queryKey: walletKey });
+    },
+  });
+  return (
+    <ConfirmDialog
+      open={open}
+      onOpenChange={(o) => {
+        if (o) {
+          setAmount(wallet.available);
+          setKey(crypto.randomUUID());
+        }
+        onOpenChange(o);
+      }}
+      title="Rút tiền về tài khoản ngân hàng"
+      description="Số tiền được khóa ngay, sàn duyệt rồi chuyển khoản kèm biên lai. Không thu phí rút."
+      confirmLabel="Gửi yêu cầu rút"
+      onConfirm={() =>
+        tooSmall || tooBig || !bank
+          ? Promise.reject(toast.error('Số tiền hoặc tài khoản chưa hợp lệ.'))
+          : submit.mutateAsync()
+      }
+    >
+      <div className="space-y-3 text-sm">
+        <div>
+          <div className="mb-1 flex justify-between text-ink/70">
+            <span>Số tiền rút</span>
+            <button
+              type="button"
+              className="text-xs text-navy underline-offset-2 hover:underline"
+              onClick={() => setAmount(wallet.available)}
+            >
+              Rút hết {formatMoney(wallet.available)}
+            </button>
+          </div>
+          <NumberInput value={amount} onChange={setAmount} suffix="đ" aria-label="Số tiền rút" />
+          <p
+            className={cn('mt-1 text-xs', tooSmall || tooBig ? 'text-destructive' : 'text-ink/50')}
+          >
+            {tooBig
+              ? `Vượt số dư khả dụng ${formatMoney(wallet.available)}.`
+              : `Tối thiểu ${formatMoney(wallet.withdrawMin)}, tối đa ${formatMoney(wallet.available)}.`}
+          </p>
+        </div>
+        <div className="rounded-lg bg-ivory px-3 py-2 text-xs text-ink/70">
+          <div className="font-medium text-ink">Tài khoản nhận (theo hồ sơ shop)</div>
+          {bank
+            ? `${bank.bankName} · ${maskAccount(bank.accountNumber)} · ${bank.accountName}`
+            : shop.isPending
+              ? 'Đang tải...'
+              : 'Shop chưa có tài khoản ngân hàng.'}
+          <div className="mt-0.5">
+            Đổi tài khoản ở{' '}
+            <Link to="/kenh-nguoi-ban/ho-so-shop" className="text-navy underline">
+              Hồ sơ shop
+            </Link>{' '}
+            (cần sàn duyệt lại).
+          </div>
+        </div>
+      </div>
+    </ConfirmDialog>
   );
 }
 
