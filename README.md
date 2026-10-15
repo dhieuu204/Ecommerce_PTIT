@@ -49,6 +49,8 @@ Lệnh nạp bộ danh mục, 2 shop đã duyệt (Táo Xanh Mobile, Galaxy Hub)
 
 Giao hàng và đối soát (P4): chưa điền `GHN_TOKEN` vào `services/marketplace-service/.env` thì vận đơn là **MÔ PHỎNG**: admin (bộ quyền Hỗ trợ) vào Quản trị › GHN mô phỏng để bấm "Đã lấy hàng", "Đã giao", "Giao thất bại"... thay cho GHN. Tiền COD về ví seller sau khi admin Tài chính nhập file ở Quản trị › Đối soát COD (chưa có file GHN thật thì bấm "Tải file MÔ PHỎNG" rồi tải lên lại).
 
+Trả hàng, tranh chấp và rút tiền (P5): người mua mở một đơn đã giao (chưa hoàn tất) ở Tài khoản › Đơn mua, bấm "Trả hàng/Hoàn tiền" (chọn món, lý do, mô tả, 1–6 ảnh). Shop trả lời ở Kênh người bán › Trả hàng/Hoàn tiền. Vận đơn trả (nhãn "Hàng trả về shop") cũng **MÔ PHỎNG** khi chưa có `GHN_TOKEN`: bấm "Đã lấy hàng" rồi "Đã giao" ở Quản trị › GHN mô phỏng, sau đó shop kiểm hàng để sàn hoàn tiền. Shop từ chối thì người mua khiếu nại; admin bộ quyền Hỗ trợ phân xử ở Quản trị › Tranh chấp. Rút tiền: seller vào Kênh người bán › Ví và rút tiền (cần tiền khả dụng: đơn đã hoàn tất và tiền đã về sàn; tối thiểu 50.000đ); admin Tài chính duyệt ở Quản trị › Rút tiền, chuyển khoản tay rồi nhập mã giao dịch và ảnh biên lai. Điều chỉnh ví sau giải ngân (Quản trị › Điều chỉnh ví) cần **hai** admin Tài chính khác nhau vì người lập không được tự duyệt: cấp thêm bộ quyền Tài chính cho một tài khoản khác ở Quản trị › Người dùng và quyền. Muốn thử hết hạn nhanh: giảm các hạn trả hàng ở Quản trị › Cấu hình chính sách. Quy tắc đầy đủ: `docs/phan-tich/12-quyet-dinh-p5.md`.
+
 | Công cụ               | Địa chỉ                                    |
 | --------------------- | ------------------------------------------ |
 | Web                   | http://localhost:5173                      |

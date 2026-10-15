@@ -292,13 +292,14 @@ Hoàn tiền được gửi tự động qua cổng thanh toán. Lỗi thì hệ
 
 #### 2.4.6. Trả hàng và khiếu nại
 
-1. Trong 7 ngày sau khi nhận hàng, người mua gửi yêu cầu trả hàng: chọn sản phẩm, số lượng, lý do, ảnh bằng chứng.
-2. Shop chấp nhận hoặc từ chối có lý do trong thời hạn quy định.
-3. Shop từ chối thì người mua có thể khiếu nại; quản trị viên Hỗ trợ xem lời trình bày, bằng chứng của hai bên rồi phân xử.
-4. Chấp nhận trả hàng thì người mua gửi hàng về, shop kiểm hàng, sàn hoàn tiền phần hàng trả (hoàn một phần nếu chỉ trả vài sản phẩm).
-5. Trong thời gian có yêu cầu trả hàng hoặc khiếu nại đang mở, tiền của đơn đó bị giữ lại, chưa chuyển cho người bán.
+![Vòng đời yêu cầu trả hàng và tranh chấp](../so-do/16-state03-tra-hang-tranh-chap.png)
 
-Chi tiết thời hạn, danh sách lý do và cách tính tiền hoàn sẽ được chốt trước giai đoạn P5.
+1. Trong 7 ngày sau khi nhận hàng, người mua gửi yêu cầu trả hàng: chọn sản phẩm, số lượng, lý do, mô tả và 1–6 ảnh bằng chứng. Chỉ nhận lý do do lỗi hàng hoặc lỗi shop (hàng lỗi, hư hỏng, giao sai, thiếu hàng, không đúng mô tả, hàng giả), không nhận "đổi ý".
+2. Shop chấp nhận hoặc từ chối có lý do trong 48 giờ; quá hạn thì hệ thống tự chấp nhận. Shop có thể chọn "hoàn tiền ngay, không cần gửi trả" (thiếu hàng, hàng rẻ).
+3. Chấp nhận trả hàng thì sàn tạo vận đơn GHN chiều về và chịu phí; người mua giao hàng cho GHN trong 3 ngày. Hàng về, shop kiểm trong 48 giờ (quá hạn thì tự hoàn tiền) và chọn món nào được nhập lại kho.
+4. Shop từ chối thì người mua khiếu nại trong 48 giờ; hàng trả về không đúng thì shop khiếu nại. Quản trị viên Hỗ trợ phân xử: chấp nhận trả hàng, hoàn toàn bộ, hoàn một phần hoặc không hoàn. Hệ thống không bao giờ tự phân xử.
+5. Tiền hoàn là tiền hàng của phần trả sau voucher, không hoàn phí ship chiều đi. Người bán bị trừ phần tiền hàng tương ứng và phí sàn được tính lại trên phần còn lại. Đơn COD được hoàn bằng chuyển khoản thủ công.
+6. Trong thời gian có yêu cầu trả hàng hoặc khiếu nại đang mở, tiền của đơn đó bị giữ lại, chưa chuyển cho người bán.
 
 #### 2.4.7. Tiền của người bán và rút tiền
 
@@ -561,9 +562,9 @@ Mọi quyết định nghiệp vụ đều được ghi lại thành tài liệu
 | **P0. Thiết kế** | Phạm vi, quy tắc nghiệp vụ, sơ đồ luồng và trạng thái, kiến trúc, dữ liệu, giao tiếp giữa dịch vụ | Bộ tài liệu, sơ đồ use case, luồng, trạng thái, tuần tự, kiến trúc, dữ liệu | Hoàn thành |
 | **P1. Tài khoản và cửa hàng** | Nền tảng chung, đăng ký/đăng nhập, phân quyền, hồ sơ, sổ địa chỉ, mở shop có duyệt, nhật ký quản trị | Đăng ký → mở shop → quản trị viên khác duyệt → người bán chỉ quản lý được shop của mình | Hoàn thành |
 | **P2. Sản phẩm và giỏ hàng** | Danh mục, sản phẩm có phân loại, tồn kho, tìm kiếm, giỏ hàng nhiều shop, tạo voucher, đình chỉ shop | Hai shop có hàng; người mua tìm và thêm hàng của cả hai vào giỏ | Hoàn thành |
-| **P3. Đặt hàng và trả trước** | Đặt hàng nhiều shop, áp voucher, phí vận chuyển, giữ tồn kho, thanh toán VNPay, kiểm tra đơn, xác nhận/hủy đơn, hoàn tiền, cấu hình chính sách | Một lần đặt → hai đơn con → thanh toán → hủy một đơn con không ảnh hưởng đơn còn lại | Hoàn thành, đang chạy thử |
-| **P4. Giao hàng và đối soát** | Vận đơn GHN, bàn giao, giao thất bại, hoàn kiện, COD, đối soát COD, ví người bán, hoàn tất đơn | Theo dõi đủ hàng và tiền; tiền COD chưa đối soát không được coi là đã về sàn | Kế hoạch |
-| **P5. Hậu mãi và rút tiền** | Trả hàng, khiếu nại, hoàn tiền một phần, giữ tiền khi có khiếu nại, rút tiền, chi trả, đối soát | Một yêu cầu trả hàng chạy tới kết thúc; một yêu cầu rút tiền có nguồn tiền, quyết định và chứng từ rõ ràng | Kế hoạch |
+| **P3. Đặt hàng và trả trước** | Đặt hàng nhiều shop, áp voucher, phí vận chuyển, giữ tồn kho, thanh toán VNPay, kiểm tra đơn, xác nhận/hủy đơn, hoàn tiền, cấu hình chính sách | Một lần đặt → hai đơn con → thanh toán → hủy một đơn con không ảnh hưởng đơn còn lại | Hoàn thành |
+| **P4. Giao hàng và đối soát** | Vận đơn GHN, bàn giao, giao thất bại, hoàn kiện, COD, đối soát COD, ví người bán, hoàn tất đơn | Theo dõi đủ hàng và tiền; tiền COD chưa đối soát không được coi là đã về sàn | Hoàn thành |
+| **P5. Hậu mãi và rút tiền** | Trả hàng, khiếu nại, hoàn tiền một phần, giữ tiền khi có khiếu nại, rút tiền, chi trả, điều chỉnh ví sau giải ngân | Một yêu cầu trả hàng chạy tới kết thúc; một yêu cầu rút tiền có nguồn tiền, quyết định và chứng từ rõ ràng | Hoàn thành |
 | **P6. Tương tác và hoàn thiện** | Chat, thông báo, đánh giá, theo dõi shop, báo cáo, tối ưu tìm kiếm, kiểm thử tổng hợp | Người mua, người bán, quản trị viên dùng được trọn vòng đời | Kế hoạch |
 | **Triển khai** | Đưa toàn bộ hệ thống lên Kubernetes (k3s) | Demo khả năng chịu lỗi và đúng nghiệp vụ khi chạy nhiều bản | Kế hoạch, trước buổi demo |
 
@@ -571,16 +572,16 @@ Mọi quyết định nghiệp vụ đều được ghi lại thành tài liệu
 
 - Hoàn thành bộ tài liệu phân tích: phạm vi, danh mục chức năng, quy tắc nghiệp vụ, bộ sơ đồ (use case, luồng nghiệp vụ, vòng đời trạng thái, tuần tự, kiến trúc, dữ liệu, giao diện; xem Phụ lục B).
 - Hoàn thành nền tảng kỹ thuật chung cho 4 dịch vụ: xác thực, phân quyền, xử lý lỗi, gửi/nhận sự kiện, nhật ký quản trị, việc hẹn giờ, cấu hình có phiên bản.
-- Hoàn thành 3 giai đoạn chức năng P1–P3. Người mua đã có thể đi từ đăng ký, tìm hàng, đặt hàng nhiều shop, thanh toán tới hủy và nhận hoàn tiền. Người bán đã có thể mở shop, đăng hàng, quản lý tồn kho, voucher và xử lý đơn. Quản trị viên đã có thể duyệt shop, đình chỉ shop, duyệt đơn rủi ro, xử lý hoàn tiền và cấu hình chính sách.
-- Hệ thống chạy được toàn bộ bằng Docker; hơn 300 ca kiểm thử tự động.
+- Hoàn thành 5 giai đoạn chức năng P1–P5. Người mua đã có thể đi từ đăng ký, tìm hàng, đặt hàng nhiều shop, thanh toán (trả trước hoặc COD), theo dõi giao hàng, tới hủy, trả hàng, khiếu nại và nhận hoàn tiền. Người bán đã có thể mở shop, đăng hàng, quản lý tồn kho, voucher, xử lý và giao đơn, xử lý yêu cầu trả hàng, xem ví và rút tiền. Quản trị viên đã có thể duyệt shop, đình chỉ shop, duyệt đơn rủi ro, phân xử tranh chấp, đối soát COD và VNPay, duyệt và chi trả rút tiền, điều chỉnh ví có hai người duyệt, và cấu hình chính sách.
+- Cổng thanh toán và vận chuyển chạy được ở cả chế độ mô phỏng (có ghi nhãn rõ) lẫn môi trường thử nghiệm của đối tác, đổi qua lại bằng cấu hình.
+- Hệ thống chạy được toàn bộ bằng Docker; hơn 400 ca kiểm thử tự động.
 
 ### 6.4. Kế hoạch tiếp theo
 
-1. Chạy thử và hoàn thiện P3.
-2. Chốt quy tắc và triển khai P4 (giao hàng qua GHN, COD, đối soát, ví người bán).
-3. Chốt quy tắc trả hàng và khiếu nại, triển khai P5.
-4. Triển khai P6 và kiểm thử tổng hợp.
-5. Đưa hệ thống lên Kubernetes, chuẩn bị kịch bản demo nghiệm thu.
+1. Chốt quy tắc và triển khai P6 (chat, thông báo, đánh giá, theo dõi shop, báo cáo, tối ưu tìm kiếm).
+2. Kiểm thử tổng hợp theo các kịch bản nghiệm thu toàn sàn.
+3. Nối tài khoản thật VNPay sandbox và GHN môi trường thử nghiệm.
+4. Đưa hệ thống lên Kubernetes, chuẩn bị kịch bản demo nghiệm thu.
 
 ---
 
@@ -592,14 +593,14 @@ Mọi quyết định nghiệp vụ đều được ghi lại thành tài liệu
 | --- | --- | --- |
 | Chưa có tài khoản VNPay sandbox và GHN dev | Chưa kiểm chứng được tích hợp thật | Dùng cổng mô phỏng có ghi nhãn; đăng ký tài khoản thử nghiệm để chuyển sang thật trước buổi demo |
 | VNPay và GHN chỉ gửi kết quả tới địa chỉ công khai trên Internet | Máy cá nhân không nhận được kết quả | Dùng đường hầm (cloudflared) để có địa chỉ công khai; bổ sung cơ chế tự tra cứu khi không nhận được |
-| Khối lượng nghiệp vụ còn lại lớn (P4, P5 liên quan nhiều tới tiền) | Nguy cơ trễ tiến độ | Ưu tiên luồng chính trước, các nhánh ngoại lệ sau; mỗi giai đoạn đều có kết quả demo được |
-| Quy tắc trả hàng và khiếu nại chưa chốt | Chưa thể thiết kế chi tiết P5 | Chốt trước khi bắt đầu P5 |
+| Khối lượng P6 (chat thời gian thực chạy nhiều bản, thông báo, báo cáo) | Nguy cơ trễ tiến độ | Ưu tiên luồng chính trước, các nhánh ngoại lệ sau; mỗi giai đoạn đều có kết quả demo được |
+| Luồng tiền P3–P5 phức tạp (hoàn một phần, giữ tiền khi trả hàng, rút tiền) | Sai một chỗ là lệch số dư người bán | Kiểm thử tự động cho mọi phép tính tiền và trạng thái; số dư ví luôn bằng tổng các dòng biến động |
 | Tài nguyên máy cá nhân (24 GB RAM) cho Kubernetes | Khó chạy nhiều bản mỗi dịch vụ cùng hạ tầng | Dùng k3s (bản Kubernetes nhẹ), giới hạn tài nguyên từng dịch vụ |
 
 ### 7.2. Đề xuất xin ý kiến giảng viên
 
 1. Phạm vi hiện tại (đủ vòng đời mua, bán, vận hành) có phù hợp với yêu cầu đồ án không, hay nên thu hẹp để tập trung chiều sâu?
-2. Nếu thiếu thời gian, nhóm nên ưu tiên phần nào: hậu mãi (trả hàng, khiếu nại) hay tương tác (chat, đánh giá, thông báo)?
+2. Nếu thiếu thời gian ở P6, nhóm nên ưu tiên phần nào: chat thời gian thực, thông báo, đánh giá hay báo cáo thống kê?
 3. Việc dùng cổng thanh toán và vận chuyển mô phỏng (có ghi nhãn rõ) trong buổi demo có được chấp nhận nếu chưa kịp có tài khoản thử nghiệm của đối tác không?
 4. Mức độ yêu cầu với phần triển khai Kubernetes: chỉ cần chạy được, hay cần trình diễn khả năng chịu lỗi và mở rộng?
 
@@ -632,7 +633,7 @@ Mọi quyết định nghiệp vụ đều được ghi lại thành tài liệu
 
 ## Phụ lục B. Danh mục sơ đồ
 
-Các sơ đồ nằm trong thư mục `docs/so-do`. Sơ đồ 01–13 vẽ bằng Excalidraw (bản `.png` để xem, bản `.excalidraw` để chỉnh sửa); sơ đồ 14–15 viết bằng PlantUML (mã nguồn trong `docs/so-do/plantuml`, xuất ra `.png`).
+Các sơ đồ nằm trong thư mục `docs/so-do`. Sơ đồ 01–13 vẽ bằng Excalidraw (bản `.png` để xem, bản `.excalidraw` để chỉnh sửa); sơ đồ 14–16 viết bằng PlantUML (mã nguồn trong `docs/so-do/plantuml`, xuất ra `.png`).
 
 | Số | Sơ đồ | Nội dung |
 | --- | --- | --- |
@@ -649,3 +650,4 @@ Các sơ đồ nằm trong thư mục `docs/so-do`. Sơ đồ 01–13 vẽ bằn
 | 14 | Use case tổng quát | Các nhóm chức năng lớn và tác nhân |
 | 14a–14c | Use case phân rã | Use case chi tiết của người mua, người bán, quản trị viên |
 | 15 | Tuần tự: đặt hàng và thanh toán | Phối hợp giữa các dịch vụ, RabbitMQ và VNPay trong luồng đặt hàng, thanh toán |
+| 16 | Vòng đời yêu cầu trả hàng và tranh chấp | Các trạng thái, thời hạn, tự chấp nhận/tự hoàn khi quá hạn, nhánh khiếu nại và phân xử |
