@@ -9,6 +9,7 @@ Mã nguồn các sơ đồ UML viết bằng PlantUML. Ảnh `.png` xuất ra n�
 | `14b-usecase-nguoi-ban.puml` | Use case phân rã: người bán |
 | `14c-usecase-quan-tri.puml` | Use case phân rã: quản trị viên, hệ thống |
 | `15-sequence-dat-hang-thanh-toan.puml` | Tuần tự: đặt hàng và thanh toán |
+| `16-state03-tra-hang-tranh-chap.puml` | Trạng thái STATE-03: yêu cầu trả hàng và tranh chấp (P5) |
 | `style.iuml` | Màu và phông chữ dùng chung (navy/champagne) |
 
 ## Xuất lại ảnh sau khi sửa

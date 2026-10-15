@@ -1,0 +1,80 @@
+@startuml 16-state03-tra-hang-tranh-chap
+' Sơ đồ trạng thái STATE-03: yêu cầu trả hàng và tranh chấp (P5: RET-01..04, DIS-01, REF-02).
+' Quy tắc: docs/phan-tich/12-quyet-dinh-p5.md. Code: services/marketplace-service/src/returns.
+' Xuất ảnh: xem docs/so-do/plantuml/README.md
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam ArrowColor #172554
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #172554
+  FontColor #172554
+  AttributeFontColor #1F2937
+  StartColor #172554
+  EndColor #172554
+}
+skinparam note {
+  BackgroundColor #F6F0E3
+  BorderColor #C8A96B
+}
+
+title STATE-03: Yêu cầu trả hàng và tranh chấp (mỗi đơn con tối đa một yêu cầu)
+
+state "Chờ shop trả lời\n(REQUESTED)" as REQUESTED
+REQUESTED : hạn return_response_hours (48 giờ)
+state "Shop từ chối\n(REJECTED)" as REJECTED
+REJECTED : người mua còn khiếu nại được
+REJECTED : hạn return_dispute_hours (48 giờ)
+state "Đang khiếu nại\n(DISPUTED)" as DISPUTED
+DISPUTED : admin SUPPORT phân xử ở approval-service
+DISPUTED : không tự quyết hồ sơ của mình
+state "Đang gửi hàng về\n(SHIPPING_BACK)" as SHIPPING_BACK
+SHIPPING_BACK : sàn tạo vận đơn trả GHN, sàn chịu phí
+SHIPPING_BACK : hạn giao cho GHN return_ship_days (3 ngày)
+state "Hàng đã về shop\n(RECEIVED)" as RECEIVED
+RECEIVED : shop kiểm hàng, chọn dòng nhập lại kho
+RECEIVED : hạn return_inspect_hours (48 giờ)
+state "Đang hoàn tiền\n(REFUNDING)" as REFUNDING
+REFUNDING : payment-service hoàn qua cổng,
+REFUNDING : đơn COD thì chuyển khoản tay
+state "Đã hoàn tiền\n(REFUNDED)" as REFUNDED
+state "Đóng, không hoàn\n(CLOSED)" as CLOSED
+state "Đã hủy\n(CANCELLED)" as CANCELLED
+
+[*] --> REQUESTED : Người mua gửi yêu cầu\n(đơn con đã giao, chưa hoàn tất;\nlý do lỗi hàng/shop, mô tả, 1–6 ảnh)
+
+REQUESTED --> REJECTED : Shop từ chối có lý do
+REQUESTED --> REFUNDING : Shop: hoàn tiền ngay,\nkhông cần gửi trả\n[Thiếu hàng, quá hạn:\ntự hoàn]
+REQUESTED --> SHIPPING_BACK : Shop chấp nhận\n[quá hạn: tự chấp nhận]
+REQUESTED --> CANCELLED : Người mua hủy
+
+REJECTED --> DISPUTED : Người mua khiếu nại
+REJECTED --> CLOSED : [quá hạn không khiếu nại]
+
+DISPUTED --> SHIPPING_BACK : Admin: chấp nhận trả hàng\n(chỉ khiếu nại vì shop từ chối)
+DISPUTED --> REFUNDING : Admin: hoàn toàn bộ\nhoặc hoàn một phần
+DISPUTED --> CLOSED : Admin: không hoàn
+
+SHIPPING_BACK --> RECEIVED : GHN giao hàng trả tới shop
+SHIPPING_BACK --> CANCELLED : Người mua hủy trước khi GHN lấy hàng\n[quá hạn giao cho GHN: tự hủy]\n[vận đơn lỗi quá hạn: admin hủy]
+SHIPPING_BACK --> REFUNDING : Admin xác nhận kiện trả thất lạc\n(sàn chịu, seller không bị trừ)\nhoặc vận đơn lỗi quá hạn:\nadmin hoàn không cần gửi trả
+
+RECEIVED --> REFUNDING : Shop kiểm: hàng đúng\n[quá hạn: tự hoàn, không nhập kho]
+RECEIVED --> DISPUTED : Shop báo hàng trả về không đúng
+
+REFUNDING --> REFUNDED : payment-service báo đã hoàn\n(cổng thành công, hoặc admin FINANCE\nchuyển khoản có mã GD + biên lai)
+
+REFUNDED --> [*]
+CLOSED --> [*]
+CANCELLED --> [*]
+
+note as N1
+  <b>Tiền và đơn con</b>
+  • Gửi yêu cầu → sự kiện <i>return.requested</i>: tiền seller của đơn con bị giữ,
+    đơn con giữ DELIVERED (không tự hoàn tất).
+  • Kết thúc (REFUNDING, CLOSED, CANCELLED) → <i>return.resolved</i>: đơn con hoàn tất ngay.
+  • Tiền hoàn = tiền hàng phần trả sau voucher, không hoàn ship chiều đi, không trả lượt voucher.
+  • Seller bị trừ tiền hàng sau voucher shop của phần trả (hoàn một phần: trừ theo tỉ lệ),
+    phí sàn tính lại; kiện trả thất lạc thì sàn chịu.
+end note
+@enduml

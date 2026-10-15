@@ -5,11 +5,11 @@ Nhóm chọn cách **code trước, sinh tài liệu**: không viết file OpenA
 | Nội dung | Ở đâu |
 | --- | --- |
 | Quy ước chung (đường dẫn, đăng nhập, lỗi, phân trang) | File này, mục 1 |
-| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3), mục 5 (P4) |
+| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3), mục 5 (P4), mục 6 (P5) |
 | Sự kiện giữa các service qua RabbitMQ | `events.md` + kiểu TypeScript trong `packages/shared/src/events` |
-| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 6 |
+| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 7 |
 
-Muốn thêm hoặc đổi API so với danh sách ở mục 2–5, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
+Muốn thêm hoặc đổi API so với danh sách ở mục 2–6, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
 
 ## 1. Quy ước chung
 
@@ -444,7 +444,110 @@ P4 (giao hàng và đối soát): ORD-03 (bàn giao), SHIP-02..05, COD-01, COD-0
 4. Admin `FINANCE` tải file đối soát COD (hoặc file MÔ PHỎNG) → các dòng khớp làm tiền COD thành khả dụng; dòng lệch được ghi chú xử lý.
 5. Nhánh lỗi: bấm "Giao thất bại" đủ 3 lần → hoàn kiện, người mua trả trước được hoàn tiền hàng; "Đã hoàn" → seller xác nhận nhận kiện, chọn nhập lại kho. "Thất lạc" → admin xác nhận sự cố, người mua được hoàn, seller được đền.
 
-## 6. Tài liệu API tự sinh (Swagger)
+## 6. Danh sách API P5
+
+P5 (hậu mãi và rút tiền): RET-01..04, DIS-01, DIS-02, REF-02, VCH-03 (phần trả hàng), FIN-02 (chặn tiền khi có hồ sơ mở), FIN-03 (đảo phí theo phần hoàn), FIN-04..06. Mục tiêu: một yêu cầu trả hàng chạy tới kết thúc; một yêu cầu rút có nguồn tiền, quyết định và kết quả thực hiện rõ. Quyết định của vòng này: `docs/phan-tich/12-quyet-dinh-p5.md` (chỉ trả hàng vì lỗi hàng/shop, sàn tạo vận đơn trả GHN và chịu phí, hoàn tiền sau khi shop nhận hàng, không hoàn phí ship chiều đi, shop quá hạn thì tự chấp nhận, admin `SUPPORT` phân xử, COD hoàn bằng chuyển khoản tay, điều chỉnh sau giải ngân cần admin thứ hai duyệt).
+
+### Quy tắc chung của P5
+
+- **Yêu cầu trả hàng** (`returns`, mã = mã đơn con + `-TH`): mỗi đơn con tối đa một yêu cầu, gồm một hay nhiều món với số lượng trả từng món. Gửi được khi đơn con "Đã giao" và chưa tới `completeBefore`. Lý do: `DEFECTIVE` (hàng lỗi, không hoạt động), `DAMAGED` (hư hỏng, bể vỡ), `WRONG_ITEM` (giao sai mẫu, màu, size), `MISSING` (thiếu hàng, phụ kiện), `NOT_AS_DESCRIBED` (không đúng mô tả), `COUNTERFEIT` (hàng giả). Bắt buộc mô tả (20–1000 ký tự) và 1–6 ảnh.
+- **Trạng thái** (STATE-03, bảng đầy đủ ở `docs/phan-tich/12-quyet-dinh-p5.md` mục 3): `REQUESTED` → `SHIPPING_BACK` → `RECEIVED` → `REFUNDING` → `REFUNDED`; nhánh `REJECTED` → `DISPUTED`; kết thúc không hoàn `CLOSED`, hủy `CANCELLED`.
+- **Hạn** (bảng `settings` của marketplace): shop trả lời `return_response_hours` (48), quá hạn tự chấp nhận (lý do `MISSING` thì hoàn ngay không cần gửi trả); người mua giao hàng cho GHN `return_ship_days` (3), quá hạn mà GHN chưa lấy hàng thì hủy yêu cầu; shop kiểm hàng `return_inspect_hours` (48), quá hạn tự hoàn tiền, không cộng kho; người mua khiếu nại `return_dispute_hours` (48), quá hạn thì đóng. Job mỗi phút quét các hạn này, khóa theo đơn và kiểm lại trạng thái nên chạy lại không có tác động mới.
+- **Đơn con trong lúc trả hàng**: giữ "Đã giao", không tự hoàn tất, người mua không bấm "Đã nhận" được (409 `RETURN_IN_PROGRESS`). Yêu cầu kết thúc (quyết hoàn tiền, đóng, hủy) thì đơn con hoàn tất ngay và `shop_order.completed` mang mã yêu cầu.
+- **Tiền hoàn** (REF-02, VCH-03): món trả `k` cái của dòng có giá `p`, số lượng `q`, phần giảm giá của dòng `d` (voucher shop + phần voucher sàn chia cho dòng lúc đặt): tiền hoàn = `p × k − ⌈d × k / q⌉`. Phần seller bị trừ của món đó = `p × k − ⌈ds × k / q⌉` với `ds` là phần voucher shop của dòng. Không hoàn phí ship chiều đi, không trả lượt voucher. Admin quyết hoàn một phần `X`: seller bị trừ `⌊phần seller × X / số hoàn tối đa⌋`. payment-service tính lại phí sàn trên tiền hàng còn lại của đơn con (FIN-03) và không cho tổng tiền hoàn của đơn con vượt số người mua đã trả.
+- **Kho**: shop chọn dòng nhập lại kho lúc kiểm hàng (ghi `stock_history`), độc lập với hoàn tiền. Món được hoàn đủ tiền thì `returned_quantity` tăng và "đã bán" giảm.
+- **Vận đơn trả** (RET-03): mỗi đơn con một vận đơn loại `RETURN`, mã gửi GHN là mã yêu cầu; lấy ở địa chỉ nhận hàng của đơn, giao về địa chỉ lấy hàng của shop, không thu hộ, sàn trả phí. GHN báo đã lấy → vẫn `SHIPPING_BACK` (hết hạn 3 ngày); báo đã giao tới shop → `RECEIVED`; báo thất lạc/hư hỏng → chờ admin `SUPPORT` xác nhận (người mua được hoàn đủ, seller không bị trừ).
+- **Ảnh bằng chứng** lưu MinIO bucket riêng tư của marketplace; chỉ người mua, chủ shop của yêu cầu đó và admin `SUPPORT` xem được.
+- **Chặn tiền seller** (FIN-02, SEQ-04): khi có yêu cầu đang mở, payment-service không chuyển tiền đơn con đó sang khả dụng; khi nhận kết quả (`return.resolved`) thì trừ phần hoàn khỏi ngăn đang giữ rồi mới xét chuyển phần còn lại.
+- **Rút tiền** (FIN-04..06): tối thiểu `withdraw_min_amount` (50.000đ), không giới hạn trên, mỗi shop chỉ một yêu cầu đang xử lý. Gửi yêu cầu = khóa tiền (khả dụng → đang khóa). Admin `FINANCE` duyệt ở approval-service; payment-service kiểm lại yêu cầu còn chờ rồi mới áp. Đã duyệt thì admin `FINANCE` chuyển khoản ngoài hệ thống, nhập mã giao dịch + ảnh biên lai → "đã chi" (trừ ngăn đang khóa). Từ chối, seller hủy, chuyển lỗi → mở khóa đúng một lần. Chủ shop không tự duyệt, không tự chi.
+- **Điều chỉnh sau giải ngân** (DIS-02): admin `FINANCE` lập đề nghị cho một đơn con (cộng/trừ ngăn khả dụng của shop, hoàn thêm cho người mua bằng chuyển khoản); một admin `FINANCE` khác duyệt; payment-service thực thi tất cả hoặc không (không đủ số dư khả dụng hoặc hoàn vượt số đã trả → không thực thi, báo lý do).
+
+### marketplace-service (`/api/market/v1`)
+
+**Trả hàng (người mua)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/uploads/return-image` | Đã đăng nhập | RET-01, DIS-01 | Ảnh bằng chứng (JPG/PNG/WebP nhận theo nội dung file, tối đa 5 MB), lưu bucket riêng tư ở `return-images/<userId>/...`, trả `{ key }`. Lỗi như ảnh sản phẩm. |
+| GET `/return-images/{ownerId}/{file}` | Người mua, chủ shop của yêu cầu, `SUPPORT` | RET-01, DIS-01 | Nội dung ảnh. Người tải lên, người mua và chủ shop của yêu cầu có ảnh đó, admin `SUPPORT` xem được; người khác → 404. |
+| POST `/orders/{orderId}/shop-orders/{shopOrderId}/returns` | Người mua | RET-01 | Header `Idempotency-Key`. `{ items: [{ orderItemId, quantity }], reason, description, images, bankAccount? }`. Đơn con chưa giao → 409 `ORDER_NOT_DELIVERED`; quá `completeBefore` → 409 `RETURN_WINDOW_CLOSED`; đã có yêu cầu → 409 `RETURN_EXISTS`; số lượng vượt số đã mua, đơn COD thiếu `bankAccount` → 400 `VALIDATION_ERROR`; ảnh không phải của người gọi → 400 `INVALID_IMAGE_KEY`. Tính tiền hoàn từng món, tạo yêu cầu `REQUESTED` (hạn `return_response_hours`), phát `return.requested`. Trả yêu cầu như GET. |
+| GET `/returns` | Người mua | RET-01 | Yêu cầu của mình, mới nhất trước, lọc `status`, phân trang. |
+| GET `/returns/{returnId}` | Người mua | RET-01..04 | Món trả và tiền hoàn từng món, ảnh, lời shop, khiếu nại, vận đơn trả (mã, trạng thái, các mốc, `simulated`), trạng thái hoàn tiền, các bước đã qua, hạn của bước đang chờ, nút bấm được (`canCancel`, `canDispute`, `canRetryShipment`). Của người khác → 404. |
+| POST `/returns/{returnId}/cancel` | Người mua | RET-01 | Khi `REQUESTED`, hoặc `SHIPPING_BACK` mà GHN chưa lấy hàng (hủy vận đơn trả trước; GHN đã lấy → 409 `ALREADY_PICKED_UP`). → `CANCELLED`, đơn con hoàn tất. Khác → 409 `RETURN_NOT_CANCELLABLE`. |
+| POST `/returns/{returnId}/dispute` | Người mua | DIS-01 | `{ statement, images? }` (lời trình bày 20–1000 ký tự, tối đa 6 ảnh). Chỉ khi `REJECTED` và còn hạn; khác → 409 `RETURN_NOT_DISPUTABLE`. → `DISPUTED`, phát `dispute.opened`. |
+| POST `/returns/{returnId}/shipment/retry` | Người mua | RET-03 | Tạo lại vận đơn trả khi GHN đã từ chối (`CREATE_FAILED`); khác → 409 `SHIPMENT_NOT_RETRYABLE`. |
+
+**Trả hàng (Kênh người bán)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/returns` | Chủ shop | RET-02 | Lọc `status`, `q` (mã yêu cầu hoặc mã đơn con), phân trang; đang chờ trả lời thì sắp hết hạn lên đầu. Kèm số yêu cầu theo từng trạng thái (cho tab). |
+| GET `/shops/me/returns/{returnId}` | Chủ shop | RET-02 | Như người mua xem; tài khoản ngân hàng của người mua chỉ hiện 4 số cuối. Yêu cầu của shop khác → 404. |
+| POST `/shops/me/returns/{returnId}/accept` | Chủ shop | RET-02 | `{ refundWithoutReturn }`. Chỉ khi `REQUESTED` (409 `RETURN_NOT_PENDING`). `false` → `SHIPPING_BACK`, tạo vận đơn trả; `true` → hoàn toàn bộ ngay (`REFUNDING`). |
+| POST `/shops/me/returns/{returnId}/reject` | Chủ shop | RET-02 | `{ reason, images? }` (lý do 10–1000 ký tự, tối đa 6 ảnh). Chỉ khi `REQUESTED` → `REJECTED`. |
+| POST `/shops/me/returns/{returnId}/inspect` | Chủ shop | RET-03, RET-04 | `{ result: OK \| PROBLEM, restockItemIds, note?, images? }`. Chỉ khi `RECEIVED` (409 `RETURN_NOT_RECEIVED`). Nhập lại kho các dòng chọn. `OK` → hoàn toàn bộ (`REFUNDING`). `PROBLEM` (bắt buộc `note` 10–1000 ký tự và 1–6 ảnh) → `DISPUTED`, phát `dispute.opened`. |
+
+**Trả hàng (admin)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/returns` | `SUPPORT` | RET-01..04 | Mọi yêu cầu, lọc `status`, `q`, phân trang, mới nhất trước. |
+| GET `/admin/returns/{returnId}` | `SUPPORT` | RET-01..04 | Như shop xem, kèm người mua. |
+| POST `/admin/returns/{returnId}/lost` | `SUPPORT` | RET-03 | `{ note }`. Chỉ khi `SHIPPING_BACK` và vận đơn trả bị GHN báo thất lạc/hư hỏng (409 `RETURN_SHIPMENT_NOT_LOST`): người mua được hoàn toàn bộ, seller không bị trừ (sàn chịu). Ghi nhật ký. |
+| POST `/admin/returns/{returnId}/failed-shipment` | `SUPPORT` | RET-03 | `{ result: 'CANCEL' \| 'REFUND', note }`. Chỉ khi `SHIPPING_BACK`, vận đơn trả bị GHN từ chối (`CREATE_FAILED`) và đã quá hạn giao hàng trả (409 `RETURN_SHIPMENT_NOT_STUCK`; view có `actions.canResolveFailedShipment`). `CANCEL`: hủy yêu cầu, đơn con hoàn tất. `REFUND`: hoàn toàn bộ không cần gửi trả, seller bị trừ như khi shop chọn cách này. Ghi nhật ký. |
+| GET, POST `/admin/carrier-simulator...` (bổ sung) | `SUPPORT` | RET-03 | Có cả vận đơn trả hàng (`type = RETURN`): bấm được `PICKED` (đã lấy ở nhà người mua), `DELIVERED` (đã giao về shop), `LOST`. |
+
+**Bổ sung vào API cũ**
+
+| Phương thức, đường dẫn | Mã | Thay đổi |
+| --- | --- | --- |
+| GET `/orders/{orderId}`, `/shops/me/orders/{id}`, `/admin/orders/{orderId}` | RET-01 | Mỗi đơn con có thêm `returnRequest` (`id`, `code`, `status`, `refundAmount`, `decidedRefund`) và (người mua) `canRequestReturn`: đã giao, còn hạn, chưa có yêu cầu. |
+| POST `/orders/{orderId}/shop-orders/{shopOrderId}/received` | RET-01 | Có yêu cầu trả hàng đang mở → 409 `RETURN_IN_PROGRESS`. |
+
+### payment-service (`/api/payment/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/wallet` (bổ sung) | Chủ shop | FIN-02, FIN-04 | Thêm `pendingWaitingReturn` (đang giữ vì có yêu cầu trả hàng), `withdrawMin` (số rút tối thiểu đang áp dụng) và `openWithdrawal` (yêu cầu đang xử lý, nếu có). |
+| GET `/shops/me/earnings` (bổ sung) | Chủ shop | REF-02, FIN-03 | Mỗi đơn con thêm `returnRefund` (đã hoàn người mua do trả hàng), `returnDeduction` (seller bị trừ), `returnFeeReversed` (phí sàn được giảm), trạng thái mới `REFUNDED` (trả hàng hoàn toàn bộ). |
+| GET `/shops/me/withdrawals` | Chủ shop | FIN-04, FIN-06 | Lịch sử yêu cầu rút, mới nhất trước: số tiền, tài khoản nhận (4 số cuối), trạng thái, lý do, mã giao dịch, lúc chi. |
+| POST `/shops/me/withdrawals` | Chủ shop | FIN-04 | Header `Idempotency-Key`. `{ amount }`. Lấy tài khoản ngân hàng từ hồ sơ shop (gọi marketplace bằng vé của seller): shop không hoạt động → 409 `SHOP_NOT_ACTIVE`; marketplace lỗi → 503 `MARKETPLACE_SERVICE_UNAVAILABLE`. Dưới `withdraw_min_amount` → 400 `VALIDATION_ERROR`; đang có yêu cầu chưa xong → 409 `WITHDRAWAL_IN_PROGRESS`; vượt số khả dụng → 409 `INSUFFICIENT_BALANCE` (`details.available`). Khóa tiền bằng câu lệnh có điều kiện nên hai yêu cầu cùng lúc không khóa vượt số dư. Phát `withdrawal.requested`. |
+| POST `/shops/me/withdrawals/{withdrawalId}/cancel` | Chủ shop | FIN-04 | Chỉ khi `PENDING` (chưa duyệt) → `CANCELLED`, mở khóa; phát `withdrawal.cancelled`. Khác → 409 `WITHDRAWAL_NOT_CANCELLABLE`. |
+| GET `/admin/withdrawals` | `FINANCE` | FIN-06 | Lọc `status` (`PENDING`, `APPROVED`, `PAID`, `REJECTED`, `CANCELLED`, `FAILED`), `from`, `to`, phân trang; kèm tổng tiền theo bộ lọc (đối soát chi trả). |
+| GET `/admin/withdrawals/{withdrawalId}` | `FINANCE` | FIN-05, FIN-06 | Yêu cầu (tài khoản nhận đầy đủ), ví hiện tại và 20 biến động ví gần nhất (nguồn tiền). |
+| POST `/admin/uploads/payout-receipt` | `FINANCE` | FIN-06 | Ảnh biên lai chi trả (như biên lai hoàn tay), trả `{ key }`. |
+| GET `/admin/withdrawals/{withdrawalId}/receipt` | `FINANCE` | FIN-06 | Xem ảnh biên lai. |
+| POST `/admin/withdrawals/{withdrawalId}/paid` | `FINANCE` | FIN-06 | `{ transferCode, receiptKey, note? }`. Chỉ khi `APPROVED` (409 `WITHDRAWAL_NOT_APPROVED`) → `PAID`, trừ ngăn đang khóa. Admin là chủ shop → 403 `SELF_PAYOUT_FORBIDDEN`. Ghi nhật ký. |
+| POST `/admin/withdrawals/{withdrawalId}/failed` | `FINANCE` | FIN-06 | `{ reason }`. Chuyển khoản không thành công: chỉ khi `APPROVED` → `FAILED`, mở khóa đúng một lần; seller gửi yêu cầu mới. Admin là chủ shop → 403. Ghi nhật ký. |
+| GET `/admin/shops/{shopId}/wallet` | `FINANCE` | FIN-05, DIS-02 | Ví của một shop và 20 biến động gần nhất (trang duyệt rút xem nguồn tiền). Shop chưa có ví → 404. |
+| GET `/admin/shop-orders/{shopOrderCode}/money` | `FINANCE` | DIS-02 | Tiền của một đơn con: người mua đã trả, đã hoàn, seller nhận, bị trừ do trả hàng, trạng thái tiền seller, ví của shop. |
+| GET `/admin/refunds` (bổ sung) | `FINANCE` | REF-02 | Thêm lý do `RETURN`, `ADJUSTMENT`; cách hoàn `method` (`GATEWAY` qua cổng, `BANK_TRANSFER` chuyển khoản tay kèm tài khoản người mua); mã yêu cầu trả hàng. Khoản `BANK_TRANSFER` tạo ra ở `NEEDS_MANUAL`. |
+
+### approval-service (`/api/approval/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/disputes` | `SUPPORT` | DIS-01 | Tranh chấp trả hàng, lọc `status` (`PENDING` mặc định, `RESOLVED`), phân trang; quá hạn phân xử lên đầu. |
+| GET `/admin/disputes/{disputeId}` | `SUPPORT` | DIS-01 | Hồ sơ trả hàng nhận qua `dispute.opened` (món, lý do, mô tả, ảnh), lời và ảnh của hai bên, số hoàn tối đa, hạn phân xử. Ảnh xem qua marketplace. |
+| POST `/admin/disputes/{disputeId}/decision` | `SUPPORT` | DIS-01 | `{ decision: ACCEPT_RETURN \| REFUND \| REJECT, refundAmount?, note }` (`note` 10–500 ký tự). `ACCEPT_RETURN` chỉ ở giai đoạn shop từ chối (người mua gửi hàng về, shop kiểm như thường); `REFUND` cần `refundAmount` từ 1 tới số hoàn tối đa (bằng = hoàn toàn bộ, nhỏ hơn = hoàn một phần; ở giai đoạn shop từ chối thì không cần gửi hàng về). Sai → 400 `VALIDATION_ERROR`. Admin là người mua hoặc chủ shop → 403 `SELF_APPROVAL_FORBIDDEN`; đã quyết → 409 `ALREADY_DECIDED`. Phát `dispute.decided`, ghi nhật ký. |
+| GET `/admin/withdrawal-approvals` | `FINANCE` | FIN-05 | Lọc `status` (`PENDING` mặc định, `APPROVED`, `REJECTED`, `CANCELLED`), phân trang; chờ lâu nhất lên đầu. |
+| GET `/admin/withdrawal-approvals/{approvalId}` | `FINANCE` | FIN-05 | Yêu cầu, chủ shop, tài khoản nhận (4 số cuối), ví lúc yêu cầu. Nguồn tiền chi tiết lấy ở payment-service. |
+| POST `/admin/withdrawal-approvals/{approvalId}/decision` | `FINANCE` | FIN-05 | `{ decision: APPROVE \| REJECT, reason? }` (lý do bắt buộc khi từ chối). Admin là chủ shop → 403 `SELF_APPROVAL_FORBIDDEN`; đã quyết hoặc seller đã hủy → 409 `ALREADY_DECIDED`. Phát `withdrawal_approval.decided`, ghi nhật ký. |
+| GET `/admin/adjustments` | `FINANCE` | DIS-02 | Đề nghị điều chỉnh, lọc `status` (`PENDING`, `APPROVED`, `REJECTED`, `EXECUTED`, `FAILED`), phân trang, mới nhất trước. |
+| GET `/admin/adjustments/{adjustmentId}` | `FINANCE` | DIS-02 | Một đề nghị: đơn con, shop, người mua, số cộng/trừ ví, số hoàn thêm và tài khoản nhận, lý do, người lập, quyết định, kết quả thực thi (`executionNote`, `executedAt`). Không có → 404 `NOT_FOUND`. |
+| POST `/admin/adjustments` | `FINANCE` | DIS-02 | Header `Idempotency-Key`. `{ shopOrderCode, sellerChange, buyerRefund, bankAccount?, reason }` (`sellerChange` dương = cộng, âm = trừ ngăn khả dụng; `buyerRefund` ≥ 0; lý do 10–500 ký tự). Tra đơn con trong dữ liệu đơn đã nhận (không có → 404 `SHOP_ORDER_NOT_FOUND`). Cả hai số bằng 0, hoàn thêm mà thiếu tài khoản ngân hàng → 400 `VALIDATION_ERROR`. Người lập là người mua hoặc chủ shop → 403 `SELF_APPROVAL_FORBIDDEN`. Tạo đề nghị `PENDING`, ghi nhật ký. |
+| POST `/admin/adjustments/{adjustmentId}/decision` | `FINANCE` | DIS-02 | `{ decision: APPROVE \| REJECT, reason? }` (lý do bắt buộc khi từ chối). Người duyệt phải khác người lập (403 `SAME_ADMIN_FORBIDDEN`), không phải người mua hay chủ shop (403 `SELF_APPROVAL_FORBIDDEN`); đã quyết → 409 `ALREADY_DECIDED`. Duyệt → `APPROVED`, phát `adjustment.approved`; payment-service thực thi rồi báo `adjustment.executed` → `EXECUTED` hoặc `FAILED` kèm lý do. Ghi nhật ký. |
+
+### Luồng P5 dùng các API trên
+
+1. Đơn con đã giao (P4). Người mua mở đơn, bấm **Trả hàng/Hoàn tiền**, chọn món và số lượng, lý do, mô tả, tải ảnh → marketplace tạo yêu cầu "Chờ shop trả lời", phát `return.requested` → payment-service giữ tiền đơn đó.
+2. Seller **chấp nhận** → hệ thống tạo vận đơn trả (MÔ PHỎNG). Admin `SUPPORT` mở **GHN mô phỏng**, bấm "Đã lấy hàng" rồi "Đã giao" → yêu cầu "Shop đang kiểm hàng".
+3. Seller **kiểm hàng đúng**, chọn dòng nhập lại kho → yêu cầu "Đang hoàn tiền", đơn con hoàn tất, phát `return.resolved` → payment-service hoàn phần tiền món trả qua VNPay (hoặc chờ hoàn tay với đơn COD), trừ tiền seller tương ứng, phí sàn tính lại, chuyển phần còn lại sang khả dụng → `refund.updated` → yêu cầu "Đã hoàn tiền".
+4. Nhánh tranh chấp: seller **từ chối** → người mua **khiếu nại** → admin `SUPPORT` mở **Tranh chấp**, xem lời và ảnh hai bên, quyết (chấp nhận trả hàng / hoàn toàn bộ / hoàn một phần / không hoàn) → marketplace áp quyết định.
+5. Seller có tiền khả dụng, bấm **Rút tiền** → tiền chuyển sang "đang khóa". Admin `FINANCE` (không phải chủ shop) **duyệt** ở trang Rút tiền → chuyển khoản ngoài hệ thống, nhập mã giao dịch + biên lai → "Đã chi", ngăn đang khóa giảm.
+6. Ngoại lệ: admin `FINANCE` lập **điều chỉnh** cho một đơn con đã hoàn tất (trừ ví seller, hoàn thêm cho người mua) → admin `FINANCE` khác duyệt → payment-service thực thi nếu đủ số dư.
+
+## 7. Tài liệu API tự sinh (Swagger)
 
 Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 

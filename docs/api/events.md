@@ -236,7 +236,132 @@ payment → marketplace. Kiểu ở `packages/shared/src/events/payment.ts`. G�
 
 marketplace-service: lưu phí sàn và số seller dự kiến nhận vào đơn con. Nhận lại thì ghi đè cùng giá trị. Tới trước khi có đơn con (không thể xảy ra vì đơn tạo trước khi gửi `order.placed`) thì báo lỗi để thử lại.
 
-## 6. Thêm sự kiện mới
+## 6. Sự kiện P5
+
+Kiểu: `packages/shared/src/events/return.ts` (trả hàng, tranh chấp) và `finance.ts` (rút tiền, điều chỉnh). Quyết định của vòng này: `docs/phan-tich/12-quyet-dinh-p5.md`.
+
+| Sự kiện | Gửi → nhận | Khi nào |
+| --- | --- | --- |
+| `return.requested` | marketplace → payment | Người mua gửi yêu cầu trả hàng (RET-01) |
+| `return.resolved` | marketplace → payment | Yêu cầu trả hàng có kết quả: hoàn tiền, đóng không hoàn, hoặc bị hủy (RET-04) |
+| `dispute.opened` | marketplace → approval | Người mua khiếu nại khi shop từ chối, hoặc shop báo hàng trả về không đúng (DIS-01) |
+| `dispute.decided` | approval → marketplace | Admin `SUPPORT` phân xử (DIS-01) |
+| `withdrawal.requested` | payment → approval | Seller gửi yêu cầu rút, tiền đã khóa (FIN-04) |
+| `withdrawal.cancelled` | payment → approval | Seller hủy yêu cầu khi chưa duyệt (FIN-04) |
+| `withdrawal_approval.decided` | approval → payment | Admin `FINANCE` duyệt hoặc từ chối yêu cầu rút (FIN-05) |
+| `adjustment.approved` | approval → payment | Admin `FINANCE` thứ hai duyệt đề nghị điều chỉnh (DIS-02) |
+| `adjustment.executed` | payment → approval | payment-service đã thực thi (hoặc không thực thi được) điều chỉnh (DIS-02) |
+
+Sự kiện cũ bổ sung trường (tương thích, bên nhận coi thiếu là `null`): `shop_order.completed` thêm `returnId`; `refund.updated` thêm `returnId`.
+
+### `return.requested` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `returnId`, `code` | Yêu cầu trả hàng (mã = mã đơn con + `-TH`) |
+| `orderId`, `shopOrderId` | |
+| `refundAmount` | Số hoàn tối đa người mua yêu cầu |
+| `requestedAt` | |
+
+payment-service đánh dấu tiền seller của đơn con là "có trả hàng đang mở" (không chuyển sang khả dụng). Nhận sau `return.resolved` của cùng yêu cầu thì bỏ qua.
+
+### `return.resolved` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `returnId`, `code`, `orderId`, `shopOrderId` | |
+| `outcome` | `REFUND` (hoàn tiền) hoặc `NO_REFUND` (đóng không hoàn, người mua hủy, quá hạn gửi hàng) |
+| `refundAmount` | Số hoàn cho người mua (0 khi `NO_REFUND`) |
+| `maxRefundAmount` | Số hoàn tối đa = tổng số người mua đã trả cho các món trả |
+| `sellerBase` | Tiền hàng sau voucher shop của các món trả (phần tính trừ tiền seller khi hoàn toàn bộ) |
+| `platformCovers` | `true` khi sàn chịu (kiện trả bị GHN làm thất lạc): không trừ tiền seller |
+| `bankAccount` | Tài khoản nhận tiền hoàn của đơn COD (`bankName`, `accountNumber`, `accountName`); `null` với đơn trả trước (hoàn qua cổng) |
+| `resolvedAt` | |
+
+payment-service (khóa theo đơn, mỗi yêu cầu áp một lần):
+- `REFUND`: tạo khoản hoàn `refundAmount` (đơn trả trước: qua cổng, hoàn một phần giao dịch; đơn COD: chuyển khoản tay, tạo ở `NEEDS_MANUAL`), không vượt `maxRefundAmount` và không cho tổng tiền hoàn của đơn con vượt số người mua đã trả. Phần seller bị trừ = `sellerBase` (hoàn toàn bộ) hoặc `⌊sellerBase × refundAmount / maxRefundAmount⌋` (hoàn một phần), 0 khi `platformCovers`. Phí sàn tính lại trên tiền hàng còn lại; trừ chênh lệch khỏi ngăn đang giữ (dòng `RETURN_DEDUCTED`). Tiền seller của đơn con còn lại 0 (trả hết mọi món) thì thành `REFUNDED`. Tiền không còn ở ngăn đang giữ (trường hợp không xảy ra khi marketplace khóa đúng) thì không ghi khoản trừ, ghi log lỗi để xử lý bằng điều chỉnh ví (DIS-02).
+- Cả hai kết quả: bỏ đánh dấu "có trả hàng đang mở", xét chuyển phần còn lại sang khả dụng.
+
+### `dispute.opened` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `returnId`, `returnCode` | |
+| `stage` | `REQUEST_REJECTED` (shop từ chối, người mua khiếu nại) hoặc `GOODS_PROBLEM` (shop báo hàng trả về không đúng) |
+| `orderId`, `orderCode`, `shopOrderId`, `shopOrderCode` | |
+| `shop` | `shopId`, `name`, `ownerId` (chặn admin là chủ shop tự quyết) |
+| `buyer` | `userId`, `name` |
+| `paymentMethod` | `VNPAY` hoặc `COD` |
+| `reason`, `description`, `images` | Lý do, mô tả và ảnh (khóa file) của yêu cầu trả hàng |
+| `items` | Mỗi món: `name`, `variant`, `price`, `quantity` (số trả), `refundAmount` |
+| `maxRefundAmount` | Số hoàn tối đa |
+| `buyerStatement`, `sellerStatement` | `text`, `images` của từng bên (giai đoạn 1: lời khiếu nại của người mua, lý do từ chối của shop; giai đoạn 2: mô tả gốc của người mua, ghi chú kiểm hàng của shop) |
+| `openedAt` | |
+
+approval-service tạo hồ sơ tranh chấp `PENDING` (hạn nhắc `dispute_sla_hours`). Nhận trùng (cùng yêu cầu, cùng giai đoạn) thì bỏ qua.
+
+### `dispute.decided` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `disputeId`, `returnId`, `stage` | |
+| `decision` | `ACCEPT_RETURN` (người mua gửi hàng về, chỉ giai đoạn `REQUEST_REJECTED`), `REFUND` (hoàn `refundAmount`), `REJECT` (không hoàn) |
+| `refundAmount` | Có khi `REFUND`: từ 1 tới số hoàn tối đa |
+| `note` | Lời giải thích của admin |
+| `decidedBy` | `userId`, `name` |
+| `decidedAt` | |
+
+marketplace chỉ áp khi yêu cầu còn `DISPUTED` đúng giai đoạn: `ACCEPT_RETURN` → tạo vận đơn trả (`SHIPPING_BACK`); `REFUND` → `REFUNDING` (giai đoạn 1 không cần gửi hàng về), phát `return.resolved`; `REJECT` → `CLOSED`, phát `return.resolved` (`NO_REFUND`). Kết quả khác `ACCEPT_RETURN` thì đơn con hoàn tất.
+
+### `withdrawal.requested` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `withdrawalId`, `shopId`, `shopName` | |
+| `owner` | `userId`, `name` của chủ shop (chặn tự duyệt) |
+| `amount` | Số tiền rút (đã khóa) |
+| `bankAccount` | `bankName`, `accountNumberMasked` (chỉ 4 số cuối), `accountName` |
+| `wallet` | `pending`, `available`, `locked` sau khi khóa |
+| `requestedAt` | |
+
+approval-service tạo hồ sơ duyệt rút `PENDING`. Nhận trùng thì bỏ qua.
+
+### `withdrawal.cancelled` (version 1)
+
+`withdrawalId`, `cancelledAt`. approval-service: hồ sơ còn `PENDING` → `CANCELLED`; đã quyết thì để nguyên (payment-service bỏ qua quyết định tới sau khi đã hủy).
+
+### `withdrawal_approval.decided` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `withdrawalId`, `approvalId` | |
+| `decision` | `APPROVED` hoặc `REJECTED` |
+| `reason` | Bắt buộc khi `REJECTED` |
+| `decidedBy` | `userId`, `name` |
+| `decidedAt` | |
+
+payment-service chỉ áp khi yêu cầu còn `PENDING`: `APPROVED` → chờ chuyển khoản; `REJECTED` → mở khóa (đúng một lần). Yêu cầu đã bị seller hủy thì bỏ qua.
+
+### `adjustment.approved` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `adjustmentId` | |
+| `orderId`, `shopOrderId`, `shopOrderCode`, `shopId` | Đơn con được điều chỉnh (approval-service tra từ dữ liệu `order.placed`) |
+| `sellerChange` | Cộng (dương) hoặc trừ (âm) ngăn khả dụng của shop; 0 = không đổi ví |
+| `buyerRefund` | Hoàn thêm cho người mua bằng chuyển khoản; 0 = không |
+| `bankAccount` | Tài khoản nhận của người mua khi `buyerRefund > 0` |
+| `reason` | Lý do đề nghị |
+| `createdBy`, `approvedBy` | `userId`, `name` của người lập và người duyệt |
+| `approvedAt` | |
+
+payment-service thực thi trong một giao dịch, **tất cả hoặc không**: đơn con phải thuộc shop; trừ ví chỉ khi số dư khả dụng đủ; hoàn thêm không vượt số người mua đã trả trừ các khoản đã hoàn. Ghi dòng ví `ADJUSTMENT`, khoản hoàn `ADJUSTMENT` (`NEEDS_MANUAL`). Rồi phát `adjustment.executed`.
+
+### `adjustment.executed` (version 1)
+
+`adjustmentId`, `result` (`APPLIED` hoặc `FAILED`), `message` (lý do khi `FAILED`), `executedAt`. approval-service ghi kết quả vào hồ sơ (`EXECUTED` / `FAILED`).
+
+## 7. Thêm sự kiện mới
 
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
 2. Thêm một mục vào file này (bảng sự kiện của phase và bảng trường).

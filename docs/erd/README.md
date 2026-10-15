@@ -8,7 +8,8 @@ Cách làm đã chốt: **khung cả dự án + chi tiết theo phase**. File n�
 | P2 | `schema.prisma` + migration `*_p2_catalog_cart_voucher` (marketplace), `*_p2_violations` (approval) |
 | P3 | Cột ghi ở các bảng P3 dưới đây; `schema.prisma` + migration `*_p3_orders` (marketplace), `*_p3_payments` (payment), `*_p3_order_checks` (approval) |
 | P4 | Cột ghi ở các bảng P4 dưới đây; migration `*_p4_shipping` (marketplace), `*_p4_wallet_reconciliation` (payment) |
-| P5–P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
+| P5 | Cột ghi ở các bảng P5 dưới đây; migration `*_p5_returns` (marketplace), `*_p5_returns_withdrawals` (payment), `*_p5_disputes_withdrawals` (approval) |
+| P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
 
 Sơ đồ (mở file `.excalidraw` trên excalidraw.com để sửa, `.png` để xem): `docs/so-do/09-erd-u-user-service`, `10-erd-m-marketplace-service`, `11-erd-p-payment-service`, `12-erd-a-approval-service`.
 
@@ -107,8 +108,10 @@ Bảng P3 đổi ở P4: `shops` thêm `cod_enabled`; `orders.payment_method` th
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `returns` | P5 | id<br>shop_order_id → shop_orders<br>buyer_id ↗U<br>reason, images, status<br>refund_amount, seller_note<br>deadline | Yêu cầu trả hàng |
-| `return_items` | P5 | return_id → returns<br>order_item_id → order_items<br>quantity, amount | Hàng trả, số lượng |
+| `returns` | P5 | id, code (mã đơn con + `-TH`, không trùng; cũng là mã gửi GHN của vận đơn trả)<br>shop_order_id → shop_orders (không trùng: mỗi đơn con 1 yêu cầu), order_id → orders, shop_id → shops<br>buyer_id ↗U<br>status: REQUESTED \| REJECTED \| DISPUTED \| SHIPPING_BACK \| RECEIVED \| REFUNDING \| REFUNDED \| CLOSED \| CANCELLED<br>reason: DEFECTIVE \| DAMAGED \| WRONG_ITEM \| MISSING \| NOT_AS_DESCRIBED \| COUNTERFEIT<br>description, images (khóa ảnh MinIO riêng tư)<br>refund_amount (hoàn tối đa), seller_base (tiền hàng sau voucher shop của món trả)<br>refund_without_return<br>bank_name, bank_account_number, bank_account_name (đơn COD)<br>seller_note, seller_images (lời shop khi từ chối/kiểm hàng)<br>dispute_note, dispute_images, dispute_stage: REQUEST_REJECTED \| GOODS_PROBLEM<br>deadline (hạn của bước đang chờ)<br>decided_refund, platform_covers (sàn chịu khi kiện trả thất lạc)<br>refund_status, refund_updated_at (nhận từ payment)<br>history (các bước đã qua, dạng danh sách)<br>request_key (Idempotency-Key, không trùng), resolved_at | Yêu cầu trả hàng (STATE-03) |
+| `return_items` | P5 | id<br>return_id → returns, order_item_id → order_items (cặp không trùng)<br>quantity<br>refund_amount (người mua đã trả cho số món này)<br>seller_base (tiền hàng sau voucher shop của số món này)<br>restocked (shop chọn nhập lại kho) | Món trả, số lượng, tiền |
+
+Bảng cũ đổi ở P5: `order_items` thêm `returned_quantity` (số món đã được hoàn đủ tiền); `shipments.type` dùng thêm `RETURN` (vận đơn trả hàng, `client_code` = mã yêu cầu).
 
 ### Đánh giá, theo dõi (P6)
 
@@ -145,7 +148,12 @@ Sơ đồ: `docs/so-do/11-erd-p-payment-service`
 | `seller_earnings` | P3 | id<br>order_id ↗M, order_code<br>shop_order_id ↗M (không trùng), shop_order_code<br>shop_id ↗M, buyer_id ↗U<br>subtotal, shop_discount, platform_discount, shipping_fee<br>buyer_paid (số buyer trả cho đơn con)<br>platform_fee_rate (500 = 5%, chụp lúc nhận đơn), platform_fee, seller_amount<br>status: UNPAID \| HELD \| AVAILABLE \| EXPIRED \| CANCELLED \| FAILED \| COMPENSATED<br>pay_before (trống với COD), paid_at<br>P4: payment_method: VNPAY \| COD, cod_amount, ghn_code, carrier_fee, delivered_at, completed_at, money_received_at (trả trước: lúc thu; COD: lúc đối soát khớp), released_at | Tiền của mỗi đơn con: buyer trả bao nhiêu, sàn thu phí bao nhiêu, seller nhận bao nhiêu. Cũng là bản chép đơn để payment-service biết số tiền cần thu (nhận qua `order.placed`) |
 | `seller_wallets` | P4 | shop_id ↗M (khóa chính)<br>owner_id ↗U (chủ shop, không trùng)<br>pending, available, locked (không âm, có ràng buộc trong database) | Ví seller: 3 ngăn tiền |
 | `wallet_transactions` | P4 | id<br>shop_id → seller_wallets<br>type: HELD \| RELEASED \| REVERSED \| COMPENSATION<br>amount (luôn dương), from_bucket, to_bucket: PENDING \| AVAILABLE \| LOCKED (trống = tiền vào/ra ví)<br>shop_order_id? (không trùng theo cặp đơn con + loại), withdrawal_id? (P5), note | Lịch sử ví: mỗi biến động 1 dòng. Test kiểm tổng các dòng khớp số dư |
-| `withdrawals` | P5 | id<br>shop_id → seller_wallets<br>amount (≥ 50.000đ), status<br>tài khoản ngân hàng (chép lại)<br>transfer_code, receipt_url, paid_at | Yêu cầu rút tiền và chi trả |
+| `withdrawals` | P5 | id<br>shop_id → seller_wallets, owner_id ↗U, shop_name<br>amount (≥ `withdraw_min_amount`)<br>status: PENDING \| APPROVED \| PAID \| REJECTED \| CANCELLED \| FAILED (mỗi shop tối đa 1 yêu cầu PENDING/APPROVED, ràng buộc viết tay)<br>bank_name, bank_account_number, bank_account_name (chép từ hồ sơ shop lúc yêu cầu)<br>request_key (Idempotency-Key, không trùng)<br>reason (lý do từ chối / chuyển lỗi), decided_by_name, decided_at<br>transfer_code, receipt_key (MinIO riêng tư), paid_by ↗U, paid_by_name, paid_at, note | Yêu cầu rút tiền và chi trả |
+
+Bảng cũ đổi ở P5:
+- `seller_earnings`: trạng thái thêm `REFUNDED` (trả hàng hoàn toàn bộ); thêm `return_id`, `return_state` (NONE \| OPEN \| RESOLVED: có yêu cầu trả hàng đang mở thì không chuyển khả dụng), `return_refund`, `return_deduction` (seller bị trừ), `return_fee_reversed` (phí sàn được giảm).
+- `wallet_transactions`: loại thêm `RETURN_DEDUCTED` (trừ ngăn đang giữ do trả hàng), `LOCKED` / `UNLOCKED` / `WITHDRAWN` (rút tiền), `ADJUSTMENT` (điều chỉnh DIS-02); thêm `withdrawal_id`, `adjustment_id` (mỗi cặp mã + loại không trùng).
+- `refunds`: `payment_id` để trống được (hoàn bằng chuyển khoản); thêm `method` (GATEWAY \| BANK_TRANSFER), `return_id` (không trùng), `adjustment_id` (không trùng), `bank_name`, `bank_account_number`, `bank_account_name`; lý do thêm `RETURN`, `ADJUSTMENT`. `shop_order_id` không còn không trùng tuyệt đối: chỉ khoản hoàn do hủy/giao thất bại/sự cố mới tối đa một khoản mỗi đơn con (ràng buộc viết tay).
 
 ### Đối soát COD (P4)
 
@@ -178,5 +186,6 @@ Sơ đồ: `docs/so-do/12-erd-a-approval-service`
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `disputes` | P5 | id<br>return_id ↗M, shop_order_id ↗M<br>buyer_statement, seller_statement, images<br>status, decision, refund_amount<br>decided_by | Khiếu nại cần admin phân xử |
-| `withdrawal_approvals` | P5 | id<br>withdrawal_id ↗P<br>shop_id ↗M, amount<br>status, reason, decided_by | Duyệt rút tiền |
+| `disputes` | P5 | id<br>type: RETURN (tranh chấp trả hàng) \| ADJUSTMENT (điều chỉnh sau giải ngân, DIS-02)<br>return_id ↗M, return_code, stage: REQUEST_REJECTED \| GOODS_PROBLEM (cặp return_id + stage không trùng)<br>order_id ↗M, order_code, shop_order_id ↗M, shop_order_code<br>shop_id ↗M, shop_name, owner_id ↗U (không tự quyết)<br>buyer_id ↗U, buyer_name<br>data (hồ sơ trả hàng nhận qua sự kiện)<br>buyer_statement, buyer_images, seller_statement, seller_images<br>max_refund<br>status: PENDING \| RESOLVED \| APPROVED \| REJECTED \| EXECUTED \| FAILED<br>decision: ACCEPT_RETURN \| REFUND \| REJECT \| APPROVE<br>refund_amount, seller_change (ADJUSTMENT: cộng/trừ ví), bank_account (ADJUSTMENT)<br>reason (lý do lập ADJUSTMENT), created_by ↗U, created_by_name, request_key<br>deadline (hạn nhắc phân xử)<br>decision_note, decided_by ↗U, decided_by_name, decided_at<br>execution_note, executed_at | Tranh chấp trả hàng cần admin `SUPPORT` phân xử, và đề nghị điều chỉnh tiền cần admin `FINANCE` thứ hai duyệt (gộp `finance_exceptions` theo vòng ERD) |
+| `withdrawal_approvals` | P5 | id<br>withdrawal_id ↗P (không trùng)<br>shop_id ↗M, shop_name, owner_id ↗U, owner_name (không tự duyệt)<br>amount<br>bank_account (4 số cuối), wallet (số dư lúc yêu cầu)<br>status: PENDING \| APPROVED \| REJECTED \| CANCELLED<br>reason, decided_by ↗U, decided_by_name, decided_at, requested_at | Duyệt rút tiền |
+| `settings` (bổ sung) | P5 | | Thêm hạn nhắc phân xử tranh chấp (72 giờ) |
