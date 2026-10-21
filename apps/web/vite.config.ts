@@ -17,7 +17,8 @@ export default defineConfig({
     // Gọi API qua cùng địa chỉ web (cookie đăng nhập cùng tên miền), Vite chuyển tới từng service
     proxy: {
       '/api/user': 'http://localhost:3001',
-      '/api/market': 'http://localhost:3002',
+      // ws: chuyển cả kết nối Socket.IO (chat, thông báo realtime)
+      '/api/market': { target: 'http://localhost:3002', ws: true },
       '/api/payment': 'http://localhost:3003',
       '/api/approval': 'http://localhost:3004',
     },

@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core.module';
 import { HealthController } from './health/health.controller';
 import { MeModule } from './me/me.module';
+import { NotificationMailModule } from './notification-mail/notification-mail.module';
 import { PrismaService } from './prisma.service';
 
 /** Khóa ký access token. Máy dev chưa đặt thì dùng khóa tạm (scripts/gen-jwt-key.mjs tạo khóa cố định). */
@@ -32,6 +33,7 @@ function jwtPrivateKey(): string {
     AuthModule,
     MeModule,
     AdminUsersModule,
+    NotificationMailModule,
   ],
   controllers: [HealthController],
 })

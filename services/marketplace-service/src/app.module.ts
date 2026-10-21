@@ -16,6 +16,8 @@ import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReturnsModule } from './returns/returns.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { ChatModule } from './chat/chat.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -32,6 +34,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     SettingsModule.forRoot(MARKET_SETTINGS),
     CoreModule,
     NotificationsModule,
+    RealtimeModule,
+    ChatModule,
     LocationsModule,
     OrdersModule,
     ReturnsModule,

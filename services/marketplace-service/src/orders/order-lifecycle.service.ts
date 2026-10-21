@@ -10,6 +10,7 @@ import {
   type PaymentSucceededPayload,
   type RefundUpdatedPayload,
 } from '@san/shared';
+import { Notifier } from '../notifications/notifier.service';
 import { applyReturnRefund, OPEN_RETURN_STATUSES } from '../returns/return-state';
 import { MarketSetting } from '../settings';
 import type { CancelActor, Prisma, ShopOrder, ShopOrderStatus } from '../../generated/prisma';
@@ -44,6 +45,9 @@ export const FINAL_STATUSES: ShopOrderStatus[] = [
   'INCIDENT_RESOLVED',
 ];
 
+/** Khoản hoàn đã xong (qua cổng hoặc admin hoàn tay) */
+const REFUND_DONE: string[] = ['SUCCEEDED', 'MANUAL_DONE'];
+
 /** Vận đơn chưa được GHN lấy hàng: hủy đơn thì hủy luôn vận đơn */
 const UNPICKED_SHIPMENT = ['CREATING', 'UNKNOWN', 'CREATE_FAILED', 'READY_TO_PICK'] as const;
 
@@ -61,6 +65,7 @@ export class OrderLifecycle {
   constructor(
     private readonly events: EventBus,
     private readonly settings: SettingsService,
+    private readonly notifier: Notifier,
   ) {}
 
   /** Khóa đơn tổng tới hết giao dịch */
@@ -262,18 +267,47 @@ export class OrderLifecycle {
     return this.cancel(tx, orderId, 'ALL', SYSTEM, reason);
   }
 
-  /** Cập nhật trạng thái hoàn tiền (refund.updated); chỉ áp tin mới hơn. Khoản hoàn trả hàng (P5) áp vào yêu cầu */
+  /**
+   * Cập nhật trạng thái hoàn tiền (refund.updated); chỉ áp tin mới hơn. Khoản hoàn trả hàng (P5) áp vào yêu
+   * cầu. Khoản hoàn vừa xong (qua cổng hoặc admin hoàn tay) thì báo người mua (P6, REFUND_DONE) đúng một lần.
+   */
   async applyRefund(tx: Tx, p: RefundUpdatedPayload): Promise<void> {
-    if (p.returnId) return applyReturnRefund(tx, p);
-    if (!p.shopOrderId) return;
+    const done = REFUND_DONE.includes(p.status);
+    if (p.returnId) {
+      const before = await tx.returnRequest.findUnique({
+        where: { id: p.returnId },
+        select: { refundStatus: true },
+      });
+      await applyReturnRefund(tx, p);
+      const after = await tx.returnRequest.findUniqueOrThrow({
+        where: { id: p.returnId },
+        select: { refundStatus: true },
+      });
+      if (done && after.refundStatus === p.status && !REFUND_DONE.includes(before!.refundStatus)) {
+        await this.notifier.refundDone(tx, p);
+      }
+      return;
+    }
+    if (!p.shopOrderId) {
+      // Hoàn cả khoản trả muộn/trả trùng (không gắn đơn con)
+      if (done) await this.notifier.refundDone(tx, p);
+      return;
+    }
     const updatedAt = new Date(p.updatedAt);
-    await tx.shopOrder.updateMany({
+    const before = await tx.shopOrder.findUnique({
+      where: { id: p.shopOrderId },
+      select: { refundStatus: true },
+    });
+    const { count } = await tx.shopOrder.updateMany({
       where: {
         id: p.shopOrderId,
         OR: [{ refundUpdatedAt: null }, { refundUpdatedAt: { lte: updatedAt } }],
       },
       data: { refundStatus: p.status, refundUpdatedAt: updatedAt },
     });
+    if (done && count > 0 && before && !REFUND_DONE.includes(before.refundStatus)) {
+      await this.notifier.refundDone(tx, p);
+    }
   }
 
   // ----- P4: giao hàng -----
@@ -563,6 +597,8 @@ export class OrderLifecycle {
         note,
       },
     });
+    // P6 (MSG-02): mọi lần đổi trạng thái đơn con đi qua đây, báo người mua/chủ shop theo bảng loại thông báo
+    await this.notifier.orderTransition(tx, shopOrderId, from, to, actor, note);
   }
 
   /** Trả lượt voucher (VCH-03): voucher shop của một đơn con, hoặc voucher sàn (shopOrderId = null) */

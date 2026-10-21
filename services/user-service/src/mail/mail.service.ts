@@ -6,6 +6,8 @@ export interface MailMessage {
   to: string;
   subject: string;
   text: string;
+  /** Bản HTML (tùy chọn), ví dụ có nút mở trang trên web */
+  html?: string;
 }
 
 /**

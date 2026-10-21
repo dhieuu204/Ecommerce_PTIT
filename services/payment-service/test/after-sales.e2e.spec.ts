@@ -4,6 +4,7 @@ import {
   REFUND_UPDATED,
   WITHDRAWAL_CANCELLED,
   WITHDRAWAL_REQUESTED,
+  WITHDRAWAL_UPDATED,
   type AdjustmentApprovedPayload,
   type OrderPlacedPayload,
   type ReturnResolvedPayload,
@@ -555,6 +556,80 @@ describeDb('Hậu mãi và rút tiền (P5: REF-02, FIN-02..06, DIS-02)', () => 
       expect(await walletA(p)).toMatchObject({ available: SELLER_A, locked: 0 });
       await withdraw(SELLER_A).expect(201);
       await expectLedgerMatches(p.shopOrders[0]!.shopId);
+    });
+
+    it('phát withdrawal.updated khi duyệt, từ chối, đã chi, chuyển lỗi (P6: báo chủ shop)', async () => {
+      const p = await available();
+      const shopId = p.shopOrders[0]!.shopId;
+      // Từ chối (quyết định tới hai lần chỉ phát một lần); seller tự hủy thì không phát
+      const r1 = (await withdraw(100_000).expect(201)).body;
+      await decide(r1.id, 'REJECTED');
+      await decide(r1.id, 'REJECTED');
+      const r2 = (await withdraw(100_000).expect(201)).body;
+      await t
+        .http()
+        .post(`${API}/shops/me/withdrawals/${r2.id}/cancel`)
+        .set(auth(sellerA))
+        .expect(200);
+      // Duyệt → chuyển lỗi
+      const r3 = (await withdraw(100_000).expect(201)).body;
+      await decide(r3.id, 'APPROVED');
+      await t
+        .http()
+        .post(`${API}/admin/withdrawals/${r3.id}/failed`)
+        .set(auth(finance))
+        .send({ reason: 'Ngân hàng trả lại vì sai tên' })
+        .expect(200);
+      // Duyệt → đã chi
+      const r4 = (await withdraw(100_000).expect(201)).body;
+      await decide(r4.id, 'APPROVED');
+      const receiptKey = await receipt();
+      await t
+        .http()
+        .post(`${API}/admin/withdrawals/${r4.id}/paid`)
+        .set(auth(finance))
+        .send({ transferCode: 'FT2610150002', receiptKey })
+        .expect(200);
+
+      const events = await outbox(t.prisma, WITHDRAWAL_UPDATED);
+      const base = { shopId, ownerId: sellerA.id, amount: 100_000 };
+      expect(events).toEqual([
+        {
+          ...base,
+          withdrawalId: r1.id,
+          status: 'REJECTED',
+          reason: 'Cần kiểm tra thêm',
+          updatedAt: expect.any(String),
+        },
+        {
+          ...base,
+          withdrawalId: r3.id,
+          status: 'APPROVED',
+          reason: null,
+          updatedAt: expect.any(String),
+        },
+        {
+          ...base,
+          withdrawalId: r3.id,
+          status: 'FAILED',
+          reason: 'Ngân hàng trả lại vì sai tên',
+          updatedAt: expect.any(String),
+        },
+        {
+          ...base,
+          withdrawalId: r4.id,
+          status: 'APPROVED',
+          reason: null,
+          updatedAt: expect.any(String),
+        },
+        {
+          ...base,
+          withdrawalId: r4.id,
+          status: 'PAID',
+          reason: null,
+          updatedAt: expect.any(String),
+        },
+      ]);
     });
 
     it('chỉ admin tài chính dùng API chi trả', async () => {
