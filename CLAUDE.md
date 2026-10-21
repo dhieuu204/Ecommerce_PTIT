@@ -10,7 +10,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; chạy thử cả hệ thống trong Docker bằng `pnpm app:up`, Dockerfile ở `services/Dockerfile` và `apps/web/Dockerfile`). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
-Trạng thái hiện tại: **P1 (tài khoản, mở shop, quản trị), P2 (danh mục, sản phẩm, tồn kho, tìm kiếm, giỏ, tạo voucher, đình chỉ shop), P3 (checkout nhiều shop, thanh toán VNPay/mô phỏng, kiểm tra đơn lớn, xác nhận/hủy đơn, hoàn tiền, cấu hình chính sách), P4 (vận đơn GHN/mô phỏng, trạng thái giao hàng, COD, hoàn tất đơn, hoàn hàng, sự cố, ví seller 3 ngăn, đối soát COD và VNPay) và P5 (trả hàng có vận đơn trả, khiếu nại và phân xử, hoàn một phần, giữ tiền khi có yêu cầu mở, rút tiền và chi trả, điều chỉnh ví sau giải ngân) đã code xong**, kèm test. API và sự kiện P1–P5 ở `docs/api`, bảng P1–P5 đầy đủ cột ở `docs/erd` và `services/*/prisma`, quyết định P2 ở `docs/phan-tich/09-quyet-dinh-p2.md`, P3 ở `10-quyet-dinh-p3.md`, P4 ở `11-quyet-dinh-p4.md`, P5 (kèm trạng thái trả hàng STATE-03) ở `12-quyet-dinh-p5.md`. Nền tảng chung (kể cả cấu hình có phiên bản `SettingsModule`) ở `packages/nest-common`. Dữ liệu demo: `pnpm seed:demo` (xem README). Phase tiếp theo: **P6 (chat, thông báo, đánh giá, theo dõi shop, báo cáo, tối ưu tìm kiếm, kiểm thử tổng hợp)**. Xem mục 9 để biết điều gì chưa được chốt.
+Trạng thái hiện tại: **P1 (tài khoản, mở shop, quản trị), P2 (danh mục, sản phẩm, tồn kho, tìm kiếm, giỏ, tạo voucher, đình chỉ shop), P3 (checkout nhiều shop, thanh toán VNPay/mô phỏng, kiểm tra đơn lớn, xác nhận/hủy đơn, hoàn tiền, cấu hình chính sách), P4 (vận đơn GHN/mô phỏng, trạng thái giao hàng, COD, hoàn tất đơn, hoàn hàng, sự cố, ví seller 3 ngăn, đối soát COD và VNPay) P5 (trả hàng có vận đơn trả, khiếu nại và phân xử, hoàn một phần, giữ tiền khi có yêu cầu mở, rút tiền và chi trả, điều chỉnh ví sau giải ngân) và P6 (đánh giá và trả lời, theo dõi shop, thả tim, lọc/sắp xếp theo sao, chat realtime, thông báo trong app và email, báo cáo vi phạm và kiểm duyệt, báo cáo vận hành và tài chính, kiểm thử tổng hợp `pnpm test:e2e`) đã code xong**, kèm test. API và sự kiện P1–P6 ở `docs/api`, bảng P1–P6 đầy đủ cột ở `docs/erd` và `services/*/prisma`, quyết định P2 ở `docs/phan-tich/09-quyet-dinh-p2.md`, P3 ở `10-quyet-dinh-p3.md`, P4 ở `11-quyet-dinh-p4.md`, P5 (kèm trạng thái trả hàng STATE-03) ở `12-quyet-dinh-p5.md`. P6 ở `13-quyet-dinh-p6.md`. Nền tảng chung (kể cả cấu hình có phiên bản `SettingsModule`) ở `packages/nest-common`. Dữ liệu demo: `pnpm seed:demo` (xem README). Đã xong cả 6 phase; việc tiếp theo: **triển khai Kubernetes (k3s, DEPLOY-01) cho buổi demo**. Xem mục 9 để biết điều gì chưa được chốt.
 
 Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong cho cả P1–P6. Trước mỗi phase mới viết chi tiết của phase đó (API, bảng dữ liệu, màn hình), rồi code, demo, sang phase sau. Không tự làm trước API hay bảng của phase chưa tới.
 
@@ -69,6 +69,7 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
 - Hạ tầng: PostgreSQL 16 (1 máy chủ, 4 database), RabbitMQ, Redis (chỉ làm Socket.IO adapter), MinIO (ảnh, bằng chứng, biên lai), Mailpit (hộp thư giả khi dev), Ingress NGINX.
 - Realtime chat/thông báo: Socket.IO trong marketplace-service + Redis adapter.
 - Tìm kiếm: PostgreSQL full-text + `unaccent` (gõ có dấu hay không dấu đều ra).
+- Biểu đồ báo cáo: **Recharts** ở web (chủ đồ án duyệt 21/10/2026), chỉ tải khi mở trang báo cáo.
 - Đối tác: VNPay sandbox, GHN môi trường dev, Google OAuth.
 
 Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không cần thêm không, rồi **hỏi người giao việc** trước.
@@ -116,8 +117,7 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 
 ## 9. Chưa chốt: không tự quyết, phải hỏi người
 
-- API và sự kiện **của P6** (P1–P5 đã chốt trong `docs/api`). Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
-- **Chi tiết cột của bảng P6.** Khung (tên bảng, cột chính) đã có trong `docs/erd`; chi tiết viết trước khi bắt đầu phase đó.
+- File Kubernetes (k3s) cho buổi demo: chưa viết, hỏi trước khi làm. Tên sự kiện trong sơ đồ ARCH-01 chỉ là dự kiến; tên đúng nằm trong `docs/api/events.md`.
 - Thư viện điều hướng trang (router) và cách gọi API ở frontend.
 
 Gặp điểm chưa chốt: dừng phần đó, ghi rõ câu hỏi kèm 2–3 phương án và phương án đề xuất, rồi hỏi người giao việc. Không tự chọn rồi code luôn.

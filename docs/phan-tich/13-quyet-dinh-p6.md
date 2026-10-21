@@ -127,3 +127,37 @@ Seller xem cùng bảng cho shop mình: giá trị đơn, khoản hoàn, phí s�
 - Kubernetes (k3s) cho buổi demo (DEPLOY-01), đã hẹn làm sau P6.
 - Chi trả bằng API ngân hàng (giữ adapter).
 - Thông báo đẩy ra điện thoại (push), tùy chọn tắt email.
+
+## 7. Điểm Claude tự quyết khi code (21/10/2026, chủ đồ án có thể đổi)
+
+Những chỗ tài liệu trên chưa nói tới, Claude chọn cách dưới đây và đã có test.
+
+**Đánh giá, theo dõi, tìm kiếm**
+
+1. Lọc `minRating` và sắp xếp "Đánh giá cao" dùng sao đã làm tròn 1 chữ số, cho khớp số đang hiển thị (3,95 sao được tính là 4,0).
+2. Sửa đánh giá là gửi lại toàn bộ: không gửi ảnh thì ảnh cũ bị bỏ.
+3. Seller xem đánh giá của shop cũng thấy tên người mua đã che bớt; danh sách có thêm số đánh giá chưa trả lời.
+4. Shop bị đình chỉ: đánh giá vẫn xem công khai được, người mua vẫn theo dõi được.
+
+**Chat, thông báo**
+
+5. Socket.IO gắn thẳng vào server HTTP của marketplace, không dùng `@nestjs/websockets` (thư viện này làm hỏng test của payment-service). Không có Redis thì vẫn chạy, chỉ là một bản.
+6. Thẻ đơn trong chat chọn trong 50 đơn gần nhất của người mua với shop đó; thẻ sản phẩm chọn từ hàng đang bán của shop.
+7. Email thông báo có nút "Xem chi tiết" mở đúng trang; màu trong email viết thẳng mã màu vì email không đọc được class Tailwind.
+
+**Báo cáo vi phạm**
+
+8. Admin là chủ shop bị chặn với mọi lựa chọn của báo cáo về shop mình, kể cả "bác báo cáo".
+9. Đình chỉ shop từ một báo cáo sản phẩm chỉ đóng các báo cáo của sản phẩm đó; báo cáo về chính shop vẫn chờ xử lý riêng.
+10. Mỗi lần xử lý ghi nhật ký `RESOLVE_REPORT` hoặc `DISMISS_REPORT`, thêm `REMOVE_PRODUCT` / `SUSPEND_SHOP` khi thật sự có biện pháp mới. Biện pháp xem ở lịch sử của đối tượng, không lưu trên dòng báo cáo.
+
+**Báo cáo vận hành và tài chính**
+
+11. Đơn trả trước bị hệ thống hủy vì quá hạn thanh toán không tính vào báo cáo (chưa từng là đơn thật). Đơn người mua tự hủy, hoặc bị hủy vì không qua kiểm tra đơn, vẫn tính là đơn hủy.
+12. Doanh số trừ phần trả hàng giống cách payment trừ tiền seller: chỉ tính yêu cầu đã hoàn tiền; hoàn một phần trừ theo tỉ lệ; khoản sàn chịu thì không trừ.
+13. Sản phẩm bán chạy đếm số lượng đã bán (chưa trừ món trả), xếp theo số lượng rồi tiền hàng. Hiệu quả voucher không tính đơn đã hủy.
+14. Bên tài chính, đơn trả trước ghi nhận lúc trả tiền, đơn COD lúc giao thành công. Thực thu COD lấy theo lúc đối soát khớp (hoặc admin chấp nhận dòng lệch).
+
+**Nền tảng chung**
+
+15. Sửa lỗi có từ P1 ở `@san/nest-common`: service vừa khởi động mà có nhiều yêu cầu tới cùng lúc thì yêu cầu thứ hai bị báo "chưa đăng nhập", vì chưa kịp tải khóa công khai. Nay các yêu cầu chờ chung một lần tải (có test).

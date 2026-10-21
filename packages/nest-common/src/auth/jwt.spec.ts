@@ -29,6 +29,16 @@ describe('JwtVerifier dùng JWKS (cách 3 service còn lại kiểm vé)', () =>
     expect(calls).toBe(1);
   });
 
+  it('nhiều vé tới cùng lúc khi chưa có khóa: chờ chung một lần tải, không vé nào bị từ chối', async () => {
+    const verifier = new JwtVerifier({ jwksUrl: url });
+    const before = calls;
+    const user = { id: 'u-2', email: 'b@b.vn', name: 'Bình', permissions: [] };
+    const token = signAccessToken(user, key);
+    const results = await Promise.all([1, 2, 3].map(() => verifier.verify(token)));
+    expect(results).toEqual([user, user, user]);
+    expect(calls - before).toBe(1);
+  });
+
   it('vé của khóa lạ thì báo vé không hợp lệ', async () => {
     const verifier = new JwtVerifier({ jwksUrl: url });
     const other = createPrivateKey(generateDevPrivateKey());
