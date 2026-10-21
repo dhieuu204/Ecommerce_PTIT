@@ -1,4 +1,5 @@
 import { ShieldAlert } from 'lucide-react';
+import { SellerChatBadge } from '@/components/chat/chat-badges';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { ConsoleLayout, type ConsoleMenuGroup } from './console-layout';
 
@@ -10,6 +11,10 @@ const MENU: ConsoleMenuGroup[] = [
       { to: '/kenh-nguoi-ban/don-hang', label: 'Tất cả đơn' },
       { to: '/kenh-nguoi-ban/tra-hang', label: 'Trả hàng/Hoàn tiền' },
     ],
+  },
+  {
+    title: 'Chăm sóc khách hàng',
+    items: [{ to: '/kenh-nguoi-ban/tin-nhan', label: 'Tin nhắn', badge: <SellerChatBadge /> }],
   },
   {
     title: 'Sản phẩm',

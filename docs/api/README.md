@@ -597,13 +597,13 @@ P6 (trải nghiệm và hoàn thiện): ENG-01..03, MSG-01, MSG-02, MOD-01, RPT-
 
 | Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
 | --- | --- | --- | --- |
-| POST `/conversations` | Đã đăng nhập | MSG-01 | `{ shopId }`. Mở cuộc trò chuyện với shop (đã có thì trả lại cuộc cũ). Shop chưa duyệt → 404; shop của mình → 409 `OWN_SHOP`. |
+| POST `/conversations` | Đã đăng nhập | MSG-01 | `{ shopId }`. Mở cuộc trò chuyện với shop (đã có thì trả lại cuộc cũ). Shop chưa duyệt → 404; shop của mình → 409 `OWN_SHOP`. Trả 200 kèm cuộc trò chuyện. |
 | GET `/conversations` | Đã đăng nhập | MSG-01 | `role` = `BUYER` (các shop mình đã chat) hoặc `SHOP` (người mua đã chat với shop mình; chưa có shop → danh sách rỗng). Mỗi dòng: bên kia (tên, logo shop), tin cuối, lúc nào, số tin chưa đọc của mình; tin mới nhất trước, phân trang. |
 | GET `/conversations/unread-count` | Đã đăng nhập | MSG-01 | `{ buyer, shop }` = tổng tin chưa đọc ở vai người mua và vai shop. |
 | GET `/conversations/{conversationId}` | Hai bên | MSG-01 | Thông tin cuộc trò chuyện, vai của người gọi. Người khác → 404. |
-| GET `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `before` (mã tin), `limit` (tối đa 50, mặc định 30): các tin cũ hơn `before`, trả theo thứ tự thời gian. |
-| POST `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `{ clientKey, type: TEXT \| IMAGE \| PRODUCT \| ORDER, text?, imageKey?, productId?, shopOrderId? }`. TEXT 1–1000 ký tự; IMAGE là khóa đã tải lên cho cuộc này; PRODUCT là hàng đang bán của sàn; ORDER là đơn con của chính người mua ở shop này. Sai → 400 `INVALID_MESSAGE` hoặc 404. Gửi lại cùng `clientKey` → trả tin cũ. Tăng số chưa đọc của bên kia, đẩy `chat:message` cho cả hai, tạo thông báo `CHAT_MESSAGE` nếu bên kia đang không có tin chưa đọc. |
-| POST `/conversations/{conversationId}/read` | Hai bên | MSG-01 | Đánh dấu đã đọc hết ở vai của mình, đẩy `chat:read`. |
+| GET `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `before` (mã tin), `limit` (tối đa 50, mặc định 30): các tin cũ hơn `before`, trả `{ items, hasMore }`, `items` theo thứ tự thời gian (cũ trước). `before` không thuộc cuộc này → 404. |
+| POST `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `{ clientKey, type: TEXT \| IMAGE \| PRODUCT \| ORDER, text?, imageKey?, productId?, shopOrderId? }`. TEXT 1–1000 ký tự; IMAGE là khóa đã tải lên cho cuộc này; PRODUCT là hàng đang bán của sàn; ORDER là đơn con của chính người mua ở shop này. Sai → 400 `INVALID_MESSAGE` hoặc 404. Gửi lại cùng `clientKey` → trả tin cũ (người kia dùng trùng mã → 409 `IDEMPOTENCY_KEY_REUSED`). Tăng số chưa đọc của bên kia, đẩy `chat:message` cho cả hai, tạo thông báo `CHAT_MESSAGE` nếu bên kia đang không có tin chưa đọc. |
+| POST `/conversations/{conversationId}/read` | Hai bên | MSG-01 | Đánh dấu đã đọc hết ở vai của mình (kèm thông báo `CHAT_MESSAGE` của cuộc này), đẩy `chat:read`, trả lại cuộc trò chuyện. |
 | POST `/uploads/chat-image` | Hai bên | MSG-01 | Query `conversationId`. Tối đa `CHAT_IMAGE_MAX_MB`, lưu bucket riêng tư, trả `{ key }`. |
 | GET `/chat-images/{conversationId}/{file}` | Hai bên | MSG-01 | Xem ảnh chat. Người khác → 404. |
 
@@ -613,7 +613,7 @@ P6 (trải nghiệm và hoàn thiện): ENG-01..03, MSG-01, MSG-02, MOD-01, RPT-
 | --- | --- | --- | --- |
 | GET `/me/notifications` | Đã đăng nhập | MSG-02 | Lọc `unread=true`, phân trang, mới nhất trước: loại, tiêu đề, nội dung, đường dẫn, đã đọc chưa, lúc nào. |
 | GET `/me/notifications/unread-count` | Đã đăng nhập | MSG-02 | `{ count }` cho chuông trên header. |
-| POST `/me/notifications/{notificationId}/read` | Đã đăng nhập | MSG-02 | Đánh dấu đã đọc. Của người khác → 404. |
+| POST `/me/notifications/{notificationId}/read` | Đã đăng nhập | MSG-02 | Đánh dấu đã đọc, trả `{ count }` = số còn chưa đọc. Của người khác → 404. |
 | POST `/me/notifications/read-all` | Đã đăng nhập | MSG-02 | Đánh dấu đọc hết, trả `{ count: 0 }`. |
 
 **Báo cáo vi phạm (phần marketplace)**

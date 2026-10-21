@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router';
+import { RealtimeConnector } from '@/components/realtime-connector';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { refreshSession } from '@/lib/api';
@@ -15,6 +16,7 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RealtimeConnector />
       <TooltipProvider>
         <RouterProvider router={router} />
         <Toaster />

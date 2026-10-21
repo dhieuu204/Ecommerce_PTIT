@@ -1,7 +1,9 @@
-import { Search, ShoppingCart, Store, UserRound } from 'lucide-react';
+import { MessageCircle, Search, ShoppingCart, Store, UserRound } from 'lucide-react';
 import { useRef } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
+import { BuyerChatBadge } from '@/components/chat/chat-badges';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { useCartCount } from '@/hooks/use-cart';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { useSession } from '@/lib/auth';
@@ -134,6 +136,15 @@ export function SiteHeader() {
               icon={<Store className="size-4" />}
               label="Kênh người bán"
             />
+            {loggedIn && (
+              <HeaderAction
+                to="/tin-nhan"
+                icon={<MessageCircle className="size-4" />}
+                label="Tin nhắn"
+                badge={<BuyerChatBadge />}
+              />
+            )}
+            {loggedIn && <NotificationBell tone="shop" />}
             <CartAction loggedIn={loggedIn} />
             {loggedIn ? (
               <UserMenu />
