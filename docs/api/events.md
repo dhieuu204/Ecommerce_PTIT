@@ -361,7 +361,55 @@ payment-service thực thi trong một giao dịch, **tất cả hoặc không**
 
 `adjustmentId`, `result` (`APPLIED` hoặc `FAILED`), `message` (lý do khi `FAILED`), `executedAt`. approval-service ghi kết quả vào hồ sơ (`EXECUTED` / `FAILED`).
 
-## 7. Thêm sự kiện mới
+## 7. Sự kiện P6
+
+Kiểu: `packages/shared/src/events/shop.ts` (gỡ sản phẩm), `finance.ts` (rút tiền đổi trạng thái), `notification.ts` (thông báo). Quyết định của vòng này: `docs/phan-tich/13-quyet-dinh-p6.md`.
+
+| Sự kiện | Gửi → nhận | Khi nào |
+| --- | --- | --- |
+| `product_moderation.decided` | approval → marketplace | Admin `MODERATION` gỡ sản phẩm vi phạm hoặc khôi phục (MOD-01) |
+| `withdrawal.updated` | payment → marketplace | Yêu cầu rút tiền được duyệt, bị từ chối, đã chi hoặc chuyển lỗi (để báo chủ shop, MSG-02) |
+| `notification.created` | marketplace → marketplace, user-service | Vừa tạo một thông báo: marketplace đẩy qua Socket.IO, user-service gửi email khi cần (MSG-02) |
+
+Thông báo về đơn, trả hàng, duyệt shop, đình chỉ, phân xử, hoàn tiền dùng các sự kiện đã có (marketplace đã nhận `shop_application.decided`, `shop_suspension.decided`, `dispute.decided`, `refund.updated`), không thêm sự kiện mới.
+
+### `product_moderation.decided` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `productId`, `shopId` | Sản phẩm và shop của nó |
+| `action` | `REMOVE` (gỡ) hoặc `RESTORE` (khôi phục) |
+| `reason` | Lý do, luôn có |
+| `decidedBy` | `userId`, `name` của admin |
+| `decidedAt` | Thời điểm quyết (tăng dần theo từng sản phẩm) |
+
+marketplace-service chỉ áp khi `decidedAt` mới hơn `products.moderated_at`: `REMOVE` → `REMOVED`, lưu lý do; `RESTORE` → `HIDDEN` (seller tự bật bán), xóa lý do. Rồi báo chủ shop (`PRODUCT_REMOVED` / `PRODUCT_RESTORED`).
+
+### `withdrawal.updated` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `withdrawalId`, `shopId`, `ownerId` | Yêu cầu, shop, chủ shop |
+| `amount` | Số tiền rút |
+| `status` | `APPROVED`, `REJECTED`, `PAID` hoặc `FAILED` |
+| `reason` | Lý do khi `REJECTED` / `FAILED` |
+| `updatedAt` | |
+
+payment-service phát trong cùng giao dịch với lúc đổi trạng thái yêu cầu. marketplace tạo thông báo `WITHDRAWAL_*` cho chủ shop; không đổi dữ liệu nào khác.
+
+### `notification.created` (version 1)
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `notificationId`, `userId` | Thông báo và người nhận |
+| `type`, `title`, `content`, `link` | Như dòng trong bảng `notifications` |
+| `email` | `true` = loại quan trọng, gửi thêm email |
+| `createdAt` | |
+
+- marketplace (nhận lại sự kiện của chính mình): đẩy `notification:new` tới phòng Socket.IO của người nhận, kèm số chưa đọc. Đẩy qua sự kiện để chỉ đẩy khi thông báo đã thật sự lưu.
+- user-service: `email = true` và tài khoản `ACTIVE` thì gửi email tới địa chỉ của tài khoản; `email = false` thì bỏ qua. Nhận trùng không gửi lại (inbox).
+
+## 8. Thêm sự kiện mới
 
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
 2. Thêm một mục vào file này (bảng sự kiện của phase và bảng trường).

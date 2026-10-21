@@ -67,3 +67,20 @@ export interface AdjustmentExecutedPayload {
   message: string | null;
   executedAt: string;
 }
+
+/**
+ * payment-service → marketplace-service (P6, MSG-02): yêu cầu rút tiền đổi trạng thái sau khi seller gửi,
+ * để marketplace báo cho chủ shop (trong app và email).
+ */
+export const WITHDRAWAL_UPDATED = 'withdrawal.updated';
+export interface WithdrawalUpdatedPayload {
+  withdrawalId: string;
+  shopId: string;
+  /** Chủ shop nhận thông báo */
+  ownerId: string;
+  amount: number;
+  status: 'APPROVED' | 'REJECTED' | 'PAID' | 'FAILED';
+  /** Lý do khi REJECTED hoặc FAILED */
+  reason: string | null;
+  updatedAt: string;
+}

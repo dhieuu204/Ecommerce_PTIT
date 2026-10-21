@@ -5,11 +5,11 @@ Nhóm chọn cách **code trước, sinh tài liệu**: không viết file OpenA
 | Nội dung | Ở đâu |
 | --- | --- |
 | Quy ước chung (đường dẫn, đăng nhập, lỗi, phân trang) | File này, mục 1 |
-| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3), mục 5 (P4), mục 6 (P5) |
+| Danh sách API từng phase và quy tắc chính của mỗi API | File này, mục 2 (P1), mục 3 (P2), mục 4 (P3), mục 5 (P4), mục 6 (P5), mục 7 (P6) |
 | Sự kiện giữa các service qua RabbitMQ | `events.md` + kiểu TypeScript trong `packages/shared/src/events` |
-| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 7 |
+| Chi tiết từng API (trường, kiểu, mã lỗi) | Tự sinh từ code, xem mục 8 |
 
-Muốn thêm hoặc đổi API so với danh sách ở mục 2–6, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
+Muốn thêm hoặc đổi API so với danh sách ở mục 2–7, hoặc đổi sự kiện: sửa file này / `events.md` trong cùng Pull Request và báo người phụ trách các service bị ảnh hưởng.
 
 ## 1. Quy ước chung
 
@@ -547,7 +547,124 @@ P5 (hậu mãi và rút tiền): RET-01..04, DIS-01, DIS-02, REF-02, VCH-03 (ph�
 5. Seller có tiền khả dụng, bấm **Rút tiền** → tiền chuyển sang "đang khóa". Admin `FINANCE` (không phải chủ shop) **duyệt** ở trang Rút tiền → chuyển khoản ngoài hệ thống, nhập mã giao dịch + biên lai → "Đã chi", ngăn đang khóa giảm.
 6. Ngoại lệ: admin `FINANCE` lập **điều chỉnh** cho một đơn con đã hoàn tất (trừ ví seller, hoàn thêm cho người mua) → admin `FINANCE` khác duyệt → payment-service thực thi nếu đủ số dư.
 
-## 7. Tài liệu API tự sinh (Swagger)
+## 7. Danh sách API P6
+
+P6 (trải nghiệm và hoàn thiện): ENG-01..03, MSG-01, MSG-02, MOD-01, RPT-01, RPT-02, SRC-01 (phần P6). Mục tiêu: buyer/seller/admin dùng được trọn vòng đời. Quyết định của vòng này: `docs/phan-tich/13-quyet-dinh-p6.md` (sao shop = trung bình sao sản phẩm; đánh giá sau khi đơn con hoàn tất, trong 30 ngày, sửa 1 lần; báo cáo vi phạm sản phẩm và shop; thông báo trong app và email; người mua mở chat, admin không đọc chat; báo cáo có biểu đồ; lọc theo sao và sắp xếp theo đánh giá).
+
+### Quy tắc chung của P6
+
+- **Sao trung bình** = `ratingTotal / ratingCount`, làm tròn 1 chữ số, trả dưới tên `ratingAvg` (`null` khi chưa có đánh giá). Database chỉ lưu số nguyên (`rating_count`, `rating_total` ở `products` và `shops`), cập nhật bằng câu lệnh cộng/trừ trong cùng giao dịch với đánh giá.
+- **Được đánh giá** một dòng hàng khi: là người mua của đơn, đơn con `COMPLETED`, chưa quá `review_days` (30) ngày từ `completedAt`, còn món chưa trả (`quantity > returnedQuantity`), dòng chưa có đánh giá. Sửa được 1 lần, trong cùng hạn đó.
+- **Ảnh**: ảnh đánh giá ở bucket công khai (`review-images/<userId>/`, ai cũng xem); ảnh chat (`chat-images/<conversationId>/`) và ảnh báo cáo vi phạm (`report-images/<userId>/`) ở bucket riêng tư, chỉ xem qua API có kiểm quyền. Mọi ảnh JPG/PNG/WebP nhận theo nội dung file, tối đa 5 MB.
+- **Thông báo** (MSG-02): marketplace tạo trong cùng giao dịch với thay đổi nghiệp vụ, hoặc khi nhận sự kiện của service khác; bảng loại và người nhận ở `13-quyet-dinh-p6.md` mục 3. Sự kiện nhận trùng không tạo thông báo trùng (inbox). Loại quan trọng thì user-service gửi thêm email (nhận `notification.created`).
+- **Realtime** (Socket.IO): web kết nối `path: /api/market/v1/socket.io`, gửi access token trong `auth.token`; vé sai hoặc hết hạn thì bị ngắt (web lấy vé mới rồi nối lại). Mỗi người vào phòng riêng. Server gửi: `notification:new` (`{ notification, unreadCount }`), `chat:message` (`{ conversationId, message }`), `chat:read` (`{ conversationId, role }`). Web không gửi gì qua socket: mọi thao tác đi bằng REST.
+- **Sản phẩm bị gỡ** (`REMOVED`): như sản phẩm ẩn với người mua (404 ở trang sản phẩm, dòng giỏ "Không còn bán"); seller thấy lý do, sửa được nội dung nhưng đổi trạng thái → 409 `PRODUCT_REMOVED`.
+- **Báo cáo (RPT)**: `from`, `to` dạng `YYYY-MM-DD` theo giờ Việt Nam, gồm cả hai ngày; trống thì 30 ngày gần nhất; dài quá 366 ngày hoặc `from > to` → 400 `INVALID_RANGE`. Định nghĩa từng con số ở `13-quyet-dinh-p6.md` mục 4.
+
+### marketplace-service (`/api/market/v1`)
+
+**Đánh giá**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/uploads/review-image` | Đã đăng nhập | ENG-01 | Như ảnh sản phẩm (tối đa `REVIEW_IMAGE_MAX_MB`), lưu `review-images/<userId>/...`, trả `{ url }`. Khi gửi đánh giá, ảnh phải nằm trong thư mục của chính người đó (400 `INVALID_IMAGE_URL`). |
+| GET `/me/reviews` | Người mua | ENG-01 | `state` = `PENDING` (dòng hàng đang được đánh giá: tên, ảnh, phân loại, mã đơn, hạn đánh giá) hoặc `DONE` (đánh giá của mình, kèm `canEdit`, `editBefore`, câu trả lời của shop), phân trang, mới nhất trước. |
+| POST `/me/reviews` | Người mua | ENG-01 | `{ orderItemId, rating (1–5), content (0–1000), images (0–5 đường dẫn) }`. Dòng hàng của người khác → 404; đơn chưa hoàn tất hoặc đã trả hết → 409 `REVIEW_NOT_ALLOWED`; quá hạn → 409 `REVIEW_WINDOW_CLOSED`; đã đánh giá → 409 `ALREADY_REVIEWED`. Cộng sao vào sản phẩm và shop, báo chủ shop (`SHOP_REVIEW_NEW`). |
+| PUT `/me/reviews/{reviewId}` | Người mua | ENG-01 | Gửi lại `rating`, `content`, `images`. Đã sửa rồi → 409 `REVIEW_EDIT_USED`; quá hạn → 409 `REVIEW_WINDOW_CLOSED`. Sao của sản phẩm và shop đổi theo chênh lệch. |
+| GET `/products/{productId}/reviews` | Mọi người | ENG-01 | Lọc `rating` (1–5), `withImages=true`, phân trang, mới nhất trước. Kèm `summary`: `ratingAvg`, `ratingCount`, số đánh giá từng mức sao, số có ảnh. Tên người mua đã che bớt. Sản phẩm không đang bán → 404. |
+| GET `/shops/{shopId}/reviews` | Mọi người | ENG-01 | Như trên cho mọi sản phẩm của shop, mỗi đánh giá kèm tên và mã sản phẩm. |
+| GET `/shops/me/reviews` | Chủ shop | ENG-02 | Lọc `rating`, `replied` (`true`/`false`), phân trang, mới nhất trước; kèm tên sản phẩm, mã đơn con. |
+| PUT `/shops/me/reviews/{reviewId}/reply` | Chủ shop | ENG-02 | `{ content }` (1–1000). Lần đầu là trả lời, sau đó là sửa câu trả lời. Đánh giá của shop khác → 404. Không sửa được nội dung của người mua. |
+
+**Theo dõi shop, thả tim sản phẩm**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| PUT, DELETE `/shops/{shopId}/follow` | Đã đăng nhập | ENG-03 | Theo dõi / bỏ theo dõi, làm lại không lỗi (không tạo dòng trùng). Shop chưa duyệt → 404; shop của mình → 409 `OWN_SHOP`. Trả `{ following, followerCount }`. |
+| GET `/me/followed-shops` | Đã đăng nhập | ENG-03 | Shop đang theo dõi (tên, logo, sao, số sản phẩm, đang bị đình chỉ hay không), phân trang, mới theo dõi trước. |
+| PUT, DELETE `/products/{productId}/like` | Đã đăng nhập | ENG-03 | Thả tim / bỏ tim, làm lại không lỗi. Thả tim chỉ với hàng đang bán (404); bỏ tim luôn được. Trả `{ liked, likeCount }`. |
+| GET `/me/liked-products` | Đã đăng nhập | ENG-03 | Sản phẩm đã thả tim dạng thẻ như `GET /products`, kèm `available` (false = không còn bán), phân trang, mới thả tim trước. |
+| GET `/products/{productId}`, GET `/shops/{shopId}` | Mọi người | ENG-01, ENG-03 | Thêm `ratingAvg`, `ratingCount`; sản phẩm thêm `likeCount`, `liked`; shop thêm `followerCount`, `following` (`false` khi chưa đăng nhập). |
+| GET `/shops/me` | Chủ shop | ENG-03 | Thêm `followerCount`, `ratingAvg`, `ratingCount`. Seller chỉ thấy số người theo dõi, không thấy danh sách. |
+
+**Tìm kiếm (bổ sung P6)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/products` | Mọi người | SRC-01 | Thêm `minRating` (1–5: sao trung bình ≥ số này) và `sort=rating`. Mỗi thẻ thêm `ratingAvg`, `ratingCount`. Phân trang ổn định (khóa phụ là mã sản phẩm). |
+
+**Chat** (người mua mở, shop trả lời)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/conversations` | Đã đăng nhập | MSG-01 | `{ shopId }`. Mở cuộc trò chuyện với shop (đã có thì trả lại cuộc cũ). Shop chưa duyệt → 404; shop của mình → 409 `OWN_SHOP`. |
+| GET `/conversations` | Đã đăng nhập | MSG-01 | `role` = `BUYER` (các shop mình đã chat) hoặc `SHOP` (người mua đã chat với shop mình; chưa có shop → danh sách rỗng). Mỗi dòng: bên kia (tên, logo shop), tin cuối, lúc nào, số tin chưa đọc của mình; tin mới nhất trước, phân trang. |
+| GET `/conversations/unread-count` | Đã đăng nhập | MSG-01 | `{ buyer, shop }` = tổng tin chưa đọc ở vai người mua và vai shop. |
+| GET `/conversations/{conversationId}` | Hai bên | MSG-01 | Thông tin cuộc trò chuyện, vai của người gọi. Người khác → 404. |
+| GET `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `before` (mã tin), `limit` (tối đa 50, mặc định 30): các tin cũ hơn `before`, trả theo thứ tự thời gian. |
+| POST `/conversations/{conversationId}/messages` | Hai bên | MSG-01 | `{ clientKey, type: TEXT \| IMAGE \| PRODUCT \| ORDER, text?, imageKey?, productId?, shopOrderId? }`. TEXT 1–1000 ký tự; IMAGE là khóa đã tải lên cho cuộc này; PRODUCT là hàng đang bán của sàn; ORDER là đơn con của chính người mua ở shop này. Sai → 400 `INVALID_MESSAGE` hoặc 404. Gửi lại cùng `clientKey` → trả tin cũ. Tăng số chưa đọc của bên kia, đẩy `chat:message` cho cả hai, tạo thông báo `CHAT_MESSAGE` nếu bên kia đang không có tin chưa đọc. |
+| POST `/conversations/{conversationId}/read` | Hai bên | MSG-01 | Đánh dấu đã đọc hết ở vai của mình, đẩy `chat:read`. |
+| POST `/uploads/chat-image` | Hai bên | MSG-01 | Query `conversationId`. Tối đa `CHAT_IMAGE_MAX_MB`, lưu bucket riêng tư, trả `{ key }`. |
+| GET `/chat-images/{conversationId}/{file}` | Hai bên | MSG-01 | Xem ảnh chat. Người khác → 404. |
+
+**Thông báo**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/me/notifications` | Đã đăng nhập | MSG-02 | Lọc `unread=true`, phân trang, mới nhất trước: loại, tiêu đề, nội dung, đường dẫn, đã đọc chưa, lúc nào. |
+| GET `/me/notifications/unread-count` | Đã đăng nhập | MSG-02 | `{ count }` cho chuông trên header. |
+| POST `/me/notifications/{notificationId}/read` | Đã đăng nhập | MSG-02 | Đánh dấu đã đọc. Của người khác → 404. |
+| POST `/me/notifications/read-all` | Đã đăng nhập | MSG-02 | Đánh dấu đọc hết, trả `{ count: 0 }`. |
+
+**Báo cáo vi phạm (phần marketplace)**
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/uploads/report-image` | Đã đăng nhập | MOD-01 | Tối đa `REPORT_IMAGE_MAX_MB`, lưu bucket riêng tư `report-images/<userId>/...`, trả `{ key }` để gửi kèm báo cáo ở approval-service. |
+| GET `/report-images/{ownerId}/{file}` | Người báo cáo, `MODERATION` | MOD-01 | Xem ảnh bằng chứng. Người khác → 404. |
+
+**Báo cáo vận hành** (RPT-01)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/reports/operations` | Chủ shop | RPT-01 | `from`, `to`. `summary` (số đơn, giá trị đặt hàng, đơn hoàn tất, doanh số, tỉ lệ hủy, tỉ lệ trả hàng theo phần nghìn), `daily` (từng ngày: số đơn, giá trị đặt hàng), `topProducts` (10 sản phẩm), `vouchers` (từng mã voucher shop: số đơn, tổng giảm, giá trị đặt hàng). |
+| GET `/admin/reports/operations` | `SYSTEM`, `FINANCE` | RPT-01 | Như trên cho cả sàn, thêm `shopCount`, `topShops` (10 shop), `vouchers` gồm cả voucher sàn. |
+
+### payment-service (`/api/payment/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/shops/me/reports/finance` | Chủ shop | RPT-02 | `from`, `to`. Giá trị đơn, khoản hoàn, phí sàn, tiền seller nhận, tiền chuyển sang khả dụng, đã rút trong khoảng; số dư 3 ngăn hiện tại; `daily` (tiền seller nhận, khoản hoàn theo ngày). Chưa có ví → mọi số bằng 0. |
+| GET `/admin/reports/finance` | `FINANCE` | RPT-02 | Giá trị đơn, tiền thực thu (VNPay + COD đã đối soát), khoản hoàn, trợ giá voucher sàn, phí sàn, phải trả seller (số dư hiện tại), đã chi cho seller; `daily` (tiền thực thu, khoản hoàn, phí sàn theo ngày). |
+
+Rút tiền (P5) phát thêm `withdrawal.updated` mỗi khi yêu cầu được duyệt, bị từ chối, đã chi hoặc chuyển lỗi, để marketplace báo cho chủ shop.
+
+### approval-service (`/api/approval/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| POST `/reports` | Đã đăng nhập | MOD-01 | Header `Idempotency-Key`. `{ targetType: PRODUCT \| SHOP, targetId, reason: COUNTERFEIT \| PROHIBITED \| SCAM \| WRONG_INFO \| OFFENSIVE \| OTHER, note (10–1000), images (0–5 khóa ảnh của chính mình, sai → 400 `INVALID_IMAGE_KEY`) }`. Sản phẩm: approval gọi `GET /products/{id}` công khai của marketplace lấy tên, ảnh, shop (không đang bán → 404); shop: lấy từ hồ sơ shop đã duyệt (chưa duyệt → 404). Đối tượng của chính mình → 409 `OWN_TARGET`; đang có báo cáo chờ cho cùng đối tượng → 409 `ALREADY_REPORTED`. Tạo báo cáo `PENDING`. |
+| GET `/me/reports` | Đã đăng nhập | MOD-01 | Báo cáo của mình: đối tượng, lý do, trạng thái (`PENDING`, `RESOLVED`, `DISMISSED`), ghi chú của admin khi đã xử lý, phân trang, mới nhất trước. |
+| GET `/admin/reports` | `MODERATION` | MOD-01 | Lọc `status` (mặc định `PENDING`), `targetType`, phân trang; chờ lâu nhất lên đầu với `PENDING`, mới xử lý lên đầu với trạng thái khác. Mỗi dòng có số báo cáo đang chờ của cùng đối tượng. |
+| GET `/admin/reports/{reportId}` | `MODERATION` | MOD-01 | Báo cáo (lý do, mô tả, ảnh: xem qua marketplace), các báo cáo khác của cùng đối tượng, lịch sử xử lý của đối tượng (gỡ/khôi phục sản phẩm, đình chỉ/khôi phục shop), trạng thái hiện tại (`removed` / `suspended`). |
+| POST `/admin/reports/{reportId}/resolve` | `MODERATION` | MOD-01 | `{ decision: REMOVE_PRODUCT \| SUSPEND_SHOP \| DISMISS, reason (5–500) }`. `REMOVE_PRODUCT` chỉ với báo cáo sản phẩm (400 `VALIDATION_ERROR`). Admin là chủ shop → 403 `SELF_MODERATION_FORBIDDEN`; báo cáo đã xử lý → 409 `REPORT_ALREADY_HANDLED`. Khóa theo đối tượng; mọi báo cáo đang chờ của cùng đối tượng cùng chuyển `RESOLVED` (có biện pháp) hoặc `DISMISSED`. Gỡ sản phẩm → thêm dòng quyết định `REMOVE`, phát `product_moderation.decided`; đình chỉ shop → như POST `/admin/shops/{shopId}/suspend` (phát `shop_suspension.decided`). Đối tượng đã bị gỡ/đình chỉ thì chỉ đánh dấu báo cáo. Ghi nhật ký. |
+| GET `/admin/products/{productId}/violations` | `MODERATION` | MOD-01 | Lịch sử gỡ/khôi phục của sản phẩm và `removed` hiện tại. |
+| POST `/admin/products/{productId}/restore` | `MODERATION` | MOD-01 | `{ reason }`. Sản phẩm không bị gỡ → 409 `NOT_REMOVED`; admin là chủ shop → 403. Thêm dòng `RESTORE`, phát `product_moderation.decided` (marketplace đưa sản phẩm về ẩn). Ghi nhật ký. |
+
+### user-service
+
+Không có API mới. Nhận `notification.created`: khi `email = true` và tài khoản còn hoạt động thì gửi email (tiêu đề, nội dung, nút mở đường dẫn trên web) qua hộp thư đã cấu hình (Mailpit khi dev).
+
+### Luồng P6 dùng các API trên
+
+1. Đơn con hoàn tất (P4) → người mua nhận thông báo "Đơn đã hoàn tất, hãy đánh giá", mở **Đánh giá của tôi** → chấm sao, viết nội dung, tải ảnh → sao sản phẩm và shop cập nhật; seller nhận thông báo, vào **Đánh giá** trả lời.
+2. Người mua mở trang sản phẩm: thấy sao trung bình, lọc đánh giá theo sao/có ảnh, thả tim; mở trang shop: theo dõi shop, bấm **Chat** → gửi chữ, ảnh, thẻ sản phẩm, thẻ đơn → seller thấy tin ngay ở **Kênh người bán › Tin nhắn** và trả lời.
+3. Mọi bước của đơn, tiền, trả hàng, rút tiền tạo thông báo (chuông có số chưa đọc, hiện ngay); việc quan trọng có thêm email (Mailpit).
+4. Người mua **báo cáo** sản phẩm/shop kèm ảnh → admin `MODERATION` mở **Báo cáo vi phạm**, xem bằng chứng, **gỡ sản phẩm** (hoặc đình chỉ shop, hoặc bác) → sản phẩm biến mất khỏi sàn, seller nhận thông báo kèm lý do; admin **khôi phục** thì sản phẩm về ẩn.
+5. Seller mở **Báo cáo** (vận hành + tài chính); admin `FINANCE`/`SYSTEM` mở **Báo cáo** của sàn, chọn khoảng ngày, xem biểu đồ.
+6. Tìm kiếm: lọc "từ 4 sao", sắp xếp "Đánh giá cao".
+
+## 8. Tài liệu API tự sinh (Swagger)
 
 Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 

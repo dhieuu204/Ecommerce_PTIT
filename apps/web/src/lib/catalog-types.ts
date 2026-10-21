@@ -293,7 +293,7 @@ export interface AdminShopDetail extends AdminShopRow {
   pickupAddress: string | null;
   /** Số tài khoản đã che, chỉ còn 4 số cuối */
   bankAccount: BankAccount | null;
-  productCounts: { ACTIVE: number; HIDDEN: number };
+  productCounts: { ACTIVE: number; HIDDEN: number; REMOVED: number };
   moderatedAt: string | null;
 }
 

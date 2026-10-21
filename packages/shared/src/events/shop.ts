@@ -75,3 +75,18 @@ export interface ShopSuspensionDecidedPayload {
   /** marketplace chỉ áp nếu mới hơn quyết định đã áp trước đó (sự kiện có thể tới sai thứ tự) */
   decidedAt: string;
 }
+
+/**
+ * approval-service → marketplace-service (P6, MOD-01): admin kiểm duyệt gỡ sản phẩm vi phạm hoặc khôi phục.
+ * marketplace chỉ áp nếu mới hơn quyết định đã áp trước đó (cột products.moderated_at).
+ */
+export const PRODUCT_MODERATION_DECIDED = 'product_moderation.decided';
+export interface ProductModerationDecidedPayload {
+  productId: string;
+  shopId: string;
+  /** REMOVE: gỡ khỏi sàn, seller không tự bật lại được; RESTORE: trả về trạng thái ẩn, seller tự bật */
+  action: 'REMOVE' | 'RESTORE';
+  reason: string;
+  decidedBy: { userId: string; name: string };
+  decidedAt: string;
+}

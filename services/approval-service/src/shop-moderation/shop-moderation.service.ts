@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { AppError, EventBus, writeAudit, type AuthUser } from '@san/nest-common';
 import { SHOP_SUSPENSION_DECIDED, type ShopApplicationData } from '@san/shared';
-import type { Prisma, Violation } from '../../generated/prisma';
+import type { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../prisma.service';
 
-type Action = Violation['action'];
+/** Biện pháp với shop (dòng quyết định; dòng báo cáo của người mua có action trống) */
+type Action = 'SUSPEND' | 'RESTORE';
+
+/** Chỉ dòng quyết định đình chỉ/khôi phục shop, không lấy dòng báo cáo (P6) */
+const SHOP_DECISION: Prisma.ViolationWhereInput = {
+  targetType: 'SHOP',
+  action: { in: ['SUSPEND', 'RESTORE'] },
+};
 
 /** Một lần đình chỉ/khôi phục */
 export interface ViolationRow {
@@ -46,17 +53,17 @@ export class ShopModerationService {
   async violations(shopId: string): Promise<ShopViolations> {
     await this.findShop(this.prisma, shopId);
     const rows = await this.prisma.violation.findMany({
-      where: { targetType: 'SHOP', targetId: shopId },
+      where: { ...SHOP_DECISION, targetId: shopId },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return {
       suspended: rows[0]?.action === 'SUSPEND',
       items: rows.map((v) => ({
         id: v.id,
-        action: v.action,
-        reason: v.reason,
-        decidedBy: v.decidedBy,
-        decidedByName: v.decidedByName,
+        action: v.action as Action,
+        reason: v.reason ?? '',
+        decidedBy: v.decidedBy ?? '',
+        decidedByName: v.decidedByName ?? '',
         createdAt: v.createdAt,
         targetName: v.targetName,
       })),
@@ -85,7 +92,7 @@ export class ShopModerationService {
         );
       }
       const last = await tx.violation.findFirst({
-        where: { targetType: 'SHOP', targetId: shopId },
+        where: { ...SHOP_DECISION, targetId: shopId },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         select: { action: true, createdAt: true },
       });
@@ -106,6 +113,7 @@ export class ShopModerationService {
           targetType: 'SHOP',
           targetId: shopId,
           targetName: shop.name,
+          shopId,
           ownerId: shop.ownerId,
           action,
           reason,

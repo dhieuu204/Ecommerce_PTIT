@@ -15,6 +15,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReturnsModule } from './returns/returns.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -30,6 +31,7 @@ import { ReturnsModule } from './returns/returns.module';
     // Cấu hình có phiên bản (bảng settings) + API /admin/settings (ADM-01)
     SettingsModule.forRoot(MARKET_SETTINGS),
     CoreModule,
+    NotificationsModule,
     LocationsModule,
     OrdersModule,
     ReturnsModule,

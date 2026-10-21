@@ -78,4 +78,16 @@ export class AppConfig {
   /** Ảnh bằng chứng trả hàng/khiếu nại tối đa (MB) và số ảnh mỗi lần gửi */
   readonly returnImageMaxMb = num('RETURN_IMAGE_MAX_MB', 5);
   readonly returnMaxImages = num('RETURN_MAX_IMAGES', 6);
+
+  // ----- P6: đánh giá, chat, báo cáo vi phạm, realtime -----
+  /** Ảnh đánh giá: tối đa (MB) mỗi ảnh và số ảnh mỗi đánh giá (ENG-01) */
+  readonly reviewImageMaxMb = num('REVIEW_IMAGE_MAX_MB', 5);
+  readonly reviewMaxImages = num('REVIEW_MAX_IMAGES', 5);
+  /** Ảnh gửi trong chat tối đa (MB) (MSG-01) */
+  readonly chatImageMaxMb = num('CHAT_IMAGE_MAX_MB', 5);
+  /** Ảnh bằng chứng khi báo cáo vi phạm: tối đa (MB) và số ảnh (MOD-01) */
+  readonly reportImageMaxMb = num('REPORT_IMAGE_MAX_MB', 5);
+  readonly reportMaxImages = num('REPORT_MAX_IMAGES', 5);
+  /** Redis cho Socket.IO khi chạy nhiều bản service; để trống thì chỉ đẩy trong một bản (đủ khi dev) */
+  readonly redisUrl = text('REDIS_URL');
 }

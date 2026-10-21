@@ -1,6 +1,7 @@
 // Schema của approval-service [A]. Chỉ service này được đọc/ghi database approval_db.
 // A chỉ lưu hồ sơ và quyết định; marketplace và payment tự áp dụng quyết định.
 // P1: duyệt shop. P2: đình chỉ shop. P3: kiểm tra đơn. P5: tranh chấp, điều chỉnh, duyệt rút tiền.
+// P6: báo cáo vi phạm của người mua, gỡ/khôi phục sản phẩm.
 // Khung các phase sau: docs/erd/README.md.
 
 generator client {
@@ -56,31 +57,68 @@ model ShopApproval {
 
 enum ViolationTarget {
   SHOP
+  /// Sản phẩm (P6, MOD-01)
+  PRODUCT
 }
 
 enum ViolationAction {
   SUSPEND
+  /// Khôi phục shop (bỏ đình chỉ) hoặc khôi phục sản phẩm đã gỡ (P6)
   RESTORE
+  /// Gỡ sản phẩm (P6)
+  REMOVE
 }
 
-/// Quyết định xử lý vi phạm (SHP-04): đình chỉ hoặc khôi phục shop.
-/// P2 chỉ có admin tự đình chỉ/khôi phục shop; P6 (MOD-01) thêm báo cáo của buyer, bằng chứng, sản phẩm.
+enum ViolationStatus {
+  /// Báo cáo của người mua đang chờ admin kiểm duyệt xử lý (P6)
+  PENDING
+  /// Đã xử lý: báo cáo đúng và đã có biện pháp, hoặc dòng quyết định của admin
+  RESOLVED
+  /// Báo cáo không đúng, không xử lý (P6)
+  DISMISSED
+}
+
+/// Vi phạm: mỗi dòng là một quyết định của admin (đình chỉ/khôi phục shop từ P2; gỡ/khôi phục sản phẩm
+/// từ P6, cột action có giá trị) hoặc một báo cáo của người mua (P6, MOD-01: cột reporter_id có giá trị,
+/// action trống). Báo cáo được xử lý bằng biện pháp thì có thêm một dòng quyết định riêng.
 model Violation {
-  id            String          @id @default(uuid()) @db.Uuid
-  targetType    ViolationTarget @default(SHOP) @map("target_type")
-  /// Mã shop bên marketplace
-  targetId      String          @map("target_id") @db.Uuid
-  /// Tên shop lúc quyết định (để xem lại lịch sử)
-  targetName    String          @map("target_name") @db.VarChar(100)
+  id            String           @id @default(uuid()) @db.Uuid
+  targetType    ViolationTarget  @default(SHOP) @map("target_type")
+  /// Mã shop hoặc mã sản phẩm bên marketplace
+  targetId      String           @map("target_id") @db.Uuid
+  /// Tên shop/sản phẩm lúc ghi (để xem lại lịch sử)
+  targetName    String           @map("target_name") @db.VarChar(150)
+  /// Ảnh đầu của sản phẩm lúc báo cáo (P6)
+  targetImage   String?          @map("target_image") @db.VarChar(255)
+  /// Shop của đối tượng (= target_id khi đối tượng là shop) (P6)
+  shopId        String?          @map("shop_id") @db.Uuid
   /// Chủ shop: admin trùng người này thì không được xử lý
-  ownerId       String          @map("owner_id") @db.Uuid
-  action        ViolationAction
-  reason        String          @db.VarChar(500)
-  decidedBy     String          @map("decided_by") @db.Uuid
-  decidedByName String          @map("decided_by_name") @db.VarChar(100)
-  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  ownerId       String           @map("owner_id") @db.Uuid
+  /// Biện pháp của dòng quyết định; trống với dòng báo cáo
+  action        ViolationAction?
+  status        ViolationStatus  @default(RESOLVED)
+  // ----- Báo cáo của người mua (P6) -----
+  reporterId    String?          @map("reporter_id") @db.Uuid
+  reporterName  String?          @map("reporter_name") @db.VarChar(100)
+  /// COUNTERFEIT | PROHIBITED | SCAM | WRONG_INFO | OFFENSIVE | OTHER
+  reportReason  String?          @map("report_reason") @db.VarChar(30)
+  reportNote    String?          @map("report_note") @db.VarChar(1000)
+  /// Khóa ảnh bằng chứng (bucket riêng tư của marketplace), tối đa 5
+  images        String[]         @default([])
+  // ----- Quyết định -----
+  /// Lý do của quyết định; với báo cáo là ghi chú lúc admin xử lý
+  reason        String?          @db.VarChar(500)
+  decidedBy     String?          @map("decided_by") @db.Uuid
+  decidedByName String?          @map("decided_by_name") @db.VarChar(100)
+  /// Lúc admin xử lý báo cáo (dòng quyết định dùng created_at)
+  decidedAt     DateTime?        @map("decided_at") @db.Timestamptz(3)
+  /// Idempotency-Key khi người mua gửi báo cáo
+  requestKey    String?          @unique @map("request_key") @db.VarChar(64)
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([targetId, createdAt])
+  @@index([status, createdAt])
+  @@index([reporterId, createdAt])
   @@map("violations")
 }
 

@@ -14,6 +14,7 @@ export const MarketSetting = {
   returnShipDays: 'return_ship_days',
   returnInspectHours: 'return_inspect_hours',
   returnDisputeHours: 'return_dispute_hours',
+  reviewDays: 'review_days',
 } as const;
 
 export const MARKET_SETTINGS: SettingDefinition[] = [
@@ -137,5 +138,15 @@ export const MARKET_SETTINGS: SettingDefinition[] = [
     min: 1,
     max: 168,
     defaultValue: 48,
+  },
+  {
+    key: MarketSetting.reviewDays,
+    label: 'Hạn đánh giá sản phẩm',
+    unit: 'ngày',
+    description:
+      'Tính từ lúc đơn hoàn tất. Trong hạn này người mua viết đánh giá và sửa được một lần (ENG-01).',
+    min: 1,
+    max: 90,
+    defaultValue: 30,
   },
 ];

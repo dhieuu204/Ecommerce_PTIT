@@ -5,12 +5,15 @@ import {
   WITHDRAWAL_APPROVAL_DECIDED,
   WITHDRAWAL_CANCELLED,
   WITHDRAWAL_REQUESTED,
+  WITHDRAWAL_UPDATED,
   type AdjustmentApprovedPayload,
   type AdjustmentExecutedPayload,
   type WithdrawalApprovalDecidedPayload,
   type WithdrawalCancelledPayload,
   type WithdrawalRequestedPayload,
+  type WithdrawalUpdatedPayload,
 } from './finance';
+import { NOTIFICATION_CREATED, type NotificationCreatedPayload } from './notification';
 import {
   ORDER_CHECK_DECIDED,
   ORDER_PLACED,
@@ -51,6 +54,8 @@ import {
   SHOP_APPLICATION_DECIDED,
   SHOP_APPLICATION_SUBMITTED,
   SHOP_SUSPENSION_DECIDED,
+  PRODUCT_MODERATION_DECIDED,
+  type ProductModerationDecidedPayload,
   type ShopApplicationDecidedPayload,
   type ShopApplicationSubmittedPayload,
   type ShopSuspensionDecidedPayload,
@@ -58,6 +63,7 @@ import {
 
 export * from './envelope';
 export * from './finance';
+export * from './notification';
 export * from './order';
 export * from './payment';
 export * from './return';
@@ -91,6 +97,9 @@ export interface EventPayloads {
   [WITHDRAWAL_APPROVAL_DECIDED]: WithdrawalApprovalDecidedPayload;
   [ADJUSTMENT_APPROVED]: AdjustmentApprovedPayload;
   [ADJUSTMENT_EXECUTED]: AdjustmentExecutedPayload;
+  [PRODUCT_MODERATION_DECIDED]: ProductModerationDecidedPayload;
+  [WITHDRAWAL_UPDATED]: WithdrawalUpdatedPayload;
+  [NOTIFICATION_CREATED]: NotificationCreatedPayload;
 }
 
 export type EventType = keyof EventPayloads;
