@@ -27,7 +27,7 @@ const SOURCES = [
   {
     key: 'market',
     prefix: API.market,
-    title: 'Đơn hàng, vận chuyển và trả hàng',
+    title: 'Đơn hàng, vận chuyển, trả hàng và đánh giá',
     note: 'marketplace-service',
   },
   {

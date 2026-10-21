@@ -87,6 +87,7 @@ export class TokenError extends Error {
 export class JwtVerifier {
   private keys = new Map<string, KeyObject>();
   private lastFetch = 0;
+  private loading?: Promise<void>;
 
   constructor(private readonly source: { privateKey: KeyObject } | { jwksUrl: string }) {
     if ('privateKey' in source) {
@@ -122,15 +123,26 @@ export class JwtVerifier {
 
   private async getKey(kid: string): Promise<KeyObject | undefined> {
     const known = this.keys.get(kid);
+    if (known || !('jwksUrl' in this.source)) return known;
+    // Đang tải JWKS (nhiều yêu cầu tới cùng lúc ngay khi service vừa chạy): chờ chung một lần tải
+    if (this.loading) {
+      await this.loading;
+      return this.keys.get(kid);
+    }
     // Không tải lại quá 1 lần mỗi 30 giây, tránh bị spam bằng kid giả
-    if (known || !('jwksUrl' in this.source) || Date.now() - this.lastFetch < 30_000) return known;
+    if (Date.now() - this.lastFetch < 30_000) return undefined;
     this.lastFetch = Date.now();
-    const res = await fetch(this.source.jwksUrl);
-    if (!res.ok) throw new Error(`Không tải được JWKS (${res.status}) từ ${this.source.jwksUrl}`);
+    this.loading = this.loadJwks(this.source.jwksUrl).finally(() => (this.loading = undefined));
+    await this.loading;
+    return this.keys.get(kid);
+  }
+
+  private async loadJwks(url: string): Promise<void> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Không tải được JWKS (${res.status}) từ ${url}`);
     const body = (await res.json()) as { keys: Array<JsonWebKey & { kid?: string }> };
     for (const jwk of body.keys) {
       if (jwk.kid) this.keys.set(jwk.kid, createPublicKey({ key: jwk, format: 'jwk' }));
     }
-    return this.keys.get(kid);
   }
 }

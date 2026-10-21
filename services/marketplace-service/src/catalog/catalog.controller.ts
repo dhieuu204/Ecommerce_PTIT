@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParseIdPipe, Public } from '@san/nest-common';
+import { CurrentUser, ParseIdPipe, Public, type AuthUser } from '@san/nest-common';
 import type { Page } from '@san/shared';
 import {
   CatalogService,
@@ -26,8 +26,11 @@ export class CatalogController {
   /** Chi tiết hàng đang bán: ảnh, danh mục, biến thể với giá và số còn bán được, thông tin shop */
   @Get(':productId')
   @ApiResponse({ status: 404, description: 'NOT_FOUND: không có hoặc không còn bán' })
-  product(@Param('productId', ParseIdPipe) productId: string): Promise<ProductDetail> {
-    return this.catalog.product(productId);
+  product(
+    @Param('productId', ParseIdPipe) productId: string,
+    @CurrentUser() user?: AuthUser,
+  ): Promise<ProductDetail> {
+    return this.catalog.product(productId, user?.id);
   }
 }
 
@@ -44,7 +47,10 @@ export class PublicShopsController {
   /** Tên, logo, mô tả, tỉnh lấy hàng, số sản phẩm đang bán, ngày tham gia, trạng thái */
   @Get(':shopId')
   @ApiResponse({ status: 404, description: 'NOT_FOUND: shop không có hoặc chưa được duyệt' })
-  shop(@Param('shopId', ParseIdPipe) shopId: string): Promise<PublicShop> {
-    return this.catalog.shop(shopId);
+  shop(
+    @Param('shopId', ParseIdPipe) shopId: string,
+    @CurrentUser() user?: AuthUser,
+  ): Promise<PublicShop> {
+    return this.catalog.shop(shopId, user?.id);
   }
 }

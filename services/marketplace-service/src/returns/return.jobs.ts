@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { EventBus, JobService } from '@san/nest-common';
-import { DISPUTE_DECIDED } from '@san/shared';
+import { DISPUTE_DECIDED, type DisputeDecidedPayload } from '@san/shared';
+import { Notifier } from '../notifications/notifier.service';
 import { SYSTEM } from '../orders/order-lifecycle.service';
 import { PrismaService } from '../prisma.service';
 import { ShipmentsService } from '../shipping/shipments.service';
@@ -24,19 +25,24 @@ export class ReturnJobs implements OnModuleInit {
     private readonly events: EventBus,
     private readonly lifecycle: ReturnLifecycle,
     private readonly shipments: ShipmentsService,
+    private readonly notifier: Notifier,
   ) {}
 
   onModuleInit(): void {
     // Vận đơn trả (khi admin quyết "chấp nhận trả hàng") được job shipments-sync gọi GHN tạo sau
-    this.events.subscribe(DISPUTE_DECIDED, async (p, tx: Tx) => {
-      await this.lifecycle.applyDisputeDecision(tx, p);
-    });
+    this.events.subscribe(DISPUTE_DECIDED, (p, tx: Tx) => this.onDisputeDecided(tx, p));
     this.jobs.define('returns-timeouts', { cron: '* * * * *' }, async () => {
       await this.responseTimeout();
       await this.disputeTimeout();
       await this.inspectTimeout();
       await this.shipTimeout();
     });
+  }
+
+  /** Admin phân xử tranh chấp: áp vào yêu cầu, rồi báo chủ shop kết quả (P6, SHOP_RETURN_RESULT) */
+  async onDisputeDecided(tx: Tx, p: DisputeDecidedPayload): Promise<void> {
+    const result = await this.lifecycle.applyDisputeDecision(tx, p);
+    if (result !== 'IGNORED') await this.notifier.disputeDecided(tx, p);
   }
 
   /**

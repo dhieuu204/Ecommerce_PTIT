@@ -9,7 +9,7 @@ Cách làm đã chốt: **khung cả dự án + chi tiết theo phase**. File n�
 | P3 | Cột ghi ở các bảng P3 dưới đây; `schema.prisma` + migration `*_p3_orders` (marketplace), `*_p3_payments` (payment), `*_p3_order_checks` (approval) |
 | P4 | Cột ghi ở các bảng P4 dưới đây; migration `*_p4_shipping` (marketplace), `*_p4_wallet_reconciliation` (payment) |
 | P5 | Cột ghi ở các bảng P5 dưới đây; migration `*_p5_returns` (marketplace), `*_p5_returns_withdrawals` (payment), `*_p5_disputes_withdrawals` (approval) |
-| P6 | Viết trước khi bắt đầu phase đó (thêm vào `schema.prisma`, tạo migration mới) |
+| P6 | Cột ghi ở các bảng P6 dưới đây; migration `*_p6_engagement_chat` (marketplace), `*_p6_reports` (approval) |
 
 Sơ đồ (mở file `.excalidraw` trên excalidraw.com để sửa, `.png` để xem): `docs/so-do/09-erd-u-user-service`, `10-erd-m-marketplace-service`, `11-erd-p-payment-service`, `12-erd-a-approval-service`.
 
@@ -69,7 +69,7 @@ Sơ đồ: `docs/so-do/10-erd-m-marketplace-service`
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
 | `categories` | P2 | id<br>parent_id → categories (2 cấp)<br>name, slug, icon, sort, hidden | Danh mục |
-| `products` | P2 | id<br>shop_id → shops<br>category_id → categories<br>name, description<br>status: ACTIVE \| HIDDEN<br>option1_name, option2_name (Màu, Size)<br>weight, min_price, max_price, sold_count<br>search_vector (từ khóa không dấu, PostgreSQL tự tính)<br>rating (P6) | Sản phẩm. Đăng là bán ngay nên không có nháp; sản phẩm bị gỡ do vi phạm thêm ở P6 |
+| `products` | P2 | id<br>shop_id → shops<br>category_id → categories<br>name, description<br>status: ACTIVE \| HIDDEN \| REMOVED (P6, bị gỡ do vi phạm)<br>option1_name, option2_name (Màu, Size)<br>weight, min_price, max_price, sold_count<br>search_vector (từ khóa không dấu, PostgreSQL tự tính)<br>rating_count, rating_total, removed_reason, moderated_at (P6) | Sản phẩm. Đăng là bán ngay nên không có nháp; sản phẩm bị gỡ do vi phạm thêm ở P6 |
 | `product_variants` | P2 | id<br>product_id → products<br>option1_value, option2_value<br>price, original_price, stock, reserved<br>sort, active | Biến thể (SKU): giá và tồn riêng. Bỏ biến thể thì `active = false`, không xóa |
 | `product_images` | P2 | id<br>product_id → products<br>url, sort<br>option1_value? (ảnh theo màu) | Ảnh, tối đa 9 + 1 ảnh/màu |
 | `stock_history` | P2 | id<br>variant_id → product_variants<br>change (+/-), stock_after, reason<br>created_by<br>order_id? → orders (P3: bán, hủy đơn) | Lịch sử nhập/điều chỉnh tồn. Giữ/nhả giữ tồn chỉ đổi `reserved`, không ghi lịch sử |
@@ -117,17 +117,19 @@ Bảng cũ đổi ở P5: `order_items` thêm `returned_quantity` (số món đ�
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `reviews` | P6 | id<br>order_item_id → order_items (1 lần)<br>product_id, shop_id, buyer_id ↗U<br>rating 1–5, content, images<br>edited, seller_reply | Đánh giá sản phẩm |
-| `shop_follows` | P6 | user_id ↗U<br>shop_id → shops | Theo dõi shop |
-| `product_likes` | P6 | user_id ↗U<br>product_id → products | Thả tim sản phẩm |
+| `reviews` | P6 | id<br>order_item_id → order_items (không trùng: mỗi dòng hàng 1 đánh giá), shop_order_id<br>product_id → products, shop_id → shops, buyer_id ↗U, buyer_name, variant_name (chép lúc đánh giá)<br>rating 1–5 (ràng buộc trong database), content (≤ 1000, được trống), images (≤ 5 đường dẫn công khai)<br>edited (đã dùng lượt sửa)<br>seller_reply, seller_replied_at | Đánh giá sản phẩm (ENG-01, ENG-02) |
+| `shop_follows` | P6 | user_id ↗U, shop_id → shops (cặp là khóa chính) | Theo dõi shop (ENG-03) |
+| `product_likes` | P6 | user_id ↗U, product_id → products (cặp là khóa chính) | Thả tim sản phẩm (ENG-03) |
+
+Bảng cũ đổi ở P6: `products` thêm `rating_count`, `rating_total` (sao trung bình = tổng / số, tính khi đọc), trạng thái `REMOVED` (bị gỡ do vi phạm), `removed_reason`, `moderated_at`; `shops` thêm `rating_count`, `rating_total` (sao shop = trung bình sao mọi sản phẩm).
 
 ### Chat, thông báo (P6)
 
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
-| `conversations` | P6 | id<br>buyer_id ↗U, shop_id → shops<br>last_message_at, unread counts | Cuộc trò chuyện buyer–shop |
-| `messages` | P6 | id<br>conversation_id → conversations<br>sender_id, type: TEXT \| IMAGE \| PRODUCT \| ORDER<br>content | Tin nhắn |
-| `notifications` | P6 | id<br>user_id ↗U<br>title, content, link<br>read_at | Thông báo |
+| `conversations` | P6 | id<br>buyer_id ↗U, buyer_name, shop_id → shops (cặp buyer + shop không trùng)<br>last_message_at, last_message_preview<br>buyer_unread, shop_unread (số tin chưa đọc của mỗi bên, không âm) | Cuộc trò chuyện người mua – shop (MSG-01) |
+| `messages` | P6 | id<br>conversation_id → conversations<br>sender_id ↗U, sender_role: BUYER \| SHOP<br>type: TEXT \| IMAGE \| PRODUCT \| ORDER<br>content (chữ, khóa ảnh riêng tư, mã sản phẩm hoặc mã đơn con), card (bản chụp thẻ sản phẩm/đơn)<br>client_key (chống gửi lặp, không trùng theo cuộc trò chuyện) | Tin nhắn, chỉ thêm |
+| `notifications` | P6 | id<br>user_id ↗U<br>type (ví dụ ORDER_DELIVERED), title, content, link<br>read_at | Thông báo trong app (MSG-02); loại quan trọng còn gửi email qua user-service |
 
 ## P: payment-service (payment_db)
 
@@ -173,7 +175,7 @@ Sơ đồ: `docs/so-do/12-erd-a-approval-service`
 | Bảng | Phase | Cột chính | Ghi chú |
 | --- | --- | --- | --- |
 | `shop_approvals` | P1 | id<br>shop_id ↗M, version<br>type: REGISTER \| CHANGE<br>status: PENDING \| APPROVED \| REJECTED \| REPLACED<br>owner_id ↗U (không tự duyệt)<br>data (hồ sơ nhận được)<br>change (phần muốn đổi, chỉ với CHANGE)<br>reason, decided_by, decided_at | Duyệt hồ sơ shop |
-| `violations` | P2 | id<br>target_type: SHOP, target_id ↗M, target_name<br>owner_id ↗U (không tự xử lý)<br>action: SUSPEND \| RESTORE<br>reason, decided_by, decided_by_name<br>P6 thêm: PRODUCT, REMOVE, reporter_id? ↗U, images, status | Đình chỉ/khôi phục shop (P2); báo cáo vi phạm của buyer (P6) |
+| `violations` | P2 | id<br>target_type: SHOP \| PRODUCT (P6), target_id ↗M, target_name, target_image (P6), shop_id ↗M (P6)<br>owner_id ↗U (không tự xử lý)<br>action: SUSPEND \| RESTORE \| REMOVE (P6); trống với dòng báo cáo<br>status (P6): PENDING \| RESOLVED \| DISMISSED<br>P6: reporter_id ↗U, reporter_name, report_reason, report_note, images (khóa ảnh riêng tư của marketplace), request_key (mỗi người tối đa 1 báo cáo đang chờ cho cùng đối tượng, ràng buộc viết tay)<br>reason, decided_by, decided_by_name, decided_at (P6) | Mỗi dòng là một quyết định của admin (đình chỉ/khôi phục shop, gỡ/khôi phục sản phẩm) hoặc một báo cáo vi phạm của người mua (P6, MOD-01) |
 
 ### Kiểm tra đơn (P3)
 

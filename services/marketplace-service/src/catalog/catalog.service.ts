@@ -6,6 +6,7 @@ import { sortImages, type CategoryRef, type ProductImageView } from '../products
 import { Prisma, type Shop } from '../../generated/prisma';
 import type { ProductSearchQuery } from './dto/catalog.dto';
 import { toPrefixQuery } from './search';
+import { ratingAvg, ratingTenthsSql } from '../reviews/rating';
 
 /** Thẻ sản phẩm ở trang chủ, danh mục, kết quả tìm, trang shop */
 export interface ProductCard {
@@ -25,6 +26,43 @@ export interface ProductCard {
   inStock: boolean;
   shop: { id: string; name: string };
   createdAt: Date;
+  /** Sao trung bình làm tròn 1 chữ số, null khi chưa có đánh giá (P6) */
+  ratingAvg: number | null;
+  ratingCount: number;
+}
+
+/** Nạp kèm khi dựng thẻ sản phẩm (toProductCard) */
+export const PRODUCT_CARD_INCLUDE = {
+  variants: { where: { active: true }, orderBy: { sort: 'asc' } },
+  images: { where: { option1Value: null }, orderBy: { sort: 'asc' }, take: 1 },
+  shop: { select: { id: true, name: true } },
+} satisfies Prisma.ProductInclude;
+
+/** Dựng thẻ sản phẩm từ sản phẩm đã nạp PRODUCT_CARD_INCLUDE (dùng cả ở danh sách đã thả tim) */
+export function toProductCard(
+  p: Prisma.ProductGetPayload<{ include: typeof PRODUCT_CARD_INCLUDE }>,
+): ProductCard {
+  // Biến thể rẻ nhất (bằng giá thì lấy biến thể đứng trước)
+  const cheapest = p.variants.reduce<(typeof p.variants)[number] | undefined>(
+    (best, v) => (!best || v.price < best.price ? v : best),
+    undefined,
+  );
+  return {
+    id: p.id,
+    name: p.name,
+    image: p.images[0]?.url ?? null,
+    minPrice: p.minPrice,
+    maxPrice: p.maxPrice,
+    originalPrice: cheapest?.originalPrice ?? null,
+    option1Name: p.option1Name,
+    option1Values: [...new Set(p.variants.map((v) => v.option1Value).filter(Boolean))],
+    soldCount: p.soldCount,
+    inStock: p.variants.some((v) => v.stock - v.reserved > 0),
+    shop: { id: p.shop.id, name: p.shop.name ?? '' },
+    createdAt: p.createdAt,
+    ratingAvg: ratingAvg(p.ratingTotal, p.ratingCount),
+    ratingCount: p.ratingCount,
+  };
 }
 
 /** Biến thể ở trang sản phẩm: chỉ số còn bán được, không lộ tồn và lượng đang giữ */
@@ -54,6 +92,11 @@ export interface ProductDetail {
   images: ProductImageView[];
   variants: PublicVariant[];
   shop: { id: string; name: string; logoUrl: string | null; productCount: number; joinedAt: Date };
+  /** P6: sao trung bình (null khi chưa có đánh giá), số đánh giá, số lượt thả tim, người xem đã thả tim chưa */
+  ratingAvg: number | null;
+  ratingCount: number;
+  likeCount: number;
+  liked: boolean;
 }
 
 /** Trang shop (CAT-04) */
@@ -71,6 +114,12 @@ export interface PublicShop {
   status: 'ACTIVE' | 'SUSPENDED';
   /** true: hiện "Shop đang tạm ngừng bán" */
   suspended: boolean;
+  /** P6: sao shop = trung bình sao mọi sản phẩm (null khi chưa có đánh giá), số người theo dõi */
+  ratingAvg: number | null;
+  ratingCount: number;
+  followerCount: number;
+  /** Người xem đang theo dõi shop (false khi chưa đăng nhập) */
+  following: boolean;
 }
 
 const notFound = (what = 'sản phẩm') => new AppError(404, 'NOT_FOUND', `Không tìm thấy ${what}.`);
@@ -96,6 +145,10 @@ export class CatalogService {
     if (q.minPrice !== undefined) conditions.push(Prisma.sql`p.min_price >= ${q.minPrice}::int`);
     if (q.maxPrice !== undefined) conditions.push(Prisma.sql`p.min_price <= ${q.maxPrice}::int`);
     if (q.shopId) conditions.push(Prisma.sql`p.shop_id = ${q.shopId}::uuid`);
+    // Sao trung bình (đã làm tròn 1 chữ số, như số hiển thị) ≥ minRating; chưa có đánh giá thì không ra
+    if (q.minRating !== undefined) {
+      conditions.push(Prisma.sql`${ratingTenthsSql} >= ${q.minRating * 10}::int`);
+    }
     const where = Prisma.join(conditions, ' AND ');
 
     let sort = q.sort ?? (tsq ? 'relevance' : 'newest');
@@ -106,6 +159,7 @@ export class CatalogService {
       price_asc: Prisma.sql`p.min_price ASC,`,
       price_desc: Prisma.sql`p.min_price DESC,`,
       best_selling: Prisma.sql`p.sold_count DESC,`,
+      rating: Prisma.sql`${ratingTenthsSql} DESC NULLS LAST, p.rating_count DESC,`,
     }[sort];
 
     const { skip, take } = skipTake(q);
@@ -119,40 +173,15 @@ export class CatalogService {
     const ids = idRows.map((r) => r.id);
     const products = await this.prisma.product.findMany({
       where: { id: { in: ids } },
-      include: {
-        variants: { where: { active: true }, orderBy: { sort: 'asc' } },
-        images: { where: { option1Value: null }, orderBy: { sort: 'asc' }, take: 1 },
-        shop: { select: { id: true, name: true } },
-      },
+      include: PRODUCT_CARD_INCLUDE,
     });
     const byId = new Map(products.map((p) => [p.id, p]));
-    const items = ids.map((id): ProductCard => {
-      const p = byId.get(id)!;
-      // Biến thể rẻ nhất (bằng giá thì lấy biến thể đứng trước)
-      const cheapest = p.variants.reduce<(typeof p.variants)[number] | undefined>(
-        (best, v) => (!best || v.price < best.price ? v : best),
-        undefined,
-      );
-      return {
-        id: p.id,
-        name: p.name,
-        image: p.images[0]?.url ?? null,
-        minPrice: p.minPrice,
-        maxPrice: p.maxPrice,
-        originalPrice: cheapest?.originalPrice ?? null,
-        option1Name: p.option1Name,
-        option1Values: [...new Set(p.variants.map((v) => v.option1Value).filter(Boolean))],
-        soldCount: p.soldCount,
-        inStock: p.variants.some((v) => v.stock - v.reserved > 0),
-        shop: { id: p.shop.id, name: p.shop.name ?? '' },
-        createdAt: p.createdAt,
-      };
-    });
+    const items = ids.map((id) => toProductCard(byId.get(id)!));
     return toPage(items, Number(countRows[0]?.total ?? 0), q);
   }
 
-  /** Chi tiết hàng đang bán; sản phẩm ẩn hoặc shop không hoạt động → 404 */
-  async product(productId: string): Promise<ProductDetail> {
+  /** Chi tiết hàng đang bán; sản phẩm ẩn hoặc shop không hoạt động → 404. `viewerId`: để biết đã thả tim chưa */
+  async product(productId: string, viewerId?: string): Promise<ProductDetail> {
     const p = await this.prisma.product.findFirst({
       where: { id: productId, status: 'ACTIVE', shop: { status: 'ACTIVE' } },
       include: {
@@ -163,9 +192,13 @@ export class CatalogService {
       },
     });
     if (!p) throw notFound();
-    const [productCount, joinedAt] = await Promise.all([
+    const [productCount, joinedAt, likeCount, liked] = await Promise.all([
       this.sellableCount(p.shop),
       this.joinedAt(p.shop),
+      this.prisma.productLike.count({ where: { productId: p.id } }),
+      viewerId
+        ? this.prisma.productLike.count({ where: { productId: p.id, userId: viewerId } })
+        : 0,
     ]);
     const ref = (c: { id: string; name: string; slug: string }): CategoryRef => ({
       id: c.id,
@@ -200,21 +233,27 @@ export class CatalogService {
         productCount,
         joinedAt,
       },
+      ratingAvg: ratingAvg(p.ratingTotal, p.ratingCount),
+      ratingCount: p.ratingCount,
+      likeCount,
+      liked: liked > 0,
     };
   }
 
-  /** Trang shop: shop đang hoạt động hoặc bị đình chỉ; shop chưa được duyệt → 404 */
-  async shop(shopId: string): Promise<PublicShop> {
+  /** Trang shop: shop đang hoạt động hoặc bị đình chỉ; shop chưa được duyệt → 404. `viewerId`: để biết đang theo dõi chưa */
+  async shop(shopId: string, viewerId?: string): Promise<PublicShop> {
     const shop = await this.prisma.shop.findUnique({ where: { id: shopId } });
     if (!shop || (shop.status !== 'ACTIVE' && shop.status !== 'SUSPENDED')) {
       throw notFound('shop');
     }
-    const [province, productCount, joinedAt] = await Promise.all([
+    const [province, productCount, joinedAt, followerCount, following] = await Promise.all([
       shop.pickupProvinceId
         ? this.prisma.province.findUnique({ where: { id: shop.pickupProvinceId } })
         : null,
       this.sellableCount(shop),
       this.joinedAt(shop),
+      this.prisma.shopFollow.count({ where: { shopId: shop.id } }),
+      viewerId ? this.prisma.shopFollow.count({ where: { shopId: shop.id, userId: viewerId } }) : 0,
     ]);
     return {
       id: shop.id,
@@ -226,6 +265,10 @@ export class CatalogService {
       joinedAt,
       status: shop.status,
       suspended: shop.status === 'SUSPENDED',
+      ratingAvg: ratingAvg(shop.ratingTotal, shop.ratingCount),
+      ratingCount: shop.ratingCount,
+      followerCount,
+      following: following > 0,
     };
   }
 

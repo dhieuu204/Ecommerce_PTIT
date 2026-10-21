@@ -2,6 +2,7 @@ import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { EventBus } from '@san/nest-common';
 import { SHOP_SUSPENSION_DECIDED, type ShopSuspensionDecidedPayload } from '@san/shared';
 import type { Prisma } from '../../generated/prisma';
+import { Notifier } from '../notifications/notifier.service';
 import { OPEN_STATUSES, OrderLifecycle, SYSTEM } from '../orders/order-lifecycle.service';
 
 /**
@@ -15,6 +16,7 @@ export class ShopSuspensionEvents implements OnModuleInit {
   constructor(
     private readonly events: EventBus,
     private readonly lifecycle: OrderLifecycle,
+    private readonly notifier: Notifier,
   ) {}
 
   onModuleInit(): void {
@@ -50,6 +52,8 @@ export class ShopSuspensionEvents implements OnModuleInit {
       return;
     }
     if (p.action === 'SUSPEND') await this.cancelOpenOrders(tx, p.shopId);
+    // P6 (MSG-02): báo chủ shop (có email)
+    await this.notifier.shopSuspension(tx, p.shopId, p.action, p.reason);
   }
 
   /**

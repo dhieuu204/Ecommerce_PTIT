@@ -4,6 +4,7 @@ import { AppConfig } from './config';
 import { HealthController } from './health/health.controller';
 import { PaymentsModule } from './payments/payments.module';
 import { PrismaService } from './prisma.service';
+import { ReportsModule } from './reports/reports.module';
 import { PAYMENT_SETTINGS } from './settings';
 
 /** Dùng chung trong payment-service: cấu hình đọc từ .env */
@@ -26,6 +27,7 @@ export class CoreModule {}
     SettingsModule.forRoot(PAYMENT_SETTINGS),
     CoreModule,
     PaymentsModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })

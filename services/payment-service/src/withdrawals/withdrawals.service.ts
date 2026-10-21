@@ -12,6 +12,7 @@ import {
   WITHDRAWAL_APPROVAL_DECIDED,
   WITHDRAWAL_CANCELLED,
   WITHDRAWAL_REQUESTED,
+  WITHDRAWAL_UPDATED,
   type Page,
   type WithdrawalApprovalDecidedPayload,
 } from '@san/shared';
@@ -265,7 +266,7 @@ export class WithdrawalsService implements OnModuleInit {
       return;
     }
     const approved = p.decision === 'APPROVED';
-    await tx.withdrawal.update({
+    const row = await tx.withdrawal.update({
       where: { id: w.id },
       data: {
         status: approved ? 'APPROVED' : 'REJECTED',
@@ -275,6 +276,7 @@ export class WithdrawalsService implements OnModuleInit {
       },
     });
     if (!approved) await this.unlock(tx, fresh, 'Yêu cầu rút bị từ chối');
+    await this.publishUpdated(tx, row);
   }
 
   // ===== Admin tài chính: chi trả =====
@@ -320,7 +322,7 @@ export class WithdrawalsService implements OnModuleInit {
     await this.receipts.assertUsable(dto.receiptKey, `payout-receipts/${admin.id}/`, used > 0);
     await this.adminAction(admin, withdrawalId, async (tx, w) => {
       const now = new Date();
-      await tx.withdrawal.update({
+      const row = await tx.withdrawal.update({
         where: { id: w.id },
         data: {
           status: 'PAID',
@@ -341,6 +343,7 @@ export class WithdrawalsService implements OnModuleInit {
         null,
         'Đã chuyển khoản cho seller',
       );
+      await this.publishUpdated(tx, row);
       await writeAudit(tx, {
         actor: admin,
         action: 'PAY_WITHDRAWAL',
@@ -361,8 +364,12 @@ export class WithdrawalsService implements OnModuleInit {
     reason: string,
   ): Promise<WithdrawalDetailView> {
     await this.adminAction(admin, withdrawalId, async (tx, w) => {
-      await tx.withdrawal.update({ where: { id: w.id }, data: { status: 'FAILED', reason } });
+      const row = await tx.withdrawal.update({
+        where: { id: w.id },
+        data: { status: 'FAILED', reason },
+      });
       await this.unlock(tx, w, 'Chuyển khoản không thành công');
+      await this.publishUpdated(tx, row);
       await writeAudit(tx, {
         actor: admin,
         action: 'FAIL_WITHDRAWAL',
@@ -410,6 +417,24 @@ export class WithdrawalsService implements OnModuleInit {
         );
       }
       await fn(tx, fresh);
+    });
+  }
+
+  /**
+   * Báo marketplace (P6, MSG-02) yêu cầu rút vừa được duyệt, bị từ chối, đã chi hoặc chuyển lỗi, để báo chủ
+   * shop. Gọi trong cùng giao dịch với lúc đổi trạng thái.
+   */
+  private async publishUpdated(tx: Tx, w: Withdrawal): Promise<void> {
+    const status = w.status;
+    if (status === 'PENDING' || status === 'CANCELLED') return;
+    await this.events.publish(tx, WITHDRAWAL_UPDATED, {
+      withdrawalId: w.id,
+      shopId: w.shopId,
+      ownerId: w.ownerId,
+      amount: w.amount,
+      status,
+      reason: status === 'REJECTED' || status === 'FAILED' ? w.reason : null,
+      updatedAt: new Date().toISOString(),
     });
   }
 

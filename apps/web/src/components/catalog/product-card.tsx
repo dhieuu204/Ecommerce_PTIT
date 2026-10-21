@@ -1,5 +1,6 @@
 import { ImageOff } from 'lucide-react';
 import { Link } from 'react-router';
+import { RatingInline } from '@/components/reviews/stars';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ProductCardData } from '@/lib/catalog-types';
 import { formatMoney } from '@/lib/format';
@@ -113,10 +114,17 @@ export function ProductCard({
         <div className="truncate text-base font-bold text-navy sm:text-lg">
           {formatMoney(product.minPrice)}
         </div>
-        <div className="h-4 text-xs leading-4 text-ink/45">
-          {percent > 0 && (
-            <span className="line-through">{formatMoney(product.originalPrice!)}</span>
+        <div className="flex h-4 items-center justify-between gap-2 text-xs leading-4 text-ink/45">
+          {percent > 0 ? (
+            <span className="truncate line-through">{formatMoney(product.originalPrice!)}</span>
+          ) : (
+            <span />
           )}
+          <RatingInline
+            avg={product.ratingAvg}
+            count={product.ratingCount}
+            className="text-[11px]"
+          />
         </div>
         <div className="mt-2 flex items-center justify-between gap-2 border-t border-dashed border-ivory-200 pt-2 text-[11px] text-ink/55">
           <span className="truncate">{product.shop.name}</span>

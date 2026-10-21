@@ -6,6 +6,7 @@ import {
   House,
   PackageSearch,
   SearchX,
+  Star,
   Wallet,
   X,
 } from 'lucide-react';
@@ -253,6 +254,8 @@ export function CatalogToolbar({
   minPrice,
   maxPrice,
   onPrice,
+  minRating,
+  onRating,
   total,
   className,
 }: {
@@ -263,6 +266,9 @@ export function CatalogToolbar({
   minPrice?: number;
   maxPrice?: number;
   onPrice: (min?: number, max?: number) => void;
+  /** P6: lọc theo sao (có onRating mới hiện hàng "Đánh giá") */
+  minRating?: number;
+  onRating?: (min?: number) => void;
   /** Số kết quả; undefined khi đang tải lần đầu */
   total?: number;
   className?: string;
@@ -367,6 +373,60 @@ export function CatalogToolbar({
             </button>
           )}
         </div>
+      </div>
+
+      {onRating && <RatingFilterRow value={minRating} onChange={onRating} />}
+    </div>
+  );
+}
+
+const RATING_PRESETS = [
+  { value: 5, label: '5 sao' },
+  { value: 4, label: 'Từ 4 sao' },
+  { value: 3, label: 'Từ 3 sao' },
+];
+
+/** Hàng lọc theo sao trung bình (P6, SRC-01) */
+function RatingFilterRow({
+  value,
+  onChange,
+}: {
+  value?: number;
+  onChange: (min?: number) => void;
+}) {
+  return (
+    <div className="mt-3 flex items-center gap-3 border-t border-dashed border-ivory-200 pt-3">
+      <span className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-ink/70 md:inline-flex">
+        <Star className="size-4 text-champagne-600" />
+        Đánh giá
+      </span>
+      <div className="-mx-3 flex flex-1 items-center gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <button
+          type="button"
+          className={chipClass(value === undefined, 'sm')}
+          onClick={() => onChange()}
+        >
+          Mọi đánh giá
+        </button>
+        {RATING_PRESETS.map((r) => (
+          <button
+            key={r.value}
+            type="button"
+            aria-pressed={value === r.value}
+            className={chipClass(value === r.value, 'sm')}
+            onClick={() => onChange(value === r.value ? undefined : r.value)}
+          >
+            <Star
+              className={cn(
+                'size-3.5',
+                value === r.value
+                  ? 'fill-champagne text-champagne'
+                  : 'fill-champagne/80 text-champagne',
+              )}
+            />
+            {r.label}
+          </button>
+        ))}
       </div>
     </div>
   );

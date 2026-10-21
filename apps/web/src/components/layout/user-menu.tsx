@@ -1,4 +1,4 @@
-import { LogOut, ReceiptText, ShieldCheck, Store, UserRound } from 'lucide-react';
+import { Heart, LogOut, ReceiptText, ShieldCheck, Star, Store, UserRound } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import {
@@ -48,6 +48,16 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
         <DropdownMenuItem asChild>
           <Link to="/tai-khoan/don-mua">
             <ReceiptText /> Đơn mua
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/tai-khoan/danh-gia">
+            <Star /> Đánh giá của tôi
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/tai-khoan/yeu-thich">
+            <Heart /> Sản phẩm yêu thích
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

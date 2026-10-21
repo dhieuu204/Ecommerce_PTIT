@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
+import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import {
@@ -33,6 +34,7 @@ import {
 } from '@/components/orders/order-parts';
 import { PAYMENT_METHOD, ShipmentPanel } from '@/components/orders/shipment-parts';
 import { ReturnStatusBadge } from '@/components/returns/return-parts';
+import { ReviewOrderButton } from '@/components/reviews/review-order-button';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, api } from '@/lib/api';
@@ -523,6 +525,11 @@ function ShopOrderCard({
           </div>
         </div>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
+          <ChatWithShopButton
+            shopId={so.shop.id}
+            shopOrder={{ id: so.id, code: so.code }}
+            size="sm"
+          />
           {so.history && so.history.length > 0 && (
             <Button
               variant="ghost"
@@ -545,6 +552,7 @@ function ShopOrderCard({
               </Link>
             </Button>
           )}
+          <ReviewOrderButton status={so.status} />
           {so.canConfirmReceived && (
             <Button size="sm" onClick={onReceived} className="rounded-lg">
               <PackageCheck className="size-4" /> Đã nhận hàng

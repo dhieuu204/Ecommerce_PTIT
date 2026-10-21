@@ -102,13 +102,19 @@ model Shop {
   codEnabled        Boolean    @default(true) @map("cod_enabled")
   /// Thời điểm của quyết định đình chỉ/khôi phục đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua
   moderatedAt       DateTime?  @map("moderated_at") @db.Timestamptz(3)
+  /// Số đánh giá và tổng số sao của mọi sản phẩm trong shop (P6): sao shop = trung bình sao sản phẩm
+  ratingCount       Int        @default(0) @map("rating_count")
+  ratingTotal       Int        @default(0) @map("rating_total")
   createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  applications ShopApplication[]
-  products     Product[]
-  vouchers     Voucher[]
-  shopOrders   ShopOrder[]
+  applications  ShopApplication[]
+  products      Product[]
+  vouchers      Voucher[]
+  shopOrders    ShopOrder[]
+  reviews       Review[]
+  followers     ShopFollow[]
+  conversations Conversation[]
 
   @@map("shops")
 }
@@ -165,36 +171,47 @@ enum ProductStatus {
   ACTIVE
   /// Seller tạm ẩn; không xóa để giữ lịch sử
   HIDDEN
+  /// Admin kiểm duyệt gỡ do vi phạm (P6, MOD-01): không hiện trên sàn, seller không tự bật lại được
+  REMOVED
 }
 
 /// Sản phẩm. Giá và tồn nằm ở từng biến thể (product_variants)
 model Product {
-  id           String                   @id @default(uuid()) @db.Uuid
-  shopId       String                   @map("shop_id") @db.Uuid
+  id            String                   @id @default(uuid()) @db.Uuid
+  shopId        String                   @map("shop_id") @db.Uuid
   /// Danh mục cấp 2
-  categoryId   String                   @map("category_id") @db.Uuid
-  name         String                   @db.VarChar(120)
-  description  String                   @db.VarChar(5000)
-  status       ProductStatus            @default(ACTIVE)
+  categoryId    String                   @map("category_id") @db.Uuid
+  name          String                   @db.VarChar(120)
+  description   String                   @db.VarChar(5000)
+  status        ProductStatus            @default(ACTIVE)
   /// Tên nhóm phân loại, ví dụ "Màu sắc", "Dung lượng". Trống = không có nhóm đó
-  option1Name  String?                  @map("option1_name") @db.VarChar(30)
-  option2Name  String?                  @map("option2_name") @db.VarChar(30)
+  option1Name   String?                  @map("option1_name") @db.VarChar(30)
+  option2Name   String?                  @map("option2_name") @db.VarChar(30)
   /// Cân nặng khi đóng gói (gram), để tính phí ship GHN
-  weight       Int
+  weight        Int
   /// Giá thấp nhất / cao nhất trong các biến thể đang bán, tính lại mỗi lần lưu (để lọc và sắp xếp theo giá)
-  minPrice     Int                      @map("min_price")
-  maxPrice     Int                      @map("max_price")
+  minPrice      Int                      @map("min_price")
+  maxPrice      Int                      @map("max_price")
   /// Số đã bán (tăng từ P3)
-  soldCount    Int                      @default(0) @map("sold_count")
-  createdAt    DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+  soldCount     Int                      @default(0) @map("sold_count")
+  /// Số đánh giá và tổng số sao (P6). Sao trung bình = rating_total / rating_count, tính khi đọc (không lưu số thực)
+  ratingCount   Int                      @default(0) @map("rating_count")
+  ratingTotal   Int                      @default(0) @map("rating_total")
+  /// Lý do gỡ khi status = REMOVED (P6, hiện cho seller)
+  removedReason String?                  @map("removed_reason") @db.VarChar(500)
+  /// Thời điểm của quyết định gỡ/khôi phục đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua (P6)
+  moderatedAt   DateTime?                @map("moderated_at") @db.Timestamptz(3)
+  createdAt     DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
   /// Từ khóa tìm kiếm đã bỏ dấu, PostgreSQL tự tính từ tên (cột GENERATED viết tay trong migration p2)
-  searchVector Unsupported("tsvector")? @default(dbgenerated("to_tsvector('simple'::regconfig, f_unaccent(lower((name)::text)))")) @map("search_vector")
+  searchVector  Unsupported("tsvector")? @default(dbgenerated("to_tsvector('simple'::regconfig, f_unaccent(lower((name)::text)))")) @map("search_vector")
 
   shop     Shop             @relation(fields: [shopId], references: [id])
   category Category         @relation(fields: [categoryId], references: [id])
   variants ProductVariant[]
   images   ProductImage[]
+  reviews  Review[]
+  likes    ProductLike[]
 
   @@index([shopId, status])
   @@index([categoryId, status])
@@ -571,19 +588,19 @@ model ShopOrder {
 
 /// Dòng hàng trong đơn con (chép lại tên, ảnh, giá lúc đặt)
 model OrderItem {
-  id            String  @id @default(uuid()) @db.Uuid
-  shopOrderId   String  @map("shop_order_id") @db.Uuid
-  productId     String  @map("product_id") @db.Uuid
-  variantId     String  @map("variant_id") @db.Uuid
-  productName   String  @map("product_name") @db.VarChar(120)
+  id               String  @id @default(uuid()) @db.Uuid
+  shopOrderId      String  @map("shop_order_id") @db.Uuid
+  productId        String  @map("product_id") @db.Uuid
+  variantId        String  @map("variant_id") @db.Uuid
+  productName      String  @map("product_name") @db.VarChar(120)
   /// Ví dụ "Đen, 128GB"; '' nếu không phân loại
-  variantName   String  @map("variant_name") @db.VarChar(80)
-  image         String? @db.VarChar(255)
-  price         Int
-  originalPrice Int?    @map("original_price")
-  quantity      Int
+  variantName      String  @map("variant_name") @db.VarChar(80)
+  image            String? @db.VarChar(255)
+  price            Int
+  originalPrice    Int?    @map("original_price")
+  quantity         Int
   /// Khối lượng 1 sản phẩm (gram), để tính lại phí ship
-  weight        Int
+  weight           Int
   /// Phần voucher shop + sàn chia cho dòng này (dùng khi trả hàng ở P5)
   discount         Int     @default(0)
   /// Số món đã được hoàn đủ tiền do trả hàng (P5)
@@ -592,6 +609,8 @@ model OrderItem {
   shopOrder   ShopOrder      @relation(fields: [shopOrderId], references: [id])
   variant     ProductVariant @relation(fields: [variantId], references: [id])
   returnItems ReturnItem[]
+  /// Đánh giá của dòng hàng này (P6), mỗi dòng tối đa một
+  review      Review?
 
   @@index([shopOrderId])
   @@map("order_items")
@@ -839,6 +858,153 @@ model ReturnItem {
 
 /// Cấu hình có phiên bản (ADM-01): hạn thanh toán, giữ tồn, hạn xác nhận, phí ship cố định.
 /// Mỗi lần sửa thêm một phiên bản; phiên bản lớn nhất đang dùng
+// ===== Đánh giá, theo dõi (P6) =====
+
+/// Đánh giá sản phẩm (ENG-01): mỗi dòng hàng của đơn con đã hoàn tất được đánh giá 1 lần, sửa 1 lần
+model Review {
+  id              String    @id @default(uuid()) @db.Uuid
+  /// Dòng hàng được đánh giá (không trùng)
+  orderItemId     String    @unique @map("order_item_id") @db.Uuid
+  shopOrderId     String    @map("shop_order_id") @db.Uuid
+  productId       String    @map("product_id") @db.Uuid
+  shopId          String    @map("shop_id") @db.Uuid
+  /// Người mua (userId bên user-service) và tên lúc đánh giá; web hiện tên đã che bớt
+  buyerId         String    @map("buyer_id") @db.Uuid
+  buyerName       String    @map("buyer_name") @db.VarChar(100)
+  /// Phân loại đã mua, chép từ dòng hàng, ví dụ "Đen, 128GB"
+  variantName     String    @map("variant_name") @db.VarChar(80)
+  /// 1–5 sao
+  rating          Int
+  content         String    @default("") @db.VarChar(1000)
+  /// Đường dẫn ảnh (bucket công khai), tối đa 5
+  images          String[]  @default([])
+  /// Đã dùng lượt sửa (mỗi đánh giá sửa được 1 lần)
+  edited          Boolean   @default(false)
+  /// Shop trả lời (ENG-02); không sửa được nội dung của người mua
+  sellerReply     String?   @map("seller_reply") @db.VarChar(1000)
+  sellerRepliedAt DateTime? @map("seller_replied_at") @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+  shop      Shop      @relation(fields: [shopId], references: [id])
+
+  @@index([productId, createdAt])
+  @@index([shopId, createdAt])
+  @@index([buyerId, createdAt])
+  @@map("reviews")
+}
+
+/// Theo dõi shop (ENG-03): mỗi người theo dõi một shop tối đa một dòng
+model ShopFollow {
+  userId    String   @map("user_id") @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  shop Shop @relation(fields: [shopId], references: [id])
+
+  @@id([userId, shopId])
+  @@index([shopId])
+  @@map("shop_follows")
+}
+
+/// Thả tim sản phẩm (ENG-03): mỗi người một sản phẩm tối đa một dòng
+model ProductLike {
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@id([userId, productId])
+  @@index([productId])
+  @@map("product_likes")
+}
+
+// ===== Chat, thông báo (P6) =====
+
+/// Cuộc trò chuyện giữa một người mua và một shop (MSG-01). Người mua mở, shop trả lời
+model Conversation {
+  id                 String    @id @default(uuid()) @db.Uuid
+  buyerId            String    @map("buyer_id") @db.Uuid
+  /// Tên người mua lúc mở chat (để shop thấy trong danh sách)
+  buyerName          String    @map("buyer_name") @db.VarChar(100)
+  shopId             String    @map("shop_id") @db.Uuid
+  lastMessageAt      DateTime? @map("last_message_at") @db.Timestamptz(3)
+  /// Vài chữ đầu của tin cuối, ví dụ "[Hình ảnh]"
+  lastMessagePreview String?   @map("last_message_preview") @db.VarChar(120)
+  /// Số tin chưa đọc của mỗi bên
+  buyerUnread        Int       @default(0) @map("buyer_unread")
+  shopUnread         Int       @default(0) @map("shop_unread")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  shop     Shop      @relation(fields: [shopId], references: [id])
+  messages Message[]
+
+  @@unique([buyerId, shopId])
+  @@index([shopId, lastMessageAt])
+  @@index([buyerId, lastMessageAt])
+  @@map("conversations")
+}
+
+enum MessageSender {
+  BUYER
+  SHOP
+}
+
+enum MessageType {
+  TEXT
+  /// Ảnh (bucket riêng tư, chỉ hai bên xem qua API có kiểm quyền)
+  IMAGE
+  /// Thẻ sản phẩm
+  PRODUCT
+  /// Thẻ đơn hàng (đơn con của chính người mua ở shop này)
+  ORDER
+}
+
+/// Tin nhắn. Chỉ thêm, không sửa
+model Message {
+  id             String        @id @default(uuid()) @db.Uuid
+  conversationId String        @map("conversation_id") @db.Uuid
+  /// userId người gửi (người mua, hoặc chủ shop)
+  senderId       String        @map("sender_id") @db.Uuid
+  senderRole     MessageSender @map("sender_role")
+  type           MessageType
+  /// Chữ (TEXT), khóa ảnh (IMAGE), mã sản phẩm (PRODUCT) hoặc mã đơn con (ORDER)
+  content        String        @db.VarChar(1000)
+  /// Bản chụp thẻ sản phẩm/đơn lúc gửi (tên, ảnh, giá / mã đơn, trạng thái, tổng tiền)
+  card           Json?
+  /// Mã do web sinh mỗi lần bấm gửi: gửi lại cùng mã thì trả tin cũ, không tạo tin mới
+  clientKey      String        @map("client_key") @db.VarChar(64)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  @@unique([conversationId, clientKey])
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+/// Thông báo trong app (MSG-02). Việc quan trọng còn gửi email (qua user-service)
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  /// Người nhận (userId bên user-service)
+  userId    String    @map("user_id") @db.Uuid
+  /// Loại, ví dụ ORDER_DELIVERED (danh sách ở docs/phan-tich/13-quyet-dinh-p6.md)
+  type      String    @db.VarChar(40)
+  title     String    @db.VarChar(150)
+  content   String    @db.VarChar(500)
+  /// Đường dẫn trên web khi bấm vào thông báo
+  link      String?   @db.VarChar(255)
+  readAt    DateTime? @map("read_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
 model Setting {
   key           String   @db.VarChar(64)
   version       Int

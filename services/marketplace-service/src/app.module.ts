@@ -15,6 +15,13 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReturnsModule } from './returns/returns.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ReportsModule } from './reports/reports.module';
+import { ModerationModule } from './moderation/moderation.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { FollowsModule } from './follows/follows.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { ChatModule } from './chat/chat.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -30,9 +37,13 @@ import { ReturnsModule } from './returns/returns.module';
     // Cấu hình có phiên bản (bảng settings) + API /admin/settings (ADM-01)
     SettingsModule.forRoot(MARKET_SETTINGS),
     CoreModule,
+    NotificationsModule,
+    RealtimeModule,
+    ChatModule,
     LocationsModule,
     OrdersModule,
     ReturnsModule,
+    ModerationModule,
     UploadsModule,
     ShopsModule,
     ShopAdminModule,
@@ -40,8 +51,12 @@ import { ReturnsModule } from './returns/returns.module';
     VouchersModule,
     CategoriesModule,
     ProductsModule,
+    ReportsModule,
     // Sau ShopsModule: GET /shops/{shopId} (công khai) không được che GET /shops/me
     CatalogModule,
+    // P6: đánh giá (ENG-01, ENG-02), theo dõi shop và thả tim (ENG-03)
+    ReviewsModule,
+    FollowsModule,
   ],
   controllers: [HealthController],
 })

@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { findCategory, useCategories } from '@/hooks/use-catalog';
 import type { CategoryNode, ProductSort } from '@/lib/catalog-types';
 
-const SORTS: ProductSort[] = ['newest', 'best_selling', 'price_asc', 'price_desc'];
+const SORTS: ProductSort[] = ['newest', 'best_selling', 'rating', 'price_asc', 'price_desc'];
 
 function scrollToResults() {
   document.getElementById('ket-qua')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -84,6 +84,7 @@ export function CategoryPage() {
       sort: state.sort,
       minPrice: state.minPrice,
       maxPrice: state.maxPrice,
+      minRating: state.minRating,
       page: state.page,
     },
     !!current,
@@ -173,6 +174,8 @@ export function CategoryPage() {
           minPrice={state.minPrice}
           maxPrice={state.maxPrice}
           onPrice={browse.setPrice}
+          minRating={state.minRating}
+          onRating={browse.setRating}
           total={products.data?.total}
         />
         <div className="mt-5">
@@ -181,11 +184,13 @@ export function CategoryPage() {
             onPage={browse.setPage}
             empty={
               <NoProducts
-                filtered={browse.hasPriceFilter}
-                onClear={() => browse.setPrice()}
+                filtered={browse.hasPriceFilter || browse.hasRatingFilter}
+                onClear={() =>
+                  browse.update({ minPrice: undefined, maxPrice: undefined, minRating: undefined })
+                }
                 text={
-                  browse.hasPriceFilter
-                    ? 'Không có sản phẩm nào trong khoảng giá này. Bạn thử khoảng giá khác nhé.'
+                  browse.hasPriceFilter || browse.hasRatingFilter
+                    ? 'Không có sản phẩm nào hợp bộ lọc giá và đánh giá này. Bạn thử bỏ bớt bộ lọc nhé.'
                     : `Chưa có sản phẩm nào trong danh mục ${current.name}. Bạn quay lại sau nhé.`
                 }
               />

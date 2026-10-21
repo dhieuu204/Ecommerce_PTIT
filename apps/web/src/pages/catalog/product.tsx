@@ -21,6 +21,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { ProductDescription } from '@/components/catalog/product-description';
+import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
 import {
   DiscountBadge,
   ProductCard,
@@ -30,8 +31,11 @@ import {
 } from '@/components/catalog/product-card';
 import { ProductGallery } from '@/components/catalog/product-gallery';
 import { QuantityStepper } from '@/components/catalog/quantity-stepper';
+import { ProductEngagementBar } from '@/components/reviews/engagement';
+import { ReviewsSection } from '@/components/reviews/review-list';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
+import { ReportButton } from '@/components/moderation/report-button';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAddToCart } from '@/hooks/use-cart';
@@ -149,6 +153,7 @@ function ProductView({ product }: { product: ProductDetail }) {
             <h1 className="text-xl font-bold leading-snug text-navy sm:text-2xl lg:text-[1.75rem]">
               {product.name}
             </h1>
+            <ProductEngagementBar product={product} />
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink/60">
               <span>
                 Đã bán <b className="font-semibold text-ink">{formatSold(product.soldCount)}</b>
@@ -173,6 +178,12 @@ function ProductView({ product }: { product: ProductDetail }) {
                   {product.shop.name}
                 </Link>
               </span>
+              <ReportButton
+                targetType="PRODUCT"
+                targetId={product.id}
+                shopId={product.shop.id}
+                className="-my-1 sm:ml-auto"
+              />
             </div>
             <div className="mt-4">
               {canBuy && available <= LOW_STOCK ? (
@@ -266,6 +277,11 @@ function ProductView({ product }: { product: ProductDetail }) {
               )}
               {canBuy ? 'Thêm vào giỏ hàng' : 'Phân loại này đã hết hàng'}
             </Button>
+            <ChatWithShopButton
+              shopId={product.shop.id}
+              productId={product.id}
+              className="mt-3 h-11 w-full rounded-xl"
+            />
           </div>
         </section>
 
@@ -284,6 +300,7 @@ function ProductView({ product }: { product: ProductDetail }) {
           </div>
         </section>
 
+        <ReviewsSection source="product" id={product.id} className="mt-6" />
         <ProductRow
           title="Sản phẩm liên quan"
           query={{ categoryId: category.id }}

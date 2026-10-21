@@ -7,15 +7,19 @@ import { cn } from '@/lib/utils';
 const MENU = [
   { to: '/tai-khoan/don-mua', label: 'Đơn mua' },
   { to: '/tai-khoan/tra-hang', label: 'Trả hàng/Hoàn tiền' },
+  { to: '/tai-khoan/danh-gia', label: 'Đánh giá của tôi' },
+  { to: '/tai-khoan/yeu-thich', label: 'Sản phẩm yêu thích' },
+  { to: '/tai-khoan/shop-theo-doi', label: 'Shop đang theo dõi' },
+  { to: '/tai-khoan/thong-bao', label: 'Thông báo' },
   { to: '/tai-khoan/ho-so', label: 'Hồ sơ của tôi' },
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu' },
   { to: '/tai-khoan/dia-chi', label: 'Sổ địa chỉ' },
   { to: '/tai-khoan/shop', label: 'Shop của tôi' },
+  { to: '/tai-khoan/bao-cao-vi-pham', label: 'Báo cáo vi phạm' },
 ];
 
 /**
  * Tài khoản của tôi (docs/so-do/07 mục A2): menu trái + nội dung. Điện thoại: menu thành hàng nút cuộn ngang.
- * Thông báo thêm vào MENU ở P6.
  */
 export function AccountLayout() {
   const user = useCurrentUser();

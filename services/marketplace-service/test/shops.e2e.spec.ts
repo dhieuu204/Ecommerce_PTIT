@@ -39,7 +39,12 @@ describeDb('Shop của tôi và áp quyết định duyệt (SHP-01..03)', () =>
       .send(body);
   const myShop = (user = seller) =>
     t.http().get(`${API}/shops/me`).set('Authorization', `Bearer ${user.token}`).expect(200);
-  const outbox = () => t.prisma.outboxEvent.findMany({ orderBy: { createdAt: 'asc' } });
+  // Sự kiện nghiệp vụ của shop (bỏ notification.created của thông báo P6)
+  const outbox = () =>
+    t.prisma.outboxEvent.findMany({
+      where: { type: { not: 'notification.created' } },
+      orderBy: { createdAt: 'asc' },
+    });
   const decide = async (
     version: number,
     decision: 'APPROVED' | 'REJECTED',

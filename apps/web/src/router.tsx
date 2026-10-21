@@ -92,6 +92,16 @@ export const router = createBrowserRouter([
               })),
           },
           {
+            path: 'tin-nhan',
+            lazy: () =>
+              import('@/pages/chat/buyer-chat').then((m) => ({ Component: m.BuyerChatPage })),
+          },
+          {
+            path: 'tin-nhan/:conversationId',
+            lazy: () =>
+              import('@/pages/chat/buyer-chat').then((m) => ({ Component: m.BuyerChatPage })),
+          },
+          {
             path: 'tai-khoan',
             element: <AccountLayout />,
             children: [
@@ -143,9 +153,42 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'danh-gia',
+                lazy: () =>
+                  import('@/pages/account/reviews').then((m) => ({ Component: m.MyReviewsPage })),
+              },
+              {
+                path: 'yeu-thich',
+                lazy: () =>
+                  import('@/pages/account/liked-products').then((m) => ({
+                    Component: m.LikedProductsPage,
+                  })),
+              },
+              {
+                path: 'shop-theo-doi',
+                lazy: () =>
+                  import('@/pages/account/followed-shops').then((m) => ({
+                    Component: m.FollowedShopsPage,
+                  })),
+              },
+              {
+                path: 'thong-bao',
+                lazy: () =>
+                  import('@/pages/account/notifications').then((m) => ({
+                    Component: m.NotificationsPage,
+                  })),
+              },
+              {
                 path: 'shop',
                 lazy: () =>
                   import('@/pages/account/my-shop').then((m) => ({ Component: m.MyShopPage })),
+              },
+              {
+                path: 'bao-cao-vi-pham',
+                lazy: () =>
+                  import('@/pages/account/violation-reports').then((m) => ({
+                    Component: m.MyViolationReportsPage,
+                  })),
               },
               {
                 path: 'shop/dang-ky',
@@ -228,6 +271,23 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'danh-gia',
+                lazy: () =>
+                  import('@/pages/seller/reviews').then((m) => ({
+                    Component: m.SellerReviewsPage,
+                  })),
+              },
+              {
+                path: 'tin-nhan',
+                lazy: () =>
+                  import('@/pages/seller/chat').then((m) => ({ Component: m.SellerChatPage })),
+              },
+              {
+                path: 'tin-nhan/:conversationId',
+                lazy: () =>
+                  import('@/pages/seller/chat').then((m) => ({ Component: m.SellerChatPage })),
+              },
+              {
                 path: 'ho-so-shop',
                 lazy: () =>
                   import('@/pages/seller/shop-profile').then((m) => ({
@@ -239,6 +299,13 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/seller/finance').then((m) => ({
                     Component: m.SellerFinancePage,
+                  })),
+              },
+              {
+                path: 'bao-cao',
+                lazy: () =>
+                  import('@/pages/seller/reports').then((m) => ({
+                    Component: m.SellerReportsPage,
                   })),
               },
             ],
@@ -287,6 +354,20 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/shop-detail').then((m) => ({
                         Component: m.ShopDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'bao-cao-vi-pham',
+                    lazy: () =>
+                      import('@/pages/admin/violation-reports').then((m) => ({
+                        Component: m.ViolationReportsPage,
+                      })),
+                  },
+                  {
+                    path: 'bao-cao-vi-pham/:reportId',
+                    lazy: () =>
+                      import('@/pages/admin/violation-reports').then((m) => ({
+                        Component: m.ViolationReportDetailPage,
                       })),
                   },
                 ],
@@ -353,6 +434,18 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/adjustments').then((m) => ({
                         Component: m.AdjustmentsPage,
+                      })),
+                  },
+                ],
+              },
+              {
+                element: <RequirePermission any={['SYSTEM', 'FINANCE']} />,
+                children: [
+                  {
+                    path: 'bao-cao',
+                    lazy: () =>
+                      import('@/pages/admin/reports').then((m) => ({
+                        Component: m.AdminReportsPage,
                       })),
                   },
                 ],

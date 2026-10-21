@@ -22,6 +22,7 @@ const GROUPS: AdminMenuGroup[] = [
     items: [
       { to: '/quan-tri/duyet-shop', label: 'Duyệt shop', any: ['MODERATION'] },
       { to: '/quan-tri/shop', label: 'Quản lý shop', any: ['MODERATION'] },
+      { to: '/quan-tri/bao-cao-vi-pham', label: 'Báo cáo vi phạm', any: ['MODERATION'] },
       { to: '/quan-tri/danh-muc', label: 'Danh mục', any: ['MODERATION'] },
     ],
   },
@@ -53,6 +54,10 @@ const GROUPS: AdminMenuGroup[] = [
       { to: '/quan-tri/nguoi-dung', label: 'Người dùng và quyền', any: ['SYSTEM'] },
       { to: '/quan-tri/nhat-ky', label: 'Nhật ký thao tác', any: ['SYSTEM'] },
     ],
+  },
+  {
+    title: 'Báo cáo',
+    items: [{ to: '/quan-tri/bao-cao', label: 'Báo cáo của sàn', any: ['SYSTEM', 'FINANCE'] }],
   },
 ];
 

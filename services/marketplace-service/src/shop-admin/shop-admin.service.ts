@@ -31,7 +31,7 @@ export interface AdminShopDetail extends AdminShopRow {
   /** Số tài khoản chỉ hiện 4 số cuối */
   bankAccount: BankAccount | null;
   /** Số sản phẩm theo trạng thái */
-  productCounts: { ACTIVE: number; HIDDEN: number };
+  productCounts: { ACTIVE: number; HIDDEN: number; REMOVED: number };
   /** Thời điểm quyết định đình chỉ/khôi phục gần nhất đã áp */
   moderatedAt: Date | null;
 }
@@ -77,7 +77,7 @@ export class ShopAdminService {
       this.approvedAt([shop.id]),
       this.prisma.product.groupBy({ by: ['status'], where: { shopId }, _count: true }),
     ]);
-    const productCounts = { ACTIVE: 0, HIDDEN: 0 };
+    const productCounts = { ACTIVE: 0, HIDDEN: 0, REMOVED: 0 };
     for (const g of byStatus) productCounts[g.status] = g._count;
     return {
       ...this.row(shop, approved.get(shop.id) ?? null),

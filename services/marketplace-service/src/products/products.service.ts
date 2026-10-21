@@ -21,6 +21,8 @@ export interface SellerProductRow {
   id: string;
   name: string;
   status: Product['status'];
+  /** Lý do khi sản phẩm bị admin gỡ (status = REMOVED, P6) */
+  removedReason: string | null;
   /** Ảnh chung đầu tiên */
   image: string | null;
   minPrice: number;
@@ -67,6 +69,8 @@ export interface SellerProduct {
   name: string;
   description: string;
   status: Product['status'];
+  /** Lý do khi sản phẩm bị admin gỡ (status = REMOVED, P6): seller sửa được nội dung nhưng không tự bật bán */
+  removedReason: string | null;
   categoryId: string;
   category: CategoryRef & { parent: CategoryRef | null };
   weight: number;
@@ -187,6 +191,7 @@ export class ProductsService {
         id: p.id,
         name: p.name,
         status: p.status,
+        removedReason: p.status === 'REMOVED' ? p.removedReason : null,
         image: p.images[0]?.url ?? null,
         minPrice: p.minPrice,
         maxPrice: p.maxPrice,
@@ -401,7 +406,7 @@ export class ProductsService {
     return this.detail(shop.id, productId);
   }
 
-  /** ACTIVE ↔ HIDDEN. Ẩn không xóa gì */
+  /** ACTIVE ↔ HIDDEN. Ẩn không xóa gì. Sản phẩm bị admin gỡ (REMOVED) thì không tự đổi được (409) */
   async setStatus(
     user: AuthUser,
     productId: string,
@@ -409,10 +414,21 @@ export class ProductsService {
   ): Promise<SellerProduct> {
     const shop = await requireSellerShop(this.prisma, user.id);
     const { count } = await this.prisma.product.updateMany({
-      where: { id: productId, shopId: shop.id },
+      where: { id: productId, shopId: shop.id, status: { not: 'REMOVED' } },
       data: { status: dto.status },
     });
-    if (count === 0) throw notFound();
+    if (count === 0) {
+      const p = await this.prisma.product.findFirst({
+        where: { id: productId, shopId: shop.id },
+        select: { status: true },
+      });
+      if (!p) throw notFound();
+      throw new AppError(
+        409,
+        'PRODUCT_REMOVED',
+        'Sản phẩm đã bị gỡ do vi phạm nên không tự bật bán hoặc ẩn được. Liên hệ sàn nếu cần xem xét lại.',
+      );
+    }
     return this.detail(shop.id, productId);
   }
 
@@ -539,6 +555,7 @@ export class ProductsService {
       name: p.name,
       description: p.description,
       status: p.status,
+      removedReason: p.status === 'REMOVED' ? p.removedReason : null,
       categoryId: p.categoryId,
       category: { ...ref(p.category), parent: p.category.parent && ref(p.category.parent) },
       weight: p.weight,
