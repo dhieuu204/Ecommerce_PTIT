@@ -20,6 +20,7 @@ import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { FormField, inputClass, SectionCard } from '@/components/console/form-field';
 import { NumberInput } from '@/components/console/money-input';
 import { PageHeader } from '@/components/layout/page-header';
+import { RemovedBanner } from '@/components/moderation/removed-note';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -557,6 +558,11 @@ function ProductEditor({
           live && <EditActions product={live} shopActive={shop.data?.status === 'ACTIVE'} />
         }
       />
+      {live?.status === 'REMOVED' && (
+        <div className="mb-6">
+          <RemovedBanner reason={live.removedReason} />
+        </div>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_260px]">
         <div className="min-w-0 space-y-6">
@@ -952,17 +958,20 @@ function EditActions({ product, shopActive }: { product: SellerProduct; shopActi
           </Link>
         </Button>
       )}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="rounded-full border-navy/30 text-navy"
-        disabled={busy}
-        onClick={() => void toggle()}
-      >
-        {busy ? <Loader2 className="animate-spin" /> : hide ? <EyeOff /> : <Eye />}
-        {hide ? 'Ẩn sản phẩm' : 'Hiện lại'}
-      </Button>
+      {/* Sản phẩm bị sàn gỡ: seller không tự bật/ẩn được (chỉ sửa nội dung) */}
+      {product.status !== 'REMOVED' && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="rounded-full border-navy/30 text-navy"
+          disabled={busy}
+          onClick={() => void toggle()}
+        >
+          {busy ? <Loader2 className="animate-spin" /> : hide ? <EyeOff /> : <Eye />}
+          {hide ? 'Ẩn sản phẩm' : 'Hiện lại'}
+        </Button>
+      )}
     </>
   );
 }

@@ -11,6 +11,7 @@ const MENU = [
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu' },
   { to: '/tai-khoan/dia-chi', label: 'Sổ địa chỉ' },
   { to: '/tai-khoan/shop', label: 'Shop của tôi' },
+  { to: '/tai-khoan/bao-cao-vi-pham', label: 'Báo cáo vi phạm' },
 ];
 
 /**

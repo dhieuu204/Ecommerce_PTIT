@@ -132,6 +132,7 @@ services:
       DATABASE_URL: postgresql://approval_svc:approval_svc@postgres:5432/approval_db?schema=public
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-san}:${RABBITMQ_PASSWORD:-san}@rabbitmq:5672
       JWKS_URL: http://user-service:3001/api/user/v1/.well-known/jwks.json
+      MARKETPLACE_API_URL: http://marketplace-service:3002/api/market/v1
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }

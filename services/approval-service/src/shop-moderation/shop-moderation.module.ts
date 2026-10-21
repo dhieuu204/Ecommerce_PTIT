@@ -6,5 +6,7 @@ import { ShopModerationService } from './shop-moderation.service';
 @Module({
   controllers: [ShopModerationController],
   providers: [ShopModerationService],
+  // Báo cáo vi phạm (MOD-01) dùng lại việc đình chỉ shop
+  exports: [ShopModerationService],
 })
 export class ShopModerationModule {}

@@ -90,7 +90,11 @@ export class ProductsController {
 
   /** Ẩn (HIDDEN) hoặc bán lại (ACTIVE) */
   @Patch(':productId/status')
-  @shopNotActive
+  @ApiResponse({
+    status: 409,
+    description:
+      'SHOP_NOT_ACTIVE; PRODUCT_REMOVED: sản phẩm bị admin gỡ, không tự đổi trạng thái được',
+  })
   setStatus(
     @CurrentUser() user: AuthUser,
     @Param('productId', ParseIdPipe) productId: string,

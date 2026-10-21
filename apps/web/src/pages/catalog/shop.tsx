@@ -12,6 +12,7 @@ import {
 import { VoucherTicket } from '@/components/catalog/voucher-ticket';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
+import { ReportButton } from '@/components/moderation/report-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, ApiError, api } from '@/lib/api';
 import type { ProductSort, PublicShop, Voucher } from '@/lib/catalog-types';
@@ -77,6 +78,12 @@ function ShopHeader({ shop }: { shop: PublicShop }) {
                   Shop đã duyệt
                 </span>
               )}
+              <ReportButton
+                targetType="SHOP"
+                targetId={shop.id}
+                shopId={shop.id}
+                className="ml-auto"
+              />
             </div>
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink/70">
               {!shop.suspended && (
