@@ -8,6 +8,7 @@ import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
 import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { WithdrawalApprovalsModule } from './withdrawal-approvals/withdrawal-approvals.module';
+import { ReportsModule } from './reports/reports.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -27,6 +28,7 @@ import { WithdrawalApprovalsModule } from './withdrawal-approvals/withdrawal-app
     OrderChecksModule,
     DisputesModule,
     WithdrawalApprovalsModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })

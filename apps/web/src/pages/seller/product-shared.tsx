@@ -33,6 +33,7 @@ export function priceRange(min: number, max: number) {
 }
 
 export function ProductStatusBadge({ status }: { status: ProductStatus }) {
+  if (status === 'REMOVED') return <StatusBadge tone="danger">Bị gỡ</StatusBadge>;
   return status === 'ACTIVE' ? (
     <StatusBadge tone="success">Đang bán</StatusBadge>
   ) : (

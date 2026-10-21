@@ -148,6 +148,13 @@ export const router = createBrowserRouter([
                   import('@/pages/account/my-shop').then((m) => ({ Component: m.MyShopPage })),
               },
               {
+                path: 'bao-cao-vi-pham',
+                lazy: () =>
+                  import('@/pages/account/violation-reports').then((m) => ({
+                    Component: m.MyViolationReportsPage,
+                  })),
+              },
+              {
                 path: 'shop/dang-ky',
                 lazy: () =>
                   import('@/pages/account/shop-apply').then((m) => ({
@@ -287,6 +294,20 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/shop-detail').then((m) => ({
                         Component: m.ShopDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'bao-cao-vi-pham',
+                    lazy: () =>
+                      import('@/pages/admin/violation-reports').then((m) => ({
+                        Component: m.ViolationReportsPage,
+                      })),
+                  },
+                  {
+                    path: 'bao-cao-vi-pham/:reportId',
+                    lazy: () =>
+                      import('@/pages/admin/violation-reports').then((m) => ({
+                        Component: m.ViolationReportDetailPage,
                       })),
                   },
                 ],

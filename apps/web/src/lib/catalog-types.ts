@@ -145,13 +145,16 @@ export interface Cart {
 
 // ----- Sản phẩm của seller (CAT-02, CAT-03, INV-01) -----
 
-export type ProductStatus = 'ACTIVE' | 'HIDDEN';
+/** REMOVED: admin gỡ do vi phạm (P6, MOD-01), seller không tự bật bán lại được */
+export type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'REMOVED';
 
 /** Một dòng trong GET /shops/me/products */
 export interface SellerProductRow {
   id: string;
   name: string;
   status: ProductStatus;
+  /** Lý do gỡ khi status = REMOVED */
+  removedReason: string | null;
   image: string | null;
   minPrice: number;
   maxPrice: number;
@@ -181,6 +184,8 @@ export interface SellerProduct {
   name: string;
   description: string;
   status: ProductStatus;
+  /** Lý do gỡ khi status = REMOVED */
+  removedReason: string | null;
   categoryId: string;
   category: CategoryRef;
   weight: number;

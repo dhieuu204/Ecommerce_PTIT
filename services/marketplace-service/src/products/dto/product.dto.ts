@@ -157,10 +157,11 @@ export class StockAdjustDto {
 
 /** Lọc danh sách sản phẩm của shop */
 export class SellerProductQuery extends PageQuery {
-  @ApiPropertyOptional({ enum: ['ACTIVE', 'HIDDEN'] })
+  /** REMOVED = bị admin gỡ do vi phạm (P6) */
+  @ApiPropertyOptional({ enum: ['ACTIVE', 'HIDDEN', 'REMOVED'] })
   @IsOptional()
-  @IsIn(['ACTIVE', 'HIDDEN'], { message: 'Trạng thái phải là ACTIVE hoặc HIDDEN.' })
-  status?: 'ACTIVE' | 'HIDDEN';
+  @IsIn(['ACTIVE', 'HIDDEN', 'REMOVED'], { message: 'Trạng thái không hợp lệ.' })
+  status?: 'ACTIVE' | 'HIDDEN' | 'REMOVED';
 
   /** Danh mục (cấp 1 thì gồm cả danh mục con) */
   @IsOptional()

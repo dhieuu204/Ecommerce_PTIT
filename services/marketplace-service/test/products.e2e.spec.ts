@@ -87,6 +87,7 @@ describeDb('Sản phẩm của seller và tồn kho (CAT-02, CAT-03, INV-01)', (
         name: 'Điện thoại iPhone 16 Pro',
         description: 'Hàng chính hãng VN/A, nguyên seal, bảo hành 12 tháng.',
         status: 'ACTIVE',
+        removedReason: null,
         categoryId: cat('iphone'),
         category: {
           id: cat('iphone'),
@@ -394,6 +395,7 @@ describeDb('Sản phẩm của seller và tồn kho (CAT-02, CAT-03, INV-01)', (
         id: phone.id,
         name: 'Điện thoại iPhone 16 Pro',
         status: 'ACTIVE',
+        removedReason: null,
         image: img(seller.id, 'cover'),
         minPrice: 25000000,
         maxPrice: 28000000,

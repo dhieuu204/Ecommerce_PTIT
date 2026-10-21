@@ -272,9 +272,10 @@ export function ShopDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-6">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat icon={Eye} label="Đang bán" value={s.productCounts.ACTIVE} tone="emerald" />
             <Stat icon={EyeOff} label="Đã ẩn" value={s.productCounts.HIDDEN} tone="muted" />
+            <Stat icon={ShieldAlert} label="Bị gỡ" value={s.productCounts.REMOVED} tone="red" />
             <Stat icon={Package} label="Tổng sản phẩm" value={s.productCount} tone="navy" />
           </div>
           {suspended && s.productCounts.ACTIVE > 0 && (
@@ -350,7 +351,7 @@ function Stat({
   icon: typeof Eye;
   label: string;
   value: number;
-  tone: 'emerald' | 'muted' | 'navy';
+  tone: 'emerald' | 'muted' | 'navy' | 'red';
 }) {
   return (
     <div className="rounded-2xl border bg-card p-3 shadow-sm shadow-navy/[0.03] sm:p-4">
@@ -360,6 +361,7 @@ function Stat({
             'size-3.5',
             tone === 'emerald' && 'text-emerald-600',
             tone === 'navy' && 'text-champagne-600',
+            tone === 'red' && 'text-red-600',
           )}
         />
         {label}
@@ -367,7 +369,13 @@ function Stat({
       <div
         className={cn(
           'mt-1 text-xl font-semibold tabular-nums sm:text-2xl',
-          tone === 'emerald' ? 'text-emerald-700' : tone === 'navy' ? 'text-navy' : 'text-ink/70',
+          tone === 'emerald'
+            ? 'text-emerald-700'
+            : tone === 'navy'
+              ? 'text-navy'
+              : tone === 'red'
+                ? 'text-red-700'
+                : 'text-ink/70',
         )}
       >
         {value.toLocaleString('vi-VN')}

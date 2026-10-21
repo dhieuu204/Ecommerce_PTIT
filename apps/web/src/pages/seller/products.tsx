@@ -20,6 +20,7 @@ import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { nativeSelectClass } from '@/components/console/form-field';
 import { Pager } from '@/components/console/pager';
 import { PageHeader } from '@/components/layout/page-header';
+import { RemovedReasonLine } from '@/components/moderation/removed-note';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -55,6 +56,7 @@ const TABS: Array<{ value: ProductStatus | 'ALL'; label: string }> = [
   { value: 'ALL', label: 'Tất cả' },
   { value: 'ACTIVE', label: 'Đang bán' },
   { value: 'HIDDEN', label: 'Đã ẩn' },
+  { value: 'REMOVED', label: 'Bị gỡ' },
 ];
 
 /**
@@ -111,8 +113,13 @@ export function ProductsPage() {
         api<Page<SellerProductRow>>(`${API.market}/shops/me/products`, {
           query: { status: s, categoryId, q, page: 1, pageSize: 1 },
         }).then((r) => r.total);
-      const [ALL, ACTIVE, HIDDEN] = await Promise.all([count(), count('ACTIVE'), count('HIDDEN')]);
-      return { ALL, ACTIVE, HIDDEN } as Record<ProductStatus | 'ALL', number>;
+      const [ALL, ACTIVE, HIDDEN, REMOVED] = await Promise.all([
+        count(),
+        count('ACTIVE'),
+        count('HIDDEN'),
+        count('REMOVED'),
+      ]);
+      return { ALL, ACTIVE, HIDDEN, REMOVED } as Record<ProductStatus | 'ALL', number>;
     },
     placeholderData: keepPreviousData,
   });
@@ -297,6 +304,7 @@ export function ProductsPage() {
                       </td>
                       <td className="px-3 py-3">
                         <ProductStatusBadge status={p.status} />
+                        <RemovedReasonLine reason={p.removedReason} />
                         <div
                           className="mt-1 text-[11px] whitespace-nowrap text-muted-foreground"
                           title="Lần sửa gần nhất"
@@ -358,6 +366,7 @@ export function ProductsPage() {
                       Đã bán <b className="text-ink">{p.soldCount.toLocaleString('vi-VN')}</b>
                     </span>
                   </div>
+                  <RemovedReasonLine reason={p.removedReason} className="max-w-none text-xs" />
                   <div className="mt-3 flex items-center gap-2 border-t pt-3">
                     <Button asChild size="sm" variant="outline" className="flex-1 rounded-full">
                       <Link to={`/kenh-nguoi-ban/san-pham/${p.id}`}>
@@ -508,9 +517,15 @@ function RowMenu({
           <History /> Lịch sử tồn kho
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => void toggle()}>
-          {hide ? <EyeOff /> : <Eye />} {hide ? 'Ẩn khỏi sàn' : 'Hiện lại (bán tiếp)'}
-        </DropdownMenuItem>
+        {row.status === 'REMOVED' ? (
+          <DropdownMenuItem disabled>
+            <EyeOff /> Bị gỡ: không tự bật bán được
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onSelect={() => void toggle()}>
+            {hide ? <EyeOff /> : <Eye />} {hide ? 'Ẩn khỏi sàn' : 'Hiện lại (bán tiếp)'}
+          </DropdownMenuItem>
+        )}
         {row.status === 'ACTIVE' && shopActive && (
           <DropdownMenuItem asChild>
             <Link to={`/san-pham/${row.id}`} target="_blank" rel="noreferrer">

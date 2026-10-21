@@ -32,6 +32,7 @@ import { ProductGallery } from '@/components/catalog/product-gallery';
 import { QuantityStepper } from '@/components/catalog/quantity-stepper';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
+import { ReportButton } from '@/components/moderation/report-button';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAddToCart } from '@/hooks/use-cart';
@@ -173,6 +174,12 @@ function ProductView({ product }: { product: ProductDetail }) {
                   {product.shop.name}
                 </Link>
               </span>
+              <ReportButton
+                targetType="PRODUCT"
+                targetId={product.id}
+                shopId={product.shop.id}
+                className="-my-1 sm:ml-auto"
+              />
             </div>
             <div className="mt-4">
               {canBuy && available <= LOW_STOCK ? (
