@@ -10,6 +10,7 @@ import {
   ProductResults,
 } from '@/components/catalog/browse-parts';
 import { VoucherTicket } from '@/components/catalog/voucher-ticket';
+import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import { ReportButton } from '@/components/moderation/report-button';
@@ -100,7 +101,10 @@ function ShopHeader({ shop }: { shop: PublicShop }) {
               {shop.provinceName && <Stat icon={MapPin}>Gửi hàng từ {shop.provinceName}</Stat>}
             </div>
           </div>
-          <ShopEngagement shop={shop} />
+          <ShopEngagement
+            shop={shop}
+            actions={<ChatWithShopButton shopId={shop.id} className="h-10 rounded-full" />}
+          />
         </div>
         {shop.description && (
           <p className="mt-4 max-w-3xl text-sm leading-6 whitespace-pre-line text-ink/70">

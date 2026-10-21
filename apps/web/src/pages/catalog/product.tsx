@@ -21,6 +21,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { ProductDescription } from '@/components/catalog/product-description';
+import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
 import {
   DiscountBadge,
   ProductCard,
@@ -276,6 +277,11 @@ function ProductView({ product }: { product: ProductDetail }) {
               )}
               {canBuy ? 'Thêm vào giỏ hàng' : 'Phân loại này đã hết hàng'}
             </Button>
+            <ChatWithShopButton
+              shopId={product.shop.id}
+              productId={product.id}
+              className="mt-3 h-11 w-full rounded-xl"
+            />
           </div>
         </section>
 

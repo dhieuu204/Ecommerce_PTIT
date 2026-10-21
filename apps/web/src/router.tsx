@@ -92,6 +92,16 @@ export const router = createBrowserRouter([
               })),
           },
           {
+            path: 'tin-nhan',
+            lazy: () =>
+              import('@/pages/chat/buyer-chat').then((m) => ({ Component: m.BuyerChatPage })),
+          },
+          {
+            path: 'tin-nhan/:conversationId',
+            lazy: () =>
+              import('@/pages/chat/buyer-chat').then((m) => ({ Component: m.BuyerChatPage })),
+          },
+          {
             path: 'tai-khoan',
             element: <AccountLayout />,
             children: [
@@ -159,6 +169,13 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/account/followed-shops').then((m) => ({
                     Component: m.FollowedShopsPage,
+                  })),
+              },
+              {
+                path: 'thong-bao',
+                lazy: () =>
+                  import('@/pages/account/notifications').then((m) => ({
+                    Component: m.NotificationsPage,
                   })),
               },
               {
@@ -259,6 +276,16 @@ export const router = createBrowserRouter([
                   import('@/pages/seller/reviews').then((m) => ({
                     Component: m.SellerReviewsPage,
                   })),
+              },
+              {
+                path: 'tin-nhan',
+                lazy: () =>
+                  import('@/pages/seller/chat').then((m) => ({ Component: m.SellerChatPage })),
+              },
+              {
+                path: 'tin-nhan/:conversationId',
+                lazy: () =>
+                  import('@/pages/seller/chat').then((m) => ({ Component: m.SellerChatPage })),
               },
               {
                 path: 'ho-so-shop',

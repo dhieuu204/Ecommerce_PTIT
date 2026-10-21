@@ -64,6 +64,9 @@ export function applyLogin(result: LoginResult) {
   setSession({ status: 'user', user: result.user });
 }
 
+/** Vé đang dùng (để kết nối Socket.IO), null khi chưa đăng nhập */
+export const getAccessToken = () => accessToken;
+
 export function clearSession() {
   accessToken = null;
   setSession({ status: 'guest' });

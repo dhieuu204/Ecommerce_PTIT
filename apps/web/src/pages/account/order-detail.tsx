@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
+import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import {
@@ -524,6 +525,11 @@ function ShopOrderCard({
           </div>
         </div>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
+          <ChatWithShopButton
+            shopId={so.shop.id}
+            shopOrder={{ id: so.id, code: so.code }}
+            size="sm"
+          />
           {so.history && so.history.length > 0 && (
             <Button
               variant="ghost"

@@ -10,6 +10,7 @@ import {
   type ShopApplicationSubmittedPayload,
 } from '@san/shared';
 import { LocationsService } from '../locations/locations.service';
+import { Notifier } from '../notifications/notifier.service';
 import { PrismaService } from '../prisma.service';
 import { StorageService } from '../uploads/storage.service';
 import { shopLogoPrefix } from '../uploads/uploads.controller';
@@ -97,6 +98,7 @@ export class ShopsService implements OnModuleInit {
     private readonly events: EventBus,
     private readonly locations: LocationsService,
     private readonly storage: StorageService,
+    private readonly notifier: Notifier,
   ) {}
 
   onModuleInit(): void {
@@ -304,6 +306,16 @@ export class ShopsService implements OnModuleInit {
         decidedAt: new Date(p.decidedAt),
       },
     });
+    // P6 (MSG-02): báo chủ shop kết quả duyệt (có email)
+    const shop = await tx.shop.findUniqueOrThrow({ where: { id: p.shopId } });
+    await this.notifier.shopApplication(
+      tx,
+      p.shopId,
+      app.type,
+      status,
+      app.type === 'REGISTER' ? data.name : (shop.name ?? data.name),
+      reason,
+    );
   }
 
   // ----- phần dùng chung -----

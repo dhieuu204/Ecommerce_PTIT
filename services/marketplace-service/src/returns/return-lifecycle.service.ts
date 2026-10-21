@@ -15,6 +15,7 @@ import {
   SYSTEM_USER_ID,
   type Actor,
 } from '../orders/order-lifecycle.service';
+import { Notifier } from '../notifications/notifier.service';
 import { MarketSetting } from '../settings';
 import { ShipmentsService, type ReturnShipmentEvent } from '../shipping/shipments.service';
 import type {
@@ -93,6 +94,7 @@ export class ReturnLifecycle implements OnModuleInit {
     private readonly settings: SettingsService,
     private readonly orders: OrderLifecycle,
     private readonly shipments: ShipmentsService,
+    private readonly notifier: Notifier,
   ) {}
 
   onModuleInit(): void {
@@ -141,6 +143,7 @@ export class ReturnLifecycle implements OnModuleInit {
       refundAmount: ret.refundAmount,
       requestedAt: now.toISOString(),
     });
+    await this.notifier.returnRequested(tx, ret);
     return ret;
   }
 
@@ -160,6 +163,7 @@ export class ReturnLifecycle implements OnModuleInit {
       await this.resolveRefund(tx, ret, actor, ret.refundAmount, {
         refundWithoutReturn: true,
         note: note ?? 'Shop chấp nhận, hoàn tiền không cần gửi trả hàng',
+        accepted: true,
       });
       return 'REFUNDING';
     }
@@ -183,13 +187,14 @@ export class ReturnLifecycle implements OnModuleInit {
     if (ret.status !== 'REQUESTED') return false;
     const hours = await this.settings.get(MarketSetting.returnDisputeHours);
     const now = new Date();
+    const disputeBefore = new Date(now.getTime() + hours * hour);
     await tx.returnRequest.update({
       where: { id: ret.id },
       data: {
         status: 'REJECTED',
         sellerNote: reason,
         sellerImages: images,
-        deadline: new Date(now.getTime() + hours * hour),
+        deadline: disputeBefore,
         history: withHistory(ret, {
           ...who(actor),
           status: 'REJECTED',
@@ -197,6 +202,7 @@ export class ReturnLifecycle implements OnModuleInit {
         }),
       },
     });
+    await this.notifier.returnRejected(tx, ret, reason, disputeBefore);
     return true;
   }
 
@@ -505,15 +511,17 @@ export class ReturnLifecycle implements OnModuleInit {
       (a, ri) => a + (lines.find((l) => l.id === ri.orderItemId)?.weight ?? 0) * ri.quantity,
       0,
     );
+    const shipBefore = new Date(Date.now() + days * day);
     await tx.returnRequest.update({
       where: { id: ret.id },
       data: {
         status: 'SHIPPING_BACK',
         refundWithoutReturn: false,
-        deadline: new Date(Date.now() + days * day),
+        deadline: shipBefore,
         history: withHistory(ret, { ...who(actor), status: 'SHIPPING_BACK', note }),
       },
     });
+    await this.notifier.returnAccepted(tx, ret, { shipBefore });
     await this.shipments.prepareReturn(tx, {
       shopOrderId: ret.shopOrderId,
       code: ret.code,
@@ -587,7 +595,13 @@ export class ReturnLifecycle implements OnModuleInit {
     ret: ReturnRow,
     actor: Actor,
     amount: number,
-    opts: { refundWithoutReturn?: boolean; platformCovers?: boolean; note: string },
+    opts: {
+      refundWithoutReturn?: boolean;
+      platformCovers?: boolean;
+      note: string;
+      /** Shop (hoặc hệ thống) vừa chấp nhận và hoàn ngay: báo "được chấp nhận" thay cho "được hoàn tiền" */
+      accepted?: boolean;
+    },
   ): Promise<void> {
     const now = new Date();
     const full = amount >= ret.refundAmount;
@@ -617,6 +631,8 @@ export class ReturnLifecycle implements OnModuleInit {
       }
     }
     await this.publishResolved(tx, ret, 'REFUND', amount, opts.platformCovers ?? false, now);
+    if (opts.accepted) await this.notifier.returnAccepted(tx, ret, { refundNow: amount });
+    else await this.notifier.returnRefunding(tx, ret, amount);
     await this.orders.complete(
       tx,
       ret.shopOrderId,
@@ -644,6 +660,10 @@ export class ReturnLifecycle implements OnModuleInit {
       },
     });
     await this.publishResolved(tx, ret, 'NO_REFUND', 0, false, now);
+    // Người mua tự hủy thì không cần báo người mua
+    if (actor.type !== 'BUYER') {
+      await this.notifier.returnClosed(tx, ret, status === 'CANCELLED', note);
+    }
     await this.orders.complete(
       tx,
       ret.shopOrderId,

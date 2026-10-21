@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Heart, Loader2, Plus, Users } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
+import type { ReactNode } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useMyShop } from '@/hooks/use-my-shop';
@@ -127,7 +128,8 @@ export function ProductEngagementBar({ product }: { product: ProductDetail }) {
  * Sao shop, số người theo dõi và nút Theo dõi / Đang theo dõi (đầu trang shop). Shop của chính mình thì
  * không hiện nút.
  */
-export function ShopEngagement({ shop }: { shop: PublicShop }) {
+/** `actions`: nút đặt cạnh nút Theo dõi (ví dụ Chat với shop). */
+export function ShopEngagement({ shop, actions }: { shop: PublicShop; actions?: ReactNode }) {
   const { session, userId, check } = useRequireLogin();
   const qc = useQueryClient();
   const viewer = useViewerState<PublicShop>(
@@ -180,23 +182,26 @@ export function ShopEngagement({ shop }: { shop: PublicShop }) {
           người theo dõi
         </span>
       </div>
-      {!isOwner && session.status !== 'loading' && (
-        <Button
-          variant={state.following ? 'outline' : 'default'}
-          className="h-10 w-full rounded-full px-6 md:w-auto"
-          disabled={toggle.isPending}
-          onClick={() => check() && toggle.mutate(!state.following)}
-        >
-          {toggle.isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : state.following ? (
-            <Check className="size-4" />
-          ) : (
-            <Plus className="size-4" />
-          )}
-          {state.following ? 'Đang theo dõi' : 'Theo dõi'}
-        </Button>
-      )}
+      <div className="flex flex-wrap gap-2 md:justify-end">
+        {!isOwner && session.status !== 'loading' && (
+          <Button
+            variant={state.following ? 'outline' : 'default'}
+            className="h-10 flex-1 rounded-full px-6 md:flex-none"
+            disabled={toggle.isPending}
+            onClick={() => check() && toggle.mutate(!state.following)}
+          >
+            {toggle.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : state.following ? (
+              <Check className="size-4" />
+            ) : (
+              <Plus className="size-4" />
+            )}
+            {state.following ? 'Đang theo dõi' : 'Theo dõi'}
+          </Button>
+        )}
+        {actions}
+      </div>
     </div>
   );
 }

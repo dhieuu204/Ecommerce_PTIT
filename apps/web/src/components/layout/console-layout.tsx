@@ -2,13 +2,14 @@ import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { UserMenu } from './user-menu';
 
 export interface ConsoleMenuGroup {
   title: string;
-  items: Array<{ to: string; label: string; end?: boolean }>;
+  items: Array<{ to: string; label: string; end?: boolean; badge?: React.ReactNode }>;
 }
 
 interface ConsoleLayoutProps {
@@ -67,6 +68,7 @@ function MenuList({
               }
             >
               {item.label}
+              {item.badge}
             </NavLink>
           ))}
         </div>
@@ -142,6 +144,7 @@ export function ConsoleLayout({
             >
               {headerInfo}
             </div>
+            <NotificationBell tone={dark ? 'dark' : 'light'} />
             <UserMenu tone={dark ? 'dark' : 'light'} />
           </div>
         </div>

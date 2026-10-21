@@ -20,6 +20,8 @@ import { ReportsModule } from './reports/reports.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { FollowsModule } from './follows/follows.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { ChatModule } from './chat/chat.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -36,6 +38,8 @@ import { FollowsModule } from './follows/follows.module';
     SettingsModule.forRoot(MARKET_SETTINGS),
     CoreModule,
     NotificationsModule,
+    RealtimeModule,
+    ChatModule,
     LocationsModule,
     OrdersModule,
     ReturnsModule,
