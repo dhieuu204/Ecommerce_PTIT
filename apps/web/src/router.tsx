@@ -241,6 +241,13 @@ export const router = createBrowserRouter([
                     Component: m.SellerFinancePage,
                   })),
               },
+              {
+                path: 'bao-cao',
+                lazy: () =>
+                  import('@/pages/seller/reports').then((m) => ({
+                    Component: m.SellerReportsPage,
+                  })),
+              },
             ],
           },
         ],
@@ -353,6 +360,18 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/adjustments').then((m) => ({
                         Component: m.AdjustmentsPage,
+                      })),
+                  },
+                ],
+              },
+              {
+                element: <RequirePermission any={['SYSTEM', 'FINANCE']} />,
+                children: [
+                  {
+                    path: 'bao-cao',
+                    lazy: () =>
+                      import('@/pages/admin/reports').then((m) => ({
+                        Component: m.AdminReportsPage,
                       })),
                   },
                 ],

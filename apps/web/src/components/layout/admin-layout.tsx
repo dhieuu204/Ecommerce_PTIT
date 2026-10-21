@@ -54,6 +54,10 @@ const GROUPS: AdminMenuGroup[] = [
       { to: '/quan-tri/nhat-ky', label: 'Nhật ký thao tác', any: ['SYSTEM'] },
     ],
   },
+  {
+    title: 'Báo cáo',
+    items: [{ to: '/quan-tri/bao-cao', label: 'Báo cáo của sàn', any: ['SYSTEM', 'FINANCE'] }],
+  },
 ];
 
 /** Menu của một admin: bỏ mục không có quyền, bỏ nhóm rỗng */

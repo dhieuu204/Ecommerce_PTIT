@@ -16,6 +16,7 @@ import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReturnsModule } from './returns/returns.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ReportsModule } from './reports/reports.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -42,6 +43,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     VouchersModule,
     CategoriesModule,
     ProductsModule,
+    ReportsModule,
     // Sau ShopsModule: GET /shops/{shopId} (công khai) không được che GET /shops/me
     CatalogModule,
   ],

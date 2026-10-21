@@ -27,6 +27,10 @@ const MENU: ConsoleMenuGroup[] = [
     items: [{ to: '/kenh-nguoi-ban/tai-chinh', label: 'Ví và rút tiền' }],
   },
   {
+    title: 'Báo cáo',
+    items: [{ to: '/kenh-nguoi-ban/bao-cao', label: 'Vận hành và tài chính' }],
+  },
+  {
     title: 'Shop',
     items: [
       { to: '/kenh-nguoi-ban/ho-so-shop', label: 'Hồ sơ shop' },
