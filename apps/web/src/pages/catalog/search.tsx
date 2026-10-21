@@ -14,7 +14,7 @@ import { findCategory, useCategories } from '@/hooks/use-catalog';
 import type { CategoryNode, ProductSort } from '@/lib/catalog-types';
 import { cn } from '@/lib/utils';
 
-const SORTS: ProductSort[] = ['newest', 'best_selling', 'price_asc', 'price_desc'];
+const SORTS: ProductSort[] = ['newest', 'best_selling', 'rating', 'price_asc', 'price_desc'];
 
 /** Gợi ý khi không tìm thấy: các danh mục cấp 1 dạng ô có icon */
 function CategorySuggestions({ tree }: { tree: CategoryNode[] }) {
@@ -85,13 +85,14 @@ export function SearchPage() {
       sort: sort === 'relevance' && !q ? 'newest' : sort,
       minPrice: browse.state.minPrice,
       maxPrice: browse.state.maxPrice,
+      minRating: browse.state.minRating,
       page: browse.state.page,
     },
     // Chờ cây danh mục để không tìm nhầm khi đường dẫn có ?category=
     !categorySlug || !categories.isPending,
   );
 
-  const filtered = !!selected || browse.hasPriceFilter;
+  const filtered = !!selected || browse.hasPriceFilter || browse.hasRatingFilter;
   const total = products.data?.total;
   const setCategory = (slug?: string) => browse.update({ category: slug });
 
@@ -179,6 +180,8 @@ export function SearchPage() {
           minPrice={browse.state.minPrice}
           maxPrice={browse.state.maxPrice}
           onPrice={browse.setPrice}
+          minRating={browse.state.minRating}
+          onRating={browse.setRating}
           total={total}
         />
       )}
@@ -192,7 +195,12 @@ export function SearchPage() {
               <NoProducts
                 filtered
                 onClear={() =>
-                  browse.update({ category: undefined, minPrice: undefined, maxPrice: undefined })
+                  browse.update({
+                    category: undefined,
+                    minPrice: undefined,
+                    maxPrice: undefined,
+                    minRating: undefined,
+                  })
                 }
                 text={
                   q

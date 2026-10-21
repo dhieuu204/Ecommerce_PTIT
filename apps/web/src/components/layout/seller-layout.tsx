@@ -29,6 +29,7 @@ const MENU: ConsoleMenuGroup[] = [
   {
     title: 'Shop',
     items: [
+      { to: '/kenh-nguoi-ban/danh-gia', label: 'Đánh giá' },
       { to: '/kenh-nguoi-ban/ho-so-shop', label: 'Hồ sơ shop' },
       { to: '/kenh-nguoi-ban/ho-so-shop#dia-chi-lay-hang', label: 'Địa chỉ lấy hàng' },
     ],

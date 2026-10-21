@@ -16,6 +16,8 @@ import { ProductsModule } from './products/products.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReturnsModule } from './returns/returns.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { FollowsModule } from './follows/follows.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -44,6 +46,9 @@ import { NotificationsModule } from './notifications/notifications.module';
     ProductsModule,
     // Sau ShopsModule: GET /shops/{shopId} (công khai) không được che GET /shops/me
     CatalogModule,
+    // P6: đánh giá (ENG-01, ENG-02), theo dõi shop và thả tim (ENG-03)
+    ReviewsModule,
+    FollowsModule,
   ],
   controllers: [HealthController],
 })

@@ -14,6 +14,8 @@ export interface ProductSearchParams {
   shopId?: string;
   minPrice?: number;
   maxPrice?: number;
+  /** P6: sao trung bình từ số này trở lên (1–5) */
+  minRating?: number;
   sort?: ProductSort;
   page?: number;
   pageSize?: number;
@@ -38,6 +40,7 @@ export const SORT_LABELS: Record<ProductSort, string> = {
   best_selling: 'Bán chạy',
   price_asc: 'Giá thấp → cao',
   price_desc: 'Giá cao → thấp',
+  rating: 'Đánh giá cao',
 };
 
 const SORTS = Object.keys(SORT_LABELS) as ProductSort[];
@@ -54,6 +57,8 @@ export interface BrowseState {
   sortExplicit: boolean;
   minPrice?: number;
   maxPrice?: number;
+  /** Lọc sao (?minRating=), 1–5 */
+  minRating?: number;
   page: number;
 }
 
@@ -72,6 +77,7 @@ export function useBrowseState(defaultSort: ProductSort = 'newest') {
       sortExplicit,
       minPrice: toInt(params.get('minPrice')),
       maxPrice: toInt(params.get('maxPrice')),
+      minRating: ((r) => (r && r >= 1 && r <= 5 ? r : undefined))(toInt(params.get('minRating'))),
       page: Math.max(1, toInt(params.get('page')) ?? 1),
     };
   }, [params, defaultSort]);
@@ -107,6 +113,8 @@ export function useBrowseState(defaultSort: ProductSort = 'newest') {
     update,
     setSort: (sort: ProductSort) => update({ sort: sort === defaultSort ? undefined : sort }),
     setPrice: (minPrice?: number, maxPrice?: number) => update({ minPrice, maxPrice }),
+    setRating: (minRating?: number) => update({ minRating }),
+    hasRatingFilter: state.minRating !== undefined,
     setPage,
     hasPriceFilter: state.minPrice !== undefined || state.maxPrice !== undefined,
   };

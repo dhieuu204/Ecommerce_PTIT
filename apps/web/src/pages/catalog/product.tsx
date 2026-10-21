@@ -30,6 +30,8 @@ import {
 } from '@/components/catalog/product-card';
 import { ProductGallery } from '@/components/catalog/product-gallery';
 import { QuantityStepper } from '@/components/catalog/quantity-stepper';
+import { ProductEngagementBar } from '@/components/reviews/engagement';
+import { ReviewsSection } from '@/components/reviews/review-list';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import { Button } from '@/components/ui/button';
@@ -149,6 +151,7 @@ function ProductView({ product }: { product: ProductDetail }) {
             <h1 className="text-xl font-bold leading-snug text-navy sm:text-2xl lg:text-[1.75rem]">
               {product.name}
             </h1>
+            <ProductEngagementBar product={product} />
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink/60">
               <span>
                 Đã bán <b className="font-semibold text-ink">{formatSold(product.soldCount)}</b>
@@ -284,6 +287,7 @@ function ProductView({ product }: { product: ProductDetail }) {
           </div>
         </section>
 
+        <ReviewsSection source="product" id={product.id} className="mt-6" />
         <ProductRow
           title="Sản phẩm liên quan"
           query={{ categoryId: category.id }}

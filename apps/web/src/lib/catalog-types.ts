@@ -33,7 +33,8 @@ export interface AdminCategory {
 
 // ----- Xem hàng công khai (CAT-04, SRC-01) -----
 
-export type ProductSort = 'relevance' | 'newest' | 'price_asc' | 'price_desc' | 'best_selling';
+export type ProductSort =
+  'relevance' | 'newest' | 'price_asc' | 'price_desc' | 'best_selling' | 'rating';
 
 /** Một thẻ sản phẩm trong GET /products */
 export interface ProductCardData {
@@ -51,6 +52,9 @@ export interface ProductCardData {
   inStock: boolean;
   shop: { id: string; name: string };
   createdAt: string;
+  /** P6: sao trung bình (null khi chưa có đánh giá) và số đánh giá */
+  ratingAvg: number | null;
+  ratingCount: number;
 }
 
 export interface CategoryRef {
@@ -96,6 +100,11 @@ export interface ProductDetail {
     productCount: number;
     joinedAt: string;
   };
+  /** P6: sao, số đánh giá, số tim, người xem đã thả tim chưa */
+  ratingAvg: number | null;
+  ratingCount: number;
+  likeCount: number;
+  liked: boolean;
 }
 
 /** GET /shops/{shopId} */
@@ -109,6 +118,11 @@ export interface PublicShop {
   joinedAt: string;
   status: 'ACTIVE' | 'SUSPENDED';
   suspended: boolean;
+  /** P6: sao shop, số đánh giá, số người theo dõi, người xem đang theo dõi chưa */
+  ratingAvg: number | null;
+  ratingCount: number;
+  followerCount: number;
+  following: boolean;
 }
 
 // ----- Giỏ hàng (CRT-01) -----

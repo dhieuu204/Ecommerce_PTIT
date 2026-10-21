@@ -572,8 +572,8 @@ P6 (trải nghiệm và hoàn thiện): ENG-01..03, MSG-01, MSG-02, MOD-01, RPT-
 | POST `/me/reviews` | Người mua | ENG-01 | `{ orderItemId, rating (1–5), content (0–1000), images (0–5 đường dẫn) }`. Dòng hàng của người khác → 404; đơn chưa hoàn tất hoặc đã trả hết → 409 `REVIEW_NOT_ALLOWED`; quá hạn → 409 `REVIEW_WINDOW_CLOSED`; đã đánh giá → 409 `ALREADY_REVIEWED`. Cộng sao vào sản phẩm và shop, báo chủ shop (`SHOP_REVIEW_NEW`). |
 | PUT `/me/reviews/{reviewId}` | Người mua | ENG-01 | Gửi lại `rating`, `content`, `images`. Đã sửa rồi → 409 `REVIEW_EDIT_USED`; quá hạn → 409 `REVIEW_WINDOW_CLOSED`. Sao của sản phẩm và shop đổi theo chênh lệch. |
 | GET `/products/{productId}/reviews` | Mọi người | ENG-01 | Lọc `rating` (1–5), `withImages=true`, phân trang, mới nhất trước. Kèm `summary`: `ratingAvg`, `ratingCount`, số đánh giá từng mức sao, số có ảnh. Tên người mua đã che bớt. Sản phẩm không đang bán → 404. |
-| GET `/shops/{shopId}/reviews` | Mọi người | ENG-01 | Như trên cho mọi sản phẩm của shop, mỗi đánh giá kèm tên và mã sản phẩm. |
-| GET `/shops/me/reviews` | Chủ shop | ENG-02 | Lọc `rating`, `replied` (`true`/`false`), phân trang, mới nhất trước; kèm tên sản phẩm, mã đơn con. |
+| GET `/shops/{shopId}/reviews` | Mọi người | ENG-01 | Như trên cho mọi sản phẩm của shop (shop đang hoạt động hoặc bị đình chỉ; chưa duyệt → 404), mỗi đánh giá kèm tên và mã sản phẩm. |
+| GET `/shops/me/reviews` | Chủ shop | ENG-02 | Lọc `rating`, `replied` (`true`/`false`), phân trang, mới nhất trước; kèm tên sản phẩm, mã đơn con. Kèm `summary` như trên thêm `unreplied` (số chưa trả lời). Tên người mua cũng che bớt. Chưa có shop → 409 `SHOP_NOT_ACTIVE`. |
 | PUT `/shops/me/reviews/{reviewId}/reply` | Chủ shop | ENG-02 | `{ content }` (1–1000). Lần đầu là trả lời, sau đó là sửa câu trả lời. Đánh giá của shop khác → 404. Không sửa được nội dung của người mua. |
 
 **Theo dõi shop, thả tim sản phẩm**
@@ -585,7 +585,7 @@ P6 (trải nghiệm và hoàn thiện): ENG-01..03, MSG-01, MSG-02, MOD-01, RPT-
 | PUT, DELETE `/products/{productId}/like` | Đã đăng nhập | ENG-03 | Thả tim / bỏ tim, làm lại không lỗi. Thả tim chỉ với hàng đang bán (404); bỏ tim luôn được. Trả `{ liked, likeCount }`. |
 | GET `/me/liked-products` | Đã đăng nhập | ENG-03 | Sản phẩm đã thả tim dạng thẻ như `GET /products`, kèm `available` (false = không còn bán), phân trang, mới thả tim trước. |
 | GET `/products/{productId}`, GET `/shops/{shopId}` | Mọi người | ENG-01, ENG-03 | Thêm `ratingAvg`, `ratingCount`; sản phẩm thêm `likeCount`, `liked`; shop thêm `followerCount`, `following` (`false` khi chưa đăng nhập). |
-| GET `/shops/me` | Chủ shop | ENG-03 | Thêm `followerCount`, `ratingAvg`, `ratingCount`. Seller chỉ thấy số người theo dõi, không thấy danh sách. |
+| GET `/shops/me` | Chủ shop | ENG-03 | Thêm `followerCount`, `ratingAvg`, `ratingCount` trong `shop`. Seller chỉ thấy số người theo dõi, không thấy danh sách. |
 
 **Tìm kiếm (bổ sung P6)**
 

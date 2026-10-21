@@ -131,6 +131,8 @@ describeDb('Xem hàng công khai (CAT-04, SRC-01)', () => {
         inStock: true,
         shop: { id: shopA.id, name: 'Shop Táo Xanh' },
         createdAt: expect.any(String),
+        ratingAvg: null,
+        ratingCount: 0,
       });
       expect(items.find((c) => c.id === p.case!.id)).toMatchObject({
         originalPrice: null,
@@ -273,6 +275,10 @@ describeDb('Xem hàng công khai (CAT-04, SRC-01)', () => {
           productCount: 2,
           joinedAt: expect.any(String),
         },
+        ratingAvg: null,
+        ratingCount: 0,
+        likeCount: 0,
+        liked: false,
       });
       await t.prisma.productVariant.updateMany({
         where: { productId: p.iphone!.id },
@@ -318,6 +324,10 @@ describeDb('Xem hàng công khai (CAT-04, SRC-01)', () => {
         joinedAt: approvedAt.toISOString(),
         status: 'ACTIVE',
         suspended: false,
+        ratingAvg: null,
+        ratingCount: 0,
+        followerCount: 0,
+        following: false,
       });
     });
 

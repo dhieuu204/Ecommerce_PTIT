@@ -143,6 +143,25 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'danh-gia',
+                lazy: () =>
+                  import('@/pages/account/reviews').then((m) => ({ Component: m.MyReviewsPage })),
+              },
+              {
+                path: 'yeu-thich',
+                lazy: () =>
+                  import('@/pages/account/liked-products').then((m) => ({
+                    Component: m.LikedProductsPage,
+                  })),
+              },
+              {
+                path: 'shop-theo-doi',
+                lazy: () =>
+                  import('@/pages/account/followed-shops').then((m) => ({
+                    Component: m.FollowedShopsPage,
+                  })),
+              },
+              {
                 path: 'shop',
                 lazy: () =>
                   import('@/pages/account/my-shop').then((m) => ({ Component: m.MyShopPage })),
@@ -225,6 +244,13 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import('@/pages/seller/return-detail').then((m) => ({
                     Component: m.SellerReturnDetailPage,
+                  })),
+              },
+              {
+                path: 'danh-gia',
+                lazy: () =>
+                  import('@/pages/seller/reviews').then((m) => ({
+                    Component: m.SellerReviewsPage,
                   })),
               },
               {
