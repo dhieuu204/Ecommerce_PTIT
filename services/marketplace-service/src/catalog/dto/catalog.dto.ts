@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PageQuery } from '@san/nest-common';
 import { Transform, Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 export const PRODUCT_SORTS = [
   'relevance',
@@ -9,6 +9,8 @@ export const PRODUCT_SORTS = [
   'price_asc',
   'price_desc',
   'best_selling',
+  // P6 (SRC-01): sao trung bình cao trước, bằng nhau thì nhiều đánh giá trước, chưa có đánh giá xếp cuối
+  'rating',
 ] as const;
 export type ProductSort = (typeof PRODUCT_SORTS)[number];
 
@@ -44,6 +46,14 @@ export class ProductSearchQuery extends PageQuery {
   @IsOptional()
   @IsUUID('all', { message: 'Shop không hợp lệ.' })
   shopId?: string;
+
+  /** Sao trung bình (làm tròn 1 chữ số) từ số này trở lên, 1–5; sản phẩm chưa có đánh giá không ra (P6) */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Số sao phải là số nguyên từ 1 đến 5.' })
+  @Min(1, { message: 'Số sao phải là số nguyên từ 1 đến 5.' })
+  @Max(5, { message: 'Số sao phải là số nguyên từ 1 đến 5.' })
+  minRating?: number;
 
   /** Mặc định: relevance khi có q, newest khi không có */
   @ApiPropertyOptional({ enum: PRODUCT_SORTS })

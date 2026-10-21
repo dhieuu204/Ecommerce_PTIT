@@ -18,6 +18,9 @@ export const productImagePrefix = (userId: string) => `product-images/${userId}/
 /** Thư mục ảnh bằng chứng trả hàng của một người, trong bucket riêng tư (P5: RET-01, DIS-01). */
 export const returnImagePrefix = (userId: string) => `return-images/${userId}/`;
 
+/** Thư mục ảnh đánh giá của một người, bucket công khai; khi gửi đánh giá kiểm ảnh nằm trong đây (P6: ENG-01). */
+export const reviewImagePrefix = (userId: string) => `review-images/${userId}/`;
+
 /** Giới hạn cứng khi nhận file, lớn hơn mức cho phép để còn trả câu báo lỗi tiếng Việt */
 const HARD_LIMIT_BYTES = 10 * 1024 * 1024;
 
@@ -108,6 +111,31 @@ export class UploadsController {
       throw new AppError(503, 'STORAGE_UNAVAILABLE', 'Chưa lưu được ảnh, bạn thử lại sau ít phút.');
     }
     return { key };
+  }
+
+  /**
+   * Tải ảnh đánh giá (người mua): JPG/PNG/WebP, tối đa 5 MB. Lưu bucket công khai, trả đường dẫn để gửi
+   * kèm đánh giá (ENG-01)
+   */
+  @Post('review-image')
+  @HttpCode(201)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } },
+  })
+  @ApiResponse({ status: 400, description: 'FILE_REQUIRED, INVALID_IMAGE hoặc FILE_TOO_LARGE' })
+  @ApiResponse({ status: 503, description: 'STORAGE_UNAVAILABLE: chưa lưu được ảnh' })
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: HARD_LIMIT_BYTES, files: 1 } }))
+  async reviewImage(
+    @CurrentUser() user: AuthUser,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<{ url: string }> {
+    return this.save(
+      file,
+      reviewImagePrefix(user.id),
+      this.config.reviewImageMaxMb,
+      'Vui lòng chọn ảnh.',
+    );
   }
 
   /** Kiểm loại và cỡ ảnh rồi lưu vào thư mục `prefix` trong bucket công khai */

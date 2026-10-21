@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils';
 const MENU = [
   { to: '/tai-khoan/don-mua', label: 'Đơn mua' },
   { to: '/tai-khoan/tra-hang', label: 'Trả hàng/Hoàn tiền' },
+  { to: '/tai-khoan/danh-gia', label: 'Đánh giá của tôi' },
+  { to: '/tai-khoan/yeu-thich', label: 'Sản phẩm yêu thích' },
+  { to: '/tai-khoan/shop-theo-doi', label: 'Shop đang theo dõi' },
   { to: '/tai-khoan/ho-so', label: 'Hồ sơ của tôi' },
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu' },
   { to: '/tai-khoan/dia-chi', label: 'Sổ địa chỉ' },

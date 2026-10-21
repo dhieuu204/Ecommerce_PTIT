@@ -33,6 +33,7 @@ import {
 } from '@/components/orders/order-parts';
 import { PAYMENT_METHOD, ShipmentPanel } from '@/components/orders/shipment-parts';
 import { ReturnStatusBadge } from '@/components/returns/return-parts';
+import { ReviewOrderButton } from '@/components/reviews/review-order-button';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, api } from '@/lib/api';
@@ -545,6 +546,7 @@ function ShopOrderCard({
               </Link>
             </Button>
           )}
+          <ReviewOrderButton status={so.status} />
           {so.canConfirmReceived && (
             <Button size="sm" onClick={onReceived} className="rounded-lg">
               <PackageCheck className="size-4" /> Đã nhận hàng

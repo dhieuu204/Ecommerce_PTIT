@@ -13,11 +13,13 @@ import { VoucherTicket } from '@/components/catalog/voucher-ticket';
 import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import { ReportButton } from '@/components/moderation/report-button';
+import { ShopEngagement } from '@/components/reviews/engagement';
+import { ShopTabs } from '@/components/reviews/shop-tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, ApiError, api } from '@/lib/api';
 import type { ProductSort, PublicShop, Voucher } from '@/lib/catalog-types';
 
-const SORTS: ProductSort[] = ['newest', 'best_selling', 'price_asc', 'price_desc'];
+const SORTS: ProductSort[] = ['newest', 'best_selling', 'rating', 'price_asc', 'price_desc'];
 
 const monthYear = new Intl.DateTimeFormat('vi-VN', {
   timeZone: 'Asia/Ho_Chi_Minh',
@@ -98,6 +100,7 @@ function ShopHeader({ shop }: { shop: PublicShop }) {
               {shop.provinceName && <Stat icon={MapPin}>Gửi hàng từ {shop.provinceName}</Stat>}
             </div>
           </div>
+          <ShopEngagement shop={shop} />
         </div>
         {shop.description && (
           <p className="mt-4 max-w-3xl text-sm leading-6 whitespace-pre-line text-ink/70">
@@ -142,6 +145,7 @@ function ShopProducts({ shopId }: { shopId: string }) {
     sort: state.sort,
     minPrice: state.minPrice,
     maxPrice: state.maxPrice,
+    minRating: state.minRating,
     page: state.page,
   });
   return (
@@ -157,6 +161,8 @@ function ShopProducts({ shopId }: { shopId: string }) {
         minPrice={state.minPrice}
         maxPrice={state.maxPrice}
         onPrice={browse.setPrice}
+        minRating={state.minRating}
+        onRating={browse.setRating}
         total={products.data?.total}
       />
       <div className="mt-5">
@@ -165,11 +171,13 @@ function ShopProducts({ shopId }: { shopId: string }) {
           onPage={browse.setPage}
           empty={
             <NoProducts
-              filtered={browse.hasPriceFilter}
-              onClear={() => browse.setPrice()}
+              filtered={browse.hasPriceFilter || browse.hasRatingFilter}
+              onClear={() =>
+                browse.update({ minPrice: undefined, maxPrice: undefined, minRating: undefined })
+              }
               text={
-                browse.hasPriceFilter
-                  ? 'Shop không có sản phẩm nào trong khoảng giá này.'
+                browse.hasPriceFilter || browse.hasRatingFilter
+                  ? 'Shop không có sản phẩm nào hợp bộ lọc giá và đánh giá này.'
                   : 'Shop chưa đăng sản phẩm nào. Bạn quay lại sau nhé.'
               }
             />
@@ -239,7 +247,7 @@ export function ShopPage() {
       ) : (
         <>
           <ShopVouchers shopId={s.id} />
-          <ShopProducts shopId={s.id} />
+          <ShopTabs shop={s} products={<ShopProducts shopId={s.id} />} />
         </>
       )}
     </div>
