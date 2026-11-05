@@ -142,6 +142,28 @@ describeDb('Xem hàng công khai (CAT-04, SRC-01)', () => {
       expect(items.find((c) => c.id === p.headphone!.id)).toMatchObject({ inStock: false });
     });
 
+    it('sản phẩm chỉ có ảnh theo màu: thẻ lấy ảnh đầu tiên làm ảnh đại diện', async () => {
+      const common = await t.prisma.productImage.findMany({
+        where: { productId: p.iphone!.id, option1Value: null },
+        select: { id: true },
+      });
+      const ids = common.map((c) => c.id);
+      await t.prisma.productImage.updateMany({
+        where: { id: { in: ids } },
+        data: { option1Value: 'Đen' },
+      });
+      const items = (await search()).body.items as Array<{ id: string; image: string | null }>;
+      const first = await t.prisma.productImage.findFirstOrThrow({
+        where: { productId: p.iphone!.id },
+        orderBy: { sort: 'asc' },
+      });
+      expect(items.find((c) => c.id === p.iphone!.id)?.image).toBe(first.url);
+      await t.prisma.productImage.updateMany({
+        where: { id: { in: ids } },
+        data: { option1Value: null },
+      });
+    });
+
     it('tìm không phân biệt dấu, hoa thường, khớp đầu từ', async () => {
       const phones = [p.samsung!.id, p.iphone!.id];
       expect(await ids({ q: 'dien thoai', sort: 'newest' })).toEqual(phones);

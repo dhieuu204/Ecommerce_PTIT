@@ -8,7 +8,7 @@ import { SiteHeader } from './site-header';
  */
 export function ShopLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-page">
       <SiteHeader />
       <main className="flex-1">
         <Outlet />

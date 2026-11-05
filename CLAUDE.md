@@ -6,7 +6,7 @@ Trả lời thành viên bằng **tiếng Việt**, dễ hiểu; giải thích t
 
 ## 1. Dự án là gì
 
-Đồ án môn học: **sàn thương mại điện tử nhiều shop** (giống Shopee thu nhỏ). Có đủ vòng đời mua, bán và vận hành: đăng ký, mở shop, đăng sản phẩm, giỏ hàng, voucher, đặt hàng nhiều shop một lần, thanh toán VNPay hoặc COD, giao hàng qua GHN, trả hàng, tranh chấp, chat, thông báo, đánh giá, tiền của seller và rút tiền.
+Đồ án môn học: **sàn thương mại điện tử nhiều shop** (giống Shopee thu nhỏ), tên **HK Shop**, **chuyên đồ điện tử** (điện thoại, máy tính bảng, laptop, màn hình & PC, gaming, đồng hồ, âm thanh, phụ kiện; chủ đồ án chốt 02/11/2026, không thêm ngành hàng khác vào dữ liệu demo). Có đủ vòng đời mua, bán và vận hành: đăng ký, mở shop, đăng sản phẩm, giỏ hàng, voucher, đặt hàng nhiều shop một lần, thanh toán VNPay hoặc COD, giao hàng qua GHN, trả hàng, tranh chấp, chat, thông báo, đánh giá, tiền của seller và rút tiền.
 
 Kiến trúc: **4 backend service + 1 frontend**. Trong lúc làm các phase chạy bằng Docker (hạ tầng trong Docker Compose, service chạy `pnpm dev`; chạy thử cả hệ thống trong Docker bằng `pnpm app:up`, Dockerfile ở `services/Dockerfile` và `apps/web/Dockerfile`). **Kubernetes (k3s) để sau khi xong các phase**, trước buổi demo: không tự viết file k8s.
 
@@ -70,6 +70,8 @@ Cách làm: **cuốn chiếu theo phase**. Phân tích tổng thể đã xong ch
 - Realtime chat/thông báo: Socket.IO trong marketplace-service + Redis adapter.
 - Tìm kiếm: PostgreSQL full-text + `unaccent` (gõ có dấu hay không dấu đều ra).
 - Biểu đồ báo cáo: **Recharts** ở web (chủ đồ án duyệt 21/10/2026), chỉ tải khi mở trang báo cáo.
+- Hiệu ứng chuyển động: **motion** (tên mới của framer-motion, `import { motion } from 'motion/react'`) ở web, chủ đồ án duyệt 02/11/2026; đang dùng cho khối Flash Sale trang chủ. Hiệu ứng đơn giản vẫn ưu tiên CSS/Tailwind.
+- Icon: **Tabler Icons** (`@tabler/icons-react`, nét 1.25 đặt chung ở `index.css` cho giống icon nét mảnh của onewaymobile.vn, chủ đồ án duyệt 24/10/2026) cho khu mua hàng; các trang cũ còn dùng lucide sẽ chuyển dần. Font: **Plus Jakarta Sans** (Google Fonts, có dấu tiếng Việt).
 - Đối tác: VNPay sandbox, GHN môi trường dev, Google OAuth.
 
 Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không cần thêm không, rồi **hỏi người giao việc** trước.
@@ -78,10 +80,11 @@ Muốn thêm thư viện mới: nói rõ để làm gì, có cách nào không c
 
 - **Chỉ tiếng Việt**, viết chữ thẳng trong code (không dùng thư viện đa ngôn ngữ).
 - Bảng màu (đã khai báo trong `apps/web/src/index.css`, dùng qua class Tailwind, không viết mã màu thẳng):
-  - `navy` #172554: màu chính, nút mua, điều hướng, header
-  - `champagne` #C8A96B: điểm nhấn, nhãn, icon, đường viền
-  - `ivory` #FAF9F6: nền trang; `card` #FFFFFF: thẻ sản phẩm; `ink` #1F2937: chữ chính
-- Khu mua hàng theo bố cục onewaymobile.vn (header 1 thanh với ô tìm bo tròn, thanh danh mục có icon và mega menu, banner, thẻ sản phẩm có nhãn giảm giá và ô chọn phiên bản, footer nền sáng). Chi tiết ở `docs/so-do/07-ui-khung-chung.png`. Không dùng logo, hình ảnh của họ.
+  - `navy` #EE4D2D: màu chính, **cam Shopee** (25/10/2026 lấy cam #FE4F00 của onewaymobile.vn, 27/10/2026 thử #FF6A13 rồi chủ đồ án chọn màu Shopee #EE4D2D; tên `navy` giữ nguyên trong code để không phải sửa hàng trăm chỗ): nút mua, giá, chữ nhấn. Header khu mua hàng chuyển sắc dọc như Shopee (`header-from` #F53D2D → `header-to` #FF6633). Chữ trên nền cam màu trắng
+  - `champagne` #FE9C13: màu nhấn vàng cam (tên cũ giữ nguyên): sao, nhãn nhỏ, số trên giỏ hàng, đầu dải chuyển sắc của khối "Đang giảm giá", vòng focus; không đặt chữ màu này lên nền cam
+  - `page` #F5F5F7: nền trang khu mua hàng (đúng màu `--gray-cl` của onewaymobile.vn), thẻ trắng nổi lên trên; `ivory` #F5F5F7: nền Kênh người bán/Quản trị và ô nền phụ; `ivory-200` #E9E9EC: nền banner chính; `mist` #F2F2F4: ô nền nhạt; `card` #FFFFFF: thẻ; `ink` #333333: chữ thường; `charcoal` #1F2937: tiêu đề lớn
+- Khu mua hàng theo **bản thiết kế trang chủ đã chốt** `HK-Shop-Homepage-Sections/` (27/10/2026, ảnh từng khu kèm tọa độ; bố cục gốc học từ onewaymobile.vn): header cam đặc với ô tìm bo góc có nút cam, thanh danh mục nền trắng (nút ☰ tròn cam nhạt) có mega menu kiểu onewaymobile.vn (cột trái danh mục cấp 1, khung phải chia cột theo danh mục con kèm hàng bán chạy, cuối là 3 ô quảng cáo), banner bo góc, tiêu đề khu có gạch cam phía trước, thẻ sản phẩm trắng liền (nhãn -% bo tròn, chip lựa chọn viền cam, giá cam, sao | đã bán), footer cùng màu nền. Không dùng logo, hình ảnh của họ.
+- **Bo góc vừa phải** (chủ đồ án chốt 27/10/2026, bo nhiều trông phèn): `--radius` 8px trong `index.css`, nên `rounded-lg` = 8px (nút, ô nhập, chip, nhãn), `rounded-xl`/`rounded-2xl` = 10px (thẻ), `rounded-3xl` = 12px (banner, khối lớn). Không làm nút hình viên thuốc; `rounded-full` chỉ cho thứ tròn thật: chấm màu, ảnh đại diện, số đếm, nút chỉ có icon. Không ghi cứng `rounded-[20px]`.
 - **Cả 3 khu đều phải dùng được trên điện thoại.** Menu trái thành nút ☰; bảng thành thẻ hoặc cuộn ngang.
 - Chức năng chưa tới giai đoạn thì ẩn, không hiện nút chết.
 

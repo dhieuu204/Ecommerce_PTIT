@@ -205,7 +205,7 @@ export interface CodFileOutRow {
 /** Tạo file Excel theo mẫu GHN (dùng cho file mẫu và file MÔ PHỎNG) */
 export async function buildCodFile(rows: CodFileOutRow[], title: string): Promise<Buffer> {
   const wb = new Workbook();
-  wb.creator = 'San TMDT';
+  wb.creator = 'HK Shop';
   const ws = wb.addWorksheet('Doi soat COD');
   ws.addRow([title]);
   ws.getRow(1).font = { bold: true, size: 13 };

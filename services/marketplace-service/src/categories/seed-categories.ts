@@ -8,7 +8,10 @@ interface SeedCategory {
   children: Array<{ name: string; slug: string }>;
 }
 
-/** Bộ danh mục mẫu: công nghệ trước, thêm vài ngành khác (lựa chọn của chủ đồ án 10/10) */
+/**
+ * Bộ danh mục mẫu: sàn chuyên đồ điện tử (chủ đồ án chốt 02/11/2026, bỏ Thời trang, Nhà cửa, Làm đẹp
+ * của lựa chọn 10/10). Admin vẫn thêm được danh mục khác trên web.
+ */
 export const SEED_CATEGORIES: SeedCategory[] = [
   {
     name: 'Điện thoại',
@@ -40,6 +43,25 @@ export const SEED_CATEGORIES: SeedCategory[] = [
     ],
   },
   {
+    name: 'Màn hình & PC',
+    slug: 'man-hinh-pc',
+    icon: 'monitor',
+    children: [
+      { name: 'Màn hình', slug: 'man-hinh' },
+      { name: 'PC', slug: 'pc' },
+      { name: 'Chuột & bàn phím', slug: 'chuot-ban-phim' },
+    ],
+  },
+  {
+    name: 'Gaming',
+    slug: 'gaming',
+    icon: 'gamepad-2',
+    children: [
+      { name: 'Máy chơi game', slug: 'may-choi-game' },
+      { name: 'Tay cầm & phụ kiện', slug: 'phu-kien-gaming' },
+    ],
+  },
+  {
     name: 'Đồng hồ thông minh',
     slug: 'dong-ho-thong-minh',
     icon: 'watch',
@@ -65,37 +87,6 @@ export const SEED_CATEGORIES: SeedCategory[] = [
       { name: 'Sạc và cáp', slug: 'sac-va-cap' },
       { name: 'Ốp lưng', slug: 'op-lung' },
       { name: 'Sạc dự phòng', slug: 'sac-du-phong' },
-    ],
-  },
-  {
-    name: 'Thời trang',
-    slug: 'thoi-trang',
-    icon: 'shirt',
-    children: [
-      { name: 'Thời trang nam', slug: 'thoi-trang-nam' },
-      { name: 'Thời trang nữ', slug: 'thoi-trang-nu' },
-      { name: 'Giày dép', slug: 'giay-dep' },
-      { name: 'Túi xách', slug: 'tui-xach' },
-    ],
-  },
-  {
-    name: 'Nhà cửa',
-    slug: 'nha-cua',
-    icon: 'house',
-    children: [
-      { name: 'Đồ dùng nhà bếp', slug: 'do-dung-nha-bep' },
-      { name: 'Trang trí', slug: 'trang-tri' },
-      { name: 'Đồ gia dụng', slug: 'do-gia-dung' },
-    ],
-  },
-  {
-    name: 'Làm đẹp',
-    slug: 'lam-dep',
-    icon: 'sparkles',
-    children: [
-      { name: 'Chăm sóc da', slug: 'cham-soc-da' },
-      { name: 'Trang điểm', slug: 'trang-diem' },
-      { name: 'Nước hoa', slug: 'nuoc-hoa' },
     ],
   },
 ];

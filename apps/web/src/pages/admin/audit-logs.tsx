@@ -563,7 +563,7 @@ function Detail({ row }: { row: Row }) {
         </button>
       </div>
       {raw && (
-        <pre className="max-h-72 overflow-auto rounded-lg bg-navy-900 p-3 text-xs leading-relaxed text-ivory">
+        <pre className="max-h-72 overflow-auto rounded-lg bg-ink p-3 text-xs leading-relaxed text-ivory">
           {JSON.stringify({ before: row.before, after: row.after }, null, 2)}
         </pre>
       )}

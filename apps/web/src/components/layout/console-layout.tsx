@@ -118,13 +118,7 @@ export function ConsoleLayout({
               <MenuList menu={menu} note={menuNote} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <BrandLogo
-            to="/"
-            className={cn(
-              'hidden sm:inline-flex',
-              dark ? '' : 'border-navy bg-navy text-champagne hover:bg-navy-800',
-            )}
-          />
+          <BrandLogo to="/" tone={dark ? 'inverse' : 'dark'} className="hidden sm:inline-flex" />
           <Link
             to={dark ? '/quan-tri' : '/kenh-nguoi-ban'}
             className="flex items-center gap-2 text-sm font-medium"

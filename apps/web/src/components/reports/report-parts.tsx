@@ -311,7 +311,7 @@ function Rank({ n }: { n: number }) {
     <span
       className={cn(
         'flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
-        n <= 3 ? 'bg-navy text-champagne' : 'bg-ivory text-ink/60',
+        n <= 3 ? 'bg-navy text-white' : 'bg-ivory text-ink/60',
       )}
     >
       {n}

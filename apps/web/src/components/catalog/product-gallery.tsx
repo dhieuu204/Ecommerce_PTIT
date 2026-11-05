@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import { IconChevronLeft, IconChevronRight, IconPhotoOff } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -7,16 +7,19 @@ const noScrollbar = '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
 /**
  * Bộ ảnh sản phẩm: ảnh lớn có nút trước/sau, dải ảnh nhỏ bên dưới (cuộn ngang được).
  * Ảnh lớn là một dải cuộn ngang có "snap" nên trên điện thoại vuốt được, kèm chấm vị trí.
- * `focusUrl` đổi (ví dụ chọn một màu có ảnh riêng) thì nhảy tới ảnh đó.
+ * `focusUrl` đổi (ví dụ chọn một màu có ảnh riêng) thì nhảy tới ảnh đó. `overlay`: nhãn đặt góc trên trái
+ * ảnh lớn (ví dụ -%, chính hãng).
  */
 export function ProductGallery({
   images,
   name,
   focusUrl,
+  overlay,
 }: {
   images: string[];
   name: string;
   focusUrl?: string | null;
+  overlay?: React.ReactNode;
 }) {
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -68,8 +71,9 @@ export function ProductGallery({
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square w-full items-center justify-center rounded-3xl border border-ivory-200 bg-card text-ink/25">
-        <ImageOff className="size-12" />
+      <div className="relative flex aspect-square w-full items-center justify-center rounded-2xl bg-page text-ink/25">
+        <IconPhotoOff className="size-12" />
+        {overlay}
       </div>
     );
   }
@@ -78,7 +82,7 @@ export function ProductGallery({
 
   return (
     <div className="min-w-0">
-      <div className="group relative overflow-hidden rounded-3xl border border-ivory-200 bg-card">
+      <div className="group relative overflow-hidden rounded-2xl ring-1 ring-ink/[0.06]">
         <div
           ref={trackRef}
           onScroll={onScroll}
@@ -103,11 +107,12 @@ export function ProductGallery({
           ))}
         </div>
 
+        {overlay}
         {multiple && (
           <>
             <GalleryArrow side="left" onClick={() => goTo(index - 1)} />
             <GalleryArrow side="right" onClick={() => goTo(index + 1)} />
-            <span className="absolute right-4 top-4 hidden rounded-full bg-ivory/90 px-2.5 py-1 text-xs font-medium text-ink/60 tabular-nums md:block">
+            <span className="absolute right-3 bottom-3 hidden rounded-lg bg-charcoal/75 px-2.5 py-1 text-xs font-medium text-white tabular-nums md:block">
               {index + 1}/{images.length}
             </span>
             {/* Chấm vị trí: chỉ trên điện thoại */}
@@ -127,22 +132,21 @@ export function ProductGallery({
       </div>
 
       {multiple && (
-        <div className="relative mt-4 hidden md:block">
+        <div className="relative mt-3 hidden md:block">
           <div
             ref={thumbsRef}
-            className={cn('flex gap-3 overflow-x-auto scroll-smooth pb-1', noScrollbar)}
+            className={cn('flex gap-2.5 overflow-x-auto scroll-smooth p-0.5', noScrollbar)}
           >
             {images.map((url, i) => (
               <button
                 key={url + i}
                 type="button"
                 aria-label={`Xem ảnh ${i + 1}`}
+                aria-current={i === index}
                 onClick={() => goTo(i)}
                 className={cn(
-                  'flex size-20 shrink-0 items-center justify-center rounded-2xl border-2 bg-card p-1.5 transition lg:size-[5.5rem]',
-                  i === index
-                    ? 'border-champagne shadow-[0_6px_16px_-8px_rgba(200,169,107,0.8)]'
-                    : 'border-ivory-200 opacity-75 hover:border-champagne/50 hover:opacity-100',
+                  'flex size-[4.5rem] shrink-0 items-center justify-center rounded-xl bg-card p-1.5 transition focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none',
+                  i === index ? 'ring-2 ring-navy' : 'ring-1 ring-ink/10 hover:ring-navy/40',
                 )}
               >
                 <img src={url} alt="" loading="lazy" className="size-full object-contain" />
@@ -156,18 +160,18 @@ export function ProductGallery({
 }
 
 function GalleryArrow({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
-  const Icon = side === 'left' ? ChevronLeft : ChevronRight;
+  const Icon = side === 'left' ? IconChevronLeft : IconChevronRight;
   return (
     <button
       type="button"
       aria-label={side === 'left' ? 'Ảnh trước' : 'Ảnh sau'}
       onClick={onClick}
       className={cn(
-        'absolute top-1/2 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-champagne/60 bg-card/95 text-champagne-600 shadow-sm transition hover:bg-navy hover:text-champagne md:flex',
-        side === 'left' ? 'left-4' : 'right-4',
+        'absolute top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-charcoal opacity-0 shadow-[0_8px_24px_-12px_rgba(15,26,61,0.4)] ring-1 ring-black/5 transition group-hover:opacity-100 hover:bg-navy hover:text-white focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none md:flex',
+        side === 'left' ? 'left-3' : 'right-3',
       )}
     >
-      <Icon className="size-5" />
+      <Icon className="size-5 [stroke-width:2]" />
     </button>
   );
 }

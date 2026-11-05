@@ -1,0 +1,112 @@
+{
+  "source": "00-homepage-approved.png",
+  "source_width": 773,
+  "source_height": 2033,
+  "coordinates": "pixel gốc; right và bottom không bao gồm trong vùng cắt",
+  "sections": [
+    {
+      "file": "01-header.png",
+      "title": "Header",
+      "component": "SiteHeader",
+      "crop": [0, 0, 773, 46],
+      "width": 773,
+      "height": 46
+    },
+    {
+      "file": "02-category-navigation.png",
+      "title": "Thanh điều hướng danh mục",
+      "component": "CategoryNav",
+      "crop": [0, 46, 773, 82],
+      "width": 773,
+      "height": 36
+    },
+    {
+      "file": "03-hero-banner.png",
+      "title": "Banner chính",
+      "component": "HeroBanner",
+      "crop": [0, 82, 773, 334],
+      "width": 773,
+      "height": 252
+    },
+    {
+      "file": "04-promotions-vouchers.png",
+      "title": "Banner ưu đãi và voucher",
+      "component": "PromoVouchers",
+      "crop": [0, 334, 773, 462],
+      "width": 773,
+      "height": 128
+    },
+    {
+      "file": "05-service-promises.png",
+      "title": "Cam kết dịch vụ",
+      "component": "ServicePromises",
+      "crop": [0, 462, 773, 523],
+      "width": 773,
+      "height": 61
+    },
+    {
+      "file": "06-category-grid.png",
+      "title": "Mua theo danh mục",
+      "component": "CategoryGrid",
+      "crop": [0, 523, 773, 665],
+      "width": 773,
+      "height": 142
+    },
+    {
+      "file": "07-featured-phones.png",
+      "title": "Điện thoại nổi bật",
+      "component": "FeaturedPhones",
+      "crop": [0, 665, 773, 927],
+      "width": 773,
+      "height": 262
+    },
+    {
+      "file": "08-deals.png",
+      "title": "Đang giảm giá",
+      "component": "DealsSection",
+      "crop": [0, 927, 773, 1199],
+      "width": 773,
+      "height": 272
+    },
+    {
+      "file": "09-featured-laptops.png",
+      "title": "Laptop nổi bật",
+      "component": "FeaturedLaptops",
+      "crop": [0, 1199, 773, 1414],
+      "width": 773,
+      "height": 215
+    },
+    {
+      "file": "10-featured-shops.png",
+      "title": "Shop nổi bật",
+      "component": "FeaturedShops",
+      "crop": [0, 1414, 773, 1582],
+      "width": 773,
+      "height": 168
+    },
+    {
+      "file": "11-new-arrivals.png",
+      "title": "Hàng mới về",
+      "component": "NewArrivals",
+      "crop": [0, 1582, 773, 1861],
+      "width": 773,
+      "height": 279
+    },
+    {
+      "file": "12-seller-banner.png",
+      "title": "Banner mở shop",
+      "component": "SellerBanner",
+      "crop": [0, 1861, 773, 1925],
+      "width": 773,
+      "height": 64
+    },
+    {
+      "file": "13-footer.png",
+      "title": "Chân trang",
+      "component": "SiteFooter",
+      "crop": [0, 1925, 773, 2033],
+      "width": 773,
+      "height": 108
+    }
+  ]
+}

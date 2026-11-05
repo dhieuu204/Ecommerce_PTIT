@@ -49,7 +49,7 @@ export function NotificationItem({
       <span
         className={cn(
           'flex size-9 shrink-0 items-center justify-center rounded-full',
-          n.read ? 'bg-ivory text-ink/40' : 'bg-navy text-champagne',
+          n.read ? 'bg-ivory text-ink/40' : 'bg-navy text-white',
         )}
       >
         <Icon className="size-4" />

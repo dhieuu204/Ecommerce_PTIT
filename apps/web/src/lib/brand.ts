@@ -1,2 +1,2 @@
-/** Tên sàn tạm: đổi một chỗ ở đây là đổi khắp web */
-export const BRAND = 'TÊN SÀN';
+/** Tên sàn (chủ đồ án chốt 25/10/2026). Logo vẽ ở components/brand-logo.tsx và public/favicon.svg */
+export const BRAND = 'HK Shop';

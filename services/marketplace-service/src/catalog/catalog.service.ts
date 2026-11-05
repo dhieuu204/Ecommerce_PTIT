@@ -34,7 +34,8 @@ export interface ProductCard {
 /** Nạp kèm khi dựng thẻ sản phẩm (toProductCard) */
 export const PRODUCT_CARD_INCLUDE = {
   variants: { where: { active: true }, orderBy: { sort: 'asc' } },
-  images: { where: { option1Value: null }, orderBy: { sort: 'asc' }, take: 1 },
+  // Ảnh đại diện: ảnh chung đầu tiên; sản phẩm chỉ có ảnh theo màu thì lấy ảnh đầu tiên
+  images: { select: { url: true, option1Value: true }, orderBy: { sort: 'asc' } },
   shop: { select: { id: true, name: true } },
 } satisfies Prisma.ProductInclude;
 
@@ -50,7 +51,7 @@ export function toProductCard(
   return {
     id: p.id,
     name: p.name,
-    image: p.images[0]?.url ?? null,
+    image: (p.images.find((i) => i.option1Value === null) ?? p.images[0])?.url ?? null,
     minPrice: p.minPrice,
     maxPrice: p.maxPrice,
     originalPrice: cheapest?.originalPrice ?? null,

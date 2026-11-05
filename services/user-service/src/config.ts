@@ -43,7 +43,7 @@ export class AppConfig {
 
   /** Máy chủ gửi mail. Mặc định Mailpit (hộp thư giả khi dev, xem ở http://localhost:8025) */
   readonly smtpUrl = text('SMTP_URL', 'smtp://localhost:1025');
-  readonly mailFrom = text('MAIL_FROM', 'Sàn TMĐT <no-reply@san.local>');
+  readonly mailFrom = text('MAIL_FROM', 'HK Shop <no-reply@hkshop.local>');
 
   /** Ứng dụng Google OAuth. Để trống thì nút "Đăng nhập bằng Google" báo chưa cấu hình. */
   readonly googleClientId = text('GOOGLE_CLIENT_ID');

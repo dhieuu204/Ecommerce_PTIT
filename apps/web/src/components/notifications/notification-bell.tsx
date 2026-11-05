@@ -1,4 +1,5 @@
-import { Bell, CheckCheck, Loader2 } from 'lucide-react';
+import { IconBell } from '@tabler/icons-react';
+import { CheckCheck, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { CountBadge } from '@/components/count-badge';
@@ -50,7 +51,7 @@ export function NotificationBell({ tone }: { tone: 'shop' | 'light' | 'dark' }) 
         className={cn(
           'group outline-none focus-visible:ring-2 focus-visible:ring-champagne',
           tone === 'shop'
-            ? 'flex flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-[11px] font-medium text-white/85 transition hover:text-champagne sm:px-2'
+            ? 'flex flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-xs font-medium text-white transition hover:opacity-80 sm:px-2'
             : 'relative rounded-full p-2 transition',
           tone === 'light' && 'text-ink hover:bg-ivory-200',
           tone === 'dark' && 'text-white hover:bg-white/10',
@@ -58,15 +59,15 @@ export function NotificationBell({ tone }: { tone: 'shop' | 'light' | 'dark' }) 
       >
         {tone === 'shop' ? (
           <>
-            <span className="relative flex size-9 items-center justify-center rounded-full border border-white/25 transition group-hover:border-champagne">
-              <Bell className="size-4" />
+            <span className="relative flex size-8 items-center justify-center md:size-7">
+              <IconBell className="size-6 [stroke-width:1.5]" />
               <CountBadge count={count} label="thông báo chưa đọc" floating />
             </span>
             <span className="hidden whitespace-nowrap lg:block">Thông báo</span>
           </>
         ) : (
           <>
-            <Bell className="size-5" />
+            <IconBell className="size-5" />
             <CountBadge
               count={count}
               label="thông báo chưa đọc"

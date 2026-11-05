@@ -8,7 +8,7 @@ Phạm vi P2: SHP-04 đình chỉ/khôi phục shop, CAT-01 danh mục, CAT-02 s
 
 | # | Chủ đề | Quyết định |
 | --- | --- | --- |
-| 1 | Bộ danh mục | Đồ công nghệ là chính, thêm vài ngành khác: Thời trang, Nhà cửa, Làm đẹp (34 danh mục, 2 cấp). |
+| 1 | Bộ danh mục | **Sàn chuyên đồ điện tử** (chốt lại 02/11/2026): 8 danh mục cấp 1 (Điện thoại, Máy tính bảng, Laptop, Màn hình & PC, Gaming, Đồng hồ thông minh, Âm thanh, Phụ kiện) và danh mục cấp 2, tổng 28 danh mục. Màn hình & PC (Màn hình, PC, Chuột & bàn phím, 6 sản phẩm demo) và Gaming (Máy chơi game, Tay cầm & phụ kiện, 3 sản phẩm demo) thêm cùng ngày. Bỏ Thời trang, Nhà cửa, Làm đẹp của lựa chọn 10/10 vì sàn trông thập cẩm; database đã chạy thì 3 nhóm này được ẩn (`hidden`) và 7 sản phẩm demo trong đó chuyển sang `HIDDEN`, không xóa. Admin vẫn thêm được danh mục khác trên web. |
 | 2 | Duyệt sản phẩm | **Đăng là bán ngay**, không qua admin duyệt. |
 | 3 | Voucher ở P2 | **Chỉ tạo và hiện**; người mua áp voucher khi đặt hàng ở P3. |
 | 4 | Loại voucher | Giảm số tiền cố định, hoặc giảm % có mức giảm tối đa. |

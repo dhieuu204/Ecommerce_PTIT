@@ -1,9 +1,11 @@
 /**
  * Nạp dữ liệu DEMO cho marketplace: bộ danh mục, 2 shop đã duyệt (Táo Xanh Mobile, Galaxy Hub),
- * 23 sản phẩm có biến thể và ảnh, vài voucher shop và 1 voucher sàn.
- * Ảnh sản phẩm là ảnh minh hoạ tự vẽ (services/marketplace-service/seed/images), không phải ảnh thật.
+ * khoảng 50 sản phẩm điện tử có biến thể và ảnh, vài voucher shop và 1 voucher sàn.
+ * Tên, giá, màu, dung lượng, thông số thu thập từ thegioididong.com (scripts/crawl-demo-products.mjs) và
+ * fptshop.com.vn; ảnh là ảnh chính hãng (Apple, Samsung, Logitech...) hoặc ảnh của FPT Shop, chỉ dùng cho đồ án và
+ * buổi demo. Ảnh nằm ở services/marketplace-service/seed/images.
  * Chạy cùng các phần khác bằng `pnpm seed:demo` ở thư mục gốc (cần infra đang chạy và database đã migrate).
- * Chạy lại không tạo trùng: shop đã có thì bỏ qua cả shop đó.
+ * Chạy lại không tạo trùng: shop đã có thì chỉ thêm sản phẩm demo còn thiếu (so theo tên).
  */
 import '../env';
 import { DEMO_SHOPS, type ShopApplicationData } from '@san/shared';
@@ -60,11 +62,73 @@ async function main() {
       products: DemoProduct[];
     };
 
+    type DemoShop = (typeof DEMO_SHOPS)[keyof typeof DEMO_SHOPS];
+
+    /** Tạo một sản phẩm demo của shop: ảnh lên MinIO, biến thể và lịch sử nhập tồn ban đầu */
+    const createDemoProduct = async (shop: DemoShop, p: DemoProduct, createdAt: Date) => {
+      const categoryId = categories.get(p.category);
+      if (!categoryId) throw new Error(`Không thấy danh mục "${p.category}"`);
+      const images: Array<{ url: string; sort: number; option1Value: string | null }> = [];
+      for (const [sort, img] of p.images.entries()) {
+        const url = await upload(`${productImagePrefix(shop.owner.id)}demo-${img.file}`, img.file);
+        images.push({ url, sort, option1Value: img.option1Value });
+      }
+      const prices = p.variants.map((v) => v.price);
+      await prisma.$transaction(async (tx) => {
+        const product = await tx.product.create({
+          data: {
+            shopId: shop.id,
+            categoryId,
+            name: p.name,
+            description: p.description,
+            weight: p.weight,
+            option1Name: p.option1Name,
+            option2Name: p.option2Name,
+            minPrice: Math.min(...prices),
+            maxPrice: Math.max(...prices),
+            soldCount: p.soldCount,
+            createdAt,
+            images: { create: images },
+          },
+        });
+        for (const [sort, v] of p.variants.entries()) {
+          const variant = await tx.productVariant.create({
+            data: { productId: product.id, sort, ...v },
+          });
+          if (v.stock > 0) {
+            await tx.stockHistory.create({
+              data: {
+                variantId: variant.id,
+                change: v.stock,
+                stockAfter: v.stock,
+                reason: 'Nhập ban đầu (dữ liệu demo)',
+                createdBy: shop.owner.id,
+                createdAt,
+              },
+            });
+          }
+        }
+      });
+    };
+
     for (const [code, shop] of Object.entries(DEMO_SHOPS) as Array<
-      [keyof typeof DEMO_SHOPS, (typeof DEMO_SHOPS)[keyof typeof DEMO_SHOPS]]
+      [keyof typeof DEMO_SHOPS, DemoShop]
     >) {
+      const mine = products.filter((p) => p.shop === code);
       if (await prisma.shop.findUnique({ where: { id: shop.id } })) {
-        console.log(`Đã có shop ${shop.name}, bỏ qua.`);
+        // Shop đã có: chỉ thêm sản phẩm demo còn thiếu (so theo tên), khi dữ liệu demo có thêm hàng mới
+        const have = new Set(
+          (
+            await prisma.product.findMany({ where: { shopId: shop.id }, select: { name: true } })
+          ).map((p) => p.name),
+        );
+        const missing = mine.filter((p) => !have.has(p.name));
+        for (const p of missing) await createDemoProduct(shop, p, new Date());
+        console.log(
+          missing.length
+            ? `Shop ${shop.name}: thêm ${missing.length} sản phẩm demo mới.`
+            : `Đã có shop ${shop.name} và đủ sản phẩm, bỏ qua.`,
+        );
         continue;
       }
       // Địa chỉ lấy hàng: tỉnh theo tên (dữ liệu mẫu hoặc GHN thật), huyện/xã đầu tiên
@@ -135,56 +199,13 @@ async function main() {
         },
       });
 
-      const mine = products.filter((p) => p.shop === code);
       for (const [index, p] of mine.entries()) {
-        const categoryId = categories.get(p.category);
-        if (!categoryId) throw new Error(`Không thấy danh mục "${p.category}"`);
-        const images: Array<{ url: string; sort: number; option1Value: string | null }> = [];
-        for (const [sort, img] of p.images.entries()) {
-          const url = await upload(
-            `${productImagePrefix(shop.owner.id)}demo-${img.file}`,
-            img.file,
-          );
-          images.push({ url, sort, option1Value: img.option1Value });
-        }
-        const prices = p.variants.map((v) => v.price);
         // Sản phẩm đăng rải rác trong 60 ngày qua để "Mới nhất" có thứ tự rõ
-        const createdAt = new Date(Date.now() - (index * 3 + (code === 'B' ? 1 : 0)) * DAY);
-        await prisma.$transaction(async (tx) => {
-          const product = await tx.product.create({
-            data: {
-              shopId: shop.id,
-              categoryId,
-              name: p.name,
-              description: p.description,
-              weight: p.weight,
-              option1Name: p.option1Name,
-              option2Name: p.option2Name,
-              minPrice: Math.min(...prices),
-              maxPrice: Math.max(...prices),
-              soldCount: p.soldCount,
-              createdAt,
-              images: { create: images },
-            },
-          });
-          for (const [sort, v] of p.variants.entries()) {
-            const variant = await tx.productVariant.create({
-              data: { productId: product.id, sort, ...v },
-            });
-            if (v.stock > 0) {
-              await tx.stockHistory.create({
-                data: {
-                  variantId: variant.id,
-                  change: v.stock,
-                  stockAfter: v.stock,
-                  reason: 'Nhập ban đầu (dữ liệu demo)',
-                  createdBy: shop.owner.id,
-                  createdAt,
-                },
-              });
-            }
-          }
-        });
+        await createDemoProduct(
+          shop,
+          p,
+          new Date(Date.now() - (index * 3 + (code === 'B' ? 1 : 0)) * DAY),
+        );
       }
       console.log(`Đã tạo shop ${shop.name} với ${mine.length} sản phẩm.`);
     }

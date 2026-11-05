@@ -30,21 +30,20 @@ describeDb('Danh mục (CAT-01)', () => {
     expect(await t.prisma.category.count({ where: { parentId: null, icon: null } })).toBe(0);
   });
 
-  it('GET /categories công khai: cây chưa ẩn theo thứ tự, công nghệ trước', async () => {
+  it('GET /categories công khai: cây chưa ẩn theo thứ tự', async () => {
     await seedCategories(t.prisma);
     await t.prisma.category.update({ where: { slug: 'oppo' }, data: { hidden: true } });
-    await t.prisma.category.update({ where: { slug: 'lam-dep' }, data: { hidden: true } });
+    await t.prisma.category.update({ where: { slug: 'phu-kien' }, data: { hidden: true } });
 
     const res = await t.http().get(`${API}/categories`).expect(200);
     expect(res.body.map((c: { slug: string }) => c.slug)).toEqual([
       'dien-thoai',
       'may-tinh-bang',
       'laptop',
+      'man-hinh-pc',
+      'gaming',
       'dong-ho-thong-minh',
       'am-thanh',
-      'phu-kien',
-      'thoi-trang',
-      'nha-cua',
     ]);
     expect(res.body[0]).toEqual({
       id: expect.any(String),

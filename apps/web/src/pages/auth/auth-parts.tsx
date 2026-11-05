@@ -35,7 +35,7 @@ export function AuthCard({
       />
       <div
         className={cn(
-          'relative mx-auto w-full rounded-[1.75rem] border border-border/70 bg-card px-5 py-8 shadow-xl shadow-navy/5 sm:px-10 sm:py-10 md:px-14 md:py-12',
+          'relative mx-auto w-full rounded-3xl border border-border/70 bg-card px-5 py-8 shadow-xl shadow-navy/5 sm:px-10 sm:py-10 md:px-14 md:py-12',
           wide ? 'max-w-2xl' : 'max-w-[34rem]',
         )}
       >

@@ -1,556 +1,2647 @@
 {
   "products": [
     {
-      "key": "iphone-16-pro-max",
+      "key": "iphone-18-pro-max",
       "shop": "A",
       "category": "iPhone",
-      "name": "Điện thoại Apple iPhone 16 Pro Max",
-      "description": "iPhone 16 Pro Max khung titan cấp 5, màn hình Super Retina XDR 6,9 inch có ProMotion 120Hz và Always-On.\n\nĐiểm nổi bật\n- Chip A18 Pro 3 nm, GPU 6 lõi, chơi game và dựng video 4K mượt mà.\n- Cụm camera Pro: chính 48MP, góc siêu rộng 48MP, tele 5x 12MP; quay 4K 120 fps Dolby Vision.\n- Nút Điều khiển Camera mới, nút Tác vụ tuỳ chỉnh.\n- Pin dùng cả ngày, sạc MagSafe tới 25W, cổng USB-C (USB 3).\n\nTrong hộp: máy, cáp USB-C dệt, sách hướng dẫn.\nBảo hành 12 tháng chính hãng. Hàng mới 100%, nguyên seal.",
-      "weight": 450,
-      "soldCount": 128,
+      "name": "Điện thoại iPhone 18 Pro Max",
+      "description": "Điện thoại iPhone 18 Pro Max chính hãng VN/A, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6,9 inch\n- Công nghệ màn hình: Super Retina XDR OLED, ProMotion 120 Hz\n- Chip xử lý (CPU): Apple A20 Pro\n- Camera sau: Fusion 48 MP khẩu độ thay đổi ƒ/1.48–ƒ/4.0, Ultra Wide 48 MP, Telephoto 48 MP zoom quang 4x\n- Dung lượng pin: 5.820 mAh, sạc MagSafe\n- Kết nối: 5G, Wi-Fi 7, Bluetooth 6, USB-C\n- Thiết kế: khung nhôm nguyên khối, mặt trước Ceramic Shield 2, chuẩn IP68\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
+      "weight": 480,
+      "soldCount": 1350,
       "option1Name": "Màu sắc",
       "option2Name": "Dung lượng",
       "variants": [
         {
-          "option1Value": "Titan Sa Mạc",
+          "option1Value": "Đỏ Burgundy",
           "option2Value": "256GB",
-          "price": 30990000,
-          "originalPrice": 33990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Titan Sa Mạc",
-          "option2Value": "512GB",
-          "price": 37490000,
-          "originalPrice": 40490000,
+          "price": 41990000,
+          "originalPrice": 43990000,
           "stock": 14
         },
         {
-          "option1Value": "Titan Sa Mạc",
-          "option2Value": "1TB",
-          "price": 43990000,
-          "originalPrice": 46990000,
-          "stock": 52
-        },
-        {
-          "option1Value": "Titan Đen",
-          "option2Value": "256GB",
-          "price": 30990000,
-          "originalPrice": 33990000,
+          "option1Value": "Đỏ Burgundy",
+          "option2Value": "512GB",
+          "price": 47990000,
+          "originalPrice": 49990000,
           "stock": 9
         },
         {
-          "option1Value": "Titan Đen",
-          "option2Value": "512GB",
-          "price": 37490000,
-          "originalPrice": 40490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Titan Đen",
+          "option1Value": "Đỏ Burgundy",
           "option2Value": "1TB",
-          "price": 43990000,
-          "originalPrice": 46990000,
-          "stock": 14
+          "price": 54990000,
+          "originalPrice": 56990000,
+          "stock": 4
         },
         {
-          "option1Value": "Titan Trắng",
+          "option1Value": "Bạc",
           "option2Value": "256GB",
-          "price": 30990000,
-          "originalPrice": 33990000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Titan Trắng",
-          "option2Value": "512GB",
-          "price": 37490000,
-          "originalPrice": 40490000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Titan Trắng",
-          "option2Value": "1TB",
-          "price": 43990000,
-          "originalPrice": 46990000,
-          "stock": 0
-        },
-        {
-          "option1Value": "Titan Tự Nhiên",
-          "option2Value": "256GB",
-          "price": 30990000,
-          "originalPrice": 33990000,
+          "price": 41990000,
+          "originalPrice": 43990000,
           "stock": 18
         },
         {
-          "option1Value": "Titan Tự Nhiên",
+          "option1Value": "Bạc",
           "option2Value": "512GB",
-          "price": 37490000,
-          "originalPrice": 40490000,
-          "stock": 41
+          "price": 47990000,
+          "originalPrice": 49990000,
+          "stock": 7
         },
         {
-          "option1Value": "Titan Tự Nhiên",
+          "option1Value": "Bạc",
           "option2Value": "1TB",
-          "price": 43990000,
-          "originalPrice": 46990000,
-          "stock": 9
+          "price": 54990000,
+          "originalPrice": 56990000,
+          "stock": 3
+        },
+        {
+          "option1Value": "Xanh Băng",
+          "option2Value": "256GB",
+          "price": 41990000,
+          "originalPrice": 43990000,
+          "stock": 11
+        },
+        {
+          "option1Value": "Xanh Băng",
+          "option2Value": "512GB",
+          "price": 47990000,
+          "originalPrice": 49990000,
+          "stock": 6
+        },
+        {
+          "option1Value": "Xanh Băng",
+          "option2Value": "1TB",
+          "price": 54990000,
+          "originalPrice": 56990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 41990000,
+          "originalPrice": 43990000,
+          "stock": 16
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 47990000,
+          "originalPrice": 49990000,
+          "stock": 10
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "1TB",
+          "price": 54990000,
+          "originalPrice": 56990000,
+          "stock": 5
         }
       ],
       "images": [
         {
-          "file": "iphone-16-pro-max-1.webp",
-          "option1Value": null
+          "file": "iphone-18-pro-max-4.webp",
+          "option1Value": "Đỏ Burgundy"
         },
         {
-          "file": "iphone-16-pro-max-2.webp",
-          "option1Value": null
+          "file": "iphone-18-pro-max-5.webp",
+          "option1Value": "Đỏ Burgundy"
         },
         {
-          "file": "iphone-16-pro-max-c1.webp",
-          "option1Value": "Titan Sa Mạc"
+          "file": "iphone-18-pro-max-6.webp",
+          "option1Value": "Đỏ Burgundy"
         },
         {
-          "file": "iphone-16-pro-max-c2.webp",
-          "option1Value": "Titan Đen"
+          "file": "iphone-18-pro-max-10.webp",
+          "option1Value": "Bạc"
         },
         {
-          "file": "iphone-16-pro-max-c3.webp",
-          "option1Value": "Titan Trắng"
+          "file": "iphone-18-pro-max-11.webp",
+          "option1Value": "Bạc"
         },
         {
-          "file": "iphone-16-pro-max-c4.webp",
-          "option1Value": "Titan Tự Nhiên"
+          "file": "iphone-18-pro-max-12.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "iphone-18-pro-max-7.webp",
+          "option1Value": "Xanh Băng"
+        },
+        {
+          "file": "iphone-18-pro-max-8.webp",
+          "option1Value": "Xanh Băng"
+        },
+        {
+          "file": "iphone-18-pro-max-9.webp",
+          "option1Value": "Xanh Băng"
+        },
+        {
+          "file": "iphone-18-pro-max-1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-18-pro-max-2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-18-pro-max-3.webp",
+          "option1Value": "Đen"
         }
-      ]
+      ],
+      "source": "https://fptshop.com.vn/dien-thoai/iphone-18-pro-max"
+    },
+    {
+      "key": "iphone-17-pro-max",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại iPhone 17 Pro Max",
+      "description": "Điện thoại iPhone 17 Pro Max chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.9\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A19 Pro 6 nhân\n- Chip đồ họa (GPU): Apple GPU 6 nhân\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 48 MP, 48 MP\n- Dung lượng pin: 37 giờ\n- Hỗ trợ sạc tối đa: 40 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 381,
+      "soldCount": 2480,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Bạc",
+          "option2Value": "512GB",
+          "price": 41490000,
+          "originalPrice": 44490000,
+          "stock": 20
+        },
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "256GB",
+          "price": 34990000,
+          "originalPrice": 37990000,
+          "stock": 38
+        },
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "512GB",
+          "price": 41490000,
+          "originalPrice": 44490000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "1TB",
+          "price": 47990000,
+          "originalPrice": 50990000,
+          "stock": 41
+        },
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "2TB",
+          "price": 60990000,
+          "originalPrice": 63990000,
+          "stock": 38
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "256GB",
+          "price": 34990000,
+          "originalPrice": 37990000,
+          "stock": 20
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "512GB",
+          "price": 41490000,
+          "originalPrice": 44490000,
+          "stock": 51
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "1TB",
+          "price": 47990000,
+          "originalPrice": 50990000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "2TB",
+          "price": 60990000,
+          "originalPrice": 63990000,
+          "stock": 16
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-17-pro-max-1.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "iphone-17-pro-max-2.webp",
+          "option1Value": "Cam Vũ Trụ"
+        },
+        {
+          "file": "iphone-17-pro-max-3.webp",
+          "option1Value": "Xanh Đậm"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-17-pro-max"
+    },
+    {
+      "key": "iphone-17-pro",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại iPhone 17 Pro",
+      "description": "Điện thoại iPhone 17 Pro chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.3\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A19 Pro 6 nhân\n- Chip đồ họa (GPU): Apple GPU 6 nhân\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 48 MP, 48 MP\n- Dung lượng pin: 31 giờ\n- Hỗ trợ sạc tối đa: 40 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 354,
+      "soldCount": 2130,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "256GB",
+          "price": 31990000,
+          "originalPrice": 34990000,
+          "stock": 13
+        },
+        {
+          "option1Value": "Cam Vũ Trụ",
+          "option2Value": "512GB",
+          "price": 38490000,
+          "originalPrice": 41490000,
+          "stock": 10
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "256GB",
+          "price": 31990000,
+          "originalPrice": 34990000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "512GB",
+          "price": 38490000,
+          "originalPrice": 41490000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "1TB",
+          "price": 44990000,
+          "originalPrice": 47990000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "1TB",
+          "price": 44990000,
+          "originalPrice": 47990000,
+          "stock": 29
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-17-pro-1.webp",
+          "option1Value": "Cam Vũ Trụ"
+        },
+        {
+          "file": "iphone-17-pro-2.webp",
+          "option1Value": "Xanh Đậm"
+        },
+        {
+          "file": "iphone-17-pro-3.webp",
+          "option1Value": "Bạc"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-17-pro"
+    },
+    {
+      "key": "iphone-17",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại iPhone 17",
+      "description": "Điện thoại iPhone 17 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.3\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A19 6 nhân\n- Chip đồ họa (GPU): Apple GPU 5 nhân\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 48 MP\n- Dung lượng pin: 30 giờ\n- Hỗ trợ sạc tối đa: 40 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 327,
+      "soldCount": 1570,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Tím Oải Hương",
+          "option2Value": "256GB",
+          "price": 26990000,
+          "originalPrice": 28990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Tím Oải Hương",
+          "option2Value": "512GB",
+          "price": 33490000,
+          "originalPrice": 35490000,
+          "stock": 60
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 26990000,
+          "originalPrice": 28990000,
+          "stock": 47
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 33490000,
+          "originalPrice": 35490000,
+          "stock": 44
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "256GB",
+          "price": 26990000,
+          "originalPrice": 28990000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "512GB",
+          "price": 33490000,
+          "originalPrice": 35490000,
+          "stock": 33
+        },
+        {
+          "option1Value": "Xanh Lá Xô Thơm",
+          "option2Value": "256GB",
+          "price": 26990000,
+          "originalPrice": 28990000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Xanh Lá Xô Thơm",
+          "option2Value": "512GB",
+          "price": 33490000,
+          "originalPrice": 35490000,
+          "stock": 31
+        },
+        {
+          "option1Value": "Xanh Lam Khói",
+          "option2Value": "256GB",
+          "price": 26990000,
+          "originalPrice": 28990000,
+          "stock": 56
+        },
+        {
+          "option1Value": "Xanh Lam Khói",
+          "option2Value": "512GB",
+          "price": 33490000,
+          "originalPrice": 35490000,
+          "stock": 0
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-17-1.webp",
+          "option1Value": "Tím Oải Hương"
+        },
+        {
+          "file": "iphone-17-2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-17-3.webp",
+          "option1Value": "Trắng"
+        },
+        {
+          "file": "iphone-17-4.webp",
+          "option1Value": "Xanh Lá Xô Thơm"
+        },
+        {
+          "file": "iphone-17-5.webp",
+          "option1Value": "Xanh Lam Khói"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-17"
+    },
+    {
+      "key": "iphone-air",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại iPhone Air",
+      "description": "Điện thoại iPhone Air chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.5\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A19 Pro 6 nhân\n- Chip đồ họa (GPU): Apple GPU 5 nhân\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: 48 MP\n- Dung lượng pin: 27 giờ\n- Hỗ trợ sạc tối đa: 20 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 315,
+      "soldCount": 1760,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Vàng nhạt",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 34990000,
+          "stock": 28
+        },
+        {
+          "option1Value": "Đen Không Gian",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 34990000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Đen Không Gian",
+          "option2Value": "512GB",
+          "price": 28990000,
+          "originalPrice": 40990000,
+          "stock": 37
+        },
+        {
+          "option1Value": "Xanh da trời",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 34990000,
+          "stock": 58
+        },
+        {
+          "option1Value": "Trắng Mây",
+          "option2Value": "256GB",
+          "price": 22990000,
+          "originalPrice": 34990000,
+          "stock": 10
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-air-1.webp",
+          "option1Value": "Vàng nhạt"
+        },
+        {
+          "file": "iphone-air-2.webp",
+          "option1Value": "Đen Không Gian"
+        },
+        {
+          "file": "iphone-air-3.webp",
+          "option1Value": "Xanh da trời"
+        },
+        {
+          "file": "iphone-air-4.webp",
+          "option1Value": "Trắng Mây"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-air"
+    },
+    {
+      "key": "iphone-16-plus",
+      "shop": "A",
+      "category": "iPhone",
+      "name": "Điện thoại iPhone 16 Plus",
+      "description": "Điện thoại iPhone 16 Plus chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.7\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A18 6 nhân\n- Chip đồ họa (GPU): Apple GPU 5 nhân\n- RAM: 8 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 12 MP\n- Dung lượng pin: 27 giờ\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 349,
+      "soldCount": 1375,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "128GB",
+          "price": 24990000,
+          "originalPrice": 25990000,
+          "stock": 43
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 27990000,
+          "originalPrice": 28990000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "128GB",
+          "price": 24990000,
+          "originalPrice": 25990000,
+          "stock": 58
+        },
+        {
+          "option1Value": "Xanh mòng két",
+          "option2Value": "128GB",
+          "price": 24990000,
+          "originalPrice": 25990000,
+          "stock": 23
+        },
+        {
+          "option1Value": "Xanh Lưu Ly",
+          "option2Value": "128GB",
+          "price": 24990000,
+          "originalPrice": 25990000,
+          "stock": 29
+        },
+        {
+          "option1Value": "Xanh Lưu Ly",
+          "option2Value": "256GB",
+          "price": 27990000,
+          "originalPrice": 28990000,
+          "stock": 29
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "128GB",
+          "price": 24990000,
+          "originalPrice": 25990000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "256GB",
+          "price": 27990000,
+          "originalPrice": 28990000,
+          "stock": 10
+        }
+      ],
+      "images": [
+        {
+          "file": "iphone-16-plus-1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "iphone-16-plus-2.webp",
+          "option1Value": "Trắng"
+        },
+        {
+          "file": "iphone-16-plus-3.webp",
+          "option1Value": "Xanh mòng két"
+        },
+        {
+          "file": "iphone-16-plus-4.webp",
+          "option1Value": "Xanh Lưu Ly"
+        },
+        {
+          "file": "iphone-16-plus-5.webp",
+          "option1Value": "Hồng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-16-plus"
     },
     {
       "key": "iphone-16",
       "shop": "A",
       "category": "iPhone",
-      "name": "Điện thoại Apple iPhone 16",
-      "description": "iPhone 16 màn hình 6,1 inch Super Retina XDR, mặt lưng kính pha màu, khung nhôm.\n\n- Chip A18 mạnh mẽ, hỗ trợ Apple Intelligence.\n- Camera Fusion 48MP, chụp ảnh không gian (spatial) cho Apple Vision Pro.\n- Nút Tác vụ và nút Điều khiển Camera.\n- Sạc MagSafe, cổng USB-C.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 400,
-      "soldCount": 342,
+      "name": "Điện thoại iPhone 16",
+      "description": "Điện thoại iPhone 16 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.1\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A18 6 nhân\n- Chip đồ họa (GPU): Apple GPU 5 nhân\n- RAM: 8 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 12 MP\n- Dung lượng pin: 22 giờ\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 320,
+      "soldCount": 1343,
       "option1Name": "Màu sắc",
-      "option2Name": "Dung lượng",
+      "option2Name": null,
       "variants": [
         {
-          "option1Value": "Xanh Lưu Ly",
-          "option2Value": "128GB",
-          "price": 19990000,
-          "originalPrice": 21990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xanh Lưu Ly",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 24990000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "128GB",
-          "price": 19990000,
-          "originalPrice": 21990000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 24990000,
-          "stock": 35
-        },
-        {
           "option1Value": "Trắng",
-          "option2Value": "128GB",
-          "price": 19990000,
-          "originalPrice": 21990000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Trắng",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 24990000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Hồng",
-          "option2Value": "128GB",
-          "price": 19990000,
-          "originalPrice": 21990000,
-          "stock": 18
-        },
-        {
-          "option1Value": "Hồng",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 24990000,
-          "stock": 0
-        },
-        {
-          "option1Value": "Xanh Mòng Két",
-          "option2Value": "128GB",
-          "price": 19990000,
-          "originalPrice": 21990000,
+          "option2Value": "",
+          "price": 24990000,
+          "originalPrice": null,
           "stock": 27
         },
         {
-          "option1Value": "Xanh Mòng Két",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 24990000,
-          "stock": 18
+          "option1Value": "Xanh mòng két",
+          "option2Value": "",
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 32
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "",
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 9
+        },
+        {
+          "option1Value": "Xanh Lưu Ly",
+          "option2Value": "",
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 22
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 40
         }
       ],
       "images": [
         {
           "file": "iphone-16-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "iphone-16-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "iphone-16-c1.webp",
-          "option1Value": "Xanh Lưu Ly"
-        },
-        {
-          "file": "iphone-16-c2.webp",
-          "option1Value": "Đen"
-        },
-        {
-          "file": "iphone-16-c3.webp",
           "option1Value": "Trắng"
         },
         {
-          "file": "iphone-16-c4.webp",
+          "file": "iphone-16-2.webp",
+          "option1Value": "Xanh mòng két"
+        },
+        {
+          "file": "iphone-16-3.webp",
           "option1Value": "Hồng"
         },
         {
-          "file": "iphone-16-c5.webp",
-          "option1Value": "Xanh Mòng Két"
+          "file": "iphone-16-4.webp",
+          "option1Value": "Xanh Lưu Ly"
+        },
+        {
+          "file": "iphone-16-5.webp",
+          "option1Value": "Đen"
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-16"
     },
     {
       "key": "iphone-15",
       "shop": "A",
       "category": "iPhone",
-      "name": "Điện thoại Apple iPhone 15",
-      "description": "iPhone 15 với Dynamic Island, camera chính 48MP và cổng USB-C.\n\n- Màn hình 6,1 inch Super Retina XDR, độ sáng ngoài trời 2000 nit.\n- Chip A16 Bionic.\n- Mặt lưng kính pha màu nhám, khung nhôm.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 400,
-      "soldCount": 511,
+      "name": "Điện thoại iPhone 15",
+      "description": "Điện thoại iPhone 15 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.1\"\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple A16 Bionic 6 nhân\n- Chip đồ họa (GPU): Apple GPU 5 nhân\n- RAM: 6 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 48 MP & Phụ 12 MP\n- Dung lượng pin: 3349 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 321,
+      "soldCount": 1260,
       "option1Name": "Màu sắc",
       "option2Name": "Dung lượng",
       "variants": [
         {
-          "option1Value": "Xanh Lá",
+          "option1Value": "Xanh dương nhạt",
           "option2Value": "128GB",
-          "price": 16490000,
-          "originalPrice": 18990000,
-          "stock": 35
+          "price": 21990000,
+          "originalPrice": null,
+          "stock": 28
         },
         {
-          "option1Value": "Xanh Lá",
+          "option1Value": "Xanh dương nhạt",
           "option2Value": "256GB",
-          "price": 19290000,
-          "originalPrice": 21790000,
-          "stock": 14
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 56
         },
         {
           "option1Value": "Đen",
           "option2Value": "128GB",
-          "price": 16490000,
-          "originalPrice": 18990000,
-          "stock": 9
+          "price": 21990000,
+          "originalPrice": null,
+          "stock": 29
         },
         {
           "option1Value": "Đen",
           "option2Value": "256GB",
-          "price": 19290000,
-          "originalPrice": 21790000,
-          "stock": 35
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 61
         },
         {
-          "option1Value": "Hồng",
+          "option1Value": "Hồng nhạt",
           "option2Value": "128GB",
-          "price": 16490000,
-          "originalPrice": 18990000,
-          "stock": 41
+          "price": 21990000,
+          "originalPrice": null,
+          "stock": 23
         },
         {
-          "option1Value": "Hồng",
+          "option1Value": "Hồng nhạt",
           "option2Value": "256GB",
-          "price": 19290000,
-          "originalPrice": 21790000,
-          "stock": 9
+          "price": 24990000,
+          "originalPrice": null,
+          "stock": 19
         }
       ],
       "images": [
         {
           "file": "iphone-15-1.webp",
-          "option1Value": null
+          "option1Value": "Xanh dương nhạt"
         },
         {
           "file": "iphone-15-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "iphone-15-c1.webp",
-          "option1Value": "Xanh Lá"
-        },
-        {
-          "file": "iphone-15-c2.webp",
           "option1Value": "Đen"
         },
         {
-          "file": "iphone-15-c3.webp",
-          "option1Value": "Hồng"
+          "file": "iphone-15-3.webp",
+          "option1Value": "Hồng nhạt"
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/dtdd/iphone-15"
     },
     {
-      "key": "ipad-air-m2",
+      "key": "macbook-air-13-inch-m5-16gb-512gb-8gpu-30w",
+      "shop": "A",
+      "category": "MacBook",
+      "name": "MacBook Air 13 inch M5 16GB/512GB/8GPU 30W",
+      "description": "MacBook Air 13 inch M5 16GB/512GB/8GPU 30W chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 13.6 inch\n- Công nghệ màn hình: 500 nits, 1 tỷ màu, Wide color (P3), True Tone Technology\n- Công nghệ CPU: Apple M5\n- RAM: 16 GB\n- Ổ cứng: 512 GB SSD\n- Hệ điều hành: macOS Tahoe\n- Kết nối: Bluetooth 6.0, Wi-Fi 7 (802.11be)\n- Công nghệ âm thanh: 4 Loa, Dolby Atmos, 3 microphones, Spatial Audio\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 1380,
+      "soldCount": 288,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Xanh đen",
+          "option2Value": "",
+          "price": 35690000,
+          "originalPrice": 35990000,
+          "stock": 26
+        },
+        {
+          "option1Value": "Xanh da trời nhạt",
+          "option2Value": "",
+          "price": 35690000,
+          "originalPrice": 35990000,
+          "stock": 48
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "",
+          "price": 35690000,
+          "originalPrice": 35990000,
+          "stock": 13
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "",
+          "price": 36290000,
+          "originalPrice": 36590000,
+          "stock": 18
+        }
+      ],
+      "images": [
+        {
+          "file": "macbook-air-13-inch-m5-16gb-512gb-8gpu-30w-1.webp",
+          "option1Value": "Xanh đen"
+        },
+        {
+          "file": "macbook-air-13-inch-m5-16gb-512gb-8gpu-30w-2.webp",
+          "option1Value": "Xanh da trời nhạt"
+        },
+        {
+          "file": "macbook-air-13-inch-m5-16gb-512gb-8gpu-30w-3.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "macbook-air-13-inch-m5-16gb-512gb-8gpu-30w-4.webp",
+          "option1Value": "Vàng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/laptop/macbook-air-13-inch-m5-16gb-512gb"
+    },
+    {
+      "key": "macbook-air-15-inch-m5-16gb-512gb-35w",
+      "shop": "A",
+      "category": "MacBook",
+      "name": "MacBook Air 15 inch M5 16GB/512GB 35W",
+      "description": "MacBook Air 15 inch M5 16GB/512GB 35W chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 15.3 inch\n- Công nghệ màn hình: 1 tỷ màu, Wide color (P3), 500 nits, True Tone Technology\n- Công nghệ CPU: Apple M5\n- RAM: 16 GB\n- Ổ cứng: 512 GB SSD\n- Hệ điều hành: macOS Tahoe\n- Kết nối: Bluetooth 6.0, Wi-Fi 7 (802.11be)\n- Công nghệ âm thanh: 3 microphones, Dolby Atmos, Hệ thống âm thanh 6 loa, Spatial Audio\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 1660,
+      "soldCount": 74,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Xanh đen",
+          "option2Value": "",
+          "price": 41390000,
+          "originalPrice": 41990000,
+          "stock": 28
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "",
+          "price": 41390000,
+          "originalPrice": 41990000,
+          "stock": 19
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "",
+          "price": 41390000,
+          "originalPrice": 41990000,
+          "stock": 48
+        },
+        {
+          "option1Value": "Xanh da trời nhạt",
+          "option2Value": "",
+          "price": 41690000,
+          "originalPrice": 42290000,
+          "stock": 26
+        }
+      ],
+      "images": [
+        {
+          "file": "macbook-air-15-inch-m5-16gb-512gb-35w-1.webp",
+          "option1Value": "Xanh đen"
+        },
+        {
+          "file": "macbook-air-15-inch-m5-16gb-512gb-35w-2.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "macbook-air-15-inch-m5-16gb-512gb-35w-3.webp",
+          "option1Value": "Vàng"
+        },
+        {
+          "file": "macbook-air-15-inch-m5-16gb-512gb-35w-4.webp",
+          "option1Value": "Xanh da trời nhạt"
+        }
+      ],
+      "source": "https://www.thegioididong.com/laptop/macbook-air-15-inch-m5-16gb-512gb"
+    },
+    {
+      "key": "macbook-neo-13-inch-a18-pro",
+      "shop": "A",
+      "category": "MacBook",
+      "name": "MacBook Neo 13 inch A18 Pro",
+      "description": "MacBook Neo 13 inch A18 Pro chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 13 inch\n- Công nghệ màn hình: 1 tỷ màu, 500 nits\n- Công nghệ CPU: Apple A18 Pro\n- RAM: 8 GB\n- Ổ cứng: 256 GB SSD\n- Hệ điều hành: macOS\n- Kết nối: Wi-Fi 6E (802.11ax), Bluetooth 6.0\n- Công nghệ âm thanh: 2 loa, Dolby Atmos, 2 microphones\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 1380,
+      "soldCount": 327,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Bạc",
+          "option2Value": "",
+          "price": 19190000,
+          "originalPrice": 19490000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Vàng nhạt",
+          "option2Value": "",
+          "price": 19190000,
+          "originalPrice": 19490000,
+          "stock": 62
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "",
+          "price": 19190000,
+          "originalPrice": 19490000,
+          "stock": 17
+        }
+      ],
+      "images": [
+        {
+          "file": "macbook-neo-13-inch-a18-pro-1.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "macbook-neo-13-inch-a18-pro-2.webp",
+          "option1Value": "Vàng nhạt"
+        },
+        {
+          "file": "macbook-neo-13-inch-a18-pro-3.webp",
+          "option1Value": "Xanh Dương"
+        }
+      ],
+      "source": "https://www.thegioididong.com/laptop/macbook-neo-13-inch-a18-pro-8gb-256gb"
+    },
+    {
+      "key": "ipad-air-m4-11-inch-wifi",
       "shop": "A",
       "category": "iPad",
-      "name": "Máy tính bảng Apple iPad Air 11 inch M2 Wi-Fi",
-      "description": "iPad Air 11 inch chip M2, màn hình Liquid Retina, hỗ trợ Apple Pencil Pro và Magic Keyboard.\n\n- Camera trước 12MP đặt ở cạnh ngang, tiện họp trực tuyến.\n- Wi-Fi 6E, cổng USB-C, Touch ID trên nút nguồn.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 650,
-      "soldCount": 76,
+      "name": "Máy tính bảng iPad Air M4 11 inch WiFi",
+      "description": "Máy tính bảng iPad Air M4 11 inch WiFi chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 11\"\n- Công nghệ màn hình: Liquid Retina\n- Chip xử lý (CPU): Apple M4 8 nhân\n- Chip đồ họa (GPU): Apple GPU 9 nhân\n- RAM: 12 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: 12 MP\n- Dung lượng pin: 28.93 Wh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 614,
+      "soldCount": 170,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Trắng Starlight",
+          "option2Value": "128GB",
+          "price": 19290000,
+          "originalPrice": 20990000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Trắng Starlight",
+          "option2Value": "256GB",
+          "price": 22090000,
+          "originalPrice": 23790000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "128GB",
+          "price": 19290000,
+          "originalPrice": 20990000,
+          "stock": 25
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "256GB",
+          "price": 22090000,
+          "originalPrice": 23790000,
+          "stock": 25
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "128GB",
+          "price": 19290000,
+          "originalPrice": 20990000,
+          "stock": 20
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "256GB",
+          "price": 22090000,
+          "originalPrice": 23790000,
+          "stock": 56
+        },
+        {
+          "option1Value": "Đen - Xám",
+          "option2Value": "128GB",
+          "price": 19290000,
+          "originalPrice": 20990000,
+          "stock": 49
+        },
+        {
+          "option1Value": "Đen - Xám",
+          "option2Value": "256GB",
+          "price": 22090000,
+          "originalPrice": 23790000,
+          "stock": 45
+        }
+      ],
+      "images": [
+        {
+          "file": "ipad-air-m4-11-inch-wifi-1.webp",
+          "option1Value": "Trắng Starlight"
+        },
+        {
+          "file": "ipad-air-m4-11-inch-wifi-2.webp",
+          "option1Value": "Tím"
+        },
+        {
+          "file": "ipad-air-m4-11-inch-wifi-3.webp",
+          "option1Value": "Xanh Dương"
+        },
+        {
+          "file": "ipad-air-m4-11-inch-wifi-4.webp",
+          "option1Value": "Đen - Xám"
+        }
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/ipad-air-m4-11-inch-wifi-128gb"
+    },
+    {
+      "key": "ipad-a16-wifi",
+      "shop": "A",
+      "category": "iPad",
+      "name": "Máy tính bảng iPad A16 WiFi",
+      "description": "Máy tính bảng iPad A16 WiFi chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 11\"\n- Công nghệ màn hình: Retina IPS LCD\n- Chip xử lý (CPU): Apple A16 5 nhân\n- Chip đồ họa (GPU): Apple GPU 4 nhân\n- RAM: 6 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: 12 MP\n- Dung lượng pin: 28.93 Wh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 627,
+      "soldCount": 1502,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Vàng",
+          "option2Value": "128GB",
+          "price": 12090000,
+          "originalPrice": 12790000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "128GB",
+          "price": 12090000,
+          "originalPrice": 12790000,
+          "stock": 26
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "256GB",
+          "price": 14890000,
+          "originalPrice": 15590000,
+          "stock": 58
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "128GB",
+          "price": 12090000,
+          "originalPrice": 12790000,
+          "stock": 43
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "256GB",
+          "price": 14890000,
+          "originalPrice": 15590000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "128GB",
+          "price": 12090000,
+          "originalPrice": 12790000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "256GB",
+          "price": 14890000,
+          "originalPrice": 15590000,
+          "stock": 51
+        }
+      ],
+      "images": [
+        {
+          "file": "ipad-a16-wifi-1.webp",
+          "option1Value": "Vàng"
+        },
+        {
+          "file": "ipad-a16-wifi-2.webp",
+          "option1Value": "Xanh Dương"
+        },
+        {
+          "file": "ipad-a16-wifi-3.webp",
+          "option1Value": "Hồng"
+        },
+        {
+          "file": "ipad-a16-wifi-4.webp",
+          "option1Value": "Bạc"
+        }
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/ipad-11-wifi-128gb"
+    },
+    {
+      "key": "ipad-pro-m5-11-inch-wifi",
+      "shop": "A",
+      "category": "iPad",
+      "name": "Máy tính bảng iPad Pro M5 11 inch WiFi",
+      "description": "Máy tính bảng iPad Pro M5 11 inch WiFi chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 11\"\n- Công nghệ màn hình: Ultra Retina XDR\n- Chip xử lý (CPU): Apple M5 9 nhân\n- Chip đồ họa (GPU): Apple GPU 10 nhân\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: 12 MP\n- Dung lượng pin: 31.29 Wh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 594,
+      "soldCount": 107,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Bạc",
+          "option2Value": "",
+          "price": 33990000,
+          "originalPrice": 35590000,
+          "stock": 19
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "",
+          "price": 33990000,
+          "originalPrice": 35590000,
+          "stock": 54
+        }
+      ],
+      "images": [
+        {
+          "file": "ipad-pro-m5-11-inch-wifi-1.webp",
+          "option1Value": "Bạc"
+        },
+        {
+          "file": "ipad-pro-m5-11-inch-wifi-2.webp",
+          "option1Value": "Đen"
+        }
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/ipad-pro-m5-11-inch-wifi-256gb"
+    },
+    {
+      "key": "ipad-air-m4-13-inch-5g",
+      "shop": "A",
+      "category": "iPad",
+      "name": "Máy tính bảng iPad Air M4 13 inch 5G",
+      "description": "Máy tính bảng iPad Air M4 13 inch 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 13\"\n- Công nghệ màn hình: Liquid Retina\n- Chip xử lý (CPU): Apple M4 8 nhân\n- Chip đồ họa (GPU): Apple GPU 9 nhân\n- RAM: 12 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: 12 MP\n- Dung lượng pin: 36.59 Wh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 767,
+      "soldCount": 10,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 30690000,
+          "originalPrice": null,
+          "stock": 38
+        }
+      ],
+      "images": [
+        {
+          "file": "ipad-air-m4-13-inch-5g-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/ipad-air-m4-13-inch-5g-128gb"
+    },
+    {
+      "key": "apple-watch-series-11-gps-42mm-vien-nhom-day-the",
+      "shop": "A",
+      "category": "Apple Watch",
+      "name": "Apple Watch Series 11 GPS 42mm viền nhôm dây thể thao",
+      "description": "Apple Watch Series 11 GPS 42mm viền nhôm dây thể thao chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple S10\n- Hệ điều hành: watchOS phiên bản mới nhất\n- Kết nối: Wifi, Bluetooth v5.3\n- Tiêu chuẩn chống nước, chống bụi: Chống nước 5 ATM - ISO 22810:2010 (Tắm, bơi vùng nước nông)\n- Khối lượng: Nặng 30.3g\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 180,
+      "soldCount": 322,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Đen bóng",
+          "option2Value": "",
+          "price": 11290000,
+          "originalPrice": 11490000,
+          "stock": 33
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "",
+          "price": 11290000,
+          "originalPrice": 11490000,
+          "stock": 40
+        },
+        {
+          "option1Value": "Vàng Hồng",
+          "option2Value": "",
+          "price": 11990000,
+          "originalPrice": 12190000,
+          "stock": 27
+        }
+      ],
+      "images": [
+        {
+          "file": "apple-watch-series-11-gps-42mm-vien-nhom-day-the-1.webp",
+          "option1Value": "Đen bóng"
+        },
+        {
+          "file": "apple-watch-series-11-gps-42mm-vien-nhom-day-the-2.webp",
+          "option1Value": "Xám"
+        },
+        {
+          "file": "apple-watch-series-11-gps-42mm-vien-nhom-day-the-3.webp",
+          "option1Value": "Vàng Hồng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dong-ho-thong-minh/apple-watch-series-11-42mm-vien-nhom-day-the-thao"
+    },
+    {
+      "key": "apple-watch-se-3-gps-40mm-vien-nhom-day-the-thao",
+      "shop": "A",
+      "category": "Apple Watch",
+      "name": "Apple Watch SE 3 GPS 40mm viền nhôm dây thể thao",
+      "description": "Apple Watch SE 3 GPS 40mm viền nhôm dây thể thao chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple S10\n- Hệ điều hành: watchOS phiên bản mới nhất\n- Kết nối: GPS, Bluetooth v5.3, Wifi\n- Tiêu chuẩn chống nước, chống bụi: Chống nước 5 ATM - ISO 22810:2010 (Tắm, bơi vùng nước nông)\n- Khối lượng: Nặng 26.3g\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 176,
+      "soldCount": 478,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Trắng Starlight",
+          "option2Value": "",
+          "price": 5990000,
+          "originalPrice": 6990000,
+          "stock": 19
+        },
+        {
+          "option1Value": "Xanh đen",
+          "option2Value": "",
+          "price": 6890000,
+          "originalPrice": 7890000,
+          "stock": 0
+        }
+      ],
+      "images": [
+        {
+          "file": "apple-watch-se-3-gps-40mm-vien-nhom-day-the-thao-1.webp",
+          "option1Value": "Trắng Starlight"
+        },
+        {
+          "file": "apple-watch-se-3-gps-40mm-vien-nhom-day-the-thao-2.webp",
+          "option1Value": "Xanh đen"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dong-ho-thong-minh/apple-watch-se-3-40mm-vien-nhom-day-the-thao"
+    },
+    {
+      "key": "apple-watch-series-11-gps-cellular-46mm-vien-tit",
+      "shop": "A",
+      "category": "Apple Watch",
+      "name": "Apple Watch Series 11 GPS + Cellular 46mm viền Titanium dây Milan",
+      "description": "Apple Watch Series 11 GPS + Cellular 46mm viền Titanium dây Milan chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ màn hình: OLED\n- Chip xử lý (CPU): Apple S10\n- Hệ điều hành: watchOS phiên bản mới nhất\n- Kết nối: Wifi, Bluetooth v5.3, Kết nối 5G\n- Tiêu chuẩn chống nước, chống bụi: Chống nước 5 ATM - ISO 22810:2010 (Tắm, bơi vùng nước nông)\n- Khối lượng: Nặng 43.1g\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 193,
+      "soldCount": 26,
+      "option1Name": "Màu sắc",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "Titan xám",
+          "option2Value": "",
+          "price": 23590000,
+          "originalPrice": 25490000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Titan vàng",
+          "option2Value": "",
+          "price": 23590000,
+          "originalPrice": 25490000,
+          "stock": 16
+        }
+      ],
+      "images": [
+        {
+          "file": "apple-watch-series-11-gps-cellular-46mm-vien-tit-1.webp",
+          "option1Value": "Titan xám"
+        },
+        {
+          "file": "apple-watch-series-11-gps-cellular-46mm-vien-tit-2.webp",
+          "option1Value": "Titan vàng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dong-ho-thong-minh/apple-watch-series-11-gps-cellular-46mm-vien-titanium-day-milan"
+    },
+    {
+      "key": "bluetooth-apple-airpods-pro-3-trang-mfhp4",
+      "shop": "A",
+      "category": "Tai nghe",
+      "name": "Tai nghe Bluetooth Apple AirPods Pro 3 Trắng MFHP4",
+      "description": "Tai nghe Bluetooth Apple AirPods Pro 3 Trắng MFHP4 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ âm thanh: Active Noise Cancellation, Adaptive Audio, Adaptive EQ, Chip Apple H2, Personalized Spatial Audio, Studio-quality audio recording, Transparency Mode\n- Khối lượng: Nặng 5.55g\n- Rộng: Rộng 1.92 cm\n- Thương hiệu của: Mỹ\n- Thời gian sử dụng hộp sạc: 32 giờ\n- Tương thích: iOS (iPhone), iPadOS (iPad), tvOS, visionOS, watchOS\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 156,
+      "soldCount": 0,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 5890000,
+          "originalPrice": 6790000,
+          "stock": 27
+        }
+      ],
+      "images": [
+        {
+          "file": "bluetooth-apple-airpods-pro-3-trang-mfhp4-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/tai-nghe/tai-nghe-bluetooth-apple-airpods-pro-3-trang-mfhp4"
+    },
+    {
+      "key": "airpods-4-chong-on",
+      "shop": "A",
+      "category": "Tai nghe",
+      "name": "AirPods 4 (chống ồn)",
+      "description": "AirPods 4 (chống ồn) chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ âm thanh: Active Noise Cancellation, Adaptive Audio, Adaptive EQ, Ambient Sound, Chip Apple H2, Transparency Mode\n- Khối lượng: Nặng 4.3g\n- Rộng: Rộng 1.83 cm\n- Thương hiệu của: Mỹ\n- Thời gian sử dụng hộp sạc: 30 giờ\n- Tương thích: Android, iOS, Windows, macOS (Macbook, iMac)\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 154,
+      "soldCount": 58,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 4390000,
+          "originalPrice": 4990000,
+          "stock": 57
+        }
+      ],
+      "images": [
+        {
+          "file": "airpods-4-chong-on-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/tai-nghe/airpods-4-chong-on-mxp93"
+    },
+    {
+      "key": "airpods-max-cong-usb-c",
+      "shop": "A",
+      "category": "Tai nghe",
+      "name": "AirPods Max cổng USB C",
+      "description": "AirPods Max cổng USB C chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ âm thanh: Active Noise Cancellation, Adaptive EQ, Chip Apple H1, Spatial Audio, Transparency Mode\n- Khối lượng: Nặng 386.2g\n- Rộng: Không\n- Thương hiệu của: Mỹ\n- Tương thích: Android, iOS (iPhone), iPadOS (iPad), macOS (Macbook, iMac)\n- Trong hộp có: Dây cáp Type-C, Hộp sạc, Sách hướng dẫn, Tai nghe\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 536,
+      "soldCount": 33,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 11990000,
+          "originalPrice": 15990000,
+          "stock": 12
+        }
+      ],
+      "images": [
+        {
+          "file": "airpods-max-cong-usb-c-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "airpods-max-cong-usb-c-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "airpods-max-cong-usb-c-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/tai-nghe/airpods-max-cong-usb-c"
+    },
+    {
+      "key": "sac-nhanh-apple-dynamic-40w-60w-mgtu4",
+      "shop": "A",
+      "category": "Sạc và cáp",
+      "name": "Sạc nhanh Apple Dynamic 40W - 60W MGTU4",
+      "description": "Sạc nhanh Apple Dynamic 40W - 60W MGTU4 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Hỗ trợ sạc tối đa: 60W\n- Thương hiệu của: Mỹ\n- Nguồn ra: Không\n- Sản xuất tại: Trung Quốc\n- Dòng sản phẩm: MGTU4\n- Công nghệ/Tiện ích: Sạc nhanh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 200,
+      "soldCount": 19,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 1190000,
+          "originalPrice": null,
+          "stock": 18
+        }
+      ],
+      "images": [
+        {
+          "file": "sac-nhanh-apple-dynamic-40w-60w-mgtu4-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/adapter-sac/sac-nhanh-apple-dynamic-40w-60w-mgtu4"
+    },
+    {
+      "key": "op-lung-magnetic-iphone-18-pro-max-17-pro-max-no",
+      "shop": "A",
+      "category": "Ốp lưng",
+      "name": "Ốp lưng Magnetic iPhone 18 Pro Max/ 17 Pro Max NOMAD Modern Leather NM009179858",
+      "description": "Ốp lưng Magnetic iPhone 18 Pro Max/ 17 Pro Max NOMAD Modern Leather NM009179858 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 150,
+      "soldCount": 1,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 1600000,
+          "originalPrice": null,
+          "stock": 32
+        }
+      ],
+      "images": [
+        {
+          "file": "op-lung-magnetic-iphone-18-pro-max-17-pro-max-no-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "op-lung-magnetic-iphone-18-pro-max-17-pro-max-no-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "op-lung-magnetic-iphone-18-pro-max-17-pro-max-no-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/op-lung-flipcover/op-lung-magnetic-iphone-18-pro-max-17-pro-max-nomad-modern-leather-nm009179858"
+    },
+    {
+      "key": "samsung-galaxy-s25-ultra-5g",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy S25 Ultra 5G",
+      "description": "Điện thoại Samsung Galaxy S25 Ultra 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.9\"\n- Công nghệ màn hình: Dynamic AMOLED 2X\n- Chip xử lý (CPU): Qualcomm Snapdragon 8 Elite For Galaxy 8 nhân\n- Chip đồ họa (GPU): Adreno 830\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 200 MP & Phụ 50 MP, 50 MP, 10 MP\n- Dung lượng pin: 5000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 368,
+      "soldCount": 2260,
       "option1Name": "Màu sắc",
       "option2Name": "Dung lượng",
       "variants": [
         {
           "option1Value": "Xanh Dương",
-          "option2Value": "128GB",
-          "price": 14990000,
-          "originalPrice": 16490000,
-          "stock": 35
+          "option2Value": "256GB",
+          "price": 28490000,
+          "originalPrice": 33990000,
+          "stock": 19
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "512GB",
+          "price": 28990000,
+          "originalPrice": 37490000,
+          "stock": 44
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "256GB",
+          "price": 28490000,
+          "originalPrice": 33990000,
+          "stock": 60
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "512GB",
+          "price": 28990000,
+          "originalPrice": 37490000,
+          "stock": 11
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 28490000,
+          "originalPrice": 33990000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 28990000,
+          "originalPrice": 37490000,
+          "stock": 16
+        },
+        {
+          "option1Value": "Trắng - Bạc",
+          "option2Value": "256GB",
+          "price": 28490000,
+          "originalPrice": 33990000,
+          "stock": 49
+        },
+        {
+          "option1Value": "Trắng - Bạc",
+          "option2Value": "512GB",
+          "price": 28990000,
+          "originalPrice": 37490000,
+          "stock": 22
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-s25-ultra-5g-1.webp",
+          "option1Value": "Xanh Dương"
+        },
+        {
+          "file": "samsung-galaxy-s25-ultra-5g-2.webp",
+          "option1Value": "Xám"
+        },
+        {
+          "file": "samsung-galaxy-s25-ultra-5g-3.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "samsung-galaxy-s25-ultra-5g-4.webp",
+          "option1Value": "Trắng - Bạc"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-s25-ultra"
+    },
+    {
+      "key": "samsung-galaxy-s25-5g",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy S25 5G",
+      "description": "Điện thoại Samsung Galaxy S25 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.2\"\n- Công nghệ màn hình: Dynamic AMOLED 2X\n- Chip xử lý (CPU): Qualcomm Snapdragon 8 Elite For Galaxy 8 nhân\n- Chip đồ họa (GPU): Adreno 830\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 12 MP, 10 MP\n- Dung lượng pin: 4000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 312,
+      "soldCount": 1545,
+      "option1Name": "Dung lượng",
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "XÁM",
+          "option2Value": "",
+          "price": 19490000,
+          "originalPrice": 22580000,
+          "stock": 47
+        },
+        {
+          "option1Value": "XANHDƯƠNGNHẠT",
+          "option2Value": "",
+          "price": 19490000,
+          "originalPrice": 22580000,
+          "stock": 32
+        },
+        {
+          "option1Value": "XANHNAVY",
+          "option2Value": "",
+          "price": 19490000,
+          "originalPrice": 22580000,
+          "stock": 44
+        },
+        {
+          "option1Value": "XANHLÁ",
+          "option2Value": "",
+          "price": 19490000,
+          "originalPrice": 22580000,
+          "stock": 55
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-s25-5g-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "samsung-galaxy-s25-5g-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "samsung-galaxy-s25-5g-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-s25"
+    },
+    {
+      "key": "samsung-galaxy-z-flip7-5g",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy Z Flip7 5G",
+      "description": "Điện thoại Samsung Galaxy Z Flip7 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: Chính 6.9\" & Phụ 4.1\"\n- Công nghệ màn hình: Chính: Dynamic AMOLED 2X, Phụ: Super AMOLED\n- Chip xử lý (CPU): Exynos 2500 10 nhân\n- Chip đồ họa (GPU): Xclipse 950\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 12 MP\n- Dung lượng pin: 4300 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 338,
+      "soldCount": 1640,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Đỏ",
+          "option2Value": "256GB",
+          "price": 28990000,
+          "originalPrice": null,
+          "stock": 19
+        },
+        {
+          "option1Value": "Đỏ",
+          "option2Value": "512GB",
+          "price": 34990000,
+          "originalPrice": null,
+          "stock": 44
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 28990000,
+          "originalPrice": null,
+          "stock": 39
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 34990000,
+          "originalPrice": null,
+          "stock": 12
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-z-flip7-5g-1.webp",
+          "option1Value": "Đỏ"
+        },
+        {
+          "file": "samsung-galaxy-z-flip7-5g-2.webp",
+          "option1Value": "Đen"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-z-flip7"
+    },
+    {
+      "key": "samsung-galaxy-z-fold7-5g",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy Z Fold7 5G",
+      "description": "Điện thoại Samsung Galaxy Z Fold7 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: Chính 8.0\" & Phụ 6.5\"\n- Công nghệ màn hình: Dynamic AMOLED 2X\n- Chip xử lý (CPU): Qualcomm Snapdragon 8 Elite For Galaxy 8 nhân\n- Chip đồ họa (GPU): Adreno 830\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 200 MP & Phụ 12 MP, 10 MP\n- Dung lượng pin: 4400 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 365,
+      "soldCount": 1890,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 40990000,
+          "originalPrice": 49390000,
+          "stock": 31
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "256GB",
+          "price": 40990000,
+          "originalPrice": 49390000,
+          "stock": 24
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "512GB",
+          "price": 52990000,
+          "originalPrice": 61390000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Xanh Navy",
+          "option2Value": "256GB",
+          "price": 40990000,
+          "originalPrice": 49390000,
+          "stock": 55
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-z-fold7-5g-1.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "samsung-galaxy-z-fold7-5g-2.webp",
+          "option1Value": "Xám"
+        },
+        {
+          "file": "samsung-galaxy-z-fold7-5g-3.webp",
+          "option1Value": "Xanh Navy"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-z-fold7"
+    },
+    {
+      "key": "samsung-galaxy-a26-5g",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy A26 5G",
+      "description": "Điện thoại Samsung Galaxy A26 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.7\"\n- Công nghệ màn hình: Super AMOLED\n- Chip xử lý (CPU): Exynos 1380 8 nhân\n- Chip đồ họa (GPU): Mali-G68\n- RAM: 8 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 8 MP, 2 MP\n- Dung lượng pin: 5000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 350,
+      "soldCount": 1210,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "8GB/256GB",
+          "price": 7540000,
+          "originalPrice": 8390000,
+          "stock": 32
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/256GB",
+          "price": 7540000,
+          "originalPrice": 8390000,
+          "stock": 13
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "6GB/128GB",
+          "price": 6590000,
+          "originalPrice": 7440000,
+          "stock": 50
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "8GB/256GB",
+          "price": 7540000,
+          "originalPrice": 8390000,
+          "stock": 16
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-a26-5g-1.webp",
+          "option1Value": "Xanh lá"
+        },
+        {
+          "file": "samsung-galaxy-a26-5g-2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "samsung-galaxy-a26-5g-3.webp",
+          "option1Value": "Hồng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-a26"
+    },
+    {
+      "key": "samsung-galaxy-a17",
+      "shop": "B",
+      "category": "Samsung",
+      "name": "Điện thoại Samsung Galaxy A17",
+      "description": "Điện thoại Samsung Galaxy A17 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.7\"\n- Công nghệ màn hình: Super AMOLED\n- Chip xử lý (CPU): MediaTek Helio G99 8 nhân\n- Chip đồ họa (GPU): Mali-G57 MC2\n- RAM: 4 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 5 MP, 2 MP\n- Dung lượng pin: 5000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 340,
+      "soldCount": 1150,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xám",
+          "option2Value": "4GB/128GB",
+          "price": 4790000,
+          "originalPrice": 5490000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "8GB/128GB",
+          "price": 5990000,
+          "originalPrice": 6690000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "8GB/256GB",
+          "price": 6690000,
+          "originalPrice": 7390000,
+          "stock": 55
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "4GB/128GB",
+          "price": 4790000,
+          "originalPrice": 5490000,
+          "stock": 8
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/128GB",
+          "price": 5990000,
+          "originalPrice": 6690000,
+          "stock": 8
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/256GB",
+          "price": 6690000,
+          "originalPrice": 7390000,
+          "stock": 8
+        },
+        {
+          "option1Value": "Xanh nhạt",
+          "option2Value": "4GB/128GB",
+          "price": 4790000,
+          "originalPrice": 5490000,
+          "stock": 13
+        },
+        {
+          "option1Value": "Xanh nhạt",
+          "option2Value": "8GB/128GB",
+          "price": 5990000,
+          "originalPrice": 6690000,
+          "stock": 21
+        },
+        {
+          "option1Value": "Xanh nhạt",
+          "option2Value": "8GB/256GB",
+          "price": 6690000,
+          "originalPrice": 7390000,
+          "stock": 29
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-a17-1.webp",
+          "option1Value": "Xám"
+        },
+        {
+          "file": "samsung-galaxy-a17-2.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "samsung-galaxy-a17-3.webp",
+          "option1Value": "Xanh nhạt"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/samsung-galaxy-a17-8gb-128gb"
+    },
+    {
+      "key": "xiaomi-17-5g",
+      "shop": "B",
+      "category": "Xiaomi",
+      "name": "Điện thoại Xiaomi 17 5G",
+      "description": "Điện thoại Xiaomi 17 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.3\"\n- Công nghệ màn hình: LTPO AMOLED\n- Chip xử lý (CPU): Qualcomm Snapdragon 8 Elite Gen 5 8 nhân\n- Chip đồ họa (GPU): Adreno 840\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 50 MP, 50 MP\n- Hỗ trợ sạc tối đa: 100 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 341,
+      "soldCount": 244,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "256GB",
+          "price": 19490000,
+          "originalPrice": 26990000,
+          "stock": 22
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "512GB",
+          "price": 20490000,
+          "originalPrice": 27990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "256GB",
+          "price": 19490000,
+          "originalPrice": 26990000,
+          "stock": 17
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 19490000,
+          "originalPrice": 26990000,
+          "stock": 12
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 20490000,
+          "originalPrice": 27990000,
+          "stock": 43
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "512GB",
+          "price": 20490000,
+          "originalPrice": 27990000,
+          "stock": 56
+        }
+      ],
+      "images": [
+        {
+          "file": "xiaomi-17-5g-1.webp",
+          "option1Value": "Xanh Dương"
+        },
+        {
+          "file": "xiaomi-17-5g-2.webp",
+          "option1Value": "Xanh lá"
+        },
+        {
+          "file": "xiaomi-17-5g-3.webp",
+          "option1Value": "Đen"
+        },
+        {
+          "file": "xiaomi-17-5g-4.webp",
+          "option1Value": "Hồng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/xiaomi-17"
+    },
+    {
+      "key": "xiaomi-17t-pro-5g",
+      "shop": "B",
+      "category": "Xiaomi",
+      "name": "Điện thoại Xiaomi 17T Pro 5G",
+      "description": "Điện thoại Xiaomi 17T Pro 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.83\"\n- Công nghệ màn hình: AMOLED\n- Chip xử lý (CPU): MediaTek Dimensity 9500 8 nhân\n- Chip đồ họa (GPU): Mali-G1 Ultra\n- RAM: 12 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: 50 MP\n- Dung lượng pin: 7000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 369,
+      "soldCount": 1590,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Đen",
+          "option2Value": "256GB",
+          "price": 19990000,
+          "originalPrice": 23990000,
+          "stock": 0
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "512GB",
+          "price": 22490000,
+          "originalPrice": 24990000,
+          "stock": 51
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "256GB",
+          "price": 19990000,
+          "originalPrice": 23990000,
+          "stock": 39
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "512GB",
+          "price": 22490000,
+          "originalPrice": 24990000,
+          "stock": 8
+        },
+        {
+          "option1Value": "Tím",
+          "option2Value": "1TB",
+          "price": 24290000,
+          "originalPrice": 26990000,
+          "stock": 24
         },
         {
           "option1Value": "Xanh Dương",
           "option2Value": "256GB",
-          "price": 17990000,
-          "originalPrice": 19490000,
-          "stock": 14
+          "price": 19990000,
+          "originalPrice": 23990000,
+          "stock": 62
         },
         {
-          "option1Value": "Xám Không Gian",
-          "option2Value": "128GB",
-          "price": 14990000,
-          "originalPrice": 16490000,
-          "stock": 9
+          "option1Value": "Xanh Dương",
+          "option2Value": "512GB",
+          "price": 22490000,
+          "originalPrice": 24990000,
+          "stock": 45
         },
         {
-          "option1Value": "Xám Không Gian",
-          "option2Value": "256GB",
-          "price": 17990000,
-          "originalPrice": 19490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Tím",
-          "option2Value": "128GB",
-          "price": 14990000,
-          "originalPrice": 16490000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Tím",
-          "option2Value": "256GB",
-          "price": 17990000,
-          "originalPrice": 19490000,
-          "stock": 9
+          "option1Value": "Xanh Dương",
+          "option2Value": "1TB",
+          "price": 24290000,
+          "originalPrice": 26990000,
+          "stock": 13
         }
       ],
       "images": [
         {
-          "file": "ipad-air-m2-1.webp",
-          "option1Value": null
+          "file": "xiaomi-17t-pro-5g-1.webp",
+          "option1Value": "Đen"
         },
         {
-          "file": "ipad-air-m2-2.webp",
-          "option1Value": null
+          "file": "xiaomi-17t-pro-5g-2.webp",
+          "option1Value": "Tím"
         },
         {
-          "file": "ipad-air-m2-c1.webp",
+          "file": "xiaomi-17t-pro-5g-3.webp",
+          "option1Value": "Xanh Dương"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/xiaomi-17t-pro-5g-12gb-256gb"
+    },
+    {
+      "key": "xiaomi-poco-x8-pro-5g",
+      "shop": "B",
+      "category": "Xiaomi",
+      "name": "Điện thoại Xiaomi POCO X8 Pro 5G",
+      "description": "Điện thoại Xiaomi POCO X8 Pro 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.59\"\n- Công nghệ màn hình: AMOLED\n- Chip xử lý (CPU): MediaTek Dimensity 8500-Ultra 8 nhân\n- Chip đồ họa (GPU): Mali-G720 MC8\n- RAM: 8 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 8 MP\n- Hỗ trợ sạc tối đa: 100 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 351,
+      "soldCount": 272,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "8GB/256GB",
+          "price": 12990000,
+          "originalPrice": 13990000,
+          "stock": 37
+        },
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "8GB/512GB",
+          "price": 13490000,
+          "originalPrice": 14490000,
+          "stock": 18
+        },
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "12GB/512GB",
+          "price": 14990000,
+          "originalPrice": 15990000,
+          "stock": 23
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "8GB/512GB",
+          "price": 13490000,
+          "originalPrice": 14490000,
+          "stock": 34
+        },
+        {
+          "option1Value": "Trắng",
+          "option2Value": "12GB/512GB",
+          "price": 14990000,
+          "originalPrice": 15990000,
+          "stock": 19
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/512GB",
+          "price": 13490000,
+          "originalPrice": 14490000,
+          "stock": 59
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/256GB",
+          "price": 12990000,
+          "originalPrice": 13990000,
+          "stock": 52
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "12GB/512GB",
+          "price": 14990000,
+          "originalPrice": 15990000,
+          "stock": 8
+        }
+      ],
+      "images": [
+        {
+          "file": "xiaomi-poco-x8-pro-5g-1.webp",
+          "option1Value": "Xanh lá"
+        },
+        {
+          "file": "xiaomi-poco-x8-pro-5g-2.webp",
+          "option1Value": "Trắng"
+        },
+        {
+          "file": "xiaomi-poco-x8-pro-5g-3.webp",
+          "option1Value": "Đen"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/xiaomi-poco-x8-pro-8gb-256gb"
+    },
+    {
+      "key": "xiaomi-redmi-15c",
+      "shop": "B",
+      "category": "Xiaomi",
+      "name": "Điện thoại Xiaomi Redmi 15C",
+      "description": "Điện thoại Xiaomi Redmi 15C chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.9\"\n- Công nghệ màn hình: IPS LCD\n- Chip xử lý (CPU): MediaTek Helio G81-Ultra 8 nhân\n- Chip đồ họa (GPU): Mali-G52 MC2\n- RAM: 4 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ QVGA\n- Dung lượng pin: 6000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 355,
+      "soldCount": 1090,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xanh lá",
+          "option2Value": "4GB/128GB",
+          "price": 3890000,
+          "originalPrice": 4690000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Cam",
+          "option2Value": "4GB/128GB",
+          "price": 3890000,
+          "originalPrice": 4690000,
+          "stock": 30
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "4GB/128GB",
+          "price": 3890000,
+          "originalPrice": 4690000,
+          "stock": 62
+        },
+        {
+          "option1Value": "Đen",
+          "option2Value": "8GB/256GB",
+          "price": 4990000,
+          "originalPrice": 5790000,
+          "stock": 38
+        }
+      ],
+      "images": [
+        {
+          "file": "xiaomi-redmi-15c-1.webp",
+          "option1Value": "Xanh lá"
+        },
+        {
+          "file": "xiaomi-redmi-15c-2.webp",
+          "option1Value": "Cam"
+        },
+        {
+          "file": "xiaomi-redmi-15c-3.webp",
+          "option1Value": "Đen"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/xiaomi-redmi-15c-4gb-128gb"
+    },
+    {
+      "key": "oppo-a6-pro-5g",
+      "shop": "B",
+      "category": "OPPO",
+      "name": "Điện thoại OPPO A6 Pro 5G",
+      "description": "Điện thoại OPPO A6 Pro 5G chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.57\"\n- Công nghệ màn hình: AMOLED\n- Chip xử lý (CPU): MediaTek Dimensity 6300 5G 8 nhân\n- Chip đồ họa (GPU): Mali-G57 MC2\n- RAM: 8 GB\n- Dung lượng lưu trữ: 256 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 2 MP\n- Hỗ trợ sạc tối đa: 80 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 335,
+      "soldCount": 1120,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Hồng",
+          "option2Value": "8GB",
+          "price": 10490000,
+          "originalPrice": 11490000,
+          "stock": 16
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "12GB",
+          "price": 11490000,
+          "originalPrice": 12490000,
+          "stock": 61
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "8GB",
+          "price": 10490000,
+          "originalPrice": 11490000,
+          "stock": 45
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "12GB",
+          "price": 11490000,
+          "originalPrice": 12490000,
+          "stock": 46
+        }
+      ],
+      "images": [
+        {
+          "file": "oppo-a6-pro-5g-1.webp",
+          "option1Value": "Hồng"
+        },
+        {
+          "file": "oppo-a6-pro-5g-2.webp",
+          "option1Value": "Xanh Dương"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/oppo-a6-pro-5g-8gb-256gb"
+    },
+    {
+      "key": "oppo-a6",
+      "shop": "B",
+      "category": "OPPO",
+      "name": "Điện thoại OPPO A6",
+      "description": "Điện thoại OPPO A6 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 6.75\"\n- Công nghệ màn hình: LCD\n- Chip xử lý (CPU): Snapdragon 685 8 nhân\n- Chip đồ họa (GPU): Adreno 610\n- RAM: 6 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: Chính 50 MP & Phụ 2 MP\n- Dung lượng pin: 7000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 365,
+      "soldCount": 1180,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Hồng",
+          "option2Value": "6GB/128GB",
+          "price": 8490000,
+          "originalPrice": 8990000,
+          "stock": 16
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "8GB/128GB",
+          "price": 10690000,
+          "originalPrice": 11190000,
+          "stock": 10
+        },
+        {
+          "option1Value": "Hồng",
+          "option2Value": "8GB/256GB",
+          "price": 11490000,
+          "originalPrice": 11990000,
+          "stock": 42
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "6GB/128GB",
+          "price": 8490000,
+          "originalPrice": 8990000,
+          "stock": 47
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "8GB/128GB",
+          "price": 10690000,
+          "originalPrice": 11190000,
+          "stock": 33
+        },
+        {
+          "option1Value": "Xanh Đậm",
+          "option2Value": "8GB/256GB",
+          "price": 11490000,
+          "originalPrice": 11990000,
+          "stock": 9
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "6GB/128GB",
+          "price": 8490000,
+          "originalPrice": 8990000,
+          "stock": 49
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "8GB/128GB",
+          "price": 10690000,
+          "originalPrice": 11190000,
+          "stock": 35
+        },
+        {
+          "option1Value": "Vàng",
+          "option2Value": "8GB/256GB",
+          "price": 11490000,
+          "originalPrice": 11990000,
+          "stock": 11
+        }
+      ],
+      "images": [
+        {
+          "file": "oppo-a6-1.webp",
+          "option1Value": "Hồng"
+        },
+        {
+          "file": "oppo-a6-2.webp",
+          "option1Value": "Xanh Đậm"
+        },
+        {
+          "file": "oppo-a6-3.webp",
+          "option1Value": "Vàng"
+        }
+      ],
+      "source": "https://www.thegioididong.com/dtdd/oppo-a6-8gb-256gb"
+    },
+    {
+      "key": "samsung-galaxy-tab-s10-fe-wifi",
+      "shop": "B",
+      "category": "Máy tính bảng Android",
+      "name": "Máy tính bảng Samsung Galaxy Tab S10 FE WiFi",
+      "description": "Máy tính bảng Samsung Galaxy Tab S10 FE WiFi chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 10.9\"\n- Công nghệ màn hình: TFT LCD\n- Chip xử lý (CPU): Exynos 1580 8 nhân\n- Chip đồ họa (GPU): Xclipse 540\n- RAM: 8 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: 13 MP\n- Dung lượng pin: 8000 mAh\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 647,
+      "soldCount": 318,
+      "option1Name": "Màu sắc",
+      "option2Name": "Dung lượng",
+      "variants": [
+        {
+          "option1Value": "Xám",
+          "option2Value": "8GB/128GB",
+          "price": 11290000,
+          "originalPrice": 13690000,
+          "stock": 28
+        },
+        {
+          "option1Value": "Xám",
+          "option2Value": "12GB/256GB",
+          "price": 14390000,
+          "originalPrice": 16790000,
+          "stock": 43
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "8GB/128GB",
+          "price": 11290000,
+          "originalPrice": 13690000,
+          "stock": 15
+        },
+        {
+          "option1Value": "Xanh Dương",
+          "option2Value": "12GB/256GB",
+          "price": 14390000,
+          "originalPrice": 16790000,
+          "stock": 58
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "8GB/128GB",
+          "price": 11290000,
+          "originalPrice": 13690000,
+          "stock": 36
+        },
+        {
+          "option1Value": "Bạc",
+          "option2Value": "12GB/256GB",
+          "price": 14390000,
+          "originalPrice": 16790000,
+          "stock": 39
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-tab-s10-fe-wifi-1.webp",
+          "option1Value": "Xám"
+        },
+        {
+          "file": "samsung-galaxy-tab-s10-fe-wifi-2.webp",
           "option1Value": "Xanh Dương"
         },
         {
-          "file": "ipad-air-m2-c2.webp",
-          "option1Value": "Xám Không Gian"
-        },
-        {
-          "file": "ipad-air-m2-c3.webp",
-          "option1Value": "Tím"
+          "file": "samsung-galaxy-tab-s10-fe-wifi-3.webp",
+          "option1Value": "Bạc"
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/samsung-galaxy-tab-s10-fe"
     },
     {
-      "key": "macbook-air-m3",
-      "shop": "A",
-      "category": "MacBook",
-      "name": "Laptop Apple MacBook Air 13 inch M3",
-      "description": "MacBook Air 13 inch chip M3, mỏng 1,13 cm, nặng 1,24 kg, không quạt nên hoạt động hoàn toàn yên lặng.\n\n- Màn hình Liquid Retina 13,6 inch, 500 nit, 1 tỉ màu.\n- Pin tới 18 giờ, sạc MagSafe 3.\n- Hỗ trợ 2 màn hình ngoài khi gập máy.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 1700,
-      "soldCount": 54,
+      "key": "samsung-galaxy-tab-a11-wifi",
+      "shop": "B",
+      "category": "Máy tính bảng Android",
+      "name": "Máy tính bảng Samsung Galaxy Tab A11+ WiFi",
+      "description": "Máy tính bảng Samsung Galaxy Tab A11+ WiFi chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 11\"\n- Công nghệ màn hình: TFT LCD\n- Chip đồ họa (GPU): Mali-G615 MP2\n- RAM: 6 GB\n- Dung lượng lưu trữ: 128 GB\n- Độ phân giải camera sau: 8 MP\n- Dung lượng pin: 7040 mAh\n- Hỗ trợ sạc tối đa: 25 W\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 630,
+      "soldCount": 441,
       "option1Name": "Màu sắc",
-      "option2Name": "Cấu hình",
+      "option2Name": "Dung lượng",
       "variants": [
         {
-          "option1Value": "Đêm Xanh Thẳm",
-          "option2Value": "8GB / 256GB",
-          "price": 24990000,
-          "originalPrice": 27990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Đêm Xanh Thẳm",
-          "option2Value": "16GB / 512GB",
-          "price": 32990000,
-          "originalPrice": 35990000,
-          "stock": 14
+          "option1Value": "Bạc",
+          "option2Value": "6GB/128GB",
+          "price": 6990000,
+          "originalPrice": 7930000,
+          "stock": 55
         },
         {
           "option1Value": "Bạc",
-          "option2Value": "8GB / 256GB",
-          "price": 24990000,
-          "originalPrice": 27990000,
-          "stock": 9
+          "option2Value": "8GB/256GB",
+          "price": 8790000,
+          "originalPrice": 9730000,
+          "stock": 57
         },
         {
-          "option1Value": "Bạc",
-          "option2Value": "16GB / 512GB",
-          "price": 32990000,
-          "originalPrice": 35990000,
-          "stock": 35
+          "option1Value": "Xám",
+          "option2Value": "6GB/128GB",
+          "price": 6990000,
+          "originalPrice": 7930000,
+          "stock": 55
         },
         {
-          "option1Value": "Xám Không Gian",
-          "option2Value": "8GB / 256GB",
-          "price": 24990000,
-          "originalPrice": 27990000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Xám Không Gian",
-          "option2Value": "16GB / 512GB",
-          "price": 32990000,
-          "originalPrice": 35990000,
-          "stock": 9
+          "option1Value": "Xám",
+          "option2Value": "8GB/256GB",
+          "price": 8790000,
+          "originalPrice": 9730000,
+          "stock": 13
         }
       ],
       "images": [
         {
-          "file": "macbook-air-m3-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "macbook-air-m3-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "macbook-air-m3-c1.webp",
-          "option1Value": "Đêm Xanh Thẳm"
-        },
-        {
-          "file": "macbook-air-m3-c2.webp",
+          "file": "samsung-galaxy-tab-a11-wifi-1.webp",
           "option1Value": "Bạc"
         },
         {
-          "file": "macbook-air-m3-c3.webp",
-          "option1Value": "Xám Không Gian"
+          "file": "samsung-galaxy-tab-a11-wifi-2.webp",
+          "option1Value": "Xám"
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/may-tinh-bang/samsung-galaxy-tab-a11-plus-wifi-6gb-128gb"
     },
     {
-      "key": "apple-watch-s10",
-      "shop": "A",
-      "category": "Apple Watch",
-      "name": "Đồng hồ thông minh Apple Watch Series 10 GPS",
-      "description": "Apple Watch Series 10 mỏng nhất từ trước tới nay, màn hình góc rộng OLED lớn hơn, sáng hơn khi nhìn nghiêng.\n\n- Theo dõi giấc ngủ, phát hiện ngưng thở khi ngủ, đo nhiệt độ cổ tay.\n- Sạc nhanh: 80% trong khoảng 30 phút.\n- Chống nước tới 50 m.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 300,
-      "soldCount": 97,
-      "option1Name": "Màu sắc",
-      "option2Name": "Kích cỡ",
+      "key": "asus-vivobook-14-x1404va-eb260w-core-5-120u-16gb",
+      "shop": "B",
+      "category": "Laptop Windows",
+      "name": "Laptop Asus Vivobook 14 X1404VA - EB260W (Core 5 120U, 16GB, 512GB, Full HD, Win11)",
+      "description": "Laptop Asus Vivobook 14 X1404VA - EB260W (Core 5 120U, 16GB, 512GB, Full HD, Win11) chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 14 inch\n- Công nghệ màn hình: Chống chói Anti Glare, LED Backlit\n- Công nghệ CPU: Intel Core 5 Raptor Lake\n- RAM: 16 GB\n- Ổ cứng: 512 GB SSD M.2 NVMe PCIe 4.0 (Có thể tháo ra, lắp thanh khác tối đa 1 TB)\n- Hệ điều hành: Windows 11 Home SL\n- Kết nối: Wi-Fi 6 (802.11ax), Bluetooth 5.2\n- Công nghệ âm thanh: Built-in speaker, SonicMaster, Built-in array microphone\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 1550,
+      "soldCount": 19,
+      "option1Name": null,
+      "option2Name": null,
       "variants": [
         {
-          "option1Value": "Đen Bóng",
-          "option2Value": "42mm",
-          "price": 10490000,
-          "originalPrice": 11490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Đen Bóng",
-          "option2Value": "46mm",
-          "price": 11490000,
-          "originalPrice": 12490000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Vàng Hồng",
-          "option2Value": "42mm",
-          "price": 10490000,
-          "originalPrice": 11490000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Vàng Hồng",
-          "option2Value": "46mm",
-          "price": 11490000,
-          "originalPrice": 12490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Bạc",
-          "option2Value": "42mm",
-          "price": 10490000,
-          "originalPrice": 11490000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Bạc",
-          "option2Value": "46mm",
-          "price": 11490000,
-          "originalPrice": 12490000,
-          "stock": 9
+          "option1Value": "",
+          "option2Value": "",
+          "price": 20990000,
+          "originalPrice": null,
+          "stock": 42
         }
       ],
       "images": [
         {
-          "file": "apple-watch-s10-1.webp",
+          "file": "asus-vivobook-14-x1404va-eb260w-core-5-120u-16gb-1.webp",
           "option1Value": null
-        },
-        {
-          "file": "apple-watch-s10-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "apple-watch-s10-c1.webp",
-          "option1Value": "Đen Bóng"
-        },
-        {
-          "file": "apple-watch-s10-c2.webp",
-          "option1Value": "Vàng Hồng"
-        },
-        {
-          "file": "apple-watch-s10-c3.webp",
-          "option1Value": "Bạc"
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/laptop/asus-vivobook-14-x1404va-core-5-120u-eb260w"
     },
     {
-      "key": "airpods-pro-2",
-      "shop": "A",
+      "key": "asus-tuf-gaming-a15-fa506ncq-hn005w-r7-170-16gb-",
+      "shop": "B",
+      "category": "Laptop Windows",
+      "name": "Laptop Asus TUF Gaming A15 FA506NCQ - HN005W (R7 170, 16GB, 512GB, RTX 3050 4GB, Full HD 144Hz, Win11)",
+      "description": "Laptop Asus TUF Gaming A15 FA506NCQ - HN005W (R7 170, 16GB, 512GB, RTX 3050 4GB, Full HD 144Hz, Win11) chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 15.6 inch\n- Công nghệ màn hình: 250 nits, Chống chói Anti Glare, Adaptive-Sync\n- Công nghệ CPU: AMD Ryzen 7\n- RAM: 16 GB\n- Ổ cứng: 512 GB SSD M.2 NVMe PCIe Gen 4 (Có thể tháo ra, lắp thanh khác tối đa 2 TB), Hỗ trợ thêm 1 khe cắm SSD M.2 PCIe Gen 4.0 mở rộng (nâng cấp tối đa 2 TB)\n- Hệ điều hành: Windows 11 Home\n- Kết nối: Bluetooth 5.3, Wi-Fi 6 (802.11ax)\n- Công nghệ âm thanh: Realtek High Definition Audio, AI noise-canceling technology, DTS Audio\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 2450,
+      "soldCount": 20,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 27990000,
+          "originalPrice": null,
+          "stock": 15
+        }
+      ],
+      "images": [
+        {
+          "file": "asus-tuf-gaming-a15-fa506ncq-hn005w-r7-170-16gb--1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/laptop/asus-tuf-gaming-fa506ncq-r7-170-hn005w"
+    },
+    {
+      "key": "asus-zenbook-s-14-ux5406sa-pv140ws-ultra-7-258v-",
+      "shop": "B",
+      "category": "Laptop Windows",
+      "name": "Laptop Asus Zenbook S 14 UX5406SA - PV140WS (Ultra 7 258V, 32GB, 1TB, 2.8K OLED 120Hz, OfficeHS, Win11)",
+      "description": "Laptop Asus Zenbook S 14 UX5406SA - PV140WS (Ultra 7 258V, 32GB, 1TB, 2.8K OLED 120Hz, OfficeHS, Win11) chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 14 inch\n- Công nghệ màn hình: Thời gian phản hồi 0.2 ms, 400 nits, Chuẩn DisplayHDR True Black 500, 500 nits (Khi bật HDR), 1.07 tỷ màu\n- Công nghệ CPU: Intel Core Ultra 7 Lunar Lake\n- RAM: 32 GB\n- Ổ cứng: 1 TB SSD NVMe PCIe Gen 4\n- Hệ điều hành: Windows 11 Home SL + Office Home & Student 2021 vĩnh viễn\n- Kết nối: Bluetooth 5.4, Wi-Fi 7 (802.11be)\n- Công nghệ âm thanh: Audio by Harman/Kardon, Công nghệ Smart AMP\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 1350,
+      "soldCount": 57,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 43990000,
+          "originalPrice": null,
+          "stock": 40
+        }
+      ],
+      "images": [
+        {
+          "file": "asus-zenbook-s-14-ux5406sa-pv140ws-ultra-7-258v--1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/laptop/asus-ux5406sa-ultra-7-pv140ws"
+    },
+    {
+      "key": "samsung-galaxy-watch8-40mm-day-silicone",
+      "shop": "B",
+      "category": "Đồng hồ Android",
+      "name": "Samsung Galaxy Watch8 40mm dây silicone",
+      "description": "Samsung Galaxy Watch8 40mm dây silicone chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 1.34 inch\n- Công nghệ màn hình: Super AMOLED\n- Chip xử lý (CPU): Exynos W1000\n- Dung lượng pin: 325 mAh\n- Hệ điều hành: Wear OS được tùy biến bởi Samsung\n- Kết nối: NFC, Bluetooth v5.3, Wifi\n- Tiêu chuẩn chống nước, chống bụi: Chống nước 5 ATM - ISO 22810:2010 (Tắm, bơi vùng nước nông)\n- Khối lượng: Nặng 30.1g\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 180,
+      "soldCount": 196,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 4490000,
+          "originalPrice": 9490000,
+          "stock": 12
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-watch8-40mm-day-silicone-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "samsung-galaxy-watch8-40mm-day-silicone-2.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/dong-ho-thong-minh/samsung-galaxy-watch8"
+    },
+    {
+      "key": "samsung-galaxy-watch-ultra-lte-47mm-2025-day-sil",
+      "shop": "B",
+      "category": "Đồng hồ Android",
+      "name": "Samsung Galaxy Watch Ultra LTE 47mm (2025) dây silicone",
+      "description": "Samsung Galaxy Watch Ultra LTE 47mm (2025) dây silicone chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 1.47 inch\n- Công nghệ màn hình: Super AMOLED\n- Chip xử lý (CPU): Exynos W1000\n- Dung lượng pin: 590 mAh\n- Hệ điều hành: Wear OS được tùy biến bởi Samsung\n- Kết nối: Wifi, NFC, Bluetooth v5.3\n- Tiêu chuẩn chống nước, chống bụi: Chống nước 10 ATM (Bơi, lặn vùng nước nông)\n- Khối lượng: Nặng 60.5g\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 211,
+      "soldCount": 64,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 10990000,
+          "originalPrice": 17190000,
+          "stock": 50
+        }
+      ],
+      "images": [
+        {
+          "file": "samsung-galaxy-watch-ultra-lte-47mm-2025-day-sil-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "samsung-galaxy-watch-ultra-lte-47mm-2025-day-sil-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "samsung-galaxy-watch-ultra-lte-47mm-2025-day-sil-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/dong-ho-thong-minh/samsung-galaxy-watch-ultra-2025"
+    },
+    {
+      "key": "tws-samsung-galaxy-buds3-pro-r630n",
+      "shop": "B",
       "category": "Tai nghe",
-      "name": "Tai nghe Apple AirPods Pro 2 (USB-C)",
-      "description": "AirPods Pro 2 hộp sạc USB-C, chống ồn chủ động gấp 2 lần thế hệ trước, chế độ Xuyên âm thích ứng.\n\n- Âm thanh không gian cá nhân hoá.\n- Hộp sạc có loa, móc dây đeo, chống nước IP54.\n- Tổng thời gian nghe tới 30 giờ cùng hộp sạc.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 200,
+      "name": "Tai nghe TWS Samsung Galaxy Buds3 Pro R630N",
+      "description": "Tai nghe TWS Samsung Galaxy Buds3 Pro R630N chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ âm thanh: 360 Reality Audio, Adaptive EQ, Adaptive Noise Control, Công nghệ phát sóng Auracast, Dolby Atmos\n- Khối lượng: Nặng 5.4g\n- Rộng: Rộng 2.02 cm\n- Thương hiệu của: Hàn Quốc\n- Thời gian sử dụng hộp sạc: 30 giờ\n- Tương thích: Android, iOS, Windows, MacOS\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 155,
+      "soldCount": 246,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 3140000,
+          "originalPrice": 5390000,
+          "stock": 26
+        }
+      ],
+      "images": [
+        {
+          "file": "tws-samsung-galaxy-buds3-pro-r630n-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "tws-samsung-galaxy-buds3-pro-r630n-2.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/tai-nghe/tai-nghe-bluetooth-true-wireless-samsung-galaxy-buds-3-pro-r630n"
+    },
+    {
+      "key": "bluetooth-true-wireless-samsung-galaxy-buds3-fe-",
+      "shop": "B",
+      "category": "Tai nghe",
+      "name": "Tai nghe Bluetooth True Wireless Samsung Galaxy Buds3 FE R420N",
+      "description": "Tai nghe Bluetooth True Wireless Samsung Galaxy Buds3 FE R420N chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Công nghệ âm thanh: 360 Reality Audio, Active Noise Cancelling, Adaptive EQ, Ambient Sound\n- Khối lượng: Nặng 5g\n- Rộng: Rộng 2.4 cm\n- Thương hiệu của: Hàn Quốc\n- Thời gian sử dụng hộp sạc: 30 giờ\n- Tương thích: MacOS, Thiết bị Android phiên bản 8.0 trở lên, Windows, iOS (iPhone)\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 155,
+      "soldCount": 199,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 2790000,
+          "originalPrice": 2990000,
+          "stock": 51
+        }
+      ],
+      "images": [
+        {
+          "file": "bluetooth-true-wireless-samsung-galaxy-buds3-fe--1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-true-wireless-samsung-galaxy-buds3-fe--2.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/tai-nghe/tai-nghe-bluetooth-true-wireless-samsung-galaxy-buds-3-fe-r420n"
+    },
+    {
+      "key": "bluetooth-jbl-flip-7",
+      "shop": "B",
+      "category": "Loa",
+      "name": "Loa Bluetooth JBL Flip 7",
+      "description": "Loa Bluetooth JBL Flip 7 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kết nối: Bluetooth 5.4\n- Công nghệ âm thanh: Công nghệ AI Sound Boost, JBL Pro Sound\n- Khối lượng: 0.56\n- Dung tích tổng: 35 W\n- Nguồn: Pin\n- Trong hộp có: Hộp, Loa, Sách hướng dẫn\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 900,
+      "soldCount": 117,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 3520000,
+          "originalPrice": null,
+          "stock": 43
+        }
+      ],
+      "images": [
+        {
+          "file": "bluetooth-jbl-flip-7-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-jbl-flip-7-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-jbl-flip-7-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/loa-laptop/loa-bluetooth-jbl-flip-7"
+    },
+    {
+      "key": "bluetooth-jbl-charge-6",
+      "shop": "B",
+      "category": "Loa",
+      "name": "Loa Bluetooth JBL Charge 6",
+      "description": "Loa Bluetooth JBL Charge 6 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kết nối: Bluetooth 5.4\n- Công nghệ âm thanh: Công nghệ AI Sound Boost, JBL Pro Sound\n- Khối lượng: 0.99\n- Dung tích tổng: 45 W\n- Nguồn: Pin\n- Trong hộp có: Dây đeo, Hộp, Loa, Sách hướng dẫn\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 900,
+      "soldCount": 316,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 4790000,
+          "originalPrice": null,
+          "stock": 7
+        }
+      ],
+      "images": [
+        {
+          "file": "bluetooth-jbl-charge-6-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-jbl-charge-6-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-jbl-charge-6-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/loa-laptop/loa-bluetooth-jbl-charge-6"
+    },
+    {
+      "key": "bluetooth-jbl-go-4",
+      "shop": "B",
+      "category": "Loa",
+      "name": "Loa Bluetooth JBL Go 4",
+      "description": "Loa Bluetooth JBL Go 4 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kết nối: Bluetooth 5.3\n- Công nghệ âm thanh: JBL Pro Sound\n- Khối lượng: 0.2\n- Dung tích tổng: 4.2 W\n- Nguồn: Pin\n- Trong hộp có: Cáp, Hộp, Loa, Sách hướng dẫn\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 900,
       "soldCount": 623,
       "option1Name": null,
       "option2Name": null,
@@ -558,955 +2649,416 @@
         {
           "option1Value": "",
           "option2Value": "",
-          "price": 5790000,
-          "originalPrice": 6790000,
-          "stock": 60
+          "price": 1070000,
+          "originalPrice": 1200000,
+          "stock": 23
         }
       ],
       "images": [
         {
-          "file": "airpods-pro-2-1.webp",
+          "file": "bluetooth-jbl-go-4-1.webp",
           "option1Value": null
         },
         {
-          "file": "airpods-pro-2-2.webp",
+          "file": "bluetooth-jbl-go-4-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "bluetooth-jbl-go-4-3.webp",
           "option1Value": null
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/loa-laptop/loa-bluetooth-jbl-go-4"
     },
     {
-      "key": "cu-sac-20w",
-      "shop": "A",
+      "key": "sac-nhanh-type-c-pd-25w-samsung-ep-t2510n",
+      "shop": "B",
       "category": "Sạc và cáp",
-      "name": "Củ sạc nhanh USB-C 20W",
-      "description": "Củ sạc USB-C công suất 20W, sạc nhanh iPhone 50% trong khoảng 30 phút.\n\n- Tương thích iPhone, iPad, AirPods.\n- Bảo vệ quá nhiệt, quá dòng.\n\nBảo hành 12 tháng, 1 đổi 1 nếu lỗi nhà sản xuất.",
-      "weight": 100,
-      "soldCount": 1204,
+      "name": "Sạc nhanh Type-C PD 25W Samsung EP-T2510N",
+      "description": "Sạc nhanh Type-C PD 25W Samsung EP-T2510N chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Hỗ trợ sạc tối đa: 25W\n- Thương hiệu của: Hàn Quốc\n- Trong hộp có: Adapter\n- Kích thước: Dài 6.69 cm - Ngang 3.8 cm - Cao 2.2 cm\n- Nguồn ra: Type C 25W\n- Nguồn vào: 100-240V~50/60Hz, 0.5A\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 200,
+      "soldCount": 1535,
       "option1Name": null,
       "option2Name": null,
       "variants": [
         {
           "option1Value": "",
           "option2Value": "",
-          "price": 390000,
-          "originalPrice": 550000,
-          "stock": 60
+          "price": 300000,
+          "originalPrice": 540000,
+          "stock": 38
         }
       ],
       "images": [
         {
-          "file": "cu-sac-20w-1.webp",
+          "file": "sac-nhanh-type-c-pd-25w-samsung-ep-t2510n-1.webp",
           "option1Value": null
         },
         {
-          "file": "cu-sac-20w-2.webp",
+          "file": "sac-nhanh-type-c-pd-25w-samsung-ep-t2510n-2.webp",
           "option1Value": null
         }
-      ]
+      ],
+      "source": "https://www.thegioididong.com/adapter-sac/adapter-sac-type-c-pd-25w-samsung-ep-t2510n"
     },
     {
-      "key": "op-lung-magsafe",
+      "key": "pin-sac-du-phong-10000mah-type-c-pd-qc-3-0-45w-a",
+      "shop": "B",
+      "category": "Sạc dự phòng",
+      "name": "Pin sạc dự phòng 10000mAh Type C PD QC 3.0 45W Anker A1638 kèm cáp dây rút Type C",
+      "description": "Pin sạc dự phòng 10000mAh Type C PD QC 3.0 45W Anker A1638 kèm cáp dây rút Type C chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Dung lượng pin: 10000 mAh\n- Khối lượng: Khối lượng 231g\n- Thương hiệu của: Trung Quốc\n- Thời gian sạc: 2 - 3 giờ (dùng Adapter 30W)\n- Lõi pin: Li-Ion\n- Kích thước: Dày 3.6 cm - Rộng 5 cm - Dài 8.1 cm\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ thegioididong.com.",
+      "weight": 381,
+      "soldCount": 146,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 910000,
+          "originalPrice": 1650000,
+          "stock": 0
+        }
+      ],
+      "images": [
+        {
+          "file": "pin-sac-du-phong-10000mah-type-c-pd-qc-3-0-45w-a-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "pin-sac-du-phong-10000mah-type-c-pd-qc-3-0-45w-a-2.webp",
+          "option1Value": null
+        },
+        {
+          "file": "pin-sac-du-phong-10000mah-type-c-pd-qc-3-0-45w-a-3.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.thegioididong.com/sac-dtdd/pin-sac-du-phong-10000mah-type-c-pd-qc-3-0-45w-anker-a1638"
+    },
+    {
+      "key": "imac-24-inch-m4-10cpu-10gpu-16gb-256gb",
       "shop": "A",
-      "category": "Ốp lưng",
-      "name": "Ốp lưng silicon MagSafe cho iPhone 16",
-      "description": "Ốp silicon mềm mịn, lót vi sợi bên trong, nam châm MagSafe bám chắc khi sạc không dây.\n\n- Viền cao bảo vệ camera và màn hình.\n- Nút bấm nhạy, không bám bụi.\n\nĐổi trả trong 7 ngày nếu không vừa máy.",
-      "weight": 100,
-      "soldCount": 388,
+      "category": "PC",
+      "name": "iMac 24 inch M4 10CPU/10GPU 16GB/256GB",
+      "description": "iMac 24 inch M4 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 24 inch Retina 4.5K\n- Chip xử lý (CPU): Apple M4 10 nhân\n- Chip đồ họa (GPU): Apple GPU 10 nhân\n- RAM: 16 GB\n- Ổ cứng: SSD 256 GB\n- Kết nối: 4 cổng Thunderbolt 4, Wi-Fi 6E, Bluetooth 5.3\n- Đi kèm: Magic Keyboard có Touch ID, Magic Mouse\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
+      "weight": 6400,
+      "soldCount": 210,
       "option1Name": "Màu sắc",
       "option2Name": null,
       "variants": [
         {
-          "option1Value": "Xanh Đậm",
+          "option1Value": "Xanh Dương",
           "option2Value": "",
-          "price": 290000,
-          "originalPrice": 390000,
-          "stock": 35
+          "price": 43990000,
+          "originalPrice": 45990000,
+          "stock": 12
         },
         {
-          "option1Value": "Be",
+          "option1Value": "Hồng",
           "option2Value": "",
-          "price": 290000,
-          "originalPrice": 390000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Hồng Phấn",
-          "option2Value": "",
-          "price": 290000,
-          "originalPrice": 390000,
-          "stock": 41
-        }
-      ],
-      "images": [
-        {
-          "file": "op-lung-magsafe-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "op-lung-magsafe-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "op-lung-magsafe-c1.webp",
-          "option1Value": "Xanh Đậm"
-        },
-        {
-          "file": "op-lung-magsafe-c2.webp",
-          "option1Value": "Be"
-        },
-        {
-          "file": "op-lung-magsafe-c3.webp",
-          "option1Value": "Hồng Phấn"
-        }
-      ]
-    },
-    {
-      "key": "galaxy-s25-ultra",
-      "shop": "B",
-      "category": "Samsung",
-      "name": "Điện thoại Samsung Galaxy S25 Ultra",
-      "description": "Galaxy S25 Ultra khung titan, màn hình Dynamic AMOLED 2X 6,9 inch, bút S Pen tích hợp.\n\n- Snapdragon 8 Elite for Galaxy.\n- Camera chính 200MP, góc siêu rộng 50MP, tele 5x 50MP.\n- Galaxy AI: khoanh vùng tìm kiếm, trợ lý ghi chú, dịch trực tiếp cuộc gọi.\n- Pin 5000 mAh, sạc nhanh 45W.\n\nBảo hành 12 tháng chính hãng Samsung Việt Nam.",
-      "weight": 450,
-      "soldCount": 164,
-      "option1Name": "Màu sắc",
-      "option2Name": "Dung lượng",
-      "variants": [
-        {
-          "option1Value": "Titan Xám",
-          "option2Value": "256GB",
-          "price": 28990000,
-          "originalPrice": 32990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Titan Xám",
-          "option2Value": "512GB",
-          "price": 33990000,
-          "originalPrice": 37990000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Titan Đen",
-          "option2Value": "256GB",
-          "price": 28990000,
-          "originalPrice": 32990000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Titan Đen",
-          "option2Value": "512GB",
-          "price": 33990000,
-          "originalPrice": 37990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Titan Xanh",
-          "option2Value": "256GB",
-          "price": 28990000,
-          "originalPrice": 32990000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Titan Xanh",
-          "option2Value": "512GB",
-          "price": 33990000,
-          "originalPrice": 37990000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "galaxy-s25-ultra-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "galaxy-s25-ultra-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "galaxy-s25-ultra-c1.webp",
-          "option1Value": "Titan Xám"
-        },
-        {
-          "file": "galaxy-s25-ultra-c2.webp",
-          "option1Value": "Titan Đen"
-        },
-        {
-          "file": "galaxy-s25-ultra-c3.webp",
-          "option1Value": "Titan Xanh"
-        }
-      ]
-    },
-    {
-      "key": "galaxy-z-flip6",
-      "shop": "B",
-      "category": "Samsung",
-      "name": "Điện thoại Samsung Galaxy Z Flip6",
-      "description": "Galaxy Z Flip6 gập nhỏ gọn, màn hình phụ 3,4 inch dùng được hầu hết ứng dụng.\n\n- Camera chính 50MP, chụp FlexCam rảnh tay.\n- Snapdragon 8 Gen 3 for Galaxy, RAM 12GB.\n- Chống nước IP48.\n\nBảo hành 12 tháng chính hãng Samsung Việt Nam.",
-      "weight": 400,
-      "soldCount": 88,
-      "option1Name": "Màu sắc",
-      "option2Name": "Dung lượng",
-      "variants": [
-        {
-          "option1Value": "Xanh Mint",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 26490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xanh Mint",
-          "option2Value": "512GB",
-          "price": 25990000,
-          "originalPrice": 29490000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Vàng",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 26490000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Vàng",
-          "option2Value": "512GB",
-          "price": 25990000,
-          "originalPrice": 29490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xám",
-          "option2Value": "256GB",
-          "price": 22990000,
-          "originalPrice": 26490000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Xám",
-          "option2Value": "512GB",
-          "price": 25990000,
-          "originalPrice": 29490000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "galaxy-z-flip6-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "galaxy-z-flip6-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "galaxy-z-flip6-c1.webp",
-          "option1Value": "Xanh Mint"
-        },
-        {
-          "file": "galaxy-z-flip6-c2.webp",
-          "option1Value": "Vàng"
-        },
-        {
-          "file": "galaxy-z-flip6-c3.webp",
-          "option1Value": "Xám"
-        }
-      ]
-    },
-    {
-      "key": "xiaomi-14t",
-      "shop": "B",
-      "category": "Xiaomi",
-      "name": "Điện thoại Xiaomi 14T 5G",
-      "description": "Xiaomi 14T camera đồng phát triển cùng Leica, màn hình AMOLED 144Hz.\n\n- MediaTek Dimensity 8300-Ultra.\n- Camera chính 50MP cảm biến lớn, ống kính Leica Summilux.\n- Pin 5000 mAh, sạc nhanh 67W.\n\nBảo hành 18 tháng chính hãng.",
-      "weight": 400,
-      "soldCount": 203,
-      "option1Name": "Màu sắc",
-      "option2Name": "Dung lượng",
-      "variants": [
-        {
-          "option1Value": "Xanh",
-          "option2Value": "256GB",
-          "price": 11990000,
-          "originalPrice": 13490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xanh",
-          "option2Value": "512GB",
-          "price": 13490000,
-          "originalPrice": 14990000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "256GB",
-          "price": 11990000,
-          "originalPrice": 13490000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "512GB",
-          "price": 13490000,
-          "originalPrice": 14990000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xám Titan",
-          "option2Value": "256GB",
-          "price": 11990000,
-          "originalPrice": 13490000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Xám Titan",
-          "option2Value": "512GB",
-          "price": 13490000,
-          "originalPrice": 14990000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "xiaomi-14t-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "xiaomi-14t-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "xiaomi-14t-c1.webp",
-          "option1Value": "Xanh"
-        },
-        {
-          "file": "xiaomi-14t-c2.webp",
-          "option1Value": "Đen"
-        },
-        {
-          "file": "xiaomi-14t-c3.webp",
-          "option1Value": "Xám Titan"
-        }
-      ]
-    },
-    {
-      "key": "oppo-reno12",
-      "shop": "B",
-      "category": "OPPO",
-      "name": "Điện thoại OPPO Reno12 5G 12GB/256GB",
-      "description": "OPPO Reno12 5G thiết kế mỏng nhẹ, chụp chân dung AI, màn hình cong 120Hz.\n\n- Camera chân dung 50MP, xoá vật thể bằng AI.\n- Pin 5000 mAh, sạc SUPERVOOC 80W.\n\nBảo hành 12 tháng chính hãng.",
-      "weight": 400,
-      "soldCount": 145,
-      "option1Name": "Màu sắc",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "Bạc Thiên Hà",
-          "option2Value": "",
-          "price": 9490000,
-          "originalPrice": 10490000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Nâu",
-          "option2Value": "",
-          "price": 9490000,
-          "originalPrice": 10490000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "oppo-reno12-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "oppo-reno12-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "oppo-reno12-c1.webp",
-          "option1Value": "Bạc Thiên Hà"
-        },
-        {
-          "file": "oppo-reno12-c2.webp",
-          "option1Value": "Nâu"
-        }
-      ]
-    },
-    {
-      "key": "tai-nghe-h900",
-      "shop": "B",
-      "category": "Tai nghe",
-      "name": "Tai nghe chụp tai chống ồn SoundMax H900",
-      "description": "Tai nghe chụp tai không dây, chống ồn chủ động 4 micro, pin 40 giờ.\n\n- Driver 40 mm, hỗ trợ LDAC.\n- Gập gọn, kèm hộp đựng cứng.\n- Kết nối cùng lúc 2 thiết bị.\n\nBảo hành 12 tháng.",
-      "weight": 500,
-      "soldCount": 230,
-      "option1Name": "Màu sắc",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "Đen",
-          "option2Value": "",
-          "price": 3290000,
-          "originalPrice": 4490000,
-          "stock": 35
+          "price": 43990000,
+          "originalPrice": 45990000,
+          "stock": 8
         },
         {
           "option1Value": "Bạc",
           "option2Value": "",
-          "price": 3290000,
-          "originalPrice": 4490000,
-          "stock": 9
+          "price": 43990000,
+          "originalPrice": 45990000,
+          "stock": 15
         },
         {
-          "option1Value": "Xanh Navy",
+          "option1Value": "Xanh Lá",
           "option2Value": "",
-          "price": 3290000,
-          "originalPrice": 4490000,
-          "stock": 41
+          "price": 43990000,
+          "originalPrice": 45990000,
+          "stock": 6
         }
       ],
       "images": [
         {
-          "file": "tai-nghe-h900-1.webp",
-          "option1Value": null
+          "file": "imac-24-inch-m4-10cpu-10gpu-16gb-256gb-1.webp",
+          "option1Value": "Xanh Dương"
         },
         {
-          "file": "tai-nghe-h900-2.webp",
-          "option1Value": null
+          "file": "imac-24-inch-m4-10cpu-10gpu-16gb-256gb-2.webp",
+          "option1Value": "Hồng"
         },
         {
-          "file": "tai-nghe-h900-c1.webp",
-          "option1Value": "Đen"
-        },
-        {
-          "file": "tai-nghe-h900-c2.webp",
+          "file": "imac-24-inch-m4-10cpu-10gpu-16gb-256gb-3.webp",
           "option1Value": "Bạc"
         },
         {
-          "file": "tai-nghe-h900-c3.webp",
-          "option1Value": "Xanh Navy"
+          "file": "imac-24-inch-m4-10cpu-10gpu-16gb-256gb-4.webp",
+          "option1Value": "Xanh Lá"
         }
-      ]
+      ],
+      "source": "https://fptshop.com.vn/may-tinh-de-ban/imac-24-m4-2024-10-cpu-10-gpu-16gb-256gb"
     },
     {
-      "key": "loa-go3",
-      "shop": "B",
-      "category": "Loa",
-      "name": "Loa bluetooth SoundMax Go 3",
-      "description": "Loa bluetooth chống nước IP67, âm bass mạnh, pin 12 giờ.\n\n- Ghép đôi 2 loa phát stereo.\n- Dây đeo tiện mang theo khi dã ngoại.\n\nBảo hành 12 tháng.",
-      "weight": 600,
-      "soldCount": 412,
+      "key": "mac-mini-m4-10cpu-10gpu-16gb-256gb",
+      "shop": "A",
+      "category": "PC",
+      "name": "Mac mini M4 10CPU/10GPU 16GB/256GB",
+      "description": "Mac mini M4 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Chip xử lý (CPU): Apple M4 10 nhân\n- Chip đồ họa (GPU): Apple GPU 10 nhân\n- RAM: 16 GB\n- Ổ cứng: SSD 256 GB\n- Cổng kết nối: 3 Thunderbolt 4, 2 USB-C phía trước, HDMI, Ethernet Gigabit\n- Kích thước: 12,7 × 12,7 × 5 cm\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
+      "weight": 1100,
+      "soldCount": 340,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 18990000,
+          "originalPrice": 20990000,
+          "stock": 25
+        }
+      ],
+      "images": [
+        {
+          "file": "mac-mini-m4-10cpu-10gpu-16gb-256gb-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://fptshop.com.vn/may-tinh-de-ban/mac-mini-m4-2024-10-cpu-10-gpu-16gb-256gb"
+    },
+    {
+      "key": "chuot-apple-magic-mouse-usb-c",
+      "shop": "A",
+      "category": "Chuột & bàn phím",
+      "name": "Chuột Apple Magic Mouse (USB-C)",
+      "description": "Chuột Apple Magic Mouse cổng sạc USB-C chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kết nối: Bluetooth, tự ghép nối với máy Mac\n- Bề mặt: Multi-Touch, vuốt và cuộn bằng cử chỉ\n- Pin: Sạc qua cổng USB-C, dùng khoảng 1 tháng mỗi lần sạc\n- Tương thích: Mac, iPad chạy iPadOS 13.4 trở lên\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.",
+      "weight": 200,
+      "soldCount": 520,
       "option1Name": "Màu sắc",
       "option2Name": null,
       "variants": [
         {
+          "option1Value": "Trắng",
+          "option2Value": "",
+          "price": 1990000,
+          "originalPrice": 2290000,
+          "stock": 40
+        },
+        {
           "option1Value": "Đen",
           "option2Value": "",
-          "price": 990000,
-          "originalPrice": 1290000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Đỏ",
-          "option2Value": "",
-          "price": 990000,
-          "originalPrice": 1290000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Xanh",
-          "option2Value": "",
-          "price": 990000,
-          "originalPrice": 1290000,
-          "stock": 41
+          "price": 2490000,
+          "originalPrice": 2790000,
+          "stock": 18
         }
       ],
       "images": [
         {
-          "file": "loa-go3-1.webp",
-          "option1Value": null
+          "file": "chuot-apple-magic-mouse-usb-c-1.webp",
+          "option1Value": "Trắng"
         },
         {
-          "file": "loa-go3-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "loa-go3-c1.webp",
+          "file": "chuot-apple-magic-mouse-usb-c-2.webp",
           "option1Value": "Đen"
-        },
-        {
-          "file": "loa-go3-c2.webp",
-          "option1Value": "Đỏ"
-        },
-        {
-          "file": "loa-go3-c3.webp",
-          "option1Value": "Xanh"
         }
-      ]
+      ],
+      "source": "https://www.apple.com/shop/product/MXK53AM/A/magic-mouse-usb-c-white-multi-touch-surface"
     },
     {
-      "key": "sac-du-phong-20000",
+      "key": "man-hinh-samsung-odyssey-oled-g6-27-inch-qhd-240hz",
       "shop": "B",
-      "category": "Sạc dự phòng",
-      "name": "Sạc dự phòng 20000mAh 22.5W",
-      "description": "Pin dự phòng 20000 mAh, sạc nhanh 22,5W, 2 cổng USB-A + 1 cổng USB-C.\n\n- Sạc đầy iPhone khoảng 4 lần.\n- Đèn báo dung lượng 4 mức.\n\nBảo hành 12 tháng.",
-      "weight": 500,
-      "soldCount": 867,
-      "option1Name": "Màu sắc",
+      "category": "Màn hình",
+      "name": "Màn hình Samsung Odyssey OLED G6 27 inch QHD 240Hz LS27DG610SEXXV",
+      "description": "Màn hình gaming Samsung Odyssey OLED G6 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 27 inch\n- Công nghệ màn hình: QD-OLED\n- Độ phân giải: 2560 × 1440 (QHD)\n- Tần số quét: 240 Hz\n- Thời gian phản hồi: 0,03 ms (GtG)\n- Cổng kết nối: 2 HDMI 2.1, 1 DisplayPort 1.4, USB hub\n\nBảo hành 24 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
+      "weight": 7800,
+      "soldCount": 160,
+      "option1Name": null,
       "option2Name": null,
       "variants": [
         {
-          "option1Value": "Đen",
+          "option1Value": "",
           "option2Value": "",
-          "price": 450000,
-          "originalPrice": 650000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Trắng",
-          "option2Value": "",
-          "price": 450000,
-          "originalPrice": 650000,
-          "stock": 9
+          "price": 16990000,
+          "originalPrice": 19990000,
+          "stock": 14
         }
       ],
       "images": [
         {
-          "file": "sac-du-phong-20000-1.webp",
+          "file": "man-hinh-samsung-odyssey-oled-g6-27-inch-qhd-240hz-1.webp",
           "option1Value": null
-        },
-        {
-          "file": "sac-du-phong-20000-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "sac-du-phong-20000-c1.webp",
-          "option1Value": "Đen"
-        },
-        {
-          "file": "sac-du-phong-20000-c2.webp",
-          "option1Value": "Trắng"
         }
-      ]
+      ],
+      "source": "https://fptshop.com.vn/man-hinh/samsung-odyssey-g6-ls27dg610sexxv-27-inch-qhd-oled-240-hz"
     },
     {
-      "key": "ao-thun-basic",
+      "key": "man-hinh-lg-ultragear-oled-27gx790a-qhd-480hz",
       "shop": "B",
-      "category": "Thời trang nam",
-      "name": "Áo thun nam cotton Basic cổ tròn",
-      "description": "Áo thun 100% cotton 250gsm, dày dặn, thấm hút mồ hôi, form regular dễ mặc.\n\nBảng size (chiều cao / cân nặng)\n- S: 1m60–1m65, 50–57 kg\n- M: 1m65–1m70, 57–64 kg\n- L: 1m70–1m75, 64–72 kg\n- XL: 1m75–1m82, 72–80 kg\n\nGiặt máy ở chế độ nhẹ, không dùng thuốc tẩy.",
-      "weight": 250,
-      "soldCount": 1530,
-      "option1Name": "Màu sắc",
-      "option2Name": "Size",
+      "category": "Màn hình",
+      "name": "Màn hình LG UltraGear OLED 27GX790A 26.5 inch QHD 480Hz",
+      "description": "Màn hình gaming LG UltraGear OLED 27GX790A chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Kích thước màn hình: 26,5 inch\n- Công nghệ màn hình: WOLED\n- Độ phân giải: 2560 × 1440 (QHD)\n- Tần số quét: 480 Hz\n- Thời gian phản hồi: 0,03 ms (GtG)\n- Cổng kết nối: DisplayPort 2.1, 2 HDMI 2.1\n\nBảo hành 24 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
+      "weight": 8200,
+      "soldCount": 95,
+      "option1Name": null,
+      "option2Name": null,
       "variants": [
         {
-          "option1Value": "Trắng",
-          "option2Value": "S",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Trắng",
-          "option2Value": "M",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Trắng",
-          "option2Value": "L",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 52
-        },
-        {
-          "option1Value": "Trắng",
-          "option2Value": "XL",
-          "price": 219000,
-          "originalPrice": 279000,
-          "stock": 6
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "S",
-          "price": 199000,
-          "originalPrice": 259000,
+          "option1Value": "",
+          "option2Value": "",
+          "price": 19490000,
+          "originalPrice": 22990000,
           "stock": 9
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "M",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "L",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Đen",
-          "option2Value": "XL",
-          "price": 219000,
-          "originalPrice": 279000,
-          "stock": 0
-        },
-        {
-          "option1Value": "Xanh Navy",
-          "option2Value": "S",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Xanh Navy",
-          "option2Value": "M",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Xanh Navy",
-          "option2Value": "L",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xanh Navy",
-          "option2Value": "XL",
-          "price": 219000,
-          "originalPrice": 279000,
-          "stock": 14
-        },
-        {
-          "option1Value": "Be",
-          "option2Value": "S",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 0
-        },
-        {
-          "option1Value": "Be",
-          "option2Value": "M",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 41
-        },
-        {
-          "option1Value": "Be",
-          "option2Value": "L",
-          "price": 199000,
-          "originalPrice": 259000,
-          "stock": 9
-        },
-        {
-          "option1Value": "Be",
-          "option2Value": "XL",
-          "price": 219000,
-          "originalPrice": 279000,
-          "stock": 35
         }
       ],
       "images": [
         {
-          "file": "ao-thun-basic-1.webp",
+          "file": "man-hinh-lg-ultragear-oled-27gx790a-qhd-480hz-1.webp",
           "option1Value": null
-        },
-        {
-          "file": "ao-thun-basic-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "ao-thun-basic-c1.webp",
-          "option1Value": "Trắng"
-        },
-        {
-          "file": "ao-thun-basic-c2.webp",
-          "option1Value": "Đen"
-        },
-        {
-          "file": "ao-thun-basic-c3.webp",
-          "option1Value": "Xanh Navy"
-        },
-        {
-          "file": "ao-thun-basic-c4.webp",
-          "option1Value": "Be"
         }
-      ]
+      ],
+      "source": "https://fptshop.com.vn/man-hinh/lg-ultragear-27gx790a-b-265inch-2k-oled-480hz"
     },
     {
-      "key": "tui-tote-canvas",
+      "key": "chuot-logitech-mx-master-3s",
       "shop": "B",
-      "category": "Túi xách",
-      "name": "Túi tote vải canvas có khoá kéo",
-      "description": "Túi tote canvas dày, có khoá kéo và ngăn nhỏ bên trong, vừa laptop 14 inch.\n\nKích thước: 38 × 33 × 10 cm.",
+      "category": "Chuột & bàn phím",
+      "name": "Chuột không dây Logitech MX Master 3S",
+      "description": "Chuột không dây Logitech MX Master 3S chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Cảm biến: 8000 DPI, dùng được trên cả mặt kính\n- Nút bấm: Click yên tĩnh, 7 nút tùy chỉnh\n- Kết nối: Bluetooth, đầu thu Logi Bolt, dùng cùng lúc 3 máy\n- Pin: Sạc USB-C, dùng tới 70 ngày mỗi lần sạc\n- Con lăn: MagSpeed cuộn nhanh 1.000 dòng/giây\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.\nThông số tham khảo từ fptshop.com.vn.",
       "weight": 300,
-      "soldCount": 640,
+      "soldCount": 880,
       "option1Name": "Màu sắc",
       "option2Name": null,
       "variants": [
-        {
-          "option1Value": "Kem",
-          "option2Value": "",
-          "price": 159000,
-          "originalPrice": 199000,
-          "stock": 35
-        },
         {
           "option1Value": "Đen",
           "option2Value": "",
-          "price": 159000,
-          "originalPrice": 199000,
-          "stock": 9
+          "price": 2190000,
+          "originalPrice": 2590000,
+          "stock": 40
+        },
+        {
+          "option1Value": "Xám Graphite",
+          "option2Value": "",
+          "price": 2190000,
+          "originalPrice": 2590000,
+          "stock": 22
         }
       ],
       "images": [
         {
-          "file": "tui-tote-canvas-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "tui-tote-canvas-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "tui-tote-canvas-c1.webp",
-          "option1Value": "Kem"
-        },
-        {
-          "file": "tui-tote-canvas-c2.webp",
+          "file": "chuot-logitech-mx-master-3s-1.webp",
           "option1Value": "Đen"
+        },
+        {
+          "file": "chuot-logitech-mx-master-3s-2.webp",
+          "option1Value": "Xám Graphite"
         }
-      ]
+      ],
+      "source": "https://fptshop.com.vn/phu-kien/chuot-bluetooth-logitech-mx-master-3s"
     },
     {
-      "key": "binh-giu-nhiet",
+      "key": "may-choi-game-sony-playstation-5-pro",
       "shop": "B",
-      "category": "Đồ dùng nhà bếp",
-      "name": "Bình giữ nhiệt inox 316 500ml",
-      "description": "Bình giữ nhiệt 2 lớp inox 316, giữ nóng 12 giờ, giữ lạnh 24 giờ.\n\n- Nắp chống tràn, không mùi.\n- Dung tích 500 ml, vừa hộc để ly ô tô.",
-      "weight": 450,
-      "soldCount": 905,
+      "category": "Máy chơi game",
+      "name": "Máy chơi game Sony PlayStation 5 Pro",
+      "description": "Máy chơi game Sony PlayStation 5 Pro chính hãng, hàng mới 100%, kèm 1 tay cầm DualSense.\n\nThông số nổi bật\n- Chip xử lý (CPU): AMD Zen 2 8 nhân\n- Chip đồ họa (GPU): AMD Radeon nâng cấp, dò tia (ray tracing) nâng cao\n- Ổ cứng: SSD 2 TB\n- Độ phân giải: tới 4K 120 Hz, nâng cấp hình ảnh PSSR\n- Kết nối: Wi-Fi 7, HDMI 2.1, 3 cổng USB\n- Lưu ý: bản không kèm ổ đĩa (mua thêm ổ đĩa rời nếu cần)\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.",
+      "weight": 5500,
+      "soldCount": 180,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 19990000,
+          "originalPrice": 21990000,
+          "stock": 11
+        }
+      ],
+      "images": [
+        {
+          "file": "may-choi-game-sony-playstation-5-pro-1.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.playstation.com/en-us/ps5/ps5-pro/"
+    },
+    {
+      "key": "may-choi-game-nintendo-switch-2",
+      "shop": "B",
+      "category": "Máy chơi game",
+      "name": "Máy chơi game Nintendo Switch 2",
+      "description": "Máy chơi game Nintendo Switch 2 chính hãng, hàng mới 100%, kèm dock, 2 Joy-Con 2 và tay cầm grip.\n\nThông số nổi bật\n- Kích thước màn hình: 7,9 inch LCD Full HD, 120 Hz, HDR\n- Độ phân giải: tới 4K khi cắm dock ra TV\n- Bộ nhớ: 256 GB, mở rộng bằng thẻ microSD Express\n- Tay cầm: Joy-Con 2 gắn nam châm, dùng như chuột được\n- Pin: khoảng 2–6,5 giờ tùy game\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.",
+      "weight": 1800,
+      "soldCount": 420,
+      "option1Name": null,
+      "option2Name": null,
+      "variants": [
+        {
+          "option1Value": "",
+          "option2Value": "",
+          "price": 12490000,
+          "originalPrice": 13490000,
+          "stock": 20
+        }
+      ],
+      "images": [
+        {
+          "file": "may-choi-game-nintendo-switch-2-1.webp",
+          "option1Value": null
+        },
+        {
+          "file": "may-choi-game-nintendo-switch-2-2.webp",
+          "option1Value": null
+        }
+      ],
+      "source": "https://www.nintendo.com/us/store/products/nintendo-switch-2-system-123669/"
+    },
+    {
+      "key": "tay-cam-sony-dualsense",
+      "shop": "B",
+      "category": "Tay cầm & phụ kiện",
+      "name": "Tay cầm chơi game không dây Sony DualSense",
+      "description": "Tay cầm chơi game không dây Sony DualSense cho PS5 chính hãng, hàng mới 100%.\n\nThông số nổi bật\n- Rung phản hồi xúc giác (haptic) và cò bấm thích ứng\n- Micro tích hợp, nút tắt micro, cổng tai nghe 3,5 mm\n- Kết nối: Bluetooth, cáp USB-C\n- Pin: sạc USB-C, chơi khoảng 6–12 giờ\n- Tương thích: PS5, PC, máy Mac, điện thoại\n\nBảo hành 12 tháng chính hãng. Đổi trả theo chính sách của sàn.",
+      "weight": 280,
+      "soldCount": 760,
       "option1Name": "Màu sắc",
       "option2Name": null,
       "variants": [
         {
-          "option1Value": "Xanh Rêu",
+          "option1Value": "Trắng",
           "option2Value": "",
-          "price": 249000,
-          "originalPrice": 319000,
-          "stock": 35
+          "price": 1590000,
+          "originalPrice": 1890000,
+          "stock": 45
         },
         {
-          "option1Value": "Kem",
+          "option1Value": "Đỏ Cosmic",
           "option2Value": "",
-          "price": 249000,
-          "originalPrice": 319000,
-          "stock": 9
+          "price": 1790000,
+          "originalPrice": 1990000,
+          "stock": 20
         },
         {
-          "option1Value": "Đen",
+          "option1Value": "Xanh Cobalt",
           "option2Value": "",
-          "price": 249000,
-          "originalPrice": 319000,
-          "stock": 41
+          "price": 1790000,
+          "originalPrice": 1990000,
+          "stock": 16
         }
       ],
       "images": [
         {
-          "file": "binh-giu-nhiet-1.webp",
-          "option1Value": null
+          "file": "tay-cam-sony-dualsense-1.webp",
+          "option1Value": "Trắng"
         },
         {
-          "file": "binh-giu-nhiet-2.webp",
-          "option1Value": null
+          "file": "tay-cam-sony-dualsense-2.webp",
+          "option1Value": "Đỏ Cosmic"
         },
         {
-          "file": "binh-giu-nhiet-c1.webp",
-          "option1Value": "Xanh Rêu"
-        },
-        {
-          "file": "binh-giu-nhiet-c2.webp",
-          "option1Value": "Kem"
-        },
-        {
-          "file": "binh-giu-nhiet-c3.webp",
-          "option1Value": "Đen"
-        }
-      ]
-    },
-    {
-      "key": "chao-chong-dinh",
-      "shop": "B",
-      "category": "Đồ dùng nhà bếp",
-      "name": "Chảo chống dính đáy từ",
-      "description": "Chảo chống dính phủ đá 5 lớp, đáy từ dùng được mọi loại bếp.\n\n- Tay cầm cách nhiệt.\n- Không chứa PFOA.",
-      "weight": 1200,
-      "soldCount": 318,
-      "option1Name": "Kích cỡ",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "24cm",
-          "option2Value": "",
-          "price": 289000,
-          "originalPrice": null,
-          "stock": 35
-        },
-        {
-          "option1Value": "26cm",
-          "option2Value": "",
-          "price": 319000,
-          "originalPrice": null,
-          "stock": 9
-        },
-        {
-          "option1Value": "28cm",
-          "option2Value": "",
-          "price": 349000,
-          "originalPrice": null,
-          "stock": 41
+          "file": "tay-cam-sony-dualsense-3.webp",
+          "option1Value": "Xanh Cobalt"
         }
       ],
-      "images": [
-        {
-          "file": "chao-chong-dinh-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "chao-chong-dinh-2.webp",
-          "option1Value": null
-        }
-      ]
-    },
-    {
-      "key": "den-ban-trang-tri",
-      "shop": "B",
-      "category": "Trang trí",
-      "name": "Đèn bàn trang trí chao vải",
-      "description": "Đèn bàn chân kim loại mạ vàng, chao vải, ánh sáng vàng ấm dễ chịu.\n\nKèm bóng LED 7W. Cao 45 cm.",
-      "weight": 1500,
-      "soldCount": 96,
-      "option1Name": "Màu sắc",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "Trắng Kem",
-          "option2Value": "",
-          "price": 420000,
-          "originalPrice": 500000,
-          "stock": 35
-        },
-        {
-          "option1Value": "Xanh Navy",
-          "option2Value": "",
-          "price": 420000,
-          "originalPrice": 500000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "den-ban-trang-tri-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "den-ban-trang-tri-2.webp",
-          "option1Value": null
-        },
-        {
-          "file": "den-ban-trang-tri-c1.webp",
-          "option1Value": "Trắng Kem"
-        },
-        {
-          "file": "den-ban-trang-tri-c2.webp",
-          "option1Value": "Xanh Navy"
-        }
-      ]
-    },
-    {
-      "key": "serum-ha",
-      "shop": "B",
-      "category": "Chăm sóc da",
-      "name": "Serum cấp ẩm Hyaluronic Acid B5",
-      "description": "Serum HA đa phân tử kết hợp B5, cấp ẩm sâu, làm dịu da.\n\nDùng sáng và tối sau bước toner. Phù hợp mọi loại da.",
-      "weight": 150,
-      "soldCount": 1120,
-      "option1Name": "Dung tích",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "30ml",
-          "option2Value": "",
-          "price": 320000,
-          "originalPrice": 370000,
-          "stock": 35
-        },
-        {
-          "option1Value": "50ml",
-          "option2Value": "",
-          "price": 450000,
-          "originalPrice": 500000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "serum-ha-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "serum-ha-2.webp",
-          "option1Value": null
-        }
-      ]
-    },
-    {
-      "key": "nuoc-hoa-noir",
-      "shop": "B",
-      "category": "Nước hoa",
-      "name": "Nước hoa Noir Eau de Parfum",
-      "description": "Hương gỗ ấm: cam bergamot, hoa nhài, gỗ đàn hương và hổ phách.\n\nĐộ lưu hương 6–8 giờ.",
-      "weight": 400,
-      "soldCount": 77,
-      "option1Name": "Dung tích",
-      "option2Name": null,
-      "variants": [
-        {
-          "option1Value": "50ml",
-          "option2Value": "",
-          "price": 1290000,
-          "originalPrice": 1590000,
-          "stock": 35
-        },
-        {
-          "option1Value": "100ml",
-          "option2Value": "",
-          "price": 1890000,
-          "originalPrice": 2190000,
-          "stock": 9
-        }
-      ],
-      "images": [
-        {
-          "file": "nuoc-hoa-noir-1.webp",
-          "option1Value": null
-        },
-        {
-          "file": "nuoc-hoa-noir-2.webp",
-          "option1Value": null
-        }
-      ]
+      "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/"
     }
   ]
 }

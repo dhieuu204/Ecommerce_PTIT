@@ -63,12 +63,12 @@ export function ReviewsSection({
     <section
       id="danh-gia"
       className={cn(
-        'scroll-mt-32 rounded-3xl border border-ivory-200 bg-card p-5 sm:p-8',
+        'scroll-mt-32 rounded-3xl bg-card p-5 shadow-[0_1px_2px_rgba(15,26,61,0.04)] sm:p-7',
         className,
       )}
     >
-      <h2 className="flex items-center gap-2.5 text-lg font-bold text-navy sm:text-xl">
-        <span className="h-5 w-1 rounded-full bg-champagne" />
+      <h2 className="flex items-center gap-3 text-base font-bold tracking-tight text-charcoal md:text-lg">
+        <span aria-hidden className="h-[3px] w-5 shrink-0 rounded-full bg-navy" />
         {title ?? (source === 'product' ? 'Đánh giá sản phẩm' : 'Đánh giá của shop')}
       </h2>
 

@@ -234,7 +234,7 @@ function CustomPrice({
               >
                 Nhập lại
               </Button>
-              <Button type="submit" size="sm" className="rounded-full px-5">
+              <Button type="submit" size="sm" className="rounded-lg px-5">
                 Áp dụng
               </Button>
             </div>
@@ -298,7 +298,7 @@ export function CatalogToolbar({
               aria-checked={s === sort}
               onClick={() => onSort(s)}
               className={cn(
-                'h-8 rounded-full border px-3.5 text-[13px] font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
+                'h-8 rounded-lg border px-3.5 text-[13px] font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
                 s === sort
                   ? 'border-navy bg-navy text-white'
                   : 'border-ivory-200 bg-ivory/60 text-ink/80 hover:border-champagne hover:text-navy',
@@ -312,7 +312,7 @@ export function CatalogToolbar({
           <Select value={sort} onValueChange={(v) => onSort(v as ProductSort)}>
             <SelectTrigger
               size="sm"
-              className="h-9 rounded-full bg-ivory/60 pl-3"
+              className="h-9 rounded-lg bg-ivory/60 pl-3"
               aria-label="Sắp xếp"
             >
               <ArrowDownUp className="size-3.5 text-champagne-600" />
@@ -366,7 +366,7 @@ export function CatalogToolbar({
             <button
               type="button"
               onClick={() => onPrice()}
-              className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[13px] font-medium text-champagne-600 transition hover:text-navy"
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-medium text-champagne-600 transition hover:text-navy"
             >
               <X className="size-3.5" />
               Bỏ lọc giá
@@ -511,7 +511,7 @@ export function NoProducts({
       }
       action={
         filtered && (
-          <Button variant="outline" className="rounded-full px-5" onClick={onClear}>
+          <Button variant="outline" className="rounded-lg px-5" onClick={onClear}>
             Xóa bộ lọc
           </Button>
         )
@@ -539,7 +539,7 @@ export function NotFoundBlock({
           text={text}
           className="py-20"
           action={
-            <Button asChild className="rounded-full px-6">
+            <Button asChild className="rounded-lg px-6">
               <Link to="/">Về trang chủ</Link>
             </Button>
           }

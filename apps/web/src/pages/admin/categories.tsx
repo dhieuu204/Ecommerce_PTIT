@@ -685,7 +685,7 @@ function CategoryDialog({
                           className={cn(
                             'flex aspect-square items-center justify-center rounded-lg transition',
                             active
-                              ? 'bg-navy text-champagne shadow-sm'
+                              ? 'bg-navy text-white shadow-sm'
                               : 'bg-white text-ink/70 ring-1 ring-border hover:text-navy hover:ring-champagne',
                           )}
                         >

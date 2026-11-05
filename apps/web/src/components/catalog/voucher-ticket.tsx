@@ -12,7 +12,7 @@ const dayMonthParts = new Intl.DateTimeFormat('en-GB', {
 });
 
 /** "09/11" theo giờ Việt Nam */
-function dayMonth(iso: string) {
+export function dayMonth(iso: string) {
   const parts = dayMonthParts.formatToParts(new Date(iso));
   const get = (t: string) => parts.find((p) => p.type === t)?.value;
   return `${get('day')}/${get('month')}`;
@@ -27,7 +27,7 @@ export function voucherDiscountText(v: Pick<Voucher, 'discountType' | 'value' | 
 }
 
 /** Chữ lớn trên cuống vé: "500K", "1,5TR", "10%" */
-function shortValue(v: Pick<Voucher, 'discountType' | 'value'>) {
+export function shortValue(v: Pick<Voucher, 'discountType' | 'value'>) {
   if (v.discountType === 'PERCENT') return `${v.value}%`;
   if (v.value >= 1_000_000) {
     return `${(v.value / 1_000_000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}TR`;
@@ -114,7 +114,7 @@ export function VoucherTicket({ voucher, className }: { voucher: Voucher; classN
             onClick={() => void copy()}
             aria-label={`Sao chép mã ${voucher.code}`}
             className={cn(
-              'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
+              'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
               copied
                 ? 'border-navy bg-navy text-white'
                 : 'border-navy/20 text-navy hover:border-navy hover:bg-navy hover:text-white',

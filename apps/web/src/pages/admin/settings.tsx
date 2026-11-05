@@ -110,7 +110,7 @@ function SourceSection({
   return (
     <section className="overflow-hidden rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
       <header className="flex items-center gap-3 border-b bg-ivory/50 px-4 py-3 md:px-5">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-navy text-champagne">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-navy text-white">
           <Settings2 className="size-4" />
         </span>
         <div>

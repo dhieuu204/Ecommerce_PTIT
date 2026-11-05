@@ -85,6 +85,7 @@ export function LikedProductsPage() {
                 <div key={p.id} className="relative">
                   <ProductCard
                     product={p}
+                    showLike={false}
                     className={cn(
                       'h-full',
                       !p.available && 'pointer-events-none opacity-55 grayscale',

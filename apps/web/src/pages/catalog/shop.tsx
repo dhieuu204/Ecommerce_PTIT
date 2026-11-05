@@ -73,11 +73,11 @@ function ShopHeader({ shop }: { shop: PublicShop }) {
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-bold text-navy md:text-2xl">{shop.name}</h1>
               {shop.suspended ? (
-                <span className="rounded-full bg-ink/10 px-2.5 py-0.5 text-xs font-medium text-ink/70">
+                <span className="rounded-lg bg-ink/10 px-2.5 py-0.5 text-xs font-medium text-ink/70">
                   Tạm ngừng bán
                 </span>
               ) : (
-                <span className="rounded-full border border-champagne/50 bg-champagne-50 px-2.5 py-0.5 text-xs font-medium text-champagne-600">
+                <span className="rounded-lg border border-champagne/50 bg-champagne-50 px-2.5 py-0.5 text-xs font-medium text-champagne-600">
                   Shop đã duyệt
                 </span>
               )}
@@ -103,7 +103,7 @@ function ShopHeader({ shop }: { shop: PublicShop }) {
           </div>
           <ShopEngagement
             shop={shop}
-            actions={<ChatWithShopButton shopId={shop.id} className="h-10 rounded-full" />}
+            actions={<ChatWithShopButton shopId={shop.id} className="h-10 rounded-lg" />}
           />
         </div>
         {shop.description && (

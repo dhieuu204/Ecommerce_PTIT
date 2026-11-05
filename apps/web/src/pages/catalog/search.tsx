@@ -156,7 +156,7 @@ export function SearchPage() {
                     aria-pressed={active}
                     onClick={() => setCategory(active ? found.parent.slug : c.slug)}
                     className={cn(
-                      'h-7 shrink-0 rounded-full border px-3 text-xs font-medium transition',
+                      'h-7 shrink-0 rounded-lg border px-3 text-xs font-medium transition',
                       active
                         ? 'border-champagne bg-champagne-50 text-navy'
                         : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne hover:text-navy',

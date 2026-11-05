@@ -40,7 +40,7 @@ export function QuantityStepper({
   return (
     <div
       className={cn(
-        'inline-flex items-center overflow-hidden rounded-lg border border-ivory-200 bg-card',
+        'inline-flex items-center overflow-hidden rounded-lg border border-ink/15 bg-card',
         disabled && 'opacity-60',
         className,
       )}

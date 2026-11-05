@@ -48,7 +48,7 @@ function ImageViewer({
   return (
     <Dialog open={index !== null} onOpenChange={(o) => !o && onIndex(null)}>
       <DialogContent
-        className="max-w-[calc(100%-1rem)] gap-3 rounded-2xl border-0 bg-navy-900 p-3 text-white sm:max-w-3xl sm:p-4 [&>button]:text-white"
+        className="max-w-[calc(100%-1rem)] gap-3 rounded-2xl border-0 bg-ink p-3 text-white sm:max-w-3xl sm:p-4 [&>button]:text-white"
         onKeyDown={(e) => {
           if (e.key === 'ArrowRight') go(1);
           if (e.key === 'ArrowLeft') go(-1);

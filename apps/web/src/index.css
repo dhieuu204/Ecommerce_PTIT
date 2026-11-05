@@ -2,55 +2,87 @@
 @import 'tw-animate-css';
 
 /*
- * Bảng màu đã chốt (docs/phan-tich/05-quyet-dinh-ui-flow01.md).
+ * Web chưa có giao diện tối: lớp dark: (có sẵn trong component shadcn) chỉ bật khi có class .dark, không theo
+ * cài đặt tối của hệ điều hành (trước đây máy để chế độ tối làm nút viền bị phủ nền xám).
+ */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Bảng màu (docs/phan-tich/05-quyet-dinh-ui-flow01.md): cam Shopee #EE4D2D là màu chính (tên navy), vàng cam #FE9C13 làm nét
+ * nhấn (tên champagne), nền xám rất nhạt #F5F5F7, chữ #333 (theo onewaymobile.vn, 25/10/2026).
  * Dùng class Tailwind theo tên màu: bg-navy, text-champagne, bg-ivory, text-ink...
  * Không viết mã màu thẳng trong component.
  */
 @theme {
-  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 
-  --color-navy: #172554;
-  --color-navy-800: #1e3070;
-  --color-navy-900: #0f1a3d;
-  --color-champagne: #c8a96b;
-  --color-champagne-600: #a88a4e;
-  --color-champagne-50: #f6f0e3;
-  --color-ivory: #faf9f6;
-  --color-ivory-200: #efede6;
+  /*
+   * Màu cam theo onewaymobile.vn (25/10/2026, chủ đồ án chọn). Tên "navy" (màu chính) và "champagne"
+   * (màu nhấn) giữ nguyên trong code để không phải sửa hàng trăm chỗ; chỉ giá trị đổi.
+   * navy: cam chính; 600: cam sáng (cuối dải chuyển sắc); 800: cam sáng hơn; 900: cam đậm (đầu dải); 950: nâu cam.
+   */
+  /* 27/10/2026: chủ đồ án chọn màu cam của Shopee #EE4D2D (thay #FE4F00 rồi #FF6A13) */
+  --color-navy: #ee4d2d;
+  --color-navy-600: #f26b4f;
+  --color-navy-800: #f5856d;
+  --color-navy-900: #d73f21;
+  --color-navy-950: #b3341b;
+  /* Dải chuyển sắc header khu mua hàng (trên → dưới, như Shopee) */
+  --color-header-from: #f53d2d;
+  --color-header-to: #ff6633;
+  /* champagne: vàng cam của dải header; 600: cam đất cho chữ nhấn trên nền sáng; 50: nền cam rất nhạt */
+  --color-champagne: #fe9c13;
+  --color-champagne-600: #c2410c;
+  --color-champagne-50: #fff4ec;
+  /* Xanh ngọc của vé mã vận chuyển (Free Ship) ở trang chủ, như vé freeship của Shopee */
+  --color-ship: #26aa99;
+  /* Đầu dải chuyển sắc header (vàng nhạt) */
+  --color-sun: #fdc884;
+  /* Nền trang khu mua hàng: đúng màu --gray-cl của onewaymobile.vn, thẻ trắng nổi lên trên */
+  --color-page: #f5f5f7;
+  --color-ivory: #f5f5f7;
+  --color-ivory-200: #e9e9ec;
   --color-card: #ffffff;
-  --color-ink: #1f2937;
+  --color-ink: #333333;
+  /* Nền xám rất nhạt của banner, ô ảnh, footer khu mua hàng (giống ảnh mẫu onewaymobile.vn) */
+  --color-mist: #f2f2f4;
+  --color-mist-200: #e3e3e6;
   /* Khu quản trị: header màu than để không nhầm với khu mua/bán */
   --color-charcoal: #1f2937;
 }
 
-/* Biến cho shadcn/ui: màu chính = navy, điểm nhấn = champagne. */
+/* Biến cho shadcn/ui: màu chính = navy, nền phụ trung tính, điểm nhấn = champagne. */
 :root {
-  --radius: 0.75rem;
-  --background: #faf9f6;
-  --foreground: #1f2937;
+  /* Bo góc vừa phải (chủ đồ án chốt 27/10/2026: bo nhiều trông phèn): nút, ô nhập 8px; thẻ 10px; khối lớn 12px */
+  --radius: 0.5rem;
+  --background: #f5f5f7;
+  --foreground: #333333;
   --card: #ffffff;
-  --card-foreground: #1f2937;
+  --card-foreground: #333333;
   --popover: #ffffff;
-  --popover-foreground: #1f2937;
-  --primary: #172554;
+  --popover-foreground: #333333;
+  --primary: #ee4d2d;
   --primary-foreground: #ffffff;
-  --secondary: #f6f0e3;
-  --secondary-foreground: #172554;
-  --muted: #f3f2ee;
+  --secondary: #f2f2f4;
+  --secondary-foreground: #333333;
+  --muted: #f2f2f4;
   --muted-foreground: #6b7280;
-  --accent: #f6f0e3;
-  --accent-foreground: #172554;
+  --accent: #fff4ec;
+  --accent-foreground: #c2410c;
   --destructive: #dc2626;
-  --border: #e7e3d8;
-  --input: #ddd8cb;
-  --ring: #c8a96b;
+  --border: #e3e3e6;
+  --input: #dededf;
+  --ring: #fe9c13;
 }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 2px);
+  --radius-3xl: calc(var(--radius) + 4px);
+  --radius-4xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card-foreground: var(--card-foreground);
@@ -76,5 +108,20 @@
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
+  }
+  /* Tailwind 4 bỏ con trỏ bàn tay mặc định của nút: thêm lại cho mọi nút bấm được */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+
+/*
+ * Icon Tabler (khu mua hàng): nét mảnh 1.25 như icon của onewaymobile.vn. Chỗ cần nét đậm hơn (mũi tên
+ * trên nút tròn) thêm class [stroke-width:1.75].
+ */
+@layer base {
+  .tabler-icon {
+    stroke-width: 1.25;
   }
 }

@@ -192,7 +192,7 @@ export class ProductsService {
         name: p.name,
         status: p.status,
         removedReason: p.status === 'REMOVED' ? p.removedReason : null,
-        image: p.images[0]?.url ?? null,
+        image: (p.images.find((i) => i.option1Value === null) ?? p.images[0])?.url ?? null,
         minPrice: p.minPrice,
         maxPrice: p.maxPrice,
         totalStock: p.variants.reduce((s, v) => s + v.stock, 0),

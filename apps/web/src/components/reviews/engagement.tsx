@@ -54,7 +54,14 @@ function useViewerState<T>(key: readonly unknown[], path: string, userId: string
  * Dòng ngay dưới tên sản phẩm: sao trung bình (bấm để xuống phần đánh giá), số đánh giá và nút tim.
  * Đặt trong trang sản phẩm bằng một dòng.
  */
-export function ProductEngagementBar({ product }: { product: ProductDetail }) {
+export function ProductEngagementBar({
+  product,
+  extra,
+}: {
+  product: ProductDetail;
+  /** Thêm vào sau phần đánh giá (ví dụ "Đã bán 1,4k") */
+  extra?: ReactNode;
+}) {
   const { userId, check } = useRequireLogin();
   const qc = useQueryClient();
   const viewer = useViewerState<ProductDetail>(
@@ -82,7 +89,7 @@ export function ProductEngagementBar({ product }: { product: ProductDetail }) {
   });
 
   return (
-    <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+    <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
       {product.ratingAvg !== null && product.ratingCount > 0 ? (
         <a
           href="#danh-gia"
@@ -97,23 +104,24 @@ export function ProductEngagementBar({ product }: { product: ProductDetail }) {
       ) : (
         <span className="text-sm text-ink/50">Chưa có đánh giá</span>
       )}
+      {extra}
       <button
         type="button"
         aria-pressed={state.liked}
         disabled={toggle.isPending}
         onClick={() => check() && toggle.mutate(!state.liked)}
         className={cn(
-          'ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne disabled:opacity-60',
+          'ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne disabled:opacity-60',
           state.liked
-            ? 'border-rose-200 bg-rose-50 text-rose-600'
-            : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne hover:text-navy',
+            ? 'border-navy/30 bg-champagne-50 text-navy'
+            : 'border-ink/15 bg-card text-ink/70 hover:border-navy/40 hover:text-navy',
         )}
         title={state.liked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
       >
         {toggle.isPending ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <Heart className={cn('size-4', state.liked && 'fill-rose-500 text-rose-500')} />
+          <Heart className={cn('size-4', state.liked && 'fill-navy text-navy')} />
         )}
         {state.liked ? 'Đã thích' : 'Yêu thích'}
         {state.likeCount > 0 && (

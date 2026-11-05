@@ -14,7 +14,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed:categories": "nest build && node dist/scripts/seed-categories.js",
-    "seed:demo": "nest build && node dist/scripts/seed-demo.js"
+    "seed:demo": "nest build && node dist/scripts/seed-demo.js",
+    "seed:refresh-images": "nest build && node dist/scripts/refresh-demo-images.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

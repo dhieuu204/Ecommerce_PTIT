@@ -444,7 +444,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <span className="text-ink">Thanh toán</span>
       </nav>
       <h1 className="mb-5 flex items-center gap-3 text-2xl font-bold text-navy md:text-[1.75rem]">
-        <span className="flex size-10 items-center justify-center rounded-2xl bg-navy text-champagne">
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-navy text-white">
           <CreditCard className="size-5" />
         </span>
         Thanh toán

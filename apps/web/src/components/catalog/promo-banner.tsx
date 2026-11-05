@@ -1,4 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
+/** Component icon dùng trong banner: nhận cả icon lucide và icon Tabler */
+type BannerIcon = React.ComponentType<{ className?: string; strokeWidth?: number }>;
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
@@ -47,7 +48,7 @@ export function BannerArt({
   tone,
   className,
 }: {
-  icon: LucideIcon;
+  icon: BannerIcon;
   tone: BannerTone;
   className?: string;
 }) {
@@ -94,7 +95,7 @@ export interface BannerContent {
   /** Đường dẫn khi bấm nút; hoặc dùng onClick */
   to?: string;
   onClick?: () => void;
-  icon: LucideIcon;
+  icon: BannerIcon;
   tone: BannerTone;
 }
 
@@ -151,7 +152,7 @@ export function PromoBanner({
         {banner.eyebrow && (
           <span
             className={cn(
-              'mb-3 w-fit items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-[0.16em] uppercase md:text-[11px]',
+              'mb-3 w-fit items-center rounded-lg border px-2.5 py-0.5 text-[10px] font-semibold tracking-[0.16em] uppercase md:text-[11px]',
               size === 'lg' ? 'hidden sm:inline-flex' : 'inline-flex',
               t.eyebrow,
             )}

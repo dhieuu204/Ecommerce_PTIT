@@ -19,3 +19,6 @@ coverage/
 
 # Prisma client sinh ra ở từng service
 services/*/generated/
+
+# Ảnh banner mượn tạm (trang hãng) chỉ để trên máy chủ đồ án, không commit; thiếu thì web dùng banner HK Shop
+apps/web/public/home/banners-temp/

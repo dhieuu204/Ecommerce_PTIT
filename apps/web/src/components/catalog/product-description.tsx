@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react';
+import { IconChevronDown } from '@tabler/icons-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -57,7 +57,7 @@ export function ProductDescription({ text }: { text: string }) {
     <div>
       <div
         ref={ref}
-        className={cn('relative overflow-hidden text-[15px] leading-7 text-ink/85')}
+        className="relative overflow-hidden text-[15px] leading-7 text-ink/80"
         style={long && !open ? { maxHeight: COLLAPSED_HEIGHT } : undefined}
       >
         <div className="space-y-4">
@@ -67,7 +67,7 @@ export function ProductDescription({ text }: { text: string }) {
                 <ul key={i} className="space-y-2">
                   {b.items.map((item, j) => (
                     <li key={j} className="flex gap-3">
-                      <span className="mt-[11px] size-1.5 shrink-0 rounded-full bg-champagne" />
+                      <span className="mt-[11px] size-1.5 shrink-0 rounded-full bg-navy/70" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -81,7 +81,7 @@ export function ProductDescription({ text }: { text: string }) {
               blocks[i + 1]?.type === 'ul';
             if (heading) {
               return (
-                <h3 key={i} className="pt-1 text-base font-semibold text-navy">
+                <h3 key={i} className="pt-1 text-base font-semibold text-charcoal">
                   {b.lines[0]}
                 </h3>
               );
@@ -107,10 +107,12 @@ export function ProductDescription({ text }: { text: string }) {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-champagne/60 px-5 py-2 text-sm font-medium text-navy transition hover:bg-champagne-50"
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-ink/15 px-5 text-sm font-semibold text-charcoal transition hover:border-navy/40 hover:text-navy focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"
           >
             {open ? 'Thu gọn' : 'Xem thêm'}
-            <ChevronDown className={cn('size-4 transition', open && 'rotate-180')} />
+            <IconChevronDown
+              className={cn('size-4 [stroke-width:2] transition', open && 'rotate-180')}
+            />
           </button>
         </div>
       )}

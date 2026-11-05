@@ -138,7 +138,7 @@ export function CodReconciliationsPage() {
           }}
           className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-champagne/60 bg-card px-6 py-8 text-center transition hover:border-navy hover:bg-ivory/40 disabled:opacity-60"
         >
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-navy text-champagne">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-navy text-white">
             {upload.isPending ? (
               <Loader2 className="size-6 animate-spin" />
             ) : (

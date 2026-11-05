@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { IconChevronDown, IconLoader2 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -32,22 +32,25 @@ export function VariantSwitcher({
 }) {
   const [open, setOpen] = useState(false);
   const label = variantLabel(item, item);
+  // Chữ gọn trên chip: chỉ giá trị ("Xanh Dương · 256GB"), tên nhóm đầy đủ hiện khi rê chuột
+  const short = [item.option1Value, item.option2Value].filter(Boolean).join(' · ');
   if (!label) return null;
 
   const canSwitch = item.state !== 'UNAVAILABLE';
-  if (!canSwitch) return <div className="mt-1 text-xs text-ink/45">{label}</div>;
+  if (!canSwitch) return <div className="mt-1 text-xs text-ink/45">{short || label}</div>;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-ivory-200 bg-ivory/80 px-2.5 py-1 text-left text-xs text-ink/70 transition hover:border-champagne hover:text-navy data-[state=open]:border-champagne"
+          title={label}
+          className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-page px-2.5 py-1 text-left text-xs text-ink/65 ring-1 ring-ink/[0.08] transition hover:text-navy hover:ring-navy/30 data-[state=open]:ring-navy/40"
         >
-          <span className="min-w-0">{label}</span>
+          <span className="min-w-0 truncate">{short || label}</span>
           <span className="flex shrink-0 items-center gap-0.5 font-semibold text-navy">
-            {pending ? <Loader2 className="size-3 animate-spin" /> : 'Đổi'}
-            <ChevronDown className="size-3" />
+            {pending ? <IconLoader2 className="size-3 animate-spin" /> : 'Đổi'}
+            <IconChevronDown className="size-3" />
           </span>
         </button>
       </PopoverTrigger>
@@ -85,7 +88,7 @@ function SwitcherBody({
   if (product.isPending) {
     return (
       <div className="flex items-center justify-center gap-2 p-8 text-sm text-ink/55">
-        <Loader2 className="size-4 animate-spin" /> Đang tải phân loại…
+        <IconLoader2 className="size-4 animate-spin" /> Đang tải phân loại…
       </div>
     );
   }
@@ -146,7 +149,7 @@ function Picker({
           />
         )}
       </div>
-      <div className="flex items-center justify-between gap-3 border-t border-ivory-200 bg-ivory/60 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-t border-ink/[0.07] bg-page px-4 py-3">
         <div className="min-w-0 text-sm">
           {variant ? (
             <>
@@ -155,7 +158,7 @@ function Picker({
                 {variant.available > 0 ? `Còn ${variant.available}` : 'Hết hàng'}
               </div>
               {short && (
-                <div className="mt-0.5 text-xs font-medium text-amber-700">
+                <div className="mt-0.5 text-xs font-medium text-champagne-600">
                   Giỏ đang có {item.quantity}, giảm còn {variant.available} rồi đổi.
                 </div>
               )}
@@ -202,10 +205,9 @@ function ChipGroup({
             className={cn(
               'rounded-lg border px-3 py-1.5 text-sm transition',
               c.value === value
-                ? 'border-navy bg-navy text-white'
-                : 'border-ivory-200 bg-card text-ink hover:border-champagne',
-              c.disabled &&
-                'cursor-not-allowed border-dashed bg-ivory text-ink/35 line-through hover:border-ivory-200',
+                ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                : 'border-ink/15 bg-card text-charcoal hover:border-navy/50',
+              c.disabled && 'cursor-not-allowed opacity-40 hover:border-ink/15',
             )}
           >
             {c.value}
