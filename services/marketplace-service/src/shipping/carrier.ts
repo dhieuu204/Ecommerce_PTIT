@@ -1,9 +1,21 @@
+/** Một đầu của vận đơn. GHN nhận địa chỉ theo tên; thiếu tên thì GHN tự lấy địa chỉ của shop đăng ký trên GHN */
+export interface ShipmentParty {
+  name: string;
+  phone: string;
+  address: string;
+  districtId: number;
+  wardCode: string;
+  wardName?: string;
+  districtName?: string;
+  provinceName?: string;
+}
+
 /** Thông tin tạo một vận đơn (một kiện của một đơn con) */
 export interface CreateShipmentInput {
   /** client_order_code gửi GHN (= mã đơn con): GHN không cho trùng nên gửi lại không tạo vận đơn thứ hai */
   clientCode: string;
-  from: { name: string; phone: string; address: string; districtId: number; wardCode: string };
-  to: { name: string; phone: string; address: string; districtId: number; wardCode: string };
+  from: ShipmentParty;
+  to: ShipmentParty;
   /** Số tiền GHN thu hộ (0 với trả trước) */
   codAmount: number;
   /** gram */

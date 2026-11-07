@@ -14,12 +14,17 @@ export class SimulatorEventDto {
 
 /** Tin trạng thái GHN gửi về (các trường dùng tới) */
 interface GhnWebhookBody {
+  /** Loại tin: create, switch_status, update_fee, update_cod... */
+  Type?: string;
   OrderCode?: string;
   Status?: string;
   Time?: string;
   Reason?: string;
   TotalFee?: number;
 }
+
+/** Chỉ hai loại tin này báo trạng thái vận đơn; tin khác (đổi phí, đổi COD...) mà áp sẽ tính thêm lần giao thất bại */
+const GHN_STATUS_TYPES = new Set(['create', 'switch_status']);
 
 /** Nhận trạng thái GHN thật (SHIP-03) */
 @ApiTags('Vận chuyển')
@@ -48,13 +53,17 @@ export class GhnWebhookController {
       throw new AppError(401, 'UNAUTHENTICATED', 'Sai mã webhook.');
     }
     if (!body.OrderCode || !body.Status) return { result: 'IGNORED' };
+    if (body.Type && !GHN_STATUS_TYPES.has(body.Type.trim().toLowerCase())) {
+      return { result: 'IGNORED' };
+    }
     const at = body.Time ? new Date(body.Time) : new Date();
     const result = await this.shipments.applyCarrierEvent({
       ghnCode: body.OrderCode,
       status: body.Status,
       at: Number.isNaN(at.getTime()) ? new Date() : at,
       source: 'GHN',
-      fee: typeof body.TotalFee === 'number' ? body.TotalFee : undefined,
+      // GHN luôn gửi đủ trường: chưa bật tin phí thì TotalFee = 0, không được ghi đè phí đã có
+      fee: typeof body.TotalFee === 'number' && body.TotalFee > 0 ? body.TotalFee : undefined,
       note: body.Reason,
     });
     this.logger.log(`GHN ${body.OrderCode} ${body.Status}: ${result}`);

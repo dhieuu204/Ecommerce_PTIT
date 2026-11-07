@@ -14,7 +14,7 @@ describe('Quy đổi trạng thái GHN', () => {
     }
     expect(mapGhnStatus('returned')).toBe('RETURNED');
     expect(mapGhnStatus('cancel')).toBe('CANCELLED');
-    for (const s of ['lost', 'damage', 'exception', 'return_fail']) {
+    for (const s of ['lost', 'damage', 'exception', 'return_fail', 'scrap']) {
       expect(mapGhnStatus(s)).toBe('INCIDENT');
     }
   });

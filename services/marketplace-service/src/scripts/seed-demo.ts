@@ -69,9 +69,16 @@ async function main() {
       }
       // Địa chỉ lấy hàng: tỉnh theo tên (dữ liệu mẫu hoặc GHN thật), huyện/xã đầu tiên
       const province = await prisma.province.findFirst({
-        where: { name: { contains: shop.city } },
+        // Chỉ lấy tỉnh có huyện và xã (GHN dev có dòng rỗng như "Hà Nội 02")
+        where: { name: { contains: shop.city }, districts: { some: { wards: { some: {} } } } },
+        orderBy: { id: 'asc' },
         include: {
-          districts: { take: 1, orderBy: { id: 'asc' }, include: { wards: { take: 1 } } },
+          districts: {
+            where: { wards: { some: {} } },
+            take: 1,
+            orderBy: { id: 'asc' },
+            include: { wards: { take: 1 } },
+          },
         },
       });
       const district = province?.districts[0];

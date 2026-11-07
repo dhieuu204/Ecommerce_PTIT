@@ -134,6 +134,21 @@ export class ShipmentsService {
     });
   }
 
+  /** Tên phường, quận, tỉnh để gửi GHN; mã không còn trong danh sách thì không có tên (GhnCarrier sẽ từ chối) */
+  private async placeNames(districtId: number, wardCode: string | null) {
+    if (!wardCode) return {};
+    const ward = await this.prisma.ward.findUnique({
+      where: { districtId_code: { districtId, code: wardCode } },
+      include: { district: { include: { province: true } } },
+    });
+    if (!ward) return {};
+    return {
+      wardName: ward.name,
+      districtName: ward.district.name,
+      provinceName: ward.district.province.name,
+    };
+  }
+
   /**
    * Gọi GHN tạo vận đơn (vận đơn đang CREATING). GHN từ chối → CREATE_FAILED (tạo lại bằng tay);
    * lỗi mạng → UNKNOWN (job tra cứu theo mã gửi GHN). Vận đơn trả hàng: lấy ở địa chỉ nhận hàng của
@@ -146,7 +161,10 @@ export class ShipmentsService {
     });
     if (sh.status !== 'CREATING') return sh;
     const so = sh.shopOrder;
+    const shopPlace = await this.placeNames(so.shop.pickupDistrictId ?? 0, so.shop.pickupWardCode);
+    const buyerPlace = await this.placeNames(so.order.districtId, so.order.wardCode);
     const shop = {
+      ...shopPlace,
       name: so.shop.name ?? so.shopName,
       phone: so.shop.phone ?? '',
       address: so.shop.pickupAddress ?? '',
@@ -154,6 +172,7 @@ export class ShipmentsService {
       wardCode: so.shop.pickupWardCode ?? '',
     };
     const buyer = {
+      ...buyerPlace,
       name: so.order.receiverName,
       phone: so.order.receiverPhone,
       address: so.order.address,

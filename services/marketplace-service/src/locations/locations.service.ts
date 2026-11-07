@@ -1,7 +1,7 @@
 import { Injectable, Logger, type OnApplicationBootstrap, type OnModuleInit } from '@nestjs/common';
 import { AppError, JobService } from '@san/nest-common';
 import { PrismaService } from '../prisma.service';
-import { GhnClient, type GhnWard } from './ghn.client';
+import { GhnClient, type GhnDistrict, type GhnWard } from './ghn.client';
 import { SAMPLE_LOCATIONS } from './sample-locations';
 
 export interface Place {
@@ -145,7 +145,15 @@ export class LocationsService implements OnModuleInit, OnApplicationBootstrap {
       .filter((p) => !isTestEntry(p.ProvinceName))
       .map((p) => ({ id: p.ProvinceID, name: p.ProvinceName.trim() }));
     const provinceIds = new Set(provinces.map((p) => p.id));
-    const districts = (await this.ghn.districts())
+    const perProvince: GhnDistrict[] = [];
+    for (let i = 0; i < provinces.length; i += 5) {
+      const batch = await Promise.all(
+        provinces.slice(i, i + 5).map((p) => this.ghn.districts(p.id)),
+      );
+      perProvince.push(...batch.flat());
+    }
+    const uniqueDistricts = new Map(perProvince.map((d) => [d.DistrictID, d]));
+    const districts = [...uniqueDistricts.values()]
       .filter((d) => provinceIds.has(d.ProvinceID) && !isTestEntry(d.DistrictName))
       .map((d) => ({ id: d.DistrictID, provinceId: d.ProvinceID, name: d.DistrictName.trim() }));
 
@@ -165,7 +173,16 @@ export class LocationsService implements OnModuleInit, OnApplicationBootstrap {
         name: w.WardName.trim(),
       });
     }
-    return { provinces, districts, wards: [...unique.values()] };
+    // GHN dev có tỉnh/huyện rỗng (ví dụ "Hà Nội 02" không có huyện): bỏ đi vì không chọn được địa chỉ đủ 3 cấp
+    const keptWards = [...unique.values()];
+    const districtsWithWards = new Set(keptWards.map((w) => w.districtId));
+    const keptDistricts = districts.filter((d) => districtsWithWards.has(d.id));
+    const provincesWithDistricts = new Set(keptDistricts.map((d) => d.provinceId));
+    return {
+      provinces: provinces.filter((p) => provincesWithDistricts.has(p.id)),
+      districts: keptDistricts,
+      wards: keptWards,
+    };
   }
 
   private sample() {

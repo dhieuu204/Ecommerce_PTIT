@@ -79,6 +79,10 @@ Mở web ở http://localhost:8080 (đổi cổng bằng `WEB_PORT` trong `.env`
 - Biến bí mật (token GHN, Google, Gmail) vẫn đọc từ `services/<ten>/.env`; địa chỉ localhost được đổi sang tên container trong `infra/docker-compose.yml`.
 - Đăng nhập Google khi chạy bản Docker: khai thêm redirect URI `http://localhost:8080/api/user/v1/auth/google/callback` trên Google Cloud.
 
+## Nối đối tác thật (VNPay, GHN, Gmail, Google)
+
+Cách lấy khóa và điền vào `.env`: [`docs/trien-khai/02-tich-hop-doi-tac.md`](docs/trien-khai/02-tich-hop-doi-tac.md). Kiểm khóa có dùng được không: `pnpm check:integrations`.
+
 ## Lệnh kiểm tra (CI chạy đúng các lệnh này)
 
 ```bash

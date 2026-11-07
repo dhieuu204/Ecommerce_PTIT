@@ -16,6 +16,12 @@ export interface GhnWard {
   WardName: string;
 }
 
+/** Dịch vụ GHN cho hàng từ 20 kg trở lên (bắt buộc gửi kích thước từng món) */
+export const GHN_HEAVY_SERVICE = 5;
+/** Quy định của GHN, không phải con số nghiệp vụ của sàn: dưới 20 kg dùng dịch vụ 2, từ 20 kg dùng dịch vụ 5 */
+export const ghnServiceType = (weightGrams: number) =>
+  weightGrams >= 20_000 ? GHN_HEAVY_SERVICE : 2;
+
 /** Gọi API danh mục địa chỉ của GHN (môi trường dev). Tách riêng để test thay bằng bản giả. */
 @Injectable()
 export class GhnClient {
@@ -29,9 +35,8 @@ export class GhnClient {
     return this.get('/master-data/province');
   }
 
-  /** Tất cả quận/huyện của cả nước */
-  districts(): Promise<GhnDistrict[]> {
-    return this.get('/master-data/district');
+  districts(provinceId: number): Promise<GhnDistrict[]> {
+    return this.get(`/master-data/district?province_id=${provinceId}`);
   }
 
   wards(districtId: number): Promise<GhnWard[]> {
@@ -52,16 +57,26 @@ export class GhnClient {
       'Content-Type': 'application/json',
     };
     if (this.config.ghnShopId) headers.ShopId = this.config.ghnShopId;
+    const serviceTypeId = ghnServiceType(input.weight);
+    const dimensions = {
+      length: this.config.packageLengthCm,
+      width: this.config.packageWidthCm,
+      height: this.config.packageHeightCm,
+    };
     const res = await fetch(`${this.config.ghnApiUrl}/v2/shipping-order/fee`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        service_type_id: 2,
+        service_type_id: serviceTypeId,
         from_district_id: input.fromDistrictId,
         from_ward_code: input.fromWardCode,
         to_district_id: input.toDistrictId,
         to_ward_code: input.toWardCode,
         weight: input.weight,
+        ...dimensions,
+        ...(serviceTypeId === GHN_HEAVY_SERVICE
+          ? { items: [{ name: 'Kiện hàng', quantity: 1, weight: input.weight, ...dimensions }] }
+          : {}),
       }),
       signal: AbortSignal.timeout(8_000),
     });
