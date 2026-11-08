@@ -45,6 +45,8 @@ import { OrdersService } from './orders.service';
         const logger = new Logger('Vận chuyển');
         if (config.ghnToken) {
           logger.log('Dùng GHN môi trường dev.');
+          if (!config.ghnShopId)
+            logger.warn('Thiếu GHN_SHOP_ID: GHN yêu cầu mã này khi tính phí và tạo vận đơn.');
           return new GhnCarrier(config);
         }
         logger.warn('Chưa có GHN_TOKEN: dùng vận chuyển MÔ PHỎNG (admin bấm các mốc giao hàng).');

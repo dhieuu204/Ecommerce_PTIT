@@ -326,6 +326,27 @@ describeDb('Giao hàng và COD (P4: SHIP-01..04, COD-01)', () => {
       await webhook({ OrderCode: 'X', Status: 'picked' }, 'sai').expect(401);
     });
 
+    it('tin không báo trạng thái (đổi phí, đổi COD) không tính thêm lần giao thất bại', async () => {
+      const { shipment } = await confirmed('COD');
+      const at = (hours: number) => new Date(Date.now() + hours * 3600_000).toISOString();
+      await webhook({ OrderCode: shipment.ghnCode, Status: 'picked', Time: at(0) }).expect(200);
+      const base = { OrderCode: shipment.ghnCode, Status: 'delivery_fail' };
+      await webhook({ ...base, Type: 'Switch_Status', Time: at(1) }).expect(200);
+      const r = await webhook({ ...base, Type: 'update_fee', Time: at(2), TotalFee: 40_000 });
+      expect(r.body.result).toBe('IGNORED');
+      const after = await t.prisma.shipment.findUniqueOrThrow({ where: { id: shipment.id } });
+      expect(after.failedAttempts).toBe(1);
+    });
+
+    it('TotalFee = 0 (chưa bật tin phí) không ghi đè phí đã có', async () => {
+      const { shipment } = await confirmed('COD');
+      await t.prisma.shipment.update({ where: { id: shipment.id }, data: { fee: 27_000 } });
+      const time = new Date(Date.now() + 3600_000).toISOString();
+      await webhook({ OrderCode: shipment.ghnCode, Status: 'picked', Time: time, TotalFee: 0 });
+      const after = await t.prisma.shipment.findUniqueOrThrow({ where: { id: shipment.id } });
+      expect(after.fee).toBe(27_000);
+    });
+
     it('lấy hàng → giao thành công; tin trùng và tin cũ tới muộn không làm sai trạng thái', async () => {
       const { so, shipment } = await confirmed('COD');
       const at = (hours: number) => new Date(Date.now() + hours * 3600_000).toISOString();

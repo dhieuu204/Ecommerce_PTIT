@@ -35,6 +35,7 @@ const MAP: Record<string, CarrierEvent> = {
   damage: 'INCIDENT',
   exception: 'INCIDENT',
   return_fail: 'INCIDENT',
+  scrap: 'INCIDENT',
 };
 
 /** null = mã lạ (chỉ ghi lịch sử) */

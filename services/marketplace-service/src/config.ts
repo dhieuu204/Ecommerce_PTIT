@@ -57,7 +57,7 @@ export class AppConfig {
   readonly stockMax = num('STOCK_MAX', 999999);
 
   // ----- P3: đặt hàng -----
-  /** Mã shop trên GHN dev (header ShopId khi tính phí); để trống vẫn tính được theo quận/huyện */
+  /** Mã shop trên GHN dev (header ShopId). Bắt buộc khi có GHN_TOKEN: GHN yêu cầu khi tính phí và tạo vận đơn */
   readonly ghnShopId = text('GHN_SHOP_ID');
   /** user-service: lấy sổ địa chỉ của buyer khi checkout */
   readonly userApiUrl = text('USER_API_URL', 'http://localhost:3001/api/user/v1');

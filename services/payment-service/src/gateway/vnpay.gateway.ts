@@ -146,6 +146,11 @@ export class VnpayGateway implements PaymentGateway {
     }
     const code = String(res.vnp_ResponseCode ?? '');
     if (code === '00') return { status: 'SUCCEEDED', message: null, raw: res };
+    // 94: VNPay đang xử lý lệnh hoàn trước đó của giao dịch này. Ghi "lỗi" sẽ dẫn tới gửi lại rồi hoàn tay,
+    // có thể hoàn hai lần, nên ghi "không rõ" để tra cứu.
+    if (code === '94') {
+      return { status: 'UNKNOWN', message: 'VNPay đang xử lý lệnh hoàn trước đó.', raw: res };
+    }
     return {
       status: 'FAILED',
       message: `VNPay từ chối hoàn (mã ${code}): ${String(res.vnp_Message ?? '')}`,
