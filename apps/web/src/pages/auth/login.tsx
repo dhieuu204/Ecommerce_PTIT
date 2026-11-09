@@ -1,4 +1,9 @@
-import { AlertCircle, Lock, MailWarning, ShieldAlert } from 'lucide-react';
+import {
+  IconAlertCircle,
+  IconLock,
+  IconMailExclamation,
+  IconShieldExclamation,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
@@ -132,20 +137,17 @@ export function LoginPage() {
       title="Đăng nhập"
       subtitle={
         <>
-          <p className="font-medium text-ink">Đăng nhập để mua sắm và theo dõi đơn dễ hơn</p>
-          <p className="mt-1.5 text-muted-foreground">
-            Bạn chưa có tài khoản?{' '}
-            <Link to={registerLink} className="font-semibold text-champagne-600 hover:underline">
-              Đăng ký
-            </Link>
-          </p>
+          Bạn chưa có tài khoản?{' '}
+          <Link to={registerLink} className="font-semibold text-navy hover:underline">
+            Đăng ký
+          </Link>
         </>
       }
       footer="Email Google trùng với tài khoản đã có thì hai cách đăng nhập được gộp làm một."
     >
       <form onSubmit={onSubmit} noValidate className="space-y-5">
         {lockLeft > 0 && (
-          <Notice tone="warning" icon={<Lock />}>
+          <Notice tone="warning" icon={<IconLock />}>
             <p>
               Bạn đã nhập sai mật khẩu quá nhiều lần. Đăng nhập tạm khóa, thử lại sau{' '}
               <strong className="tabular-nums">{mmss(lockLeft)}</strong>.
@@ -159,24 +161,24 @@ export function LoginPage() {
           </Notice>
         )}
         {problem?.kind === 'error' && (
-          <Notice tone="danger" icon={<AlertCircle />}>
+          <Notice tone="danger" icon={<IconAlertCircle />}>
             {problem.message}
           </Notice>
         )}
         {problem?.kind === 'locked' && (
-          <Notice tone="danger" icon={<ShieldAlert />}>
+          <Notice tone="danger" icon={<IconShieldExclamation />}>
             {problem.message}
           </Notice>
         )}
         {problem?.kind === 'unverified' && (
-          <Notice tone="warning" icon={<MailWarning />}>
+          <Notice tone="warning" icon={<IconMailExclamation />}>
             <p>{problem.message}</p>
             <Button
               type="button"
               size="sm"
               disabled={resending}
               onClick={() => goVerify(problem.email)}
-              className="rounded-full bg-navy text-white hover:bg-navy-800"
+              className="rounded-lg bg-navy text-white hover:bg-navy-800"
             >
               {resending ? 'Đang gửi mã…' : 'Gửi lại mã và xác minh'}
             </Button>
@@ -208,10 +210,7 @@ export function LoginPage() {
           />
         </Field>
         <div className="-mt-1">
-          <Link
-            to="/quen-mat-khau"
-            className="text-sm font-medium text-navy hover:text-champagne-600"
-          >
+          <Link to="/quen-mat-khau" className="text-sm font-medium text-navy hover:text-navy-900">
             Quên mật khẩu?
           </Link>
         </div>

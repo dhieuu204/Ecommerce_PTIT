@@ -1,5 +1,12 @@
-import { Heart, LogOut, ReceiptText, ShieldCheck, Star, Store, UserRound } from 'lucide-react';
-import { IconUser } from '@tabler/icons-react';
+import {
+  IconBuildingStore,
+  IconHeart,
+  IconLogout,
+  IconReceipt,
+  IconShieldCheck,
+  IconStar,
+  IconUser,
+} from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import {
@@ -42,7 +49,7 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' | 'shop' }
       ) : (
         <DropdownMenuTrigger
           className={cn(
-            'flex items-center gap-2 rounded-full p-1 pr-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-champagne',
+            'flex items-center gap-2 rounded-lg p-1 pr-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-champagne',
             tone === 'dark' ? 'text-white hover:bg-white/10' : 'text-ink hover:bg-ivory-200',
           )}
         >
@@ -58,33 +65,33 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' | 'shop' }
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/tai-khoan/ho-so">
-            <UserRound /> Tài khoản của tôi
+            <IconUser /> Tài khoản của tôi
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/tai-khoan/don-mua">
-            <ReceiptText /> Đơn mua
+            <IconReceipt /> Đơn mua
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/tai-khoan/danh-gia">
-            <Star /> Đánh giá của tôi
+            <IconStar /> Đánh giá của tôi
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/tai-khoan/yeu-thich">
-            <Heart /> Sản phẩm yêu thích
+            <IconHeart /> Sản phẩm yêu thích
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to={shopActive ? '/kenh-nguoi-ban' : '/tai-khoan/shop'}>
-            <Store /> {shopActive ? 'Kênh người bán' : 'Shop của tôi'}
+            <IconBuildingStore /> {shopActive ? 'Kênh người bán' : 'Shop của tôi'}
           </Link>
         </DropdownMenuItem>
         {isAdmin && (
           <DropdownMenuItem asChild>
             <Link to="/quan-tri">
-              <ShieldCheck /> Quản trị
+              <IconShieldCheck /> Quản trị
             </Link>
           </DropdownMenuItem>
         )}
@@ -96,7 +103,7 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' | 'shop' }
             navigate('/');
           }}
         >
-          <LogOut /> Đăng xuất
+          <IconLogout /> Đăng xuất
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

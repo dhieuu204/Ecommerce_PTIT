@@ -1,23 +1,23 @@
-import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  CalendarCheck,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  FileText,
-  History,
-  Landmark,
-  Loader2,
-  Mail,
-  MapPin,
-  Package,
-  Phone,
-  RotateCcw,
-  ShieldAlert,
-  Store,
-  UserRound,
-} from 'lucide-react';
+  IconArrowLeft,
+  IconBuildingBank,
+  IconBuildingStore,
+  IconCalendarCheck,
+  IconExternalLink,
+  IconEye,
+  IconEyeOff,
+  IconFileText,
+  IconHistory,
+  IconLoader2,
+  IconMail,
+  IconMapPin,
+  IconPackage,
+  IconPhone,
+  IconRefresh,
+  IconShieldExclamation,
+  IconUser,
+} from '@tabler/icons-react';
+import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -123,10 +123,10 @@ export function ShopDetailPage() {
     return (
       <div className="mx-auto max-w-6xl">
         <PageHeader crumbs={crumbs} title="Chi tiết shop" />
-        <div className="rounded-2xl border bg-card">
+        <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
           {notFound ? (
             <EmptyState
-              icon={Store}
+              icon={IconBuildingStore}
               title="Không tìm thấy shop"
               text="Shop không có hoặc chưa được duyệt."
               action={
@@ -157,14 +157,14 @@ export function ShopDetailPage() {
         actions={
           <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
             <Link to="/quan-tri/shop">
-              <ArrowLeft /> Danh sách
+              <IconArrowLeft /> Danh sách
             </Link>
           </Button>
         }
       />
 
       {/* Đầu trang: logo, trạng thái, nút quyết định */}
-      <div className="mb-6 flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-sm shadow-navy/[0.03] sm:flex-row sm:items-center md:p-5">
+      <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 sm:flex-row sm:items-center md:p-5">
         <ShopLogo url={s.logoUrl} className="size-16 border" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -175,31 +175,35 @@ export function ShopDetailPage() {
           </div>
           <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <CalendarCheck className="size-4 text-champagne-600" />
+              <IconCalendarCheck className="size-4 text-navy" />
               Duyệt {formatDate(s.approvedAt) || '—'}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Package className="size-4 text-champagne-600" />
+              <IconPackage className="size-4 text-navy" />
               {s.productCount.toLocaleString('vi-VN')} sản phẩm
             </span>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" className="rounded-full border-navy/30 text-navy">
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
+            >
               <Link to={`/shop/${s.id}`} target="_blank" rel="noreferrer">
-                <ExternalLink /> Trang shop
+                <IconExternalLink /> Trang shop
               </Link>
             </Button>
             <Button
               className={cn(
-                'rounded-full px-5',
+                'rounded-lg px-5',
                 action === 'SUSPEND' && 'bg-red-600 text-white hover:bg-red-700',
               )}
               disabled={isOwner || !!pending}
               onClick={() => setDialog(action)}
             >
-              {action === 'SUSPEND' ? <ShieldAlert /> : <RotateCcw />}
+              {action === 'SUSPEND' ? <IconShieldExclamation /> : <IconRefresh />}
               {action === 'SUSPEND' ? 'Đình chỉ shop' : 'Khôi phục shop'}
             </Button>
           </div>
@@ -220,9 +224,9 @@ export function ShopDetailPage() {
           )}
         >
           {slow ? (
-            <ShieldAlert className="mt-0.5 size-5 shrink-0 text-amber-700" />
+            <IconShieldExclamation className="mt-0.5 size-5 shrink-0 text-amber-700" />
           ) : (
-            <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-champagne-600" />
+            <IconLoader2 className="mt-0.5 size-5 shrink-0 animate-spin text-champagne-600" />
           )}
           <div className="min-w-0 flex-1">
             <div className="font-semibold">
@@ -240,7 +244,7 @@ export function ShopDetailPage() {
             <Button
               size="sm"
               variant="outline"
-              className="self-start rounded-full"
+              className="self-start rounded-lg"
               onClick={() => {
                 setSlow(false);
                 setPending({ ...pending, since: Date.now() });
@@ -254,7 +258,7 @@ export function ShopDetailPage() {
 
       {suspended && !pending && (
         <div className="mb-6 flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
-          <ShieldAlert className="mt-0.5 size-5 shrink-0 text-red-600" />
+          <IconShieldExclamation className="mt-0.5 size-5 shrink-0 text-red-600" />
           <div className="min-w-0">
             <div className="font-semibold">Shop đang bị đình chỉ</div>
             {s.suspendReason && (
@@ -273,10 +277,15 @@ export function ShopDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat icon={Eye} label="Đang bán" value={s.productCounts.ACTIVE} tone="emerald" />
-            <Stat icon={EyeOff} label="Đã ẩn" value={s.productCounts.HIDDEN} tone="muted" />
-            <Stat icon={ShieldAlert} label="Bị gỡ" value={s.productCounts.REMOVED} tone="red" />
-            <Stat icon={Package} label="Tổng sản phẩm" value={s.productCount} tone="navy" />
+            <Stat icon={IconEye} label="Đang bán" value={s.productCounts.ACTIVE} tone="emerald" />
+            <Stat icon={IconEyeOff} label="Đã ẩn" value={s.productCounts.HIDDEN} tone="muted" />
+            <Stat
+              icon={IconShieldExclamation}
+              label="Bị gỡ"
+              value={s.productCounts.REMOVED}
+              tone="red"
+            />
+            <Stat icon={IconPackage} label="Tổng sản phẩm" value={s.productCount} tone="navy" />
           </div>
           {suspended && s.productCounts.ACTIVE > 0 && (
             <p className="-mt-3 text-xs text-muted-foreground">
@@ -286,21 +295,21 @@ export function ShopDetailPage() {
           <InfoCard shop={s} />
         </div>
         <aside className="space-y-6">
-          <section className="rounded-2xl border bg-card p-5 shadow-sm shadow-navy/[0.03]">
-            <h2 className="flex items-center gap-2 font-semibold text-navy">
-              <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-5">
+            <h2 className="flex items-center gap-2 font-semibold text-charcoal">
+              <span className="h-[3px] w-5 shrink-0 rounded-full bg-navy" aria-hidden />
               Chủ shop
             </h2>
             <div className="mt-4 space-y-2.5 text-sm">
               <div className="flex items-center gap-2.5">
-                <UserRound className="size-4 shrink-0 text-champagne-600" />
+                <IconUser className="size-4 shrink-0 text-champagne-600" />
                 <span className="truncate font-medium text-ink">
                   {owner?.ownerName ?? 'Chưa rõ tên'}
                 </span>
               </div>
               {owner && (
                 <div className="flex items-center gap-2.5">
-                  <Mail className="size-4 shrink-0 text-champagne-600" />
+                  <IconMail className="size-4 shrink-0 text-champagne-600" />
                   <span className="truncate text-muted-foreground">{owner.ownerEmail}</span>
                 </div>
               )}
@@ -312,7 +321,7 @@ export function ShopDetailPage() {
                   to={`/quan-tri/duyet-shop/${owner.approvalId}`}
                   className="inline-flex items-center gap-1 text-xs font-medium text-navy hover:underline"
                 >
-                  <FileText className="size-3.5" /> Xem hồ sơ mở shop
+                  <IconFileText className="size-3.5" /> Xem hồ sơ mở shop
                 </Link>
               )}
             </div>
@@ -348,13 +357,13 @@ function Stat({
   value,
   tone,
 }: {
-  icon: typeof Eye;
+  icon: typeof IconEye;
   label: string;
   value: number;
   tone: 'emerald' | 'muted' | 'navy' | 'red';
 }) {
   return (
-    <div className="rounded-2xl border bg-card p-3 shadow-sm shadow-navy/[0.03] sm:p-4">
+    <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-3 sm:p-4">
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Icon
           className={cn(
@@ -385,16 +394,16 @@ function Stat({
 }
 
 function InfoCard({ shop: s }: { shop: AdminShopDetail }) {
-  const rows: Array<{ icon: typeof Store; label: string; value: React.ReactNode }> = [
+  const rows: Array<{ icon: typeof IconBuildingStore; label: string; value: React.ReactNode }> = [
     {
-      icon: FileText,
+      icon: IconFileText,
       label: 'Mô tả',
       value: <span className="whitespace-pre-line">{s.description || '—'}</span>,
     },
-    { icon: Phone, label: 'SĐT shop', value: s.phone || '—' },
-    { icon: MapPin, label: 'Lấy hàng', value: s.pickupAddress || '—' },
+    { icon: IconPhone, label: 'SĐT shop', value: s.phone || '—' },
+    { icon: IconMapPin, label: 'Lấy hàng', value: s.pickupAddress || '—' },
     {
-      icon: Landmark,
+      icon: IconBuildingBank,
       label: 'Ngân hàng',
       value: s.bankAccount ? (
         <span className="flex flex-wrap gap-x-1.5">
@@ -408,7 +417,7 @@ function InfoCard({ shop: s }: { shop: AdminShopDetail }) {
         '—'
       ),
     },
-    { icon: CalendarCheck, label: 'Ngày duyệt', value: formatDateTime(s.approvedAt) || '—' },
+    { icon: IconCalendarCheck, label: 'Ngày duyệt', value: formatDateTime(s.approvedAt) || '—' },
   ];
   return (
     <SectionCard title="Thông tin shop" description="Thông tin shop đang dùng trên sàn.">
@@ -419,7 +428,7 @@ function InfoCard({ shop: s }: { shop: AdminShopDetail }) {
             className="grid gap-1 py-2.5 first:pt-0 last:pb-0 sm:grid-cols-[130px_1fr]"
           >
             <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon className="size-4 text-champagne-600" /> {label}
+              <Icon className="size-4 text-navy" /> {label}
             </dt>
             <dd className="text-sm break-words text-ink">{value}</dd>
           </div>
@@ -435,9 +444,9 @@ function InfoCard({ shop: s }: { shop: AdminShopDetail }) {
 /** Lịch sử đình chỉ / khôi phục, mới nhất trước */
 function ViolationHistory({ query }: { query: UseQueryResult<ShopViolations> }) {
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-sm shadow-navy/[0.03]">
-      <h2 className="flex items-center gap-2 font-semibold text-navy">
-        <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
+    <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-5">
+      <h2 className="flex items-center gap-2 font-semibold text-charcoal">
+        <span className="h-[3px] w-5 shrink-0 rounded-full bg-navy" aria-hidden />
         Lịch sử đình chỉ
       </h2>
       {query.isPending ? (
@@ -453,7 +462,7 @@ function ViolationHistory({ query }: { query: UseQueryResult<ShopViolations> }) 
         />
       ) : query.data.items.length === 0 ? (
         <div className="mt-4 flex items-center gap-2.5 rounded-xl bg-ivory px-3 py-3 text-sm text-muted-foreground">
-          <History className="size-4 text-champagne-600" />
+          <IconHistory className="size-4 text-navy" />
           Shop chưa từng bị đình chỉ.
         </div>
       ) : (
@@ -551,7 +560,7 @@ function DecisionDialog({
     <Dialog open={!!action} onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-lg">
         <DialogHeader className="text-left">
-          <DialogTitle className={cn('pr-6', suspend ? 'text-red-700' : 'text-navy')}>
+          <DialogTitle className={cn('pr-6', suspend ? 'text-red-700' : 'text-charcoal')}>
             {suspend ? 'Đình chỉ shop' : 'Khôi phục shop'} "{shop.name}"
           </DialogTitle>
           <DialogDescription>
@@ -588,7 +597,7 @@ function DecisionDialog({
                       setReason(r);
                       setError(null);
                     }}
-                    className="rounded-full border border-champagne/50 bg-champagne-50/60 px-2.5 py-1 text-xs text-navy transition hover:border-champagne hover:bg-champagne-50"
+                    className="rounded-lg border border-champagne/50 bg-champagne-50/60 px-2.5 py-1 text-xs text-navy transition hover:border-champagne hover:bg-champagne-50"
                   >
                     {r}
                   </button>
@@ -613,7 +622,7 @@ function DecisionDialog({
             onClick={() => void submit()}
             className={cn('min-w-36', suspend && 'bg-red-600 hover:bg-red-700')}
           >
-            {busy && <Loader2 className="animate-spin" />}
+            {busy && <IconLoader2 className="animate-spin" />}
             {suspend ? 'Đình chỉ shop' : 'Khôi phục shop'}
           </Button>
         </DialogFooter>

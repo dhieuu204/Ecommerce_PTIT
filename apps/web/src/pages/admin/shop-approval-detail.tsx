@@ -1,21 +1,21 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  ArrowRight,
-  Ban,
-  Check,
-  CheckCircle2,
-  FileText,
-  Landmark,
-  Loader2,
-  Mail,
-  MapPin,
-  Phone,
-  ShieldAlert,
-  Store,
-  UserRound,
-  X,
-} from 'lucide-react';
+  IconArrowLeft,
+  IconArrowRight,
+  IconBan,
+  IconBuildingBank,
+  IconBuildingStore,
+  IconCheck,
+  IconCircleCheck,
+  IconFileText,
+  IconLoader2,
+  IconMail,
+  IconMapPin,
+  IconPhone,
+  IconShieldExclamation,
+  IconUser,
+  IconX,
+} from '@tabler/icons-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -41,6 +41,7 @@ import { formatDateTime, maskAccount } from '@/lib/format';
 import { showApiError } from '@/lib/form';
 import type { BankAccount } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { CARD, CardTitle, PRIMARY_BUTTON } from '@/pages/checkout/checkout-parts';
 import { APPROVAL_STATUS, ApprovalStatusBadge, ApprovalTypeBadge, waited } from './labels';
 import { approvalsKey } from './shop-approvals';
 
@@ -80,7 +81,7 @@ export function ShopApprovalDetailPage() {
     return (
       <div className="mx-auto max-w-6xl">
         <PageHeader crumbs={crumbs} title="Chi tiết hồ sơ" />
-        <div className="rounded-2xl border bg-card">
+        <div className={CARD}>
           <LoadError message={query.error.message} onRetry={() => void query.refetch()} />
         </div>
       </div>
@@ -98,18 +99,18 @@ export function ShopApprovalDetailPage() {
         actions={
           <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
             <Link to="/quan-tri/duyet-shop">
-              <ArrowLeft /> Danh sách
+              <IconArrowLeft /> Danh sách
             </Link>
           </Button>
         }
       />
-      <div className="-mt-3 mb-6 flex flex-wrap items-center gap-2">
+      <div className="-mt-2 mb-4 flex flex-wrap items-center gap-2">
         <ApprovalTypeBadge type={a.type} />
-        <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-ink">
+        <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-charcoal">
           Phiên bản {a.version}
         </span>
         <ApprovalStatusBadge status={a.status} />
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-ink/55">
           Nộp lúc {formatDateTime(a.submittedAt)}
           {a.status === 'PENDING' && <> · đã chờ {waited(a.submittedAt)}</>}
         </span>
@@ -118,21 +119,23 @@ export function ShopApprovalDetailPage() {
       {a.status === 'PENDING' && isOwner && <SelfBanner />}
 
       {a.status === 'REPLACED' && latest && latest.id !== a.id && (
-        <div className="mb-6 flex flex-col gap-3 rounded-2xl border bg-muted/60 p-4 text-sm sm:flex-row sm:items-center">
-          <FileText className="size-5 shrink-0 text-muted-foreground" />
+        <div
+          className={cn(CARD, 'mb-4 flex flex-col gap-3 p-4 text-sm sm:flex-row sm:items-center')}
+        >
+          <IconFileText className="size-5 shrink-0 text-ink/45" />
           <div className="flex-1">
             Shop đã nộp phiên bản mới hơn (v{latest.version}), bản này không duyệt được nữa.
           </div>
-          <Button asChild size="sm" variant="outline" className="rounded-full">
+          <Button asChild size="sm" variant="outline" className="rounded-lg">
             <Link to={`/quan-tri/duyet-shop/${latest.id}`}>
-              Xem bản v{latest.version} <ArrowRight />
+              Xem bản v{latest.version} <IconArrowRight />
             </Link>
           </Button>
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="min-w-0 space-y-6">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 space-y-4">
           {a.type === 'CHANGE' && a.change && <ChangeTable a={a} />}
           <FullProfile a={a} />
           {a.status === 'PENDING' && (
@@ -140,7 +143,7 @@ export function ShopApprovalDetailPage() {
           )}
           {a.status !== 'PENDING' && a.status !== 'REPLACED' && <DecisionResult a={a} />}
         </div>
-        <aside className="space-y-6">
+        <aside className="space-y-4 lg:sticky lg:top-20">
           <OwnerCard a={a} />
           <History items={a.history} currentId={a.id} />
         </aside>
@@ -200,16 +203,16 @@ function ChangeTable({ a }: { a: ShopApprovalDetail }) {
         {rows.map((r) => (
           <div
             key={r.label}
-            className="grid gap-2 rounded-xl border p-3 md:grid-cols-[1fr_auto_1fr] md:items-stretch md:gap-3"
+            className="grid gap-2 rounded-xl border border-ink/10 p-3 md:grid-cols-[1fr_auto_1fr] md:items-stretch md:gap-3"
           >
-            <div className="text-sm font-semibold text-ink md:col-span-3">{r.label}</div>
-            <div className="rounded-lg bg-muted/70 px-3 py-2 text-sm text-muted-foreground">
+            <div className="text-sm font-semibold text-charcoal md:col-span-3">{r.label}</div>
+            <div className="rounded-lg bg-page px-3 py-2 text-sm text-ink/60">
               <div className="text-[11px] font-medium tracking-wide uppercase">Hiện tại</div>
               <div className="break-words">{r.old}</div>
             </div>
-            <ArrowRight className="hidden size-4 self-center text-champagne-600 md:block" />
-            <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900 ring-1 ring-emerald-200 ring-inset">
-              <div className="text-[11px] font-medium tracking-wide text-emerald-700 uppercase">
+            <IconArrowRight className="hidden size-4 self-center text-navy md:block" />
+            <div className="rounded-lg bg-champagne-50 px-3 py-2 text-sm text-charcoal ring-1 ring-navy/20 ring-inset">
+              <div className="text-[11px] font-medium tracking-wide text-navy uppercase">
                 Muốn đổi thành
               </div>
               <div className="font-medium break-words">{r.next}</div>
@@ -225,26 +228,30 @@ function ChangeTable({ a }: { a: ShopApprovalDetail }) {
 function FullProfile({ a }: { a: ShopApprovalDetail }) {
   const d = a.data;
   const p = d.pickupAddress;
-  const rows: Array<{ icon: typeof Store; label: string; value: React.ReactNode }> = [
-    { icon: Store, label: 'Tên shop', value: <span className="font-semibold">{d.name}</span> },
+  const rows: Array<{ icon: typeof IconBuildingStore; label: string; value: React.ReactNode }> = [
     {
-      icon: FileText,
+      icon: IconBuildingStore,
+      label: 'Tên shop',
+      value: <span className="font-semibold">{d.name}</span>,
+    },
+    {
+      icon: IconFileText,
       label: 'Mô tả',
       value: <span className="whitespace-pre-line">{d.description || '—'}</span>,
     },
-    { icon: Phone, label: 'SĐT shop', value: d.phone || '—' },
+    { icon: IconPhone, label: 'SĐT shop', value: d.phone || '—' },
     {
-      icon: MapPin,
+      icon: IconMapPin,
       label: 'Lấy hàng',
       value: `${p.street}, ${p.wardName}, ${p.districtName}, ${p.provinceName}`,
     },
     {
-      icon: Landmark,
+      icon: IconBuildingBank,
       label: 'Ngân hàng',
       value: (
         <>
           {d.bankAccount.bankName} ·{' '}
-          <span className="font-mono tracking-wide">{d.bankAccount.accountNumber}</span> ·{' '}
+          <span className="font-medium tabular-nums">{d.bankAccount.accountNumber}</span> ·{' '}
           <span className="font-medium">{d.bankAccount.accountName}</span>
         </>
       ),
@@ -261,27 +268,30 @@ function FullProfile({ a }: { a: ShopApprovalDetail }) {
         <div className="flex flex-col items-center gap-2">
           {d.logoUrl ? (
             <a href={d.logoUrl} target="_blank" rel="noreferrer" title="Mở ảnh gốc">
-              <ShopLogo url={d.logoUrl} className="size-32 border border-champagne/40 shadow-sm" />
+              <ShopLogo url={d.logoUrl} className="size-32 rounded-xl ring-1 ring-ink/[0.08]" />
             </a>
           ) : (
-            <ShopLogo url={null} className="size-32 border border-dashed" />
+            <ShopLogo
+              url={null}
+              className="size-32 rounded-xl border border-dashed border-ink/20"
+            />
           )}
           <span className="text-xs text-muted-foreground">
             {d.logoUrl ? 'Bấm để xem ảnh gốc' : 'Chưa có logo'}
           </span>
         </div>
-        <dl className="min-w-0 flex-1 divide-y">
+        <dl className="min-w-0 flex-1 divide-y divide-ink/[0.06]">
           {rows.map(({ icon: Icon, label, value }) => (
             <div key={label} className="grid gap-1 py-2.5 first:pt-0 sm:grid-cols-[130px_1fr]">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon className="size-4 text-champagne-600" /> {label}
+              <dt className="flex items-center gap-2 text-sm text-ink/55">
+                <Icon className="size-4 text-navy" /> {label}
               </dt>
-              <dd className="text-sm break-words text-ink">{value}</dd>
+              <dd className="text-sm break-words text-charcoal">{value}</dd>
             </div>
           ))}
         </dl>
       </div>
-      <p className="mt-4 rounded-lg bg-ivory px-3 py-2 text-xs text-muted-foreground">
+      <p className="mt-4 rounded-lg bg-page px-3 py-2.5 text-xs text-ink/55">
         Số tài khoản hiện đầy đủ ở đây để admin đối chiếu tên chủ tài khoản với tên shop / chủ shop.
       </p>
     </SectionCard>
@@ -290,19 +300,16 @@ function FullProfile({ a }: { a: ShopApprovalDetail }) {
 
 function OwnerCard({ a }: { a: ShopApprovalDetail }) {
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-sm shadow-navy/[0.03]">
-      <h2 className="flex items-center gap-2 font-semibold text-navy">
-        <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
-        Chủ shop
-      </h2>
+    <section className={cn(CARD, 'p-5')}>
+      <CardTitle>Chủ shop</CardTitle>
       <div className="mt-4 space-y-2.5 text-sm">
         <div className="flex items-center gap-2.5">
-          <UserRound className="size-4 text-champagne-600" />
-          <span className="font-medium text-ink">{a.ownerName}</span>
+          <IconUser className="size-4 text-navy" />
+          <span className="font-medium text-charcoal">{a.ownerName}</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <Mail className="size-4 text-champagne-600" />
-          <span className="truncate text-muted-foreground">{a.ownerEmail}</span>
+          <IconMail className="size-4 text-navy" />
+          <span className="truncate text-ink/60">{a.ownerEmail}</span>
         </div>
         <div className="text-xs text-muted-foreground">Nộp lúc {formatDateTime(a.submittedAt)}</div>
       </div>
@@ -320,12 +327,9 @@ const DOT: Record<ShopApprovalVersion['status'], string> = {
 /** Lịch sử phiên bản của shop, mới nhất trước */
 function History({ items, currentId }: { items: ShopApprovalVersion[]; currentId: string }) {
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-sm shadow-navy/[0.03]">
-      <h2 className="flex items-center gap-2 font-semibold text-navy">
-        <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
-        Lịch sử phiên bản
-      </h2>
-      <ol className="relative mt-4 space-y-1 before:absolute before:top-2 before:bottom-2 before:left-[5px] before:w-px before:bg-border">
+    <section className={cn(CARD, 'p-5')}>
+      <CardTitle>Lịch sử phiên bản</CardTitle>
+      <ol className="relative mt-4 space-y-1 before:absolute before:top-2 before:bottom-2 before:left-[5px] before:w-px before:bg-ink/10">
         {items.map((v) => {
           const current = v.id === currentId;
           return (
@@ -341,12 +345,12 @@ function History({ items, currentId }: { items: ShopApprovalVersion[]; currentId
                 aria-current={current ? 'page' : undefined}
                 className={cn(
                   'block rounded-lg px-2.5 py-2 transition',
-                  current ? 'bg-champagne-50' : 'hover:bg-ivory',
+                  current ? 'bg-champagne-50' : 'hover:bg-page',
                 )}
               >
-                <div className="text-sm font-medium text-ink">
+                <div className="text-sm font-medium text-charcoal">
                   v{v.version} · {v.type === 'REGISTER' ? 'Mở shop' : 'Đổi thông tin'}
-                  {current && <span className="ml-1.5 text-xs text-champagne-600">(đang xem)</span>}
+                  {current && <span className="ml-1.5 text-xs text-navy">(đang xem)</span>}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {APPROVAL_STATUS[v.status].label} · {formatDateTime(v.decidedAt ?? v.submittedAt)}
@@ -367,25 +371,23 @@ function History({ items, currentId }: { items: ShopApprovalVersion[]; currentId
 function DecisionResult({ a }: { a: ShopApprovalDetail }) {
   const approved = a.status === 'APPROVED';
   return (
-    <div
-      className={cn(
-        'flex gap-3 rounded-2xl border p-4 md:p-5',
-        approved ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50',
-      )}
-    >
-      {approved ? (
-        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" />
-      ) : (
-        <Ban className="mt-0.5 size-5 shrink-0 text-red-600" />
-      )}
-      <div className="text-sm">
-        <div className={cn('font-semibold', approved ? 'text-emerald-900' : 'text-red-900')}>
+    <div className={cn(CARD, 'flex items-center gap-3.5 px-5 py-4')}>
+      <span
+        className={cn(
+          'flex size-12 shrink-0 items-center justify-center rounded-full',
+          approved ? 'bg-ship/10 text-ship' : 'bg-red-50 text-red-500',
+        )}
+      >
+        {approved ? <IconCircleCheck className="size-6" /> : <IconBan className="size-6" />}
+      </span>
+      <div className="min-w-0 text-sm">
+        <div className="text-base font-bold tracking-tight text-charcoal">
           {approved ? 'Đã duyệt' : 'Đã từ chối'}
           {a.decidedByName && <> bởi {a.decidedByName}</>}
         </div>
-        <div className="text-xs text-muted-foreground">{formatDateTime(a.decidedAt)}</div>
+        <div className="text-xs text-ink/55">{formatDateTime(a.decidedAt)}</div>
         {a.reason && (
-          <p className={cn('mt-2', approved ? 'text-emerald-900' : 'text-red-900')}>
+          <p className="mt-1 text-ink/70">
             <span className="font-medium">{approved ? 'Ghi chú' : 'Lý do'}:</span> {a.reason}
           </p>
         )}
@@ -397,8 +399,8 @@ function DecisionResult({ a }: { a: ShopApprovalDetail }) {
 /** Admin đang xem hồ sơ shop của chính mình: không có nút quyết định */
 function SelfBanner() {
   return (
-    <div className="mb-6 flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-      <ShieldAlert className="mt-0.5 size-5 shrink-0 text-red-600" />
+    <div className="mb-4 flex gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-900 ring-1 ring-red-200">
+      <IconShieldExclamation className="mt-0.5 size-5 shrink-0 text-red-600" />
       <div>
         <div className="font-semibold">Bạn là chủ shop này</div>
         Bạn không thể tự duyệt hoặc từ chối hồ sơ shop của chính mình. Hãy nhờ một admin kiểm duyệt
@@ -479,31 +481,34 @@ function DecisionBar({
 
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t bg-white/95 p-3 shadow-[0_-4px_16px_rgba(23,37,84,0.08)] backdrop-blur md:static md:justify-end md:rounded-2xl md:border md:p-4 md:shadow-sm">
-        <span className="mr-auto hidden self-center text-sm text-muted-foreground md:block">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-black/[0.06] bg-card/95 p-3 shadow-[0_-8px_24px_-12px_rgba(15,26,61,0.25)] backdrop-blur md:static md:justify-end md:rounded-2xl md:border-0 md:bg-card md:p-4 md:shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
+        <span className="mr-auto hidden self-center text-sm text-ink/55 md:block">
           Duyệt hay từ chối đều được ghi nhật ký (ai, lúc nào, lý do).
         </span>
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 rounded-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 md:flex-none md:px-8"
+          className="h-11 flex-1 rounded-lg border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 md:flex-none md:px-8"
           onClick={() => open('REJECT')}
         >
-          <X /> Từ chối
+          <IconX /> Từ chối
         </Button>
-        <Button
-          size="lg"
-          className="flex-1 rounded-full md:flex-none md:px-10"
+        <button
+          type="button"
+          className={cn(
+            PRIMARY_BUTTON,
+            'inline-flex h-11 flex-1 items-center justify-center gap-2 text-sm md:flex-none md:px-10',
+          )}
           onClick={() => open('APPROVE')}
         >
-          <Check /> Duyệt
-        </Button>
+          <IconCheck className="size-4 [stroke-width:2.5]" /> Duyệt
+        </button>
       </div>
 
       <Dialog open={!!mode} onOpenChange={(o) => !o && !busy && setMode(null)}>
         <DialogContent className="rounded-2xl sm:max-w-lg">
           <DialogHeader className="text-left">
-            <DialogTitle className={mode === 'REJECT' ? 'text-red-700' : 'text-navy'}>
+            <DialogTitle className={mode === 'REJECT' ? 'text-red-600' : 'text-charcoal'}>
               {mode === 'REJECT' ? 'Từ chối hồ sơ' : 'Duyệt hồ sơ'} "{a.shopName}" (v{a.version})
             </DialogTitle>
             <DialogDescription>
@@ -532,7 +537,7 @@ function DecisionBar({
               value={reason}
               aria-invalid={!!error}
               placeholder={mode === 'REJECT' ? 'Ví dụ: Logo không rõ tên shop…' : ''}
-              className="rounded-lg bg-white focus-visible:border-champagne"
+              className="rounded-lg bg-card focus-visible:border-navy/50"
               onChange={(e) => {
                 setReason(e.target.value);
                 setError(null);
@@ -561,7 +566,7 @@ function DecisionBar({
                         setReason((cur) => (cur.trim() ? `${cur.trim()}. ${r}` : r));
                         setError(null);
                       }}
-                      className="rounded-full border border-champagne/50 bg-champagne-50/60 px-2.5 py-1 text-xs text-navy transition hover:border-champagne hover:bg-champagne-50"
+                      className="rounded-lg border border-ink/15 bg-card px-2.5 py-1 text-xs text-ink/70 transition hover:border-navy/40 hover:text-navy"
                     >
                       {r}
                     </button>
@@ -580,8 +585,8 @@ function DecisionBar({
               onClick={() => void submit()}
               className={cn('min-w-40', mode === 'REJECT' && 'bg-red-600 hover:bg-red-700')}
             >
-              {busy && <Loader2 className="animate-spin" />}
-              {mode === 'REJECT' ? 'Xác nhận từ chối' : 'Xác nhận duyệt'}
+              {busy && <IconLoader2 className="animate-spin" />}
+              {mode === 'REJECT' ? 'IconXác nhận từ chối' : 'IconXác nhận duyệt'}
             </Button>
           </DialogFooter>
         </DialogContent>

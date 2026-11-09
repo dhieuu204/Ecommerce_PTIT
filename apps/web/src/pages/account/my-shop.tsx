@@ -1,18 +1,18 @@
 import {
-  ArrowRight,
-  BadgeCheck,
-  Check,
-  ChevronDown,
-  CircleAlert,
-  FileText,
-  Hourglass,
-  Landmark,
-  Info,
-  ShieldAlert,
-  Percent,
-  Store,
-  Truck,
-} from 'lucide-react';
+  IconAlertCircle,
+  IconArrowRight,
+  IconBuildingBank,
+  IconBuildingStore,
+  IconCheck,
+  IconChevronDown,
+  IconFileText,
+  IconHourglass,
+  IconInfoCircle,
+  IconPercentage,
+  IconRosetteDiscountCheck,
+  IconShieldExclamation,
+  IconTruck,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Notice } from '../auth/auth-parts';
@@ -77,7 +77,7 @@ export function MyShopPage() {
     default:
       return (
         <AccountCard title="Shop của tôi">
-          <Notice tone="warning" icon={<CircleAlert />}>
+          <Notice tone="warning" icon={<IconAlertCircle />}>
             Shop đang ở trạng thái chưa hỗ trợ trên web. Bạn liên hệ hỗ trợ để biết thêm.
           </Notice>
         </AccountCard>
@@ -102,13 +102,13 @@ function Progress({ current, failed }: { current: 0 | 1 | 2 | 3; failed?: boolea
             <span
               className={cn(
                 'flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1',
-                done && 'bg-champagne text-navy ring-champagne',
+                done && 'bg-navy text-white ring-champagne',
                 active && !failed && 'bg-navy text-white ring-navy',
                 active && failed && 'bg-red-600 text-white ring-red-600',
                 !done && !active && 'bg-white text-muted-foreground ring-border',
               )}
             >
-              {done ? <Check className="size-4" /> : i + 1}
+              {done ? <IconCheck className="size-4" /> : i + 1}
             </span>
             <span
               className={cn(
@@ -163,7 +163,7 @@ function StatusPanel({
       </span>
       <div className="min-w-0 flex-1">
         <StatusBadge tone={tone}>{badge}</StatusBadge>
-        <h2 className="mt-2 text-lg font-semibold break-words text-navy md:text-xl">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold break-words text-charcoal md:text-xl">{title}</h2>
         <div className="mt-1.5 space-y-1 text-sm text-muted-foreground">{children}</div>
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">{actions}</div>
       </div>
@@ -175,10 +175,10 @@ const primaryBtn = 'h-10 rounded-lg bg-navy px-5 text-white hover:bg-navy-800';
 
 function InviteCard() {
   const perks = [
-    { icon: Percent, title: 'Phí sàn 5%', text: 'Chỉ tính trên đơn giao thành công.' },
-    { icon: Truck, title: 'Giao qua GHN', text: 'Shipper tới lấy hàng tại địa chỉ của bạn.' },
+    { icon: IconPercentage, title: 'Phí sàn 5%', text: 'Chỉ tính trên đơn giao thành công.' },
+    { icon: IconTruck, title: 'Giao qua GHN', text: 'Shipper tới lấy hàng tại địa chỉ của bạn.' },
     {
-      icon: Landmark,
+      icon: IconBuildingBank,
       title: 'Rút tiền về ngân hàng',
       text: 'Tiền bán hàng vào tài khoản bạn khai.',
     },
@@ -191,20 +191,14 @@ function InviteCard() {
   ];
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl bg-navy px-6 py-8 text-white shadow-sm md:px-10 md:py-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-champagne/20 blur-3xl"
-        />
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-header-from to-header-to px-6 py-8 text-white md:px-10 md:py-10">
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="max-w-xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-champagne/40 px-3 py-1 text-xs text-champagne">
-              <Store className="size-3.5" /> Bạn chưa có shop
+            <span className="inline-flex items-center gap-2 rounded-lg bg-white/20 px-3 py-1 text-xs text-white">
+              <IconBuildingStore className="size-3.5" /> Bạn chưa có shop
             </span>
-            <h1 className="mt-4 text-2xl font-semibold md:text-3xl">
-              Mở shop trên {BRAND} <span className="text-champagne">trong vài phút</span>
-            </h1>
-            <p className="mt-3 text-sm text-white/75 md:text-base">
+            <h1 className="mt-4 text-2xl font-semibold md:text-3xl">Mở shop trên {BRAND}</h1>
+            <p className="mt-3 text-sm text-white/90 md:text-base">
               Nộp một hồ sơ duy nhất. Admin duyệt xong là bạn vào Kênh người bán, đăng sản phẩm và
               nhận đơn.
             </p>
@@ -212,19 +206,19 @@ function InviteCard() {
           <Button
             asChild
             size="lg"
-            className="h-12 shrink-0 rounded-full bg-champagne px-7 font-semibold text-navy hover:bg-champagne-600"
+            className="h-12 shrink-0 rounded-lg bg-card px-7 font-bold text-navy hover:bg-champagne-50"
           >
             <Link to="/tai-khoan/shop/dang-ky">
-              Đăng ký mở shop <ArrowRight />
+              Đăng ký mở shop <IconArrowRight />
             </Link>
           </Button>
         </div>
         <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
           {perks.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <Icon className="size-5 text-champagne" />
+            <div key={title} className="rounded-xl bg-white/15 p-4">
+              <Icon className="size-5 text-white" />
               <div className="mt-2 font-medium">{title}</div>
-              <p className="mt-0.5 text-sm text-white/65">{text}</p>
+              <p className="mt-0.5 text-sm text-white/85">{text}</p>
             </div>
           ))}
         </div>
@@ -237,7 +231,7 @@ function InviteCard() {
           {prepare.map((t) => (
             <li key={t} className="flex items-start gap-3 text-sm text-ink">
               <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
-                <Check className="size-3.5" />
+                <IconCheck className="size-3.5" />
               </span>
               {t}
             </li>
@@ -258,7 +252,7 @@ function PendingCard({ data }: { data: MyShop }) {
           <Progress current={1} />
           <StatusPanel
             tone="pending"
-            icon={<Hourglass />}
+            icon={<IconHourglass />}
             badge="Chờ duyệt"
             title="Hồ sơ đang chờ duyệt"
             actions={
@@ -269,8 +263,8 @@ function PendingCard({ data }: { data: MyShop }) {
                   onClick={() => setOpen((v) => !v)}
                   aria-expanded={open}
                 >
-                  <FileText /> {open ? 'Ẩn hồ sơ đã nộp' : 'Xem hồ sơ đã nộp'}
-                  <ChevronDown className={cn('transition', open && 'rotate-180')} />
+                  <IconFileText /> {open ? 'Ẩn hồ sơ đã nộp' : 'Xem hồ sơ đã nộp'}
+                  <IconChevronDown className={cn('transition', open && 'rotate-180')} />
                 </Button>
                 <Button asChild className={primaryBtn}>
                   <Link to="/tai-khoan/shop/dang-ky">Sửa và nộp lại</Link>
@@ -305,7 +299,7 @@ function RejectedCard({ data }: { data: MyShop }) {
           <Progress current={1} failed />
           <StatusPanel
             tone="danger"
-            icon={<CircleAlert />}
+            icon={<IconAlertCircle />}
             badge="Bị từ chối"
             title="Hồ sơ chưa được duyệt"
             actions={
@@ -348,14 +342,14 @@ function ActiveCard({ data }: { data: MyShop }) {
       <AccountCard title="Shop của tôi" description="Shop của bạn đã được duyệt.">
         <div className="space-y-6">
           {change?.status === 'PENDING' && (
-            <Notice tone="warning" icon={<Hourglass />}>
+            <Notice tone="warning" icon={<IconHourglass />}>
               Yêu cầu đổi {describeChange(change.change)} đang chờ duyệt (gửi{' '}
               {formatDateTime(change.submittedAt)}). Shop vẫn bán bằng thông tin cũ cho tới khi được
               duyệt.
             </Notice>
           )}
           {change?.status === 'REJECTED' && (
-            <Notice tone="danger" icon={<CircleAlert />}>
+            <Notice tone="danger" icon={<IconAlertCircle />}>
               Yêu cầu đổi {describeChange(change.change)} không được duyệt
               {change.rejectReason ? `: ${change.rejectReason}` : '.'}
             </Notice>
@@ -364,7 +358,7 @@ function ActiveCard({ data }: { data: MyShop }) {
             <ShopLogo url={shop?.logoUrl ?? null} className="size-20" />
             <div className="min-w-0 flex-1">
               <StatusBadge tone="success">Đang hoạt động</StatusBadge>
-              <h2 className="mt-2 text-lg font-semibold break-words text-navy md:text-xl">
+              <h2 className="mt-2 text-lg font-semibold break-words text-charcoal md:text-xl">
                 {shop?.name ?? 'Shop của bạn'} đang hoạt động
               </h2>
               <p className="mt-1.5 text-sm text-muted-foreground">
@@ -374,7 +368,7 @@ function ActiveCard({ data }: { data: MyShop }) {
               <div className="mt-5 flex flex-col gap-2 sm:flex-row">
                 <Button asChild className={primaryBtn}>
                   <Link to="/kenh-nguoi-ban">
-                    Vào Kênh người bán <ArrowRight />
+                    Vào Kênh người bán <IconArrowRight />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="h-10 rounded-lg">
@@ -391,10 +385,11 @@ function ActiveCard({ data }: { data: MyShop }) {
           description={
             <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="inline-flex items-center gap-1">
-                <BadgeCheck className="size-3.5 text-emerald-600" /> Đã duyệt
+                <IconRosetteDiscountCheck className="size-3.5 text-emerald-600" /> Đã duyệt
               </span>
               <span className="inline-flex items-center gap-1">
-                <Info className="size-3.5" /> Đổi tên shop, tài khoản ngân hàng cần duyệt lại
+                <IconInfoCircle className="size-3.5" /> Đổi tên shop, tài khoản ngân hàng cần duyệt
+                lại
               </span>
             </span>
           }
@@ -416,11 +411,11 @@ function SuspendedCard({ data }: { data: MyShop }) {
           <ShopLogo url={shop?.logoUrl ?? null} className="size-20" />
           <div className="min-w-0 flex-1">
             <StatusBadge tone="pending">Bị đình chỉ</StatusBadge>
-            <h2 className="mt-2 text-lg font-semibold break-words text-navy md:text-xl">
+            <h2 className="mt-2 text-lg font-semibold break-words text-charcoal md:text-xl">
               {shop?.name ?? 'Shop của bạn'} đang bị đình chỉ
             </h2>
             <div className="mt-3 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-              <ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-700" />
+              <IconShieldExclamation className="mt-0.5 size-4 shrink-0 text-amber-700" />
               <div className="min-w-0 space-y-1">
                 <p className="font-medium">Hàng của bạn tạm ẩn khỏi sàn.</p>
                 {shop?.suspendReason && (
@@ -437,7 +432,7 @@ function SuspendedCard({ data }: { data: MyShop }) {
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
               <Button asChild className={primaryBtn}>
                 <Link to="/kenh-nguoi-ban">
-                  Vào Kênh người bán <ArrowRight />
+                  Vào Kênh người bán <IconArrowRight />
                 </Link>
               </Button>
             </div>

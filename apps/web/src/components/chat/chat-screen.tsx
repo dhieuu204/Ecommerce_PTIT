@@ -1,4 +1,4 @@
-import { MessagesSquare } from 'lucide-react';
+import { IconMessages } from '@tabler/icons-react';
 import { useParams } from 'react-router';
 import { EmptyState } from '@/components/console/empty-state';
 import type { ChatRole } from '@/lib/chat-types';
@@ -24,17 +24,17 @@ export function ChatScreen({
   return (
     <div
       className={cn(
-        'grid min-h-0 overflow-hidden rounded-2xl border border-ivory-200 bg-card lg:grid-cols-[20rem_minmax(0,1fr)]',
+        'grid min-h-0 overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] lg:grid-cols-[20rem_minmax(0,1fr)]',
         className,
       )}
     >
       <aside
         className={cn(
-          'min-h-0 flex-col border-r border-ivory-200 lg:flex',
+          'min-h-0 flex-col border-r border-ink/[0.06] lg:flex',
           conversationId ? 'hidden' : 'flex',
         )}
       >
-        <div className="border-b px-4 py-3 font-semibold text-navy">Tin nhắn</div>
+        <div className="border-b px-4 py-3 font-bold tracking-tight text-charcoal">Tin nhắn</div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ConversationList role={role} basePath={basePath} activeId={conversationId} />
         </div>
@@ -44,11 +44,7 @@ export function ChatScreen({
           <ChatWindow key={conversationId} conversationId={conversationId} basePath={basePath} />
         ) : (
           <div className="flex h-full items-center justify-center bg-ivory/70">
-            <EmptyState
-              icon={MessagesSquare}
-              title="Chọn một cuộc trò chuyện"
-              text="Tin nhắn mới hiện ngay, không cần tải lại trang."
-            />
+            <EmptyState icon={IconMessages} title="Chọn một cuộc trò chuyện" />
           </div>
         )}
       </section>

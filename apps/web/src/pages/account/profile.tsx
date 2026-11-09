@@ -1,5 +1,5 @@
+import { IconCalendar, IconMail, IconRosetteDiscountCheck } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, CalendarDays, Mail } from 'lucide-react';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -94,7 +94,7 @@ export function ProfilePage() {
   const p = profile.data;
 
   return (
-    <AccountCard title="Hồ sơ của tôi" description="Thông tin dùng khi giao hàng và liên hệ.">
+    <AccountCard title="Hồ sơ của tôi">
       <div className="grid gap-8 lg:grid-cols-[1fr_240px]">
         <form onSubmit={onSubmit} noValidate className="order-2 space-y-5 lg:order-1">
           <Field id="fullName" label="Họ tên" error={errors.fullName?.message}>
@@ -109,7 +109,7 @@ export function ProfilePage() {
               })}
             />
           </Field>
-          <Field id="email" label="Email" hint="Chưa đổi được email ở giai đoạn này.">
+          <Field id="email" label="Email" hint="Email dùng để đăng nhập, không đổi được.">
             <div className="relative">
               <input
                 id="email"
@@ -120,7 +120,7 @@ export function ProfilePage() {
               />
               {p.status === 'ACTIVE' && (
                 <span className="absolute top-1/2 right-3 inline-flex -translate-y-1/2 items-center gap-1 text-xs font-medium text-emerald-700">
-                  <BadgeCheck className="size-3.5" /> Đã xác minh
+                  <IconRosetteDiscountCheck className="size-3.5" /> Đã xác minh
                 </span>
               )}
             </div>
@@ -171,9 +171,9 @@ export function ProfilePage() {
                     <label
                       key={g.value}
                       className={cn(
-                        'flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm transition',
+                        'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm transition',
                         field.value === g.value
-                          ? 'border-champagne bg-champagne-50 font-medium text-navy'
+                          ? 'border-navy bg-champagne-50 font-medium text-navy'
                           : 'border-input bg-white hover:border-champagne/60',
                       )}
                     >
@@ -202,30 +202,28 @@ export function ProfilePage() {
           </div>
         </form>
 
-        <aside className="order-1 flex items-center gap-4 rounded-2xl border border-champagne/30 bg-gradient-to-b from-champagne-50 to-white p-4 lg:order-2 lg:flex-col lg:gap-3 lg:self-start lg:px-5 lg:py-6 lg:text-center">
+        <aside className="order-1 flex items-center gap-4 rounded-xl bg-page p-4 lg:order-2 lg:flex-col lg:gap-3 lg:self-start lg:px-5 lg:py-6 lg:text-center">
           <UserAvatar name={p.fullName} className="size-16 text-xl ring-4 lg:size-24 lg:text-3xl" />
           <div className="min-w-0 space-y-2 lg:space-y-3">
             <div>
-              <div className="font-semibold break-words text-navy">{p.fullName}</div>
+              <div className="font-semibold break-words text-charcoal">{p.fullName}</div>
               <div className="mt-0.5 text-xs break-all text-muted-foreground">{p.email}</div>
             </div>
             <div className="flex flex-wrap gap-1.5 lg:justify-center">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-ink ring-1 ring-border">
-                <Mail className="size-3" />{' '}
+              <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs text-ink ring-1 ring-border">
+                <IconMail className="size-3" />{' '}
                 {p.hasPassword ? 'Email + mật khẩu' : 'Chưa đặt mật khẩu'}
               </span>
               {p.hasGoogle && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-ink ring-1 ring-border">
-                  <BadgeCheck className="size-3 text-emerald-600" /> Đã liên kết Google
+                <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs text-ink ring-1 ring-border">
+                  <IconRosetteDiscountCheck className="size-3 text-emerald-600" /> Đã liên kết
+                  Google
                 </span>
               )}
             </div>
             <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <CalendarDays className="size-3.5" /> Thành viên từ {formatDate(p.createdAt)}
+              <IconCalendar className="size-3.5" /> Thành viên từ {formatDate(p.createdAt)}
             </div>
-            <p className="hidden text-[11px] text-muted-foreground/80 lg:block">
-              Ảnh đại diện hiện chữ cái đầu họ tên.
-            </p>
           </div>
         </aside>
       </div>
@@ -235,7 +233,7 @@ export function ProfilePage() {
 
 function ProfileSkeleton() {
   return (
-    <div className="rounded-2xl border bg-card p-6 shadow-sm">
+    <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-6">
       <Skeleton className="h-6 w-40" />
       <Skeleton className="mt-2 h-4 w-64" />
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_240px]">

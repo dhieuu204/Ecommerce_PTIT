@@ -83,7 +83,7 @@ export function RegisterPage() {
           Đã có tài khoản?{' '}
           <Link
             to={`/dang-nhap${returnTo !== '/' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
-            className="font-semibold text-champagne-600 hover:underline"
+            className="font-semibold text-navy hover:underline"
           >
             Đăng nhập
           </Link>

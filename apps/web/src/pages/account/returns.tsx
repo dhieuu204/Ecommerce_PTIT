@@ -1,5 +1,5 @@
+import { IconArrowBackUp, IconChevronRight } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, Undo2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { Pager } from '@/components/console/pager';
@@ -49,8 +49,8 @@ export function ReturnsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Trả hàng / Hoàn tiền</h1>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Trả hàng / Hoàn tiền</h1>
         <p className="mt-1 text-sm text-ink/60">
           Gửi yêu cầu từ trang chi tiết đơn đã giao, trong hạn trước khi đơn tự hoàn tất.
         </p>
@@ -63,10 +63,10 @@ export function ReturnsPage() {
               aria-checked={status === f.value}
               onClick={() => set({ status: f.value === 'ALL' ? null : f.value })}
               className={cn(
-                'shrink-0 rounded-full border px-3 py-1 text-xs transition',
+                'shrink-0 rounded-lg border px-3 py-1 text-xs transition',
                 status === f.value
-                  ? 'border-navy bg-navy text-white'
-                  : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                  ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                  : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
               )}
             >
               {f.label}
@@ -79,14 +79,14 @@ export function ReturnsPage() {
         <Skeleton className="h-48 rounded-2xl" />
       ) : list.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={list.error.message}
           onRetry={() => list.refetch()}
         />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={Undo2}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={IconArrowBackUp}
           title="Chưa có yêu cầu trả hàng"
           text="Khi bạn gửi yêu cầu trả hàng, tình hình xử lý hiện ở đây."
         />
@@ -96,10 +96,10 @@ export function ReturnsPage() {
             <Link
               key={r.id}
               to={`/tai-khoan/tra-hang/${r.id}`}
-              className="block rounded-2xl border border-ivory-200 bg-card px-4 py-3 transition hover:border-champagne md:px-5"
+              className="block rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-3 transition hover:border-champagne md:px-5"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-2 font-semibold text-navy">
+                <div className="flex min-w-0 items-center gap-2 font-semibold text-charcoal">
                   <ShopLogo url={r.shop.logoUrl} className="size-6 rounded-md border" />
                   <span className="truncate">{r.shop.name}</span>
                 </div>
@@ -118,11 +118,11 @@ export function ReturnsPage() {
                   <div className="text-xs text-ink/50">
                     {r.decidedRefund !== null ? 'Hoàn' : 'Hoàn tối đa'}
                   </div>
-                  <div className="font-semibold text-navy">
+                  <div className="font-bold tracking-tight text-charcoal">
                     {formatMoney(r.decidedRefund ?? r.refundAmount)}
                   </div>
                 </div>
-                <ChevronRight className="size-4 shrink-0 text-ink/35" />
+                <IconChevronRight className="size-4 shrink-0 text-ink/35" />
               </div>
             </Link>
           ))}

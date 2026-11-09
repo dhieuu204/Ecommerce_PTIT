@@ -1,5 +1,10 @@
+import {
+  IconAlertTriangle,
+  IconArrowBackUp,
+  IconChevronRight,
+  IconSearch,
+} from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ChevronRight, Search, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -66,9 +71,9 @@ export function AdminReturnsPage() {
       <PageHeader
         crumbs={[{ label: 'Hỗ trợ' }, { label: 'Trả hàng' }]}
         title="Yêu cầu trả hàng"
-        description="Tra cứu yêu cầu của mọi shop. Tranh chấp phân xử ở trang Tranh chấp; vận đơn trả bấm các mốc ở GHN mô phỏng."
+        description="Tra cứu yêu cầu của mọi shop. Tranh chấp phân xử ở trang Tranh chấp."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-3 border-b px-4 py-3 md:flex-row md:items-center md:px-5">
           <form
             className="relative md:w-72"
@@ -77,7 +82,7 @@ export function AdminReturnsPage() {
               set({ q: text.trim() || null });
             }}
           >
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40" />
+            <IconSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40" />
             <input
               className={cn(inputClass, 'pl-9')}
               placeholder="Mã yêu cầu hoặc mã đơn con"
@@ -94,10 +99,10 @@ export function AdminReturnsPage() {
                 aria-checked={status === f}
                 onClick={() => set({ status: f === 'ALL' ? null : f })}
                 className={cn(
-                  'shrink-0 rounded-full border px-3 py-1 text-xs transition',
+                  'shrink-0 rounded-lg border px-3 py-1 text-xs transition',
                   status === f
-                    ? 'border-navy bg-navy text-white'
-                    : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
                 )}
               >
                 {f === 'ALL' ? 'Tất cả' : RETURN_STATUS[f].label}
@@ -113,7 +118,7 @@ export function AdminReturnsPage() {
         ) : list.isError ? (
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
-          <EmptyState icon={Undo2} title="Không có yêu cầu trả hàng nào" />
+          <EmptyState icon={IconArrowBackUp} title="Không có yêu cầu trả hàng nào" />
         ) : (
           <>
             <ul className="divide-y">
@@ -125,7 +130,7 @@ export function AdminReturnsPage() {
                   >
                     <div className="min-w-0 flex-1 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold text-navy">{r.code}</span>
+                        <span className="font-semibold text-charcoal">{r.code}</span>
                         <ReturnStatusBadge status={r.status} />
                         {r.shipment?.status === 'LOST' && r.status === 'SHIPPING_BACK' && (
                           <span className="text-xs font-semibold text-red-600">
@@ -146,7 +151,7 @@ export function AdminReturnsPage() {
                     <div className="text-right text-sm font-semibold text-navy">
                       {formatMoney(r.decidedRefund ?? r.refundAmount)}
                     </div>
-                    <ChevronRight className="size-4 text-ink/35" />
+                    <IconChevronRight className="size-4 text-ink/35" />
                   </Link>
                 </li>
               ))}
@@ -211,7 +216,7 @@ export function AdminReturnDetailPage() {
   if (detail.isError) {
     return (
       <LoadError
-        className="mx-auto max-w-5xl rounded-2xl border bg-card"
+        className="mx-auto max-w-5xl rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
         message={detail.error.message}
         onRetry={() => detail.refetch()}
       />
@@ -236,7 +241,7 @@ export function AdminReturnDetailPage() {
       {r.actions.canConfirmLost && (
         <ActionBar
           tone="danger"
-          icon={AlertTriangle}
+          icon={IconAlertTriangle}
           title="GHN báo kiện trả thất lạc/hư hỏng"
           text="Xác nhận sau khi đã kiểm tra với GHN: người mua được hoàn đủ, shop không bị trừ tiền (sàn chịu, tự khiếu nại GHN)."
           actions={<Button onClick={() => setLost(true)}>Xác nhận thất lạc</Button>}
@@ -245,7 +250,7 @@ export function AdminReturnDetailPage() {
       {r.actions.canResolveFailedShipment && (
         <ActionBar
           tone="danger"
-          icon={AlertTriangle}
+          icon={IconAlertTriangle}
           title="Vận đơn trả bị GHN từ chối, đã quá hạn giao hàng trả"
           text="Người mua chưa bấm tạo lại vận đơn. Liên hệ người mua rồi chọn: hủy yêu cầu (đơn hoàn tất, shop nhận tiền) hoặc hoàn tiền không cần gửi trả (shop bị trừ như khi tự chọn cách này)."
           actions={
@@ -261,7 +266,7 @@ export function AdminReturnDetailPage() {
       {r.status === 'DISPUTED' && (
         <ActionBar
           tone="warn"
-          icon={AlertTriangle}
+          icon={IconAlertTriangle}
           title="Yêu cầu đang tranh chấp"
           text={
             <>

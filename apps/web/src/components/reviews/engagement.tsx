@@ -1,5 +1,5 @@
+import { IconCheck, IconHeart, IconLoader2, IconPlus } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Heart, Loader2, Plus, Users } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ReactNode } from 'react';
 import { toast } from 'sonner';
@@ -119,9 +119,9 @@ export function ProductEngagementBar({
         title={state.liked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
       >
         {toggle.isPending ? (
-          <Loader2 className="size-4 animate-spin" />
+          <IconLoader2 className="size-4 animate-spin" />
         ) : (
-          <Heart className={cn('size-4', state.liked && 'fill-navy text-navy')} />
+          <IconHeart className={cn('size-4', state.liked && 'fill-navy text-navy')} />
         )}
         {state.liked ? 'Đã thích' : 'Yêu thích'}
         {state.likeCount > 0 && (
@@ -137,7 +137,16 @@ export function ProductEngagementBar({
  * không hiện nút.
  */
 /** `actions`: nút đặt cạnh nút Theo dõi (ví dụ Chat với shop). */
-export function ShopEngagement({ shop, actions }: { shop: PublicShop; actions?: ReactNode }) {
+export function ShopEngagement({
+  shop,
+  actions,
+  children,
+}: {
+  shop: PublicShop;
+  actions?: ReactNode;
+  /** Trang shop tự xếp bố cục: số người theo dõi (cập nhật khi bấm) và cụm nút */
+  children: (parts: { followerCount: number; buttons: ReactNode }) => ReactNode;
+}) {
   const { session, userId, check } = useRequireLogin();
   const qc = useQueryClient();
   const viewer = useViewerState<PublicShop>(
@@ -170,46 +179,29 @@ export function ShopEngagement({ shop, actions }: { shop: PublicShop; actions?: 
   const myShop = useMyShop();
   const isOwner = myShop.data?.shop?.id === shop.id;
 
-  return (
-    <div className="flex flex-col gap-3 md:items-end md:pb-1">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink/70 md:justify-end">
-        <span className="inline-flex items-center gap-1.5">
-          {shop.ratingAvg !== null && shop.ratingCount > 0 ? (
-            <>
-              <Stars value={shop.ratingAvg} />
-              <b className="font-semibold text-navy">{formatRating(shop.ratingAvg)}</b>
-              <span className="text-ink/50">({formatCount(shop.ratingCount)} đánh giá)</span>
-            </>
-          ) : (
-            <span className="text-ink/50">Chưa có đánh giá</span>
-          )}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <Users className="size-4 text-champagne-600" />
-          <b className="font-semibold text-navy">{state.followerCount.toLocaleString('vi-VN')}</b>
-          người theo dõi
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2 md:justify-end">
+  return children({
+    followerCount: state.followerCount,
+    buttons: (
+      <div className="flex flex-wrap gap-2">
         {!isOwner && session.status !== 'loading' && (
           <Button
             variant={state.following ? 'outline' : 'default'}
-            className="h-10 flex-1 rounded-full px-6 md:flex-none"
+            className="h-10 rounded-lg px-5"
             disabled={toggle.isPending}
             onClick={() => check() && toggle.mutate(!state.following)}
           >
             {toggle.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : state.following ? (
-              <Check className="size-4" />
+              <IconCheck className="size-4" />
             ) : (
-              <Plus className="size-4" />
+              <IconPlus className="size-4" />
             )}
             {state.following ? 'Đang theo dõi' : 'Theo dõi'}
           </Button>
         )}
         {actions}
       </div>
-    </div>
-  );
+    ),
+  });
 }

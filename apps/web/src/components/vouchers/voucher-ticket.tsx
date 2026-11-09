@@ -1,4 +1,4 @@
-import { CalendarClock, Store, Ticket, UserRound } from 'lucide-react';
+import { IconBuildingStore, IconCalendarTime, IconTicket, IconUser } from '@tabler/icons-react';
 import { StatusBadge } from '@/components/status-badge';
 import type { Voucher } from '@/lib/catalog-types';
 import { formatDateTime } from '@/lib/format';
@@ -43,27 +43,26 @@ function Stub({
       className={cn(
         'relative flex shrink-0 items-center justify-center gap-3 overflow-hidden text-center',
         compact ? 'w-28 flex-col gap-1 px-3 py-4' : 'px-5 py-4 sm:w-40 sm:flex-col sm:gap-1.5',
-        dim ? 'bg-navy/45' : 'bg-navy',
+        dim ? 'bg-ink/30' : 'bg-gradient-to-br from-header-from to-header-to',
       )}
     >
-      {/* họa tiết chéo mờ cho cuống vé */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07] [background:repeating-linear-gradient(135deg,white_0_2px,transparent_2px_12px)]"
-      />
-      <span className="relative flex size-8 items-center justify-center rounded-full bg-white/10 text-champagne ring-1 ring-champagne/40">
-        {kind === 'shop' ? <Store className="size-4" /> : <Ticket className="size-4" />}
+      <span className="relative flex size-8 items-center justify-center rounded-full bg-white/15 text-white">
+        {kind === 'shop' ? (
+          <IconBuildingStore className="size-4" />
+        ) : (
+          <IconTicket className="size-4" />
+        )}
       </span>
       <div className="relative">
         <div
           className={cn(
-            'leading-none font-bold tracking-tight text-champagne tabular-nums',
+            'leading-none font-bold tracking-tight text-white tabular-nums',
             compact ? 'text-2xl' : 'text-2xl sm:text-[28px]',
           )}
         >
           {discountShort(v)}
         </div>
-        <div className="mt-1 text-[10px] font-medium tracking-[0.14em] text-white/70 uppercase">
+        <div className="mt-1 text-[10px] font-medium text-white/85">
           {kind === 'shop' ? 'Voucher shop' : 'Voucher sàn'}
         </div>
       </div>
@@ -160,11 +159,11 @@ export function VoucherTicket({
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <CalendarClock className="size-3.5 text-champagne-600" />
+              <IconCalendarTime className="size-3.5 text-navy" />
               {formatDateTime(v.startAt)} – {formatDateTime(v.endAt)}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <UserRound className="size-3.5 text-champagne-600" />
+              <IconUser className="size-3.5 text-navy" />
               Mỗi người {v.perUserLimit} lần
             </span>
           </div>

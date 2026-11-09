@@ -18,7 +18,7 @@ export function GoogleButton({ label, returnTo }: { label: string; returnTo?: st
     <Button
       type="button"
       variant="outline"
-      className="h-11 w-full rounded-full bg-white"
+      className="h-11 w-full rounded-lg bg-white"
       onClick={() => startGoogleLogin(returnTo)}
     >
       <GoogleIcon />

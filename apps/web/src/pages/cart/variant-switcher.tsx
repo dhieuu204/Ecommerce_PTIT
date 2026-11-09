@@ -17,10 +17,10 @@ import {
   variantLabel,
 } from '@/lib/variants';
 
-/**
- * Chữ phân loại của dòng giỏ kèm nút "Đổi": mở khung chọn phân loại khác của cùng sản phẩm
- * (tải chi tiết sản phẩm khi mở lần đầu), xác nhận thì PATCH /cart/items/{id} với variantId.
- */
+/** Thông tin tối thiểu của dòng hàng để đổi phân loại (dùng ở giỏ hàng và trang đặt hàng) */
+type SwitchLine = Pick<CartItem, 'productId' | 'variantId' | 'quantity'>;
+
+/** Đổi phân loại ở giỏ hàng: tính chữ hiển thị từ dòng giỏ rồi dùng VariantPopover */
 export function VariantSwitcher({
   item,
   onChange,
@@ -30,7 +30,6 @@ export function VariantSwitcher({
   onChange: (variantId: string) => void;
   pending: boolean;
 }) {
-  const [open, setOpen] = useState(false);
   const label = variantLabel(item, item);
   // Chữ gọn trên chip: chỉ giá trị ("Xanh Dương · 256GB"), tên nhóm đầy đủ hiện khi rê chuột
   const short = [item.option1Value, item.option2Value].filter(Boolean).join(' · ');
@@ -40,14 +39,47 @@ export function VariantSwitcher({
   if (!canSwitch) return <div className="mt-1 text-xs text-ink/45">{short || label}</div>;
 
   return (
+    <VariantPopover
+      item={item}
+      label={label}
+      short={short || label}
+      pending={pending}
+      onChange={onChange}
+    />
+  );
+}
+
+/**
+ * Chữ phân loại kèm nút "Đổi": mở khung chọn phân loại khác của cùng sản phẩm (tải chi tiết sản phẩm khi mở
+ * lần đầu). Việc lưu do nơi dùng làm trong onChange.
+ */
+export function VariantPopover({
+  item,
+  label,
+  short,
+  pending,
+  disabled,
+  onChange,
+}: {
+  item: SwitchLine;
+  label: string;
+  short: string;
+  pending: boolean;
+  disabled?: boolean;
+  onChange: (variantId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
           title={label}
+          disabled={disabled}
           className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-page px-2.5 py-1 text-left text-xs text-ink/65 ring-1 ring-ink/[0.08] transition hover:text-navy hover:ring-navy/30 data-[state=open]:ring-navy/40"
         >
-          <span className="min-w-0 truncate">{short || label}</span>
+          <span className="min-w-0 truncate">{short}</span>
           <span className="flex shrink-0 items-center gap-0.5 font-semibold text-navy">
             {pending ? <IconLoader2 className="size-3 animate-spin" /> : 'Đổi'}
             <IconChevronDown className="size-3" />
@@ -75,7 +107,7 @@ function SwitcherBody({
   onCancel,
   onConfirm,
 }: {
-  item: CartItem;
+  item: SwitchLine;
   onCancel: () => void;
   onConfirm: (variantId: string) => void;
 }) {
@@ -113,7 +145,7 @@ function Picker({
   onConfirm,
 }: {
   product: ProductDetail;
-  item: CartItem;
+  item: SwitchLine;
   onCancel: () => void;
   onConfirm: (variantId: string) => void;
 }) {
@@ -121,7 +153,7 @@ function Picker({
   const [sel, setSel] = useState<Selection>(() => initialSelection(variants, item.variantId));
   const variant = findVariant(variants, sel);
   const hasGroup2 = !!product.option2Name && variants.some((v) => v.option2Value);
-  // Phân loại mới phải đủ hàng cho số lượng đang có trong giỏ (máy chủ cũng kiểm lại)
+  // Phân loại mới phải đủ hàng cho số lượng đang chọn (máy chủ cũng kiểm lại)
   const short =
     !!variant &&
     variant.id !== item.variantId &&
@@ -159,7 +191,7 @@ function Picker({
               </div>
               {short && (
                 <div className="mt-0.5 text-xs font-medium text-champagne-600">
-                  Giỏ đang có {item.quantity}, giảm còn {variant.available} rồi đổi.
+                  Đang chọn {item.quantity}, giảm còn {variant.available} rồi đổi.
                 </div>
               )}
             </>

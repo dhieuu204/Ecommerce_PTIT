@@ -1,5 +1,11 @@
+import {
+  IconCircleCheck,
+  IconLoader2,
+  IconPhotoOff,
+  IconPhotoPlus,
+  IconX,
+} from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, ImageOff, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CANCEL_ACTOR } from '@/components/orders/order-parts';
@@ -75,14 +81,14 @@ export function EvidenceImage({ imageKey, className }: { imageKey: string; class
     retry: false,
   });
   const box = cn(
-    'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-ivory',
+    'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-ivory',
     className,
   );
   if (q.isPending) return <div className={cn(box, 'animate-pulse')} />;
   if (q.isError) {
     return (
       <div className={box} title="Không tải được ảnh">
-        <ImageOff className="size-5 text-ink/30" />
+        <IconPhotoOff className="size-5 text-ink/30" />
       </div>
     );
   }
@@ -179,7 +185,7 @@ export function ReturnImagePicker({
       {value.map((img) => (
         <div
           key={img.key}
-          className="relative size-20 overflow-hidden rounded-xl border border-ivory-200"
+          className="relative size-20 overflow-hidden rounded-xl border border-ink/[0.06]"
         >
           <img src={img.preview} alt="" className="size-full object-cover" />
           <button
@@ -189,7 +195,7 @@ export function ReturnImagePicker({
             className="absolute top-1 right-1 rounded-full bg-black/55 p-0.5 text-white hover:bg-black/75"
             aria-label="Bỏ ảnh"
           >
-            <X className="size-3.5" />
+            <IconX className="size-3.5" />
           </button>
         </div>
       ))}
@@ -198,7 +204,7 @@ export function ReturnImagePicker({
           key={`up-${i}`}
           className="flex size-20 items-center justify-center rounded-xl border border-dashed border-champagne"
         >
-          <Loader2 className="size-5 animate-spin text-champagne-600" />
+          <IconLoader2 className="size-5 animate-spin text-champagne-600" />
         </div>
       ))}
       {value.length + uploading < max && (
@@ -208,7 +214,7 @@ export function ReturnImagePicker({
           onClick={() => input.current?.click()}
           className="flex size-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-champagne text-xs text-champagne-600 transition hover:bg-champagne-50 disabled:opacity-50"
         >
-          <ImagePlus className="size-5" />
+          <IconPhotoPlus className="size-5" />
           Thêm ảnh
         </button>
       )}
@@ -233,14 +239,14 @@ export function ReturnItemsList({
   showRestock?: boolean;
 }) {
   return (
-    <div className="divide-y divide-ivory-200">
+    <div className="divide-y divide-ink/[0.06]">
       {items.map((it) => (
         <div key={it.orderItemId} className="flex gap-3 py-3">
-          <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-card p-1">
+          <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-card p-1">
             {it.image ? (
               <img src={it.image} alt={it.productName} className="size-full object-contain" />
             ) : (
-              <ImageOff className="size-5 text-ink/25" />
+              <IconPhotoOff className="size-5 text-ink/25" />
             )}
           </div>
           <div className="min-w-0 flex-1 text-sm">
@@ -252,14 +258,16 @@ export function ReturnItemsList({
               Trả {it.quantity}/{it.purchasedQuantity} · giá {formatMoney(it.price)}
               {showRestock && it.restocked && (
                 <span className="ml-1 inline-flex items-center gap-0.5 text-emerald-700">
-                  · <CheckCircle2 className="size-3" /> đã nhập lại kho
+                  · <IconCircleCheck className="size-3" /> đã nhập lại kho
                 </span>
               )}
             </div>
           </div>
           <div className="shrink-0 text-right text-sm">
             <div className="text-xs text-ink/50">Hoàn tối đa</div>
-            <div className="font-semibold text-navy">{formatMoney(it.refundAmount)}</div>
+            <div className="font-bold tracking-tight text-charcoal">
+              {formatMoney(it.refundAmount)}
+            </div>
           </div>
         </div>
       ))}
@@ -280,7 +288,7 @@ export function ReturnTimeline({ history }: { history: ReturnHistoryEntry[] }) {
           <span
             className={cn(
               'relative mt-1 size-[15px] shrink-0 rounded-full border-2 bg-card',
-              i === 0 ? 'border-navy' : 'border-ivory-200',
+              i === 0 ? 'border-navy' : 'border-ink/[0.06]',
             )}
           />
           <div className="min-w-0 text-sm">

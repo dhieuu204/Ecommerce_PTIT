@@ -1,16 +1,16 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertCircle,
-  CheckCircle2,
-  ChevronRight,
-  Circle,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  Loader2,
-  PackageSearch,
-  PackagePlus,
-} from 'lucide-react';
+  IconAlertCircle,
+  IconChevronRight,
+  IconCircle,
+  IconCircleCheck,
+  IconExternalLink,
+  IconEye,
+  IconEyeOff,
+  IconLoader2,
+  IconPackage,
+  IconPackages,
+} from '@tabler/icons-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
 import { Controller, useForm, type Control, type UseFormGetValues } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -175,7 +175,7 @@ export function ProductFormPage() {
     if (product.error instanceof ApiError && product.error.status === 404) {
       return (
         <EmptyState
-          icon={PackageSearch}
+          icon={IconPackages}
           title="Không tìm thấy sản phẩm"
           text="Sản phẩm không có hoặc không thuộc shop của bạn."
           action={
@@ -674,7 +674,7 @@ function ProductEditor({
               title="Thông tin bán hàng"
               description="Giá, phân loại hàng và tồn kho."
               actions={
-                <label className="flex cursor-pointer items-center gap-2.5 rounded-full border bg-ivory px-3 py-1.5 text-sm">
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border bg-ivory px-3 py-1.5 text-sm">
                   <Switch checked={hasVariants} onCheckedChange={toggleVariants} />
                   <span className="font-medium text-navy">Có phân loại hàng</span>
                 </label>
@@ -685,7 +685,7 @@ function ProductEditor({
                   role="alert"
                   className="mb-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
                 >
-                  <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                  <IconAlertCircle className="mt-0.5 size-4 shrink-0" />
                   {structErrors.variants}
                 </div>
               )}
@@ -830,10 +830,10 @@ function ProductEditor({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full border-champagne/60 text-navy"
+                  className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
                   onClick={() => setStockVariant(live.variants[0]?.id ?? null)}
                 >
-                  <PackagePlus /> Điều chỉnh tồn
+                  <IconPackage /> Điều chỉnh tồn
                 </Button>
               }
             >
@@ -844,8 +844,8 @@ function ProductEditor({
 
         <aside className="hidden xl:block">
           <div className="sticky top-20 space-y-4">
-            <div className="rounded-2xl border bg-card p-4 shadow-sm shadow-navy/[0.03]">
-              <div className="text-sm font-semibold text-navy">Gợi ý điền thông tin</div>
+            <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4">
+              <div className="text-sm font-semibold text-charcoal">Gợi ý điền thông tin</div>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Tin đăng đủ thông tin dễ được tìm thấy hơn.
               </p>
@@ -853,9 +853,9 @@ function ProductEditor({
                 {tips.map((t) => (
                   <li key={t.text} className="flex items-start gap-2 text-sm">
                     {t.ok ? (
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                      <IconCircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
                     ) : (
-                      <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
+                      <IconCircle className="mt-0.5 size-4 shrink-0 text-muted-foreground/50" />
                     )}
                     <span className={t.ok ? 'text-ink' : 'text-muted-foreground'}>{t.text}</span>
                   </li>
@@ -863,7 +863,7 @@ function ProductEditor({
               </ul>
             </div>
             {isEdit && status && (
-              <div className="rounded-2xl border bg-card p-4 text-sm shadow-sm shadow-navy/[0.03]">
+              <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Trạng thái</span>
                   <ProductStatusBadge status={status} />
@@ -886,7 +886,7 @@ function ProductEditor({
           <div className="hidden min-w-0 flex-1 text-sm sm:block">
             {errorCount > 0 ? (
               <span className="inline-flex items-center gap-1.5 text-destructive">
-                <AlertCircle className="size-4" /> Còn {errorCount} chỗ cần sửa
+                <IconAlertCircle className="size-4" /> Còn {errorCount} chỗ cần sửa
               </span>
             ) : dirty ? (
               <span className="text-amber-700">Có thay đổi chưa lưu</span>
@@ -900,16 +900,16 @@ function ProductEditor({
             asChild
             type="button"
             variant="outline"
-            className="h-10 flex-1 rounded-full px-6 sm:flex-none"
+            className="h-10 flex-1 rounded-lg px-6 sm:flex-none"
           >
             <Link to="/kenh-nguoi-ban/san-pham">Hủy</Link>
           </Button>
           <Button
             type="submit"
-            className="h-10 flex-[2] rounded-full px-8 sm:flex-none"
+            className="h-10 flex-[2] rounded-lg px-8 sm:flex-none"
             disabled={isSubmitting || (isEdit && !dirty)}
           >
-            {isSubmitting && <Loader2 className="animate-spin" />}
+            {isSubmitting && <IconLoader2 className="animate-spin" />}
             {isEdit ? 'Lưu thay đổi' : 'Lưu và đăng bán'}
           </Button>
         </div>
@@ -952,9 +952,9 @@ function EditActions({ product, shopActive }: { product: SellerProduct; shopActi
     <>
       <ProductStatusBadge status={product.status} />
       {hide && shopActive && (
-        <Button asChild type="button" variant="ghost" size="sm" className="rounded-full text-navy">
+        <Button asChild type="button" variant="ghost" size="sm" className="rounded-lg text-navy">
           <Link to={`/san-pham/${product.id}`} target="_blank" rel="noreferrer">
-            <ExternalLink /> Xem trên sàn
+            <IconExternalLink /> Xem trên sàn
           </Link>
         </Button>
       )}
@@ -964,11 +964,11 @@ function EditActions({ product, shopActive }: { product: SellerProduct; shopActi
           type="button"
           variant="outline"
           size="sm"
-          className="rounded-full border-navy/30 text-navy"
+          className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
           disabled={busy}
           onClick={() => void toggle()}
         >
-          {busy ? <Loader2 className="animate-spin" /> : hide ? <EyeOff /> : <Eye />}
+          {busy ? <IconLoader2 className="animate-spin" /> : hide ? <IconEyeOff /> : <IconEye />}
           {hide ? 'Ẩn sản phẩm' : 'Hiện lại'}
         </Button>
       )}
@@ -1058,7 +1058,7 @@ function CategoryPicker({
                       )}
                     />
                     <span className="min-w-0 flex-1 truncate">{p.name}</span>
-                    <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+                    <IconChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
                   </button>
                 </li>
               );
@@ -1079,7 +1079,7 @@ function CategoryPicker({
                     )}
                   >
                     <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                    {active && <CheckCircle2 className="size-4 shrink-0 text-champagne-600" />}
+                    {active && <IconCircleCheck className="size-4 shrink-0 text-champagne-600" />}
                   </button>
                 </li>
               );

@@ -1,5 +1,12 @@
+import {
+  IconBuildingStore,
+  IconCalendarTime,
+  IconMessage2,
+  IconPackage,
+  IconPencil,
+  IconStar,
+} from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { CalendarClock, MessageSquareText, PackageCheck, Pencil, Star, Store } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -61,8 +68,8 @@ export function MyReviewsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 pt-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Đánh giá của tôi</h1>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 pt-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Đánh giá của tôi</h1>
         <p className="mt-1 text-sm text-ink/60">
           Đánh giá các món của đơn đã hoàn tất, trong hạn kể từ lúc đơn hoàn tất. Mỗi đánh giá sửa
           được một lần.
@@ -102,14 +109,14 @@ export function MyReviewsPage() {
         <Skeleton className="h-48 rounded-2xl" />
       ) : list.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={list.error.message}
           onRetry={() => list.refetch()}
         />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={tab === 'PENDING' ? PackageCheck : MessageSquareText}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={tab === 'PENDING' ? IconPackage : IconMessage2}
           title={tab === 'PENDING' ? 'Không có món nào chờ đánh giá' : 'Bạn chưa viết đánh giá nào'}
           text={
             tab === 'PENDING'
@@ -117,7 +124,7 @@ export function MyReviewsPage() {
               : 'Đánh giá của bạn giúp người mua khác chọn hàng tốt hơn.'
           }
           action={
-            <Button asChild variant="outline" className="rounded-full px-5">
+            <Button asChild variant="outline" className="rounded-lg px-5">
               <Link to="/tai-khoan/don-mua">Xem đơn mua</Link>
             </Button>
           }
@@ -155,11 +162,11 @@ export function MyReviewsPage() {
 
 function ProductThumb({ image }: { image: string | null }) {
   return (
-    <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-card p-1">
+    <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-card p-1">
       {image ? (
         <img src={image} alt="" className="size-full object-contain" />
       ) : (
-        <Star className="size-5 text-champagne-600" />
+        <IconStar className="size-5 text-navy" />
       )}
     </span>
   );
@@ -177,7 +184,7 @@ function ShopLine({
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink/55">
       <Link to={`/shop/${shop.id}`} className="inline-flex items-center gap-1 hover:text-navy">
-        <Store className="size-3.5 text-champagne-600" />
+        <IconBuildingStore className="size-3.5 text-navy" />
         {shop.name}
       </Link>
       <span>·</span>
@@ -191,7 +198,7 @@ function ShopLine({
 function PendingRow({ item, onReview }: { item: PendingReviewItem; onReview: () => void }) {
   const left = daysLeft(item.reviewBefore);
   return (
-    <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-3.5 md:px-5">
+    <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-3.5 md:px-5">
       <ShopLine shop={item.shop} orderId={item.orderId} code={item.shopOrderCode} />
       <div className="mt-2.5 flex flex-wrap items-center gap-3">
         <ProductThumb image={item.image} />
@@ -211,12 +218,12 @@ function PendingRow({ item, onReview }: { item: PendingReviewItem; onReview: () 
               left <= 3 ? 'font-medium text-amber-700' : 'text-ink/55',
             )}
           >
-            <CalendarClock className="size-3.5" />
+            <IconCalendarTime className="size-3.5" />
             Hoàn tất {formatDate(item.completedAt)} · {deadlineText(item.reviewBefore)}
           </div>
         </div>
         <Button onClick={onReview} className="w-full rounded-lg sm:w-auto">
-          <Star className="size-4" /> Đánh giá
+          <IconStar className="size-4" /> Đánh giá
         </Button>
       </div>
     </div>
@@ -225,7 +232,7 @@ function PendingRow({ item, onReview }: { item: PendingReviewItem; onReview: () 
 
 function DoneRow({ review: r, onEdit }: { review: MyReview; onEdit: () => void }) {
   return (
-    <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-3.5 md:px-5">
+    <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-3.5 md:px-5">
       <ShopLine shop={r.shop} orderId={r.orderId} code={r.shopOrderCode} />
       <div className="mt-2.5 flex gap-3">
         <ProductThumb image={r.image} />
@@ -260,14 +267,14 @@ function DoneRow({ review: r, onEdit }: { review: MyReview; onEdit: () => void }
           )}
         </div>
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-end gap-3 border-t border-dashed border-ivory-200 pt-3">
+      <div className="mt-3 flex flex-wrap items-center justify-end gap-3 border-t border-dashed border-ink/[0.06] pt-3">
         {r.canEdit ? (
           <>
             <span className="text-xs text-ink/55">
               Sửa được một lần · {deadlineText(r.editBefore)}
             </span>
             <Button variant="outline" size="sm" onClick={onEdit} className="rounded-lg">
-              <Pencil className="size-3.5" /> Sửa đánh giá
+              <IconPencil className="size-3.5" /> Sửa đánh giá
             </Button>
           </>
         ) : (

@@ -1,5 +1,12 @@
+import {
+  IconAlertCircle,
+  IconInfoCircle,
+  IconLoader2,
+  IconPhotoPlus,
+  IconRefresh,
+  IconSend,
+} from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, ImagePlus, Info, Loader2, RefreshCw, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useController, useForm } from 'react-hook-form';
 import { Navigate, useNavigate } from 'react-router';
@@ -211,7 +218,7 @@ function ApplyFormView({ myShop }: { myShop: MyShop | null }) {
 
       <form onSubmit={onSubmit} noValidate className="space-y-8">
         {status === 'REJECTED' && app?.rejectReason && (
-          <Notice tone="danger" icon={<AlertCircle />}>
+          <Notice tone="danger" icon={<IconAlertCircle />}>
             <p>
               <span className="font-medium">Hồ sơ phiên bản {app.version} bị từ chối</span>
               {app.decidedAt && ` ngày ${formatDate(app.decidedAt)}`}. Lý do: {app.rejectReason}
@@ -220,7 +227,7 @@ function ApplyFormView({ myShop }: { myShop: MyShop | null }) {
           </Notice>
         )}
         {status === 'PENDING' && (
-          <Notice tone="info" icon={<Info />}>
+          <Notice tone="info" icon={<IconInfoCircle />}>
             Hồ sơ phiên bản {app?.version} đang chờ duyệt. Nộp bản này sẽ thay bản đang chờ.
           </Notice>
         )}
@@ -444,7 +451,7 @@ function ApplyFormView({ myShop }: { myShop: MyShop | null }) {
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <SubmitButton pending={isSubmitting} className="h-11 w-full px-8 sm:w-auto">
-              {!isSubmitting && <Send className="size-4" />}
+              {!isSubmitting && <IconSend className="size-4" />}
               {isSubmitting ? 'Đang nộp hồ sơ…' : 'Nộp hồ sơ'}
             </SubmitButton>
             <p className="text-xs text-muted-foreground">
@@ -556,18 +563,18 @@ function LogoUpload({
           <img src={value} alt="Logo shop" className="size-full object-cover" />
         ) : (
           <span className="flex flex-col items-center gap-1.5 px-2 text-xs text-muted-foreground">
-            <ImagePlus className="size-7 text-champagne-600" />
+            <IconPhotoPlus className="size-7 text-navy" />
             Bấm để tải logo
           </span>
         )}
         {uploading && (
           <span className="absolute inset-0 flex items-center justify-center bg-white/70">
-            <Loader2 className="size-6 animate-spin text-navy" />
+            <IconLoader2 className="size-6 animate-spin text-navy" />
           </span>
         )}
         {value && !uploading && (
           <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-navy/80 py-1.5 text-xs text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
-            <RefreshCw className="size-3" /> Đổi logo
+            <IconRefresh className="size-3" /> Đổi logo
           </span>
         )}
       </button>

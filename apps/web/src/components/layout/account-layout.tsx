@@ -37,12 +37,12 @@ export function AccountLayout() {
   return (
     <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-4 py-6 md:grid-cols-[260px_minmax(0,1fr)] md:py-10">
       <aside className="md:sticky md:top-28 md:self-start">
-        <div className="rounded-2xl border bg-card p-4 shadow-sm md:p-5">
+        <div className="rounded-2xl bg-card p-4 shadow-[0_1px_2px_rgba(15,26,61,0.04)] md:p-5">
           {user && (
             <div className="flex items-center gap-3 border-b pb-4">
               <UserAvatar name={user.fullName} />
               <div className="min-w-0">
-                <div className="truncate font-semibold text-navy">{user.fullName}</div>
+                <div className="truncate font-semibold text-charcoal">{user.fullName}</div>
                 <div className="truncate text-xs text-muted-foreground">{user.email}</div>
               </div>
             </div>
@@ -57,10 +57,10 @@ export function AccountLayout() {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'shrink-0 rounded-full border px-4 py-2 text-sm whitespace-nowrap transition md:rounded-lg md:border-0 md:border-l-[3px] md:border-transparent md:px-3',
+                    'shrink-0 rounded-lg border px-4 py-2 text-sm whitespace-nowrap transition md:border-0 md:px-3',
                     isActive
-                      ? 'border-champagne bg-champagne-50 font-medium text-navy md:border-champagne'
-                      : 'text-ink hover:bg-ivory-200',
+                      ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                      : 'border-ink/15 text-ink hover:text-navy md:hover:bg-page',
                   )
                 }
               >

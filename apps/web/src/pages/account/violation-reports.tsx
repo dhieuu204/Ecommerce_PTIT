@@ -1,5 +1,5 @@
+import { IconExternalLink, IconFlag, IconMessage2 } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ExternalLink, Flag, MessageSquareText } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { Pager } from '@/components/console/pager';
@@ -36,11 +36,11 @@ export function MyViolationReportsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Báo cáo vi phạm</h1>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Báo cáo vi phạm</h1>
         <p className="mt-1 text-sm text-ink/60">
-          Báo cáo sản phẩm hoặc shop bằng nút <Flag className="inline size-3.5 align-[-2px]" /> Báo
-          cáo trên trang của họ. Bộ phận kiểm duyệt xử lý xong, kết quả hiện ở đây.
+          Báo cáo sản phẩm hoặc shop bằng nút <IconFlag className="inline size-3.5 align-[-2px]" />{' '}
+          Báo cáo trên trang của họ. Bộ phận kiểm duyệt xử lý xong, kết quả hiện ở đây.
         </p>
       </div>
 
@@ -48,14 +48,14 @@ export function MyViolationReportsPage() {
         <Skeleton className="h-48 rounded-2xl" />
       ) : list.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={list.error.message}
           onRetry={() => list.refetch()}
         />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={Flag}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={IconFlag}
           title="Bạn chưa gửi báo cáo nào"
           text="Thấy hàng giả, lừa đảo hay thông tin sai sự thật? Hãy báo cho sàn để được xem xét."
         />
@@ -79,7 +79,7 @@ export function MyViolationReportsPage() {
 function ReportCard({ report: r }: { report: Report }) {
   const link = r.targetType === 'SHOP' ? `/shop/${r.targetId}` : `/san-pham/${r.targetId}`;
   return (
-    <article className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
+    <article className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
       <div className="flex gap-3">
         <TargetThumb type={r.targetType} image={r.targetImage} />
         <div className="min-w-0 flex-1">
@@ -88,11 +88,11 @@ function ReportCard({ report: r }: { report: Report }) {
               <div className="text-xs text-ink/50">{REPORT_TARGET_LABEL[r.targetType]}</div>
               <Link
                 to={link}
-                className="line-clamp-2 font-semibold text-navy hover:underline"
+                className="line-clamp-2 font-semibold text-charcoal transition hover:text-navy"
                 title="Mở trang trên sàn"
               >
                 {r.targetName}
-                <ExternalLink className="ml-1 inline size-3 align-[-1px] text-ink/35" />
+                <IconExternalLink className="ml-1 inline size-3 align-[-1px] text-ink/35" />
               </Link>
             </div>
             <ReportStatusBadge status={r.status} />
@@ -115,7 +115,7 @@ function ReportCard({ report: r }: { report: Report }) {
             r.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-900' : 'bg-ivory text-ink/75',
           )}
         >
-          <MessageSquareText className="mt-0.5 size-4 shrink-0 opacity-60" />
+          <IconMessage2 className="mt-0.5 size-4 shrink-0 opacity-60" />
           <div className="min-w-0">
             <div className="font-medium">
               {r.status === 'RESOLVED'

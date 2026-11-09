@@ -41,6 +41,8 @@ VNPay báo kết quả (IPN) bằng cách gọi vào địa chỉ công khai tr�
 
 Không chạy tunnel vẫn dùng được: khi buyer quay về trang `/thanh-toan/ket-qua`, payment-service kiểm chữ ký rồi **tra cứu VNPay** (API `querydr`) trước khi ghi "đã trả"; job mỗi phút tra cứu các lần chưa rõ kết quả và các đơn đã quá hạn.
 
+Lưu ý (09/11/2026): với tài khoản sandbox hiện tại, API `querydr` luôn trả mã 99 "Unexpected error", kể cả khi chữ ký sai hoặc mã merchant không tồn tại, tức là lỗi xảy ra phía VNPay trước bước kiểm tra chữ ký. Trong lúc đó tra cứu không dùng được, đơn trả qua VNPay chỉ được ghi "đã trả" nhờ IPN, nên **phải chạy tunnel**.
+
 ## Quy tắc chính
 
 - Mỗi đơn tối đa `max_payment_attempts` lần (mặc định 3), mỗi lần một mã `vnp_TxnRef` riêng. Còn lần đang chờ thì bấm lại mở đúng link cũ; lần trước "không rõ" thì không tạo lần mới.

@@ -1,4 +1,4 @@
-import { Check, Copy, FlaskConical, Truck } from 'lucide-react';
+import { IconCheck, IconCopy, IconFlask, IconTruck } from '@tabler/icons-react';
 import { useState } from 'react';
 import { StatusBadge } from '@/components/status-badge';
 import { formatDateTime, formatMoney } from '@/lib/format';
@@ -66,7 +66,7 @@ export function SimulatedChip({ className }: { className?: string }) {
       )}
       title="Chưa nối hệ thống thật, dữ liệu do sàn mô phỏng"
     >
-      <FlaskConical className="size-3" /> Mô phỏng
+      <IconFlask className="size-3" /> Mô phỏng
     </span>
   );
 }
@@ -76,7 +76,8 @@ export const PAYMENT_METHOD: Record<PaymentMethod, string> = {
   COD: 'Thanh toán khi nhận hàng (COD)',
 };
 
-function CopyCode({ code }: { code: string }) {
+/** Mã (vận đơn, đơn hàng) bấm để sao chép */
+export function CopyCode({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -87,14 +88,14 @@ function CopyCode({ code }: { code: string }) {
           window.setTimeout(() => setCopied(false), 1500);
         });
       }}
-      className="inline-flex items-center gap-1 rounded-md px-1 font-mono text-sm font-semibold text-navy hover:bg-ivory"
-      aria-label={`Sao chép mã vận đơn ${code}`}
+      className="inline-flex items-center gap-1 rounded-md px-1 text-sm font-semibold text-charcoal transition hover:text-navy"
+      aria-label={`Sao chép mã ${code}`}
     >
       {code}
       {copied ? (
-        <Check className="size-3.5 text-emerald-600" />
+        <IconCheck className="size-3.5 text-ship" />
       ) : (
-        <Copy className="size-3.5 text-ink/40" />
+        <IconCopy className="size-3.5 text-ink/40" />
       )}
     </button>
   );
@@ -115,11 +116,15 @@ export function ShipmentPanel({
 }) {
   const tracking = shipment.tracking ?? [];
   return (
-    <div className={cn('rounded-xl border border-ivory-200 bg-ivory/40 px-4 py-3', className)}>
+    <div className={cn('rounded-xl bg-page px-4 py-3.5', className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-        <span className="flex items-center gap-1.5 text-sm font-semibold text-navy">
-          <Truck className="size-4 text-champagne-600" /> Giao Hàng Nhanh
-        </span>
+        {shipment.simulated ? (
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-charcoal">
+            <IconTruck className="size-[1.125rem] text-ship [stroke-width:1.75]" /> Giao Hàng Nhanh
+          </span>
+        ) : (
+          <img src="/partners/ghn.webp" alt="Giao Hàng Nhanh" className="h-5 w-auto" />
+        )}
         {shipment.ghnCode ? (
           <CopyCode code={shipment.ghnCode} />
         ) : (
@@ -150,19 +155,16 @@ export function ShipmentPanel({
           {tracking.map((t, i) => (
             <li key={`${t.happenedAt}-${i}`} className="relative flex gap-3 pb-3 last:pb-0">
               {i < tracking.length - 1 && (
-                <span
-                  className="absolute top-3.5 bottom-0 left-[5px] w-px bg-ivory-200"
-                  aria-hidden
-                />
+                <span className="absolute top-3.5 bottom-0 left-[5px] w-px bg-ink/10" aria-hidden />
               )}
               <span
                 className={cn(
-                  'relative mt-1.5 size-[11px] shrink-0 rounded-full ring-2 ring-card',
-                  i === 0 ? 'bg-emerald-500' : 'bg-ink/20',
+                  'relative mt-1.5 size-[11px] shrink-0 rounded-full ring-2 ring-page',
+                  i === 0 ? 'bg-ship' : 'bg-ink/20',
                 )}
               />
               <div className="min-w-0 text-sm">
-                <div className={cn(i === 0 ? 'font-medium text-navy' : 'text-ink/70')}>
+                <div className={cn(i === 0 ? 'font-semibold text-charcoal' : 'text-ink/70')}>
                   {ghnStatusLabel(t.ghnStatus)}
                 </div>
                 {t.note && <div className="break-words text-xs text-ink/55">{t.note}</div>}

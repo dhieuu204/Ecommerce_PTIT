@@ -1,5 +1,11 @@
+import {
+  IconDownload,
+  IconFileSpreadsheet,
+  IconFlask,
+  IconLoader2,
+  IconUpload,
+} from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, FileSpreadsheet, FlaskConical, Loader2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -140,9 +146,9 @@ export function CodReconciliationsPage() {
         >
           <span className="flex size-12 items-center justify-center rounded-2xl bg-navy text-white">
             {upload.isPending ? (
-              <Loader2 className="size-6 animate-spin" />
+              <IconLoader2 className="size-6 animate-spin" />
             ) : (
-              <Upload className="size-6" />
+              <IconUpload className="size-6" />
             )}
           </span>
           <span className="font-semibold text-navy">
@@ -159,8 +165,8 @@ export function CodReconciliationsPage() {
           className="hidden"
           onChange={(e) => pick(e.target.files?.[0])}
         />
-        <div className="space-y-3 rounded-2xl border bg-card p-4">
-          <div className="text-sm font-semibold text-navy">File mẫu</div>
+        <div className="space-y-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4">
+          <div className="text-sm font-semibold text-charcoal">File mẫu</div>
           <Button
             variant="outline"
             className="w-full justify-start"
@@ -168,9 +174,9 @@ export function CodReconciliationsPage() {
             disabled={downloading !== null}
           >
             {downloading === 'TEMPLATE' ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : (
-              <Download className="size-4" />
+              <IconDownload className="size-4" />
             )}
             Tải file mẫu (các cột đọc được)
           </Button>
@@ -181,9 +187,9 @@ export function CodReconciliationsPage() {
             disabled={downloading !== null}
           >
             {downloading === 'SIM' ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : (
-              <FlaskConical className="size-4" />
+              <IconFlask className="size-4" />
             )}
             Tải file MÔ PHỎNG “GHN chuyển tiền”
           </Button>
@@ -194,8 +200,10 @@ export function CodReconciliationsPage() {
         </div>
       </section>
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
-        <div className="border-b px-4 py-3 font-semibold text-navy md:px-5">Các lần nhập file</div>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
+        <div className="border-b px-4 py-3 font-semibold text-charcoal md:px-5">
+          Các lần nhập file
+        </div>
         {list.isPending ? (
           <div className="space-y-3 p-5">
             {Array.from({ length: 3 }, (_, i) => (
@@ -205,7 +213,7 @@ export function CodReconciliationsPage() {
         ) : list.isError ? (
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
-          <EmptyState icon={FileSpreadsheet} title="Chưa nhập file đối soát nào" />
+          <EmptyState icon={IconFileSpreadsheet} title="Chưa nhập file đối soát nào" />
         ) : (
           <>
             <ul className="divide-y">
@@ -216,9 +224,9 @@ export function CodReconciliationsPage() {
                     className="grid gap-2 px-4 py-4 transition hover:bg-ivory/50 md:grid-cols-[minmax(0,1fr)_9rem_minmax(0,20rem)] md:items-center md:gap-4 md:px-5"
                   >
                     <div className="flex min-w-0 gap-3">
-                      <FileSpreadsheet className="mt-0.5 size-5 shrink-0 text-emerald-600" />
+                      <IconFileSpreadsheet className="mt-0.5 size-5 shrink-0 text-emerald-600" />
                       <div className="min-w-0 text-sm">
-                        <div className="truncate font-semibold text-navy">{r.fileName}</div>
+                        <div className="truncate font-semibold text-charcoal">{r.fileName}</div>
                         <div className="text-xs text-muted-foreground">
                           {r.uploadedByName} · {formatDateTime(r.createdAt)} · {r.totalRows} dòng
                         </div>
@@ -310,7 +318,7 @@ export function CodReconciliationDetailPage() {
         />
       </div>
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-wrap gap-2 border-b px-4 py-3 md:px-5">
           {(['ALL', ...Object.keys(RESULT)] as Array<ReconcileResult | 'ALL'>).map((k) => {
             const n = k === 'ALL' ? r.items.length : r.items.filter((i) => i.result === k).length;
@@ -321,10 +329,10 @@ export function CodReconciliationDetailPage() {
                 type="button"
                 onClick={() => setFilter(k)}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs transition',
+                  'rounded-lg border px-3 py-1 text-xs transition',
                   filter === k
-                    ? 'border-navy bg-navy text-white'
-                    : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
                 )}
               >
                 {k === 'ALL' ? 'Tất cả' : RESULT[k].label} ({n})
@@ -332,7 +340,7 @@ export function CodReconciliationDetailPage() {
             );
           })}
         </div>
-        <div className="hidden grid-cols-[3rem_minmax(0,1fr)_9rem_9rem_10rem_9rem] gap-3 border-b bg-ivory/40 px-5 py-2.5 text-xs font-medium text-muted-foreground lg:grid">
+        <div className="hidden grid-cols-[3rem_minmax(0,1fr)_9rem_9rem_10rem_9rem] gap-3 border-b border-ink/[0.06] px-5 py-2.5 text-[13px] text-ink/55 lg:grid">
           <span>Dòng</span>
           <span>Vận đơn / đơn</span>
           <span className="text-right">COD theo GHN</span>
@@ -373,7 +381,7 @@ function Stat({
   return (
     <div
       className={cn(
-        'rounded-2xl border bg-card px-4 py-3',
+        'rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-3',
         tone === 'warn' && 'border-amber-200 bg-amber-50',
       )}
     >
@@ -391,7 +399,7 @@ function ItemRow({ item: i, onResolve }: { item: CodReconciliationItem; onResolv
     <li className="grid gap-2 px-4 py-3.5 text-sm md:px-5 lg:grid-cols-[3rem_minmax(0,1fr)_9rem_9rem_10rem_9rem] lg:items-center lg:gap-3">
       <span className="text-xs text-muted-foreground">#{i.rowNumber}</span>
       <div className="min-w-0">
-        <div className="font-mono font-semibold text-navy">{i.ghnCode}</div>
+        <div className="font-mono font-semibold text-charcoal">{i.ghnCode}</div>
         <div className="text-xs text-muted-foreground">{i.shopOrderCode ?? '—'}</div>
       </div>
       <Money label="COD theo GHN" value={formatMoney(i.codAmount)} />
@@ -476,7 +484,7 @@ function ResolveDialog({
     <Dialog open={!!item} onOpenChange={(o) => !o && !save.isPending && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-navy">Xử lý dòng lệch {item?.ghnCode}</DialogTitle>
+          <DialogTitle className="text-charcoal">Xử lý dòng lệch {item?.ghnCode}</DialogTitle>
           <DialogDescription>
             GHN chuyển {formatMoney(item?.codAmount ?? 0)}, sàn cần{' '}
             {formatMoney(item?.expectedCod ?? 0)}. Thao tác được ghi nhật ký.
@@ -505,7 +513,7 @@ function ResolveDialog({
                 'rounded-xl border px-3 py-2.5 text-left text-sm transition',
                 accept === v
                   ? 'border-navy ring-1 ring-navy'
-                  : 'border-ivory-200 hover:border-champagne',
+                  : 'border-ink/[0.06] hover:border-champagne',
               )}
             >
               <div className="font-medium text-ink">{t as string}</div>
@@ -525,7 +533,7 @@ function ResolveDialog({
             Quay lại
           </Button>
           <Button onClick={() => save.mutate()} disabled={note.trim().length < 3 || save.isPending}>
-            {save.isPending && <Loader2 className="size-4 animate-spin" />}
+            {save.isPending && <IconLoader2 className="size-4 animate-spin" />}
             Lưu
           </Button>
         </DialogFooter>

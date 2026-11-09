@@ -1,5 +1,12 @@
+import {
+  IconChevronRight,
+  IconClipboardList,
+  IconClock,
+  IconPhotoOff,
+  IconSearch,
+  IconX,
+} from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, ClipboardList, Search, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -13,6 +20,7 @@ import { API, api } from '@/lib/api';
 import { elapsed, formatDateTime, formatMoney } from '@/lib/format';
 import type { SellerOrder, SellerOrderPage, ShopOrderStatus } from '@/lib/order-types';
 import { cn } from '@/lib/utils';
+import { CARD } from '@/pages/checkout/checkout-parts';
 
 const PAGE_SIZE = 20;
 type Tab = ShopOrderStatus | 'ALL';
@@ -34,8 +42,18 @@ const TABS: Array<{ value: Tab; label: string; rare?: boolean }> = [
   { value: 'CANCELLED', label: 'Đã hủy' },
 ];
 
-/** Tab cần seller làm gì đó: số đơn tô đỏ */
+/** Tab cần seller làm gì đó: số đơn nổi bật */
 const URGENT: Tab[] = ['TO_CONFIRM', 'CANCEL_REQUESTED', 'RETURNED'];
+
+/** Việc shop cần làm ở đơn này (hiện ở cột cuối của dòng) */
+const NEXT_ACTION: Partial<Record<ShopOrderStatus, string>> = {
+  TO_CONFIRM: 'Xác nhận đơn',
+  CANCEL_REQUESTED: 'Trả lời yêu cầu',
+  RETURNED: 'Nhận hàng hoàn',
+};
+
+/** Cột của dòng đơn trên màn rộng: sản phẩm | tiền hàng | dự kiến nhận | trạng thái */
+const COLS = 'lg:grid-cols-[minmax(0,1fr)_8rem_8rem_11rem]';
 
 export const sellerOrdersKey = ['seller', 'orders'] as const;
 
@@ -78,74 +96,76 @@ export function SellerOrdersPage() {
       <PageHeader
         crumbs={[{ label: 'Đơn hàng' }]}
         title="Đơn hàng"
-        description="Xác nhận đơn trong hạn để tạo vận đơn GHN, rồi đóng gói chờ GHN đến lấy. Quá hạn xác nhận hoặc bàn giao thì đơn tự hủy."
-      />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
-        <div className="flex flex-col gap-3 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
-          <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Trạng thái đơn">
-            {TABS.map((t) => {
-              const active = status === t.value;
-              const n = t.value === 'ALL' ? total : counts?.[t.value];
-              if (t.rare && !active && !n) return null;
-              const urgent = URGENT.includes(t.value) && !!n;
-              return (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => update({ status: t.value === 'ALL' ? null : t.value })}
-                  className={cn(
-                    'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
-                    active
-                      ? 'border-navy font-semibold text-navy'
-                      : 'border-transparent text-muted-foreground hover:text-ink',
-                  )}
-                >
-                  {t.label}
-                  {n !== undefined && (
-                    <span
-                      className={cn(
-                        'rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums',
-                        urgent
-                          ? 'bg-red-100 text-red-700'
-                          : active
-                            ? 'bg-navy text-white'
-                            : 'bg-muted text-muted-foreground',
-                      )}
-                    >
-                      {n}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-          <div className="relative pb-3 md:w-64 md:pb-2.5">
-            <Search className="pointer-events-none absolute top-[18px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        actions={
+          <div className="relative w-full sm:w-72">
+            <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40 [stroke-width:1.75]" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm mã đơn…"
-              className="h-9 rounded-full bg-white pr-8 pl-9"
+              className="h-10 rounded-lg bg-card pr-8 pl-9"
               aria-label="Tìm mã đơn"
             />
             {search && (
               <button
                 type="button"
-                className="absolute top-[18px] right-2.5 -translate-y-1/2 text-muted-foreground hover:text-ink"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 text-ink/40 transition hover:text-navy"
                 onClick={() => setSearch('')}
                 aria-label="Xóa tìm kiếm"
               >
-                <X className="size-4" />
+                <IconX className="size-4 [stroke-width:2]" />
               </button>
             )}
           </div>
-        </div>
+        }
+      />
+      <div className={cn(CARD, 'overflow-hidden')}>
+        <nav
+          className="flex gap-1 overflow-x-auto border-b border-ink/[0.06] px-2 [scrollbar-width:none] md:px-3 [&::-webkit-scrollbar]:hidden"
+          aria-label="Trạng thái đơn"
+        >
+          {TABS.map((t) => {
+            const active = status === t.value;
+            const n = t.value === 'ALL' ? total : counts?.[t.value];
+            if (t.rare && !active && !n) return null;
+            const urgent = URGENT.includes(t.value) && !!n;
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => update({ status: t.value === 'ALL' ? null : t.value })}
+                className={cn(
+                  '-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3.5 text-sm whitespace-nowrap transition',
+                  active
+                    ? 'border-navy font-semibold text-navy'
+                    : 'border-transparent text-ink/60 hover:text-navy',
+                )}
+              >
+                {t.label}
+                {n !== undefined && n > 0 && (
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums',
+                      urgent
+                        ? 'bg-navy text-white'
+                        : active
+                          ? 'bg-champagne-50 text-navy'
+                          : 'bg-page text-ink/50',
+                    )}
+                  >
+                    {n}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
         {list.isPending ? (
-          <div className="divide-y">
+          <div className="divide-y divide-ink/[0.06]">
             {Array.from({ length: 4 }, (_, i) => (
               <div key={i} className="flex gap-4 px-5 py-4">
-                <Skeleton className="size-14 rounded-xl" />
+                <Skeleton className="size-16 rounded-xl" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-48" />
                   <Skeleton className="h-3 w-32" />
@@ -157,26 +177,30 @@ export function SellerOrdersPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={ClipboardList}
+            icon={IconClipboardList}
             title={q ? 'Không có đơn khớp mã này' : 'Chưa có đơn nào ở mục này'}
             text="Đơn mới sẽ hiện ở tab Chờ xác nhận khi người mua đã thanh toán hoặc chọn COD."
           />
         ) : (
           <>
-            <div className="hidden grid-cols-[minmax(0,1fr)_9rem_9rem_10rem_2rem] gap-4 border-b bg-ivory/40 px-5 py-2.5 text-xs font-medium text-muted-foreground lg:grid">
+            <div
+              className={cn(
+                'hidden gap-4 border-b border-ink/[0.06] px-5 py-2.5 text-[13px] text-ink/55 lg:grid',
+                COLS,
+              )}
+            >
               <span>Sản phẩm</span>
               <span className="text-right">Tiền hàng</span>
               <span className="text-right">Dự kiến nhận</span>
-              <span>Trạng thái</span>
-              <span />
+              <span className="text-right">Trạng thái</span>
             </div>
-            <div className="divide-y">
+            <div className="divide-y divide-ink/[0.06]">
               {list.data.items.map((o) => (
                 <Row key={o.id} order={o} />
               ))}
             </div>
             <Pager
-              className="border-t px-5 py-3"
+              className="border-t border-ink/[0.06] px-5 py-3"
               page={page}
               pageSize={PAGE_SIZE}
               total={list.data.total}
@@ -200,58 +224,91 @@ function Row({ order }: { order: SellerOrder }) {
         ? order.handoverBefore
         : null;
   const hoursLeft = deadline ? (new Date(deadline).getTime() - Date.now()) / 3_600_000 : null;
+  const action = NEXT_ACTION[order.status];
   return (
     <Link
       to={`/kenh-nguoi-ban/don-hang/${order.id}`}
-      className="grid gap-3 px-4 py-4 transition hover:bg-ivory/50 md:px-5 lg:grid-cols-[minmax(0,1fr)_9rem_9rem_10rem_2rem] lg:items-center lg:gap-4"
+      className="group block transition hover:bg-page/50"
     >
-      <div className="flex min-w-0 gap-3">
-        <div className="size-14 shrink-0 overflow-hidden rounded-xl border bg-white p-1">
-          {first?.image && <img src={first.image} alt="" className="size-full object-contain" />}
-        </div>
-        <div className="min-w-0 text-sm">
-          <div className="font-semibold text-navy">{order.code}</div>
-          <div className="truncate text-ink">
-            {first?.productName}
-            {more > 0 && <span className="text-ink/50"> và {more} sản phẩm khác</span>}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {order.buyerName} · {formatDateTime(order.createdAt)}
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-between text-sm lg:block lg:text-right">
-        <span className="text-xs text-muted-foreground lg:hidden">Tiền hàng</span>
-        <span className="font-medium text-ink">
-          {formatMoney(order.subtotal - order.shopDiscount)}
-        </span>
-      </div>
-      <div className="flex justify-between text-sm lg:block lg:text-right">
-        <span className="text-xs text-muted-foreground lg:hidden">Dự kiến nhận</span>
-        <span className="font-semibold text-navy">
-          {order.sellerAmount !== null ? formatMoney(order.sellerAmount) : '—'}
-        </span>
-      </div>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <ShopOrderStatusBadge status={order.status} paid={order.paymentStatus !== 'UNPAID'} />
-        <RefundBadge status={order.refundStatus} />
-        {order.paymentMethod === 'COD' && (
-          <span className="rounded-md bg-champagne-50 px-1.5 py-0.5 text-[11px] font-semibold text-champagne-600">
-            COD
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-page/60 px-4 py-2 text-xs text-ink/55 lg:px-5">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-2">
+          <b className="text-[13px] font-semibold text-charcoal">{order.code}</b>
+          <span aria-hidden className="text-ink/25">
+            |
           </span>
-        )}
-        {deadline && hoursLeft !== null && (
+          <span>{order.buyerName}</span>
+          <span aria-hidden className="text-ink/25">
+            |
+          </span>
+          <span>{formatDateTime(order.createdAt)}</span>
+        </span>
+        <span className="flex items-center gap-2">
+          {order.paymentMethod === 'COD' && (
+            <span className="rounded-md bg-champagne-50 px-1.5 py-0.5 text-[11px] font-semibold text-champagne-600">
+              COD
+            </span>
+          )}
+          {deadline && hoursLeft !== null && (
+            <span
+              className={cn(
+                'flex items-center gap-1',
+                hoursLeft < 6 ? 'font-semibold text-red-600' : 'text-ink/55',
+              )}
+            >
+              <IconClock className="size-3.5 [stroke-width:1.75]" />
+              Còn {hoursLeft <= 0 ? '0 giờ' : elapsedUntil(deadline)}
+            </span>
+          )}
+        </span>
+      </div>
+
+      <div className={cn('grid gap-3 px-4 py-4 lg:items-center lg:gap-4 lg:px-5', COLS)}>
+        <div className="flex min-w-0 gap-3">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-card p-1.5 ring-1 ring-ink/[0.08]">
+            {first?.image ? (
+              <img src={first.image} alt="" className="size-full object-contain" />
+            ) : (
+              <IconPhotoOff className="size-5 text-ink/25" />
+            )}
+          </div>
+          <div className="min-w-0 self-center text-sm">
+            <div className="line-clamp-2 leading-5 font-medium text-charcoal transition group-hover:text-navy">
+              {first?.productName}
+            </div>
+            <div className="mt-1 text-xs text-ink/55">
+              {first?.variantName && `${first.variantName} · `}Số lượng: {first?.quantity}
+              {more > 0 && <span> · và {more} sản phẩm khác</span>}
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-between text-sm lg:block lg:text-right">
+          <span className="text-xs text-ink/55 lg:hidden">Tiền hàng</span>
+          <span className="font-medium text-charcoal">
+            {formatMoney(order.subtotal - order.shopDiscount)}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm lg:block lg:text-right">
+          <span className="text-xs text-ink/55 lg:hidden">Dự kiến nhận</span>
+          <span className="font-bold text-navy">
+            {order.sellerAmount !== null ? formatMoney(order.sellerAmount) : '—'}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-1.5 lg:flex-col lg:items-end">
+          <div className="flex flex-wrap items-center gap-1.5 lg:justify-end">
+            <ShopOrderStatusBadge status={order.status} paid={order.paymentStatus !== 'UNPAID'} />
+            <RefundBadge status={order.refundStatus} />
+          </div>
           <span
             className={cn(
-              'text-xs',
-              hoursLeft < 6 ? 'font-semibold text-red-600' : 'text-muted-foreground',
+              'flex items-center text-[13px] font-semibold',
+              action ? 'text-navy' : 'text-ink/40 transition group-hover:text-navy',
             )}
           >
-            còn {hoursLeft <= 0 ? '0 giờ' : elapsedUntil(deadline)}
+            {action ?? 'Xem chi tiết'}
+            <IconChevronRight className="size-4 [stroke-width:2] transition group-hover:translate-x-0.5" />
           </span>
-        )}
+        </div>
       </div>
-      <ChevronRight className="hidden size-4 text-ink/30 lg:block" />
     </Link>
   );
 }

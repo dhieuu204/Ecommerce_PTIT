@@ -495,13 +495,6 @@ export const router = createBrowserRouter([
                         Component: m.DisputeDetailPage,
                       })),
                   },
-                  {
-                    path: 'ghn-mo-phong',
-                    lazy: () =>
-                      import('@/pages/admin/carrier-simulator').then((m) => ({
-                        Component: m.CarrierSimulatorPage,
-                      })),
-                  },
                 ],
               },
               {

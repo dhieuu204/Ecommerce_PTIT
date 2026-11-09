@@ -1,5 +1,5 @@
+import { IconChevronLeft, IconInfoCircle, IconLoader2, IconPackageOff } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Info, Loader2, PackageX } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -83,7 +83,7 @@ export function ReturnRequestPage() {
   if (order.isError) {
     return (
       <LoadError
-        className="rounded-2xl border bg-card"
+        className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
         message={order.error.message}
         onRetry={() => order.refetch()}
       />
@@ -96,7 +96,7 @@ export function ReturnRequestPage() {
       to={`/tai-khoan/don-mua/${orderId}`}
       className="flex items-center gap-1 text-sm text-ink/60 hover:text-navy"
     >
-      <ChevronLeft className="size-4" /> Quay lại đơn {o.code}
+      <IconChevronLeft className="size-4" /> Quay lại đơn {o.code}
     </Link>
   );
   if (!so || !so.canRequestReturn) {
@@ -104,8 +104,8 @@ export function ReturnRequestPage() {
       <div className="space-y-4">
         {back}
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={PackageX}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={IconPackageOff}
           title="Đơn này không gửi yêu cầu trả hàng được"
           text="Chỉ gửi được khi đơn đã giao, còn trong hạn và chưa có yêu cầu nào (mỗi đơn của shop gửi một lần)."
         />
@@ -125,14 +125,14 @@ export function ReturnRequestPage() {
   return (
     <div className="space-y-4">
       {back}
-      <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Yêu cầu trả hàng / hoàn tiền</h1>
+      <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Yêu cầu trả hàng / hoàn tiền</h1>
         <p className="mt-1 text-sm text-ink/65">
           Đơn {so.code} của <b>{so.shop.name}</b> · hạn gửi yêu cầu{' '}
           {formatDateTime(so.completeBefore)}
         </p>
         <div className="mt-3 flex gap-2 rounded-xl bg-champagne-50 px-3 py-2.5 text-xs text-navy">
-          <Info className="mt-0.5 size-4 shrink-0 text-champagne-600" />
+          <IconInfoCircle className="mt-0.5 size-4 shrink-0 text-champagne-600" />
           <div>
             Sàn hoàn đúng số bạn đã trả cho món trả (sau voucher), không gồm phí vận chuyển. Shop
             chấp nhận thì GHN tới lấy hàng tận nhà, bạn không trả phí gửi trả. Tiền được hoàn sau
@@ -141,10 +141,10 @@ export function ReturnRequestPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <div className="mb-1 font-semibold text-navy">1. Chọn món muốn trả</div>
+      <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <div className="mb-1 font-bold tracking-tight text-charcoal">1. Chọn món muốn trả</div>
         {errors.items && <p className="mb-1 text-xs text-destructive">{errors.items}</p>}
-        <div className="divide-y divide-ivory-200">
+        <div className="divide-y divide-ink/[0.06]">
           {so.items.map((it) => {
             const n = qty[it.id] ?? 0;
             return (
@@ -156,7 +156,7 @@ export function ReturnRequestPage() {
                   }
                   aria-label={`Chọn ${it.productName}`}
                 />
-                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-ivory-200 bg-white p-1">
+                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-ink/[0.06] bg-white p-1">
                   {it.image && <img src={it.image} alt="" className="size-full object-contain" />}
                 </div>
                 <div className="min-w-0 flex-1 text-sm">
@@ -180,8 +180,8 @@ export function ReturnRequestPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <div className="mb-2 font-semibold text-navy">2. Lý do trả hàng</div>
+      <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <div className="mb-2 font-bold tracking-tight text-charcoal">2. Lý do trả hàng</div>
         <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Lý do">
           {(Object.keys(RETURN_REASONS) as ReturnReason[]).map((r) => (
             <button
@@ -193,8 +193,8 @@ export function ReturnRequestPage() {
               className={cn(
                 'rounded-xl border px-3 py-2.5 text-left text-sm transition',
                 reason === r
-                  ? 'border-navy bg-navy text-white'
-                  : 'border-ivory-200 bg-card text-ink hover:border-champagne',
+                  ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                  : 'border-ink/[0.06] bg-card text-ink hover:border-champagne',
               )}
             >
               {RETURN_REASONS[r]}
@@ -214,8 +214,8 @@ export function ReturnRequestPage() {
         {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
       </section>
 
-      <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <div className="mb-1 font-semibold text-navy">3. Ảnh bằng chứng</div>
+      <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <div className="mb-1 font-bold tracking-tight text-charcoal">3. Ảnh bằng chứng</div>
         <p className="mb-3 text-xs text-ink/55">
           1–6 ảnh JPG, PNG hoặc WebP, mỗi ảnh tối đa 5 MB. Chỉ bạn, shop và quản trị viên hỗ trợ xem
           được.
@@ -225,8 +225,10 @@ export function ReturnRequestPage() {
       </section>
 
       {cod && (
-        <section className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-          <div className="mb-1 font-semibold text-navy">4. Tài khoản nhận tiền hoàn</div>
+        <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+          <div className="mb-1 font-bold tracking-tight text-charcoal">
+            4. Tài khoản nhận tiền hoàn
+          </div>
           <p className="mb-3 text-xs text-ink/55">
             Đơn trả khi nhận hàng (COD) nên sàn chuyển khoản tiền hoàn vào tài khoản này.
           </p>
@@ -287,7 +289,7 @@ export function ReturnRequestPage() {
             submit.mutate();
           }}
         >
-          {submit.isPending && <Loader2 className="size-4 animate-spin" />}
+          {submit.isPending && <IconLoader2 className="size-4 animate-spin" />}
           Gửi yêu cầu
         </Button>
       </div>

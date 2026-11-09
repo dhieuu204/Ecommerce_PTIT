@@ -1,18 +1,17 @@
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Eye,
-  EyeOff,
-  ExternalLink,
-  History,
-  Loader2,
-  MoreHorizontal,
-  Package,
-  PackagePlus,
-  Pencil,
-  Plus,
-  Search,
-  X,
-} from 'lucide-react';
+  IconDots,
+  IconExternalLink,
+  IconEye,
+  IconEyeOff,
+  IconHistory,
+  IconLoader2,
+  IconPackage,
+  IconPencil,
+  IconPlus,
+  IconSearch,
+  IconX,
+} from '@tabler/icons-react';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -135,15 +134,15 @@ export function ProductsPage() {
         title="Sản phẩm của shop"
         description="Đăng là bán ngay. Tồn kho đổi bằng nút Điều chỉnh tồn, mỗi lần đều ghi lịch sử."
         actions={
-          <Button asChild className="h-10 rounded-full px-5">
+          <Button asChild className="h-10 rounded-lg px-5">
             <Link to="/kenh-nguoi-ban/san-pham/moi">
-              <Plus /> Thêm sản phẩm
+              <IconPlus /> Thêm sản phẩm
             </Link>
           </Button>
         }
       />
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-3 border-b px-4 pt-2 md:px-5 lg:flex-row lg:items-end lg:justify-between">
           <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Trạng thái sản phẩm">
             {TABS.map((t) => {
@@ -158,7 +157,7 @@ export function ProductsPage() {
                     'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                     active
                       ? 'border-navy font-semibold text-navy'
-                      : 'border-transparent text-muted-foreground hover:text-ink',
+                      : 'border-transparent text-ink/60 hover:text-navy',
                   )}
                 >
                   {t.label}
@@ -178,12 +177,12 @@ export function ProductsPage() {
           </nav>
           <div className="flex flex-col gap-2 pb-3 sm:flex-row lg:pb-2.5">
             <div className="relative sm:flex-1 lg:w-64 lg:flex-none">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm tên sản phẩm…"
-                className="h-9 rounded-full bg-white pr-8 pl-9"
+                className="h-9 rounded-lg bg-white pr-8 pl-9"
                 aria-label="Tìm sản phẩm"
               />
               {search && (
@@ -193,13 +192,13 @@ export function ProductsPage() {
                   onClick={() => setSearch('')}
                   aria-label="Xóa tìm kiếm"
                 >
-                  <X className="size-4" />
+                  <IconX className="size-4" />
                 </button>
               )}
             </div>
             <select
               aria-label="Danh mục"
-              className={cn(nativeSelectClass, 'h-9 rounded-full sm:w-52')}
+              className={cn(nativeSelectClass, 'h-9 rounded-lg sm:w-52')}
               value={categoryId}
               onChange={(e) => update({ category: e.target.value || null })}
             >
@@ -225,7 +224,7 @@ export function ProductsPage() {
         ) : rows.length === 0 ? (
           filtered ? (
             <EmptyState
-              icon={Search}
+              icon={IconSearch}
               title="Không có sản phẩm khớp bộ lọc"
               text="Thử từ khóa khác, chọn danh mục khác hoặc tab Tất cả."
               action={
@@ -242,13 +241,13 @@ export function ProductsPage() {
             />
           ) : (
             <EmptyState
-              icon={Package}
+              icon={IconPackage}
               title="Shop chưa có sản phẩm nào"
               text="Thêm ảnh, giá, phân loại và tồn kho. Đăng xong là hàng lên sàn ngay."
               action={
-                <Button asChild className="rounded-full px-5">
+                <Button asChild className="rounded-lg px-5">
                   <Link to="/kenh-nguoi-ban/san-pham/moi">
-                    <Plus /> Thêm sản phẩm đầu tiên
+                    <IconPlus /> Thêm sản phẩm đầu tiên
                   </Link>
                 </Button>
               }
@@ -261,11 +260,11 @@ export function ProductsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-ivory text-left text-xs tracking-wide whitespace-nowrap text-muted-foreground uppercase">
-                    <th className="px-5 py-3 font-medium">Sản phẩm</th>
-                    <th className="px-3 py-3 font-medium">Giá</th>
-                    <th className="px-3 py-3 font-medium">Còn bán / Tồn</th>
-                    <th className="px-3 py-3 text-right font-medium">Đã bán</th>
-                    <th className="px-3 py-3 font-medium">Trạng thái</th>
+                    <th className="px-5 py-3 font-normal">Sản phẩm</th>
+                    <th className="px-3 py-3 font-normal">Giá</th>
+                    <th className="px-3 py-3 font-normal">Còn bán / Tồn</th>
+                    <th className="px-3 py-3 text-right font-normal">Đã bán</th>
+                    <th className="px-3 py-3 font-normal">Trạng thái</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -318,10 +317,10 @@ export function ProductsPage() {
                             asChild
                             size="sm"
                             variant="outline"
-                            className="rounded-full border-navy/30 text-navy group-hover:border-navy"
+                            className="rounded-lg border-ink/15 text-charcoal group-hover:border-navy/40 group-hover:text-navy hover:bg-transparent"
                           >
                             <Link to={`/kenh-nguoi-ban/san-pham/${p.id}`}>
-                              <Pencil /> Sửa
+                              <IconPencil /> Sửa
                             </Link>
                           </Button>
                           <RowMenu
@@ -368,18 +367,18 @@ export function ProductsPage() {
                   </div>
                   <RemovedReasonLine reason={p.removedReason} className="max-w-none text-xs" />
                   <div className="mt-3 flex items-center gap-2 border-t pt-3">
-                    <Button asChild size="sm" variant="outline" className="flex-1 rounded-full">
+                    <Button asChild size="sm" variant="outline" className="flex-1 rounded-lg">
                       <Link to={`/kenh-nguoi-ban/san-pham/${p.id}`}>
-                        <Pencil /> Sửa
+                        <IconPencil /> Sửa
                       </Link>
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 rounded-full"
+                      className="flex-1 rounded-lg"
                       onClick={() => setStockFor(p.id)}
                     >
-                      <PackagePlus /> Tồn kho
+                      <IconPackage /> Tồn kho
                     </Button>
                     <RowMenu
                       row={p}
@@ -432,11 +431,11 @@ function StockCell({ row, inline }: { row: SellerProductRow; inline?: boolean })
   const low = !out && row.totalAvailable <= PRODUCT_LIMITS.lowStock;
   const tone = out ? 'text-red-600' : low ? 'text-amber-700' : 'text-ink';
   const badge = out ? (
-    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
+    <span className="rounded-md bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
       Hết hàng
     </span>
   ) : low ? (
-    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200 ring-inset">
+    <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200 ring-inset">
       Sắp hết
     </span>
   ) : null;
@@ -506,30 +505,30 @@ function RowMenu({
           aria-label="Thao tác khác"
           disabled={busy}
         >
-          {busy ? <Loader2 className="animate-spin" /> : <MoreHorizontal />}
+          {busy ? <IconLoader2 className="animate-spin" /> : <IconDots />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuItem onSelect={onStock}>
-          <PackagePlus /> Nhập / điều chỉnh tồn
+          <IconPackage /> Nhập / điều chỉnh tồn
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onHistory}>
-          <History /> Lịch sử tồn kho
+          <IconHistory /> Lịch sử tồn kho
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {row.status === 'REMOVED' ? (
           <DropdownMenuItem disabled>
-            <EyeOff /> Bị gỡ: không tự bật bán được
+            <IconEyeOff /> Bị gỡ: không tự bật bán được
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem onSelect={() => void toggle()}>
-            {hide ? <EyeOff /> : <Eye />} {hide ? 'Ẩn khỏi sàn' : 'Hiện lại (bán tiếp)'}
+            {hide ? <IconEyeOff /> : <IconEye />} {hide ? 'Ẩn khỏi sàn' : 'Hiện lại (bán tiếp)'}
           </DropdownMenuItem>
         )}
         {row.status === 'ACTIVE' && shopActive && (
           <DropdownMenuItem asChild>
             <Link to={`/san-pham/${row.id}`} target="_blank" rel="noreferrer">
-              <ExternalLink /> Xem trên sàn
+              <IconExternalLink /> Xem trên sàn
             </Link>
           </DropdownMenuItem>
         )}
@@ -550,7 +549,7 @@ function ListSkeleton() {
           </div>
           <Skeleton className="hidden h-4 w-24 md:block" />
           <Skeleton className="hidden h-4 w-20 md:block" />
-          <Skeleton className="h-8 w-16 rounded-full" />
+          <Skeleton className="h-8 w-16 rounded-lg" />
         </div>
       ))}
     </div>

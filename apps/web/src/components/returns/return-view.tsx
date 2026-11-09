@@ -1,4 +1,11 @@
-import { Banknote, FileText, Scale, Store, Truck, UserRound } from 'lucide-react';
+import {
+  IconBuildingStore,
+  IconCash,
+  IconFileText,
+  IconScale,
+  IconTruck,
+  IconUser,
+} from '@tabler/icons-react';
 import { MoneyRow, RefundBadge } from '@/components/orders/order-parts';
 import { ShipmentPanel } from '@/components/orders/shipment-parts';
 import type { ReturnRequest } from '@/lib/after-sales-types';
@@ -16,16 +23,19 @@ export function Card({
   className,
 }: {
   title: React.ReactNode;
-  icon?: typeof FileText;
+  icon?: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <section
-      className={cn('rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5', className)}
+      className={cn(
+        'rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5',
+        className,
+      )}
     >
-      <div className="mb-2 flex items-center gap-2 font-semibold text-navy">
-        {Icon && <Icon className="size-4 text-champagne-600" />}
+      <div className="mb-3 flex items-center gap-2 text-base font-bold tracking-tight text-charcoal">
+        {Icon && <Icon className="size-[1.125rem] text-navy" />}
         {title}
       </div>
       {children}
@@ -42,30 +52,34 @@ export function ActionBar({
   actions,
 }: {
   tone: 'info' | 'warn' | 'danger' | 'success' | 'muted';
-  icon: typeof FileText;
+  icon: React.ComponentType<{ className?: string }>;
   title: React.ReactNode;
   text?: React.ReactNode;
   actions?: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-3 rounded-2xl border px-4 py-4 sm:flex-row sm:items-center md:px-5',
-        {
-          info: 'border-champagne/50 bg-champagne-50 text-navy',
-          warn: 'border-amber-200 bg-amber-50 text-amber-900',
-          danger: 'border-red-200 bg-red-50 text-red-900',
-          success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-          muted: 'bg-ivory text-ink/75',
-        }[tone],
-      )}
-    >
-      <Icon className="hidden size-6 shrink-0 opacity-70 sm:block" />
-      <div className="min-w-0 flex-1 text-sm">
-        <div className="font-semibold">{title}</div>
-        {text && <div className="opacity-90">{text}</div>}
+    <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-center gap-3.5">
+        <span
+          className={cn(
+            'flex size-12 shrink-0 items-center justify-center rounded-full',
+            {
+              info: 'bg-champagne-50 text-navy',
+              warn: 'bg-amber-50 text-amber-600',
+              danger: 'bg-red-50 text-red-500',
+              success: 'bg-ship/10 text-ship',
+              muted: 'bg-page text-ink/50',
+            }[tone],
+          )}
+        >
+          <Icon className="size-6" />
+        </span>
+        <div className="min-w-0 text-sm">
+          <div className="text-base font-bold tracking-tight text-charcoal">{title}</div>
+          {text && <div className="mt-0.5 leading-relaxed text-ink/60">{text}</div>}
+        </div>
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
@@ -83,8 +97,8 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
           <ReturnItemsList items={r.items} showRestock={viewer !== 'BUYER'} />
         </Card>
 
-        <Card title="Lý do và bằng chứng của người mua" icon={UserRound}>
-          <div className="text-sm font-medium text-ink">{RETURN_REASONS[r.reason]}</div>
+        <Card title="Lý do và bằng chứng của người mua" icon={IconUser}>
+          <div className="text-sm font-semibold text-charcoal">{RETURN_REASONS[r.reason]}</div>
           <p className="mt-1 text-sm break-words whitespace-pre-line text-ink/70">
             {r.description}
           </p>
@@ -92,8 +106,8 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
             <EvidenceGallery keys={r.images} />
           </div>
           {r.disputeNote && (
-            <div className="mt-4 border-t border-ivory-200 pt-3">
-              <div className="text-sm font-medium text-ink">Lời khiếu nại</div>
+            <div className="mt-4 border-t border-ink/[0.06] pt-3">
+              <div className="text-sm font-semibold text-charcoal">Lời khiếu nại</div>
               <p className="mt-1 text-sm break-words whitespace-pre-line text-ink/70">
                 {r.disputeNote}
               </p>
@@ -111,7 +125,7 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
                 ? 'Shop báo hàng trả về không đúng'
                 : 'Lời của shop'
             }
-            icon={Store}
+            icon={IconBuildingStore}
           >
             <p className="text-sm break-words whitespace-pre-line text-ink/70">{r.sellerNote}</p>
             <div className="mt-3">
@@ -121,7 +135,7 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
         )}
 
         {r.shipment && (
-          <Card title="Vận đơn trả hàng (người mua → shop)" icon={Truck}>
+          <Card title="Vận đơn trả hàng (người mua → shop)" icon={IconTruck}>
             <ShipmentPanel
               shipment={{ ...r.shipment, failedAttempts: 0 }}
               forSeller={viewer !== 'BUYER'}
@@ -130,7 +144,7 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
         )}
 
         {r.history && r.history.length > 0 && (
-          <Card title="Các bước đã qua" icon={FileText}>
+          <Card title="Các bước đã qua" icon={IconFileText}>
             <ReturnTimeline history={r.history} />
           </Card>
         )}
@@ -143,7 +157,7 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
               Tiền hoàn <RefundBadge status={r.refundStatus} />
             </span>
           }
-          icon={Banknote}
+          icon={IconCash}
         >
           <MoneyRow
             label="Hoàn tối đa"
@@ -152,7 +166,7 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
           />
           {decided && (
             <>
-              <div className="my-2 border-t border-ivory-200" />
+              <div className="my-2.5 border-t border-dashed border-ink/15" />
               <MoneyRow
                 label={r.decidedRefund! < r.refundAmount ? 'Hoàn một phần' : 'Hoàn cho người mua'}
                 value={r.decidedRefund!}
@@ -172,14 +186,14 @@ export function ReturnBody({ ret: r, viewer }: { ret: ReturnRequest; viewer: Vie
             </p>
           )}
           {r.bankAccount && (
-            <div className="mt-3 rounded-lg bg-ivory px-3 py-2 text-xs text-ink/70">
+            <div className="mt-3 rounded-lg bg-page px-3 py-2.5 text-xs text-ink/70">
               <div className="font-medium text-ink">Tài khoản nhận tiền hoàn</div>
               {r.bankAccount.bankName} · {r.bankAccount.accountNumber} · {r.bankAccount.accountName}
             </div>
           )}
         </Card>
 
-        <Card title="Thông tin" icon={Scale}>
+        <Card title="Thông tin" icon={IconScale}>
           <dl className="space-y-1 text-sm">
             <Row label="Mã yêu cầu" value={r.code} />
             <Row label="Đơn" value={r.shopOrderCode} />
@@ -203,7 +217,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
       <dt className="text-ink/55">{label}</dt>
-      <dd className="text-right font-medium text-ink">{value}</dd>
+      <dd className="text-right font-medium text-charcoal">{value}</dd>
     </div>
   );
 }

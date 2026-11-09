@@ -1,5 +1,10 @@
-import type { LucideIcon } from 'lucide-react';
-import { CalendarDays, Info, Package, Store, TicketPercent } from 'lucide-react';
+import {
+  IconBuildingStore,
+  IconCalendar,
+  IconInfoCircle,
+  IconPackage,
+  IconTicket,
+} from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { EmptyState } from '@/components/console/empty-state';
 import { StatusBadge } from '@/components/status-badge';
@@ -18,7 +23,7 @@ export function ReportTabs<T extends string>({
   value,
   onChange,
 }: {
-  tabs: Array<{ value: T; label: string; icon: LucideIcon }>;
+  tabs: Array<{ value: T; label: string; icon: React.ComponentType<{ className?: string }> }>;
   value: T;
   onChange: (t: T) => void;
 }) {
@@ -35,7 +40,7 @@ export function ReportTabs<T extends string>({
             '-mb-px flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
             value === t.value
               ? 'border-navy font-semibold text-navy'
-              : 'border-transparent text-muted-foreground hover:text-ink',
+              : 'border-transparent text-ink/60 hover:text-navy',
           )}
         >
           <t.icon className="size-4" />
@@ -65,12 +70,12 @@ export function RangePicker({
   onRange: (r: { from: string; to: string }) => void;
 }) {
   return (
-    <div className="mb-6 rounded-2xl border bg-card p-3 shadow-sm shadow-navy/[0.03] md:px-4">
+    <div className="mb-6 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-3 md:px-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div
           role="radiogroup"
           aria-label="Khoảng ngày nhanh"
-          className="flex w-full rounded-full bg-ivory p-1 md:w-auto"
+          className="flex w-full rounded-lg bg-ivory p-1 md:w-auto"
         >
           {RANGE_PRESETS.map((n) => (
             <button
@@ -80,7 +85,7 @@ export function RangePicker({
               aria-checked={preset === n}
               onClick={() => onPreset(n)}
               className={cn(
-                'flex-1 rounded-full px-4 py-1.5 text-sm whitespace-nowrap transition md:flex-none',
+                'flex-1 rounded-lg px-4 py-1.5 text-sm whitespace-nowrap transition md:flex-none',
                 preset === n
                   ? 'bg-navy font-medium text-white shadow-sm'
                   : 'text-ink/70 hover:text-navy',
@@ -91,7 +96,7 @@ export function RangePicker({
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <CalendarDays className="hidden size-4 shrink-0 text-champagne-600 sm:block" />
+          <IconCalendar className="hidden size-4 shrink-0 text-champagne-600 sm:block" />
           <label className="sr-only" htmlFor="report-from">
             Từ ngày
           </label>
@@ -142,10 +147,13 @@ export function ReportSection({
 }) {
   return (
     <section
-      className={cn('min-w-0 rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]', className)}
+      className={cn(
+        'min-w-0 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]',
+        className,
+      )}
     >
       <header className="border-b px-4 py-3.5 md:px-5">
-        <h2 className="font-semibold text-navy">{title}</h2>
+        <h2 className="font-semibold text-charcoal">{title}</h2>
         {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
       </header>
       <div className={cn('p-4 md:p-5', bodyClassName)}>{children}</div>
@@ -164,7 +172,7 @@ export function StatTile({
   highlight,
   className,
 }: {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
   hint?: React.ReactNode;
@@ -176,27 +184,21 @@ export function StatTile({
       className={cn(
         'relative min-w-0 overflow-hidden rounded-2xl p-4 md:p-5',
         highlight
-          ? 'bg-navy text-white shadow-lg shadow-navy/20'
-          : 'border bg-card shadow-sm shadow-navy/[0.03]',
+          ? 'bg-gradient-to-br from-header-from to-header-to text-white'
+          : 'bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]',
         className,
       )}
     >
-      {highlight && (
-        <div
-          className="absolute -top-10 -right-10 size-32 rounded-full bg-champagne/15"
-          aria-hidden
-        />
-      )}
       <div
         className={cn(
           'relative flex items-center gap-2 text-xs font-medium',
-          highlight ? 'text-white/75' : 'text-ink/60',
+          highlight ? 'text-white/85' : 'text-ink/60',
         )}
       >
         <span
           className={cn(
             'flex size-8 shrink-0 items-center justify-center rounded-full',
-            highlight ? 'bg-white/10 text-champagne' : 'bg-champagne-50 text-champagne-600',
+            highlight ? 'bg-white/15 text-white' : 'bg-champagne-50 text-navy',
           )}
         >
           <Icon className="size-4" />
@@ -206,18 +208,13 @@ export function StatTile({
       <div
         className={cn(
           'relative mt-3 text-lg font-bold break-words tabular-nums sm:text-2xl',
-          highlight ? 'text-champagne' : 'text-navy',
+          highlight ? 'text-white' : 'text-charcoal',
         )}
       >
         {value}
       </div>
       {hint && (
-        <div
-          className={cn(
-            'relative mt-1 text-xs',
-            highlight ? 'text-white/65' : 'text-muted-foreground',
-          )}
-        >
+        <div className={cn('relative mt-1 text-xs', highlight ? 'text-white/80' : 'text-ink/55')}>
           {hint}
         </div>
       )}
@@ -232,14 +229,14 @@ export function RateTile({
   rate,
   hint,
 }: {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   /** Phần nghìn */
   rate: number;
   hint: string;
 }) {
   return (
-    <div className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm shadow-navy/[0.03] md:p-5">
+    <div className="min-w-0 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 md:p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-medium text-ink/60">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
@@ -285,7 +282,7 @@ export function FormulaNote({ items }: { items: Array<[string, string]> }) {
   return (
     <details className="group rounded-2xl border border-champagne/40 bg-champagne-50/40 px-4 py-3 text-sm md:px-5">
       <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-navy">
-        <Info className="size-4 text-champagne-600" />
+        <IconInfoCircle className="size-4 text-navy" />
         Các con số được tính thế nào?
         <span className="ml-auto text-xs text-muted-foreground group-open:hidden">Xem</span>
         <span className="ml-auto hidden text-xs text-muted-foreground group-open:inline">
@@ -345,7 +342,7 @@ export function TopProductsTable({
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={Package}
+        icon={IconPackage}
         title="Chưa có sản phẩm bán ra"
         text="Sản phẩm trong các đơn không bị hủy hiện ở đây."
         className="py-10"
@@ -372,7 +369,7 @@ export function TopProductsTable({
                 {p.image ? (
                   <img src={p.image} alt="" className="size-full object-cover" loading="lazy" />
                 ) : (
-                  <Package className="size-4 text-ink/30" />
+                  <IconPackage className="size-4 text-ink/30" />
                 )}
               </span>
               <div className="min-w-0 flex-1">
@@ -418,7 +415,7 @@ export function VoucherTable({
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={TicketPercent}
+        icon={IconTicket}
         title="Chưa có đơn dùng voucher"
         text="Mã giảm giá được dùng trong các đơn không bị hủy hiện ở đây."
         className="py-10"
@@ -473,7 +470,7 @@ export function TopShopsTable({
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={Store}
+        icon={IconBuildingStore}
         title="Chưa có shop nào có đơn"
         text="Shop có đơn trong khoảng ngày hiện ở đây."
         className="py-10"

@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import { useProductSearch } from '@/components/catalog/browse-query';
 import { discountPercent, formatSold } from '@/components/catalog/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAddToCart } from '@/hooks/use-cart';
+import { useAddToCart, useBuyNow } from '@/hooks/use-cart';
 import { API, api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
 import { toastCartError } from '@/lib/cart-errors';
@@ -462,13 +462,14 @@ function SpotlightCard({ product, createdAt }: { product: ProductDetail; created
 
 /**
  * Thêm vào giỏ / Mua ngay từ khối tiêu điểm: khách chưa đăng nhập thì sang trang đăng nhập rồi quay lại
- * trang chủ; Mua ngay = thêm vào giỏ rồi sang trang giỏ hàng.
+ * trang chủ; Mua ngay sang thẳng trang đặt hàng.
  */
 function useSpotlightCart(name: string) {
   const session = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   const mutation = useAddToCart();
+  const buying = useBuyNow();
   const ready = () => {
     if (session.status === 'loading') return false;
     if (session.status === 'guest') {
@@ -492,11 +493,7 @@ function useSpotlightCart(name: string) {
     );
   };
   const buyNow = (variantId: string) => {
-    if (!ready()) return;
-    mutation.mutate(
-      { variantId, quantity: 1 },
-      { onSuccess: () => navigate('/gio-hang'), onError: toastCartError },
-    );
+    if (ready()) buying.mutate({ variantId, quantity: 1 });
   };
-  return { add, buyNow, pending: mutation.isPending };
+  return { add, buyNow, pending: mutation.isPending || buying.isPending };
 }

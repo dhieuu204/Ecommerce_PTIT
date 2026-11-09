@@ -1,4 +1,4 @@
-import { Loader2, MessagesSquare } from 'lucide-react';
+import { IconLoader2, IconMessages } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
@@ -37,7 +37,7 @@ export function ConversationList({
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={MessagesSquare}
+        icon={IconMessages}
         title="Chưa có cuộc trò chuyện"
         text={
           role === 'BUYER'
@@ -66,7 +66,7 @@ export function ConversationList({
             {role === 'BUYER' ? (
               <ShopLogo
                 url={c.shop.logoUrl}
-                className="size-11 rounded-full border border-ivory-200"
+                className="size-11 rounded-full border border-ink/[0.06]"
               />
             ) : (
               <UserAvatar name={c.buyer.name} className="size-11" />
@@ -76,7 +76,7 @@ export function ConversationList({
                 <span
                   className={cn(
                     'min-w-0 flex-1 truncate text-sm',
-                    c.unread ? 'font-semibold text-navy' : 'font-medium text-ink',
+                    c.unread ? 'font-bold text-charcoal' : 'font-medium text-ink',
                   )}
                 >
                   {name}
@@ -108,7 +108,7 @@ export function ConversationList({
           disabled={list.isFetchingNextPage}
           onClick={() => void list.fetchNextPage()}
         >
-          {list.isFetchingNextPage && <Loader2 className="animate-spin" />}
+          {list.isFetchingNextPage && <IconLoader2 className="animate-spin" />}
           Xem thêm
         </Button>
       )}

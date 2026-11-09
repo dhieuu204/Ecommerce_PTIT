@@ -1,5 +1,11 @@
+import {
+  IconBuildingStore,
+  IconChevronRight,
+  IconSearch,
+  IconShieldExclamation,
+  IconX,
+} from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, Search, ShieldAlert, Store, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -132,7 +138,7 @@ export function ShopsPage() {
         description="Shop đã được duyệt. Đình chỉ shop vi phạm: hàng của shop tạm ẩn khỏi sàn cho tới khi khôi phục."
       />
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-3 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
           <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Trạng thái shop">
             {TABS.map((t) => {
@@ -147,7 +153,7 @@ export function ShopsPage() {
                     'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                     active
                       ? 'border-navy font-semibold text-navy'
-                      : 'border-transparent text-muted-foreground hover:text-ink',
+                      : 'border-transparent text-ink/60 hover:text-navy',
                   )}
                 >
                   {t.label}
@@ -170,12 +176,12 @@ export function ShopsPage() {
             })}
           </nav>
           <div className="relative pb-3 md:w-72 md:pb-2.5">
-            <Search className="pointer-events-none absolute top-[18px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="pointer-events-none absolute top-[18px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm tên shop…"
-              className="h-9 rounded-full bg-white pr-8 pl-9"
+              className="h-9 rounded-lg bg-white pr-8 pl-9"
               aria-label="Tìm shop"
             />
             {search && (
@@ -185,7 +191,7 @@ export function ShopsPage() {
                 onClick={() => setSearch('')}
                 aria-label="Xóa tìm kiếm"
               >
-                <X className="size-4" />
+                <IconX className="size-4" />
               </button>
             )}
           </div>
@@ -200,7 +206,7 @@ export function ShopsPage() {
                   <Skeleton className="h-4 w-48" />
                   <Skeleton className="h-3 w-32" />
                 </div>
-                <Skeleton className="h-8 w-16 rounded-full" />
+                <Skeleton className="h-8 w-16 rounded-lg" />
               </div>
             ))}
           </div>
@@ -208,7 +214,7 @@ export function ShopsPage() {
           <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
         ) : rows.length === 0 ? (
           <EmptyState
-            icon={Store}
+            icon={IconBuildingStore}
             title={q ? 'Không có shop khớp từ khóa' : 'Chưa có shop nào'}
             text={
               q
@@ -232,11 +238,11 @@ export function ShopsPage() {
               <table className="w-full table-fixed text-sm">
                 <thead>
                   <tr className="bg-ivory text-left text-xs tracking-wide whitespace-nowrap text-muted-foreground uppercase">
-                    <th className="w-[34%] px-5 py-3 font-medium">Shop</th>
-                    <th className="w-[24%] px-3 py-3 font-medium">Chủ shop</th>
-                    <th className="w-[11%] px-3 py-3 text-right font-medium">Sản phẩm</th>
-                    <th className="w-[12%] px-3 py-3 font-medium">Ngày duyệt</th>
-                    <th className="px-3 py-3 font-medium">Trạng thái</th>
+                    <th className="w-[34%] px-5 py-3 font-normal">Shop</th>
+                    <th className="w-[24%] px-3 py-3 font-normal">Chủ shop</th>
+                    <th className="w-[11%] px-3 py-3 text-right font-normal">Sản phẩm</th>
+                    <th className="w-[12%] px-3 py-3 font-normal">Ngày duyệt</th>
+                    <th className="px-3 py-3 font-normal">Trạng thái</th>
                     <th className="w-24 px-5 py-3" />
                   </tr>
                 </thead>
@@ -250,7 +256,7 @@ export function ShopsPage() {
                         >
                           <ShopLogo url={s.logoUrl} className="size-11 rounded-xl border" />
                           <span className="min-w-0">
-                            <span className="block truncate font-semibold text-navy group-hover:underline">
+                            <span className="block truncate font-semibold text-charcoal transition group-hover:text-navy">
                               {s.name}
                             </span>
                             <span className="block font-mono text-xs text-muted-foreground">
@@ -284,7 +290,7 @@ export function ShopsPage() {
                           asChild
                           size="sm"
                           variant="outline"
-                          className="rounded-full border-navy/30 text-navy group-hover:border-navy"
+                          className="rounded-lg border-ink/15 text-charcoal group-hover:border-navy/40 group-hover:text-navy hover:bg-transparent"
                         >
                           <Link to={`/quan-tri/shop/${s.id}`}>Xem</Link>
                         </Button>
@@ -306,7 +312,7 @@ export function ShopsPage() {
                     <ShopLogo url={s.logoUrl} className="size-12 rounded-xl border" />
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-semibold text-navy">{s.name}</span>
+                        <span className="truncate font-semibold text-charcoal">{s.name}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                         <ShopStatusBadge status={s.status} />
@@ -318,12 +324,12 @@ export function ShopsPage() {
                       </div>
                       {s.status === 'SUSPENDED' && s.suspendReason && (
                         <p className="flex gap-1 text-xs text-red-700">
-                          <ShieldAlert className="mt-px size-3.5 shrink-0" />
+                          <IconShieldExclamation className="mt-px size-3.5 shrink-0" />
                           <span className="line-clamp-2">{s.suspendReason}</span>
                         </p>
                       )}
                     </div>
-                    <ChevronRight className="size-5 shrink-0 text-champagne-600" />
+                    <IconChevronRight className="size-5 shrink-0 text-champagne-600" />
                   </Link>
                 </li>
               ))}
@@ -342,9 +348,6 @@ export function ShopsPage() {
           </div>
         )}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Tên và email chủ shop lấy theo hồ sơ mở shop đã duyệt. Số sản phẩm gồm cả hàng đang ẩn.
-      </p>
     </div>
   );
 }

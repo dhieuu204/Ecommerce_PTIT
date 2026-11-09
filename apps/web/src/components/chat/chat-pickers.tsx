@@ -1,5 +1,5 @@
+import { IconLoader2, IconPackage, IconReceipt, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Package, ReceiptText, Search } from 'lucide-react';
 import { useState } from 'react';
 import {
   Dialog,
@@ -26,7 +26,7 @@ function Row({
   onClick,
 }: {
   image: string | null;
-  icon: typeof Package;
+  icon: typeof IconPackage;
   title: string;
   sub: React.ReactNode;
   onClick: () => void;
@@ -37,7 +37,7 @@ function Row({
       onClick={onClick}
       className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-ivory-200/70"
     >
-      <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ivory-200 bg-ivory text-champagne-600">
+      <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink/[0.06] bg-ivory text-champagne-600">
         {image ? (
           <img src={image} alt="" className="size-full object-cover" />
         ) : (
@@ -64,7 +64,7 @@ function ListState({
   if (pending) {
     return (
       <div className="flex justify-center py-8 text-ink/40">
-        <Loader2 className="size-5 animate-spin" />
+        <IconLoader2 className="size-5 animate-spin" />
       </div>
     );
   }
@@ -106,7 +106,7 @@ export function ProductPicker({
           </DialogDescription>
         </DialogHeader>
         <div className="relative">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40" />
+          <IconSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -125,7 +125,7 @@ export function ProductPicker({
             <Row
               key={p.id}
               image={p.image}
-              icon={Package}
+              icon={IconPackage}
               title={p.name}
               sub={
                 p.minPrice === p.maxPrice
@@ -178,7 +178,7 @@ export function OrderPicker({
             <Row
               key={so.id}
               image={so.items[0]?.image ?? null}
-              icon={ReceiptText}
+              icon={IconReceipt}
               title={`Đơn ${so.code} · ${so.items[0]?.productName ?? ''}`}
               sub={
                 <>

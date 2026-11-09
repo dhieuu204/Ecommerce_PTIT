@@ -1,15 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  ImagePlus,
-  Loader2,
-  Package,
-  PauseCircle,
-  ReceiptText,
-  RotateCw,
-  SendHorizontal,
-  X,
-} from 'lucide-react';
+  IconArrowLeft,
+  IconLoader2,
+  IconPackage,
+  IconPhotoPlus,
+  IconPlayerPause,
+  IconReceipt,
+  IconRefresh,
+  IconSend,
+  IconX,
+} from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -63,24 +63,24 @@ function ChatHeader({ conv, backTo }: { conv: Conversation; backTo: string }) {
         className="rounded-full p-1.5 text-ink/70 transition hover:bg-ivory-200 lg:hidden"
         aria-label="Về danh sách"
       >
-        <ArrowLeft className="size-5" />
+        <IconArrowLeft className="size-5" />
       </Link>
       {buyerView ? (
         <ShopLogo
           url={conv.shop.logoUrl}
-          className="size-10 rounded-full border border-ivory-200"
+          className="size-10 rounded-full border border-ink/[0.06]"
         />
       ) : (
         <UserAvatar name={conv.buyer.name} className="size-10" />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate font-semibold text-navy">
+          <span className="truncate font-semibold text-charcoal">
             {buyerView ? conv.shop.name : conv.buyer.name}
           </span>
           {buyerView && conv.shop.suspended && (
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-ink/10 px-2 py-0.5 text-[11px] text-ink/70">
-              <PauseCircle className="size-3" /> Tạm ngừng bán
+            <span className="flex shrink-0 items-center gap-1 rounded-md bg-ink/10 px-2 py-0.5 text-[11px] text-ink/70">
+              <IconPlayerPause className="size-3" /> Tạm ngừng bán
             </span>
           )}
         </div>
@@ -121,9 +121,9 @@ function AttachOffer({
         {p?.images[0] ? (
           <img src={p.images[0].url} alt="" className="size-full object-cover" />
         ) : attach.kind === 'ORDER' ? (
-          <ReceiptText className="size-5" />
+          <IconReceipt className="size-5" />
         ) : (
-          <Package className="size-5" />
+          <IconPackage className="size-5" />
         )}
       </span>
       <div className="min-w-0 flex-1 text-sm">
@@ -152,7 +152,7 @@ function AttachOffer({
         className="rounded-full p-1 text-ink/50 transition hover:bg-card"
         aria-label="Bỏ qua"
       >
-        <X className="size-4" />
+        <IconX className="size-4" />
       </button>
     </div>
   );
@@ -385,7 +385,7 @@ export function ChatWindow({
       >
         {msgs.isPending ? (
           <div className="flex justify-center py-10 text-ink/40">
-            <Loader2 className="size-5 animate-spin" />
+            <IconLoader2 className="size-5 animate-spin" />
           </div>
         ) : msgs.isError ? (
           <LoadError message={msgs.error.message} onRetry={() => void msgs.refetch()} />
@@ -393,7 +393,7 @@ export function ChatWindow({
           <>
             {msgs.isFetchingNextPage && (
               <div className="flex justify-center pb-3 text-ink/40">
-                <Loader2 className="size-4 animate-spin" />
+                <IconLoader2 className="size-4 animate-spin" />
               </div>
             )}
             {!msgs.hasNextPage && (
@@ -444,7 +444,7 @@ export function ChatWindow({
                         className="flex items-center gap-1 font-medium underline"
                         onClick={() => void deliver(p)}
                       >
-                        <RotateCw className="size-3" /> Gửi lại
+                        <IconRefresh className="size-3" /> Gửi lại
                       </button>
                       <button
                         type="button"
@@ -499,7 +499,7 @@ export function ChatWindow({
             title="Gửi ảnh"
             onClick={() => fileRef.current?.click()}
           >
-            <ImagePlus className="size-5 text-champagne-600" />
+            <IconPhotoPlus className="size-5 text-navy" />
           </Button>
           {!c.shop.suspended && (
             <Button
@@ -510,7 +510,7 @@ export function ChatWindow({
               title="Gửi sản phẩm"
               onClick={() => setPicker('product')}
             >
-              <Package className="size-5 text-champagne-600" />
+              <IconPackage className="size-5 text-navy" />
             </Button>
           )}
           {c.role === 'BUYER' && (
@@ -522,7 +522,7 @@ export function ChatWindow({
               title="Gửi đơn hàng"
               onClick={() => setPicker('order')}
             >
-              <ReceiptText className="size-5 text-champagne-600" />
+              <IconReceipt className="size-5 text-navy" />
             </Button>
           )}
           <textarea
@@ -539,7 +539,7 @@ export function ChatWindow({
             maxLength={MAX_TEXT}
             placeholder="Nhập tin nhắn…"
             aria-label="Nội dung tin nhắn"
-            className="max-h-32 min-h-9 min-w-0 flex-1 resize-none rounded-2xl border border-ivory-200 bg-ivory px-3.5 py-2 text-sm text-ink outline-none field-sizing-content placeholder:text-ink/40 focus:border-champagne"
+            className="max-h-32 min-h-9 min-w-0 flex-1 resize-none rounded-2xl border border-ink/[0.06] bg-ivory px-3.5 py-2 text-sm text-ink outline-none field-sizing-content placeholder:text-ink/40 focus:border-champagne"
           />
           <Button
             type="submit"
@@ -548,7 +548,7 @@ export function ChatWindow({
             disabled={!text.trim()}
             aria-label="Gửi"
           >
-            <SendHorizontal className="size-4" />
+            <IconSend className="size-4" />
           </Button>
         </form>
       </div>

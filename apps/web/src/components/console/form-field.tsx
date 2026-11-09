@@ -63,14 +63,14 @@ export function SectionCard({
     <section
       id={id}
       className={cn(
-        'scroll-mt-20 rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]',
+        'scroll-mt-20 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]',
         className,
       )}
     >
-      <header className="flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
+      <header className="flex flex-col gap-3 border-b border-ink/[0.06] px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
         <div>
-          <h2 className="flex items-center gap-2 font-semibold text-navy">
-            <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
+          <h2 className="flex items-center gap-3 text-base font-bold tracking-tight text-charcoal">
+            <span aria-hidden className="h-[3px] w-5 shrink-0 rounded-full bg-navy" />
             {title}
           </h2>
           {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}

@@ -1,4 +1,4 @@
-import { Lightbulb, SearchX } from 'lucide-react';
+import { IconBulb, IconSearchOff } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { useBrowseState, useProductSearch } from '@/components/catalog/browse-query';
 import {
@@ -12,24 +12,25 @@ import {
 import { CategoryIcon } from '@/components/catalog/category-icon';
 import { findCategory, useCategories } from '@/hooks/use-catalog';
 import type { CategoryNode, ProductSort } from '@/lib/catalog-types';
-import { cn } from '@/lib/utils';
 
 const SORTS: ProductSort[] = ['newest', 'best_selling', 'rating', 'price_asc', 'price_desc'];
 
 /** Gợi ý khi không tìm thấy: các danh mục cấp 1 dạng ô có icon */
 function CategorySuggestions({ tree }: { tree: CategoryNode[] }) {
   return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-9">
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-8">
       {tree.map((c) => (
         <Link
           key={c.id}
           to={`/danh-muc/${c.slug}`}
-          className="group flex flex-col items-center gap-2 rounded-2xl border border-ivory-200 bg-card px-2 py-4 text-center transition hover:-translate-y-0.5 hover:border-champagne/60 hover:shadow-md"
+          className="group flex flex-col items-center gap-2 rounded-lg border border-ink/10 bg-card px-2 py-4 text-center transition hover:border-navy/40"
         >
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-champagne-50 text-champagne-600 transition group-hover:bg-navy group-hover:text-champagne">
+          <span className="flex size-11 items-center justify-center rounded-full bg-champagne-50 text-navy">
             <CategoryIcon icon={c.icon} className="size-5" />
           </span>
-          <span className="line-clamp-2 text-xs leading-tight font-medium text-ink">{c.name}</span>
+          <span className="line-clamp-2 text-xs leading-tight font-medium text-charcoal transition group-hover:text-navy">
+            {c.name}
+          </span>
         </Link>
       ))}
     </div>
@@ -39,23 +40,23 @@ function CategorySuggestions({ tree }: { tree: CategoryNode[] }) {
 function NoMatch({ q, tree }: { q: string; tree: CategoryNode[] }) {
   return (
     <div className="px-5 py-12 text-center sm:px-10">
-      <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-champagne-50 text-champagne-600 ring-8 ring-champagne-50/50">
-        <SearchX className="size-6" />
+      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-champagne-50 text-navy">
+        <IconSearchOff className="size-7 [stroke-width:1.5]" />
       </span>
-      <h2 className="mt-4 text-lg font-semibold text-navy">Không tìm thấy sản phẩm cho “{q}”</h2>
+      <h2 className="mt-4 text-lg font-bold text-charcoal">Không tìm thấy sản phẩm cho “{q}”</h2>
       <ul className="mx-auto mt-3 max-w-md space-y-1 text-left text-sm text-ink/65">
         <li className="flex gap-2">
-          <Lightbulb className="mt-0.5 size-4 shrink-0 text-champagne-600" />
+          <IconBulb className="mt-0.5 size-4 shrink-0 text-navy [stroke-width:1.75]" />
           Kiểm tra lại chính tả, hoặc gõ ngắn hơn (ví dụ “ip” thay vì “iphone 16 pro max 256”).
         </li>
         <li className="flex gap-2">
-          <Lightbulb className="mt-0.5 size-4 shrink-0 text-champagne-600" />
+          <IconBulb className="mt-0.5 size-4 shrink-0 text-navy [stroke-width:1.75]" />
           Gõ có dấu hay không dấu đều được: “điện thoại” và “dien thoai” cho cùng kết quả.
         </li>
       </ul>
       {tree.length > 0 && (
         <div className="mt-8 text-left">
-          <div className="mb-3 text-sm font-semibold text-navy">Danh mục được tìm nhiều</div>
+          <div className="mb-3 text-sm font-bold text-charcoal">Xem theo danh mục</div>
           <CategorySuggestions tree={tree} />
         </div>
       )}
@@ -97,35 +98,23 @@ export function SearchPage() {
   const setCategory = (slug?: string) => browse.update({ category: slug });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-5 pb-4">
+    <div className="mx-auto max-w-7xl px-4 pb-12">
       <Breadcrumb items={[{ label: 'Tìm kiếm' }]} />
 
-      <div className="mt-6 md:mt-8">
-        <h1 className="text-2xl font-bold tracking-tight text-navy md:text-3xl">
-          {q ? (
-            <>
-              Kết quả cho <span className="text-champagne-600">“{q}”</span>
-            </>
-          ) : (
-            'Tất cả sản phẩm'
-          )}
-        </h1>
-        <p className="mt-1.5 h-5 text-sm text-ink/60">
-          {total !== undefined &&
-            (total > 0
-              ? `Tìm thấy ${total.toLocaleString('vi-VN')} sản phẩm${selected ? ` trong ${selected.name}` : ''}`
-              : 'Chưa có sản phẩm phù hợp')}
-        </p>
-      </div>
+      <h1 className="text-xl font-bold tracking-tight text-charcoal md:text-2xl">
+        {q ? (
+          <>
+            Kết quả cho <span className="text-navy">“{q}”</span>
+          </>
+        ) : (
+          'Tất cả sản phẩm'
+        )}
+      </h1>
 
       {tree.length > 0 && (
-        <section className="mt-5" aria-label="Lọc theo danh mục">
+        <section className="mt-4" aria-label="Lọc theo danh mục">
           <ChipRow>
-            <button
-              type="button"
-              className={chipClass(!selected, 'sm')}
-              onClick={() => setCategory()}
-            >
+            <button type="button" className={chipClass(!selected)} onClick={() => setCategory()}>
               Tất cả danh mục
             </button>
             {tree.map((c) => {
@@ -135,10 +124,10 @@ export function SearchPage() {
                   key={c.id}
                   type="button"
                   aria-pressed={active}
-                  className={chipClass(active, 'sm')}
+                  className={chipClass(active)}
                   onClick={() => setCategory(active && !found?.child ? undefined : c.slug)}
                 >
-                  <CategoryIcon icon={c.icon} className="size-3.5" />
+                  <CategoryIcon icon={c.icon} className="size-4" />
                   {c.name}
                 </button>
               );
@@ -146,7 +135,7 @@ export function SearchPage() {
           </ChipRow>
           {found && (found.parent.children?.length ?? 0) > 0 && (
             <div className="mt-3 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] sm:flex-wrap [&::-webkit-scrollbar]:hidden">
-              <span className="shrink-0 text-xs font-medium text-ink/50">{found.parent.name}:</span>
+              <span className="shrink-0 text-[13px] text-ink/55">{found.parent.name}:</span>
               {found.parent.children!.map((c) => {
                 const active = found.child?.id === c.id;
                 return (
@@ -155,12 +144,7 @@ export function SearchPage() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setCategory(active ? found.parent.slug : c.slug)}
-                    className={cn(
-                      'h-7 shrink-0 rounded-lg border px-3 text-xs font-medium transition',
-                      active
-                        ? 'border-champagne bg-champagne-50 text-navy'
-                        : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne hover:text-navy',
-                    )}
+                    className={chipClass(active, 'sm')}
                   >
                     {c.name}
                   </button>
@@ -173,7 +157,7 @@ export function SearchPage() {
 
       {!(total === 0 && !filtered) && (
         <CatalogToolbar
-          className="mt-5"
+          className="mt-4"
           sort={sort}
           sorts={sorts}
           onSort={(s) => browse.update({ sort: s === defaultSort ? undefined : s })}
@@ -186,7 +170,7 @@ export function SearchPage() {
         />
       )}
 
-      <div className="mt-5">
+      <div className="mt-4">
         <ProductResults
           query={products}
           onPage={browse.setPage}

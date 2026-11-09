@@ -1,16 +1,27 @@
+import {
+  IconCircleCheckFilled,
+  IconCircleXFilled,
+  IconClock,
+  IconLoader2,
+  IconPhotoOff,
+} from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Clock, Loader2, ShoppingBag, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
+import { useProductSearch } from '@/components/catalog/browse-query';
 import { LoadError } from '@/components/console/empty-state';
+import { ProductRow, SectionTitle } from '@/components/home/home-sections';
 import { useCountdown } from '@/components/orders/order-parts';
-import { Button } from '@/components/ui/button';
 import { API, api } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import type { Order, OrderPayment } from '@/lib/order-types';
 import { cn } from '@/lib/utils';
-import { startPayment } from './checkout';
+import { openPayUrl, startPayment } from './checkout';
+import { CARD, PRIMARY_BUTTON } from './checkout-parts';
+
+/** Số ảnh sản phẩm tối đa hiện trong biên nhận */
+const MAX_THUMBS = 5;
 
 /**
  * Trang buyer quay về sau cổng thanh toán (PAY-02). Không tự coi là đã trả: gửi tham số cổng cho
@@ -60,7 +71,7 @@ export function PaymentResultPage() {
     setRetrying(true);
     try {
       const link = await startPayment(orderId);
-      window.location.assign(link.payUrl);
+      openPayUrl(link.payUrl);
     } catch (e) {
       setRetrying(false);
       toast.error(e instanceof Error ? e.message : 'Chưa mở được trang thanh toán.');
@@ -97,20 +108,22 @@ export function PaymentResultPage() {
   if (s.status === 'PAID') {
     const checking = order.data?.checkStatus === 'PENDING';
     return (
-      <Frame mock={mock}>
-        <Hero
-          tone="success"
-          icon={CheckCircle2}
-          title="Thanh toán thành công"
-          text={`Đơn ${s.orderCode} · ${formatMoney(s.amount)}`}
-        />
-        <p className="mt-4 text-center text-sm text-ink/65">
-          {checking
-            ? 'Đơn có giá trị lớn đang được sàn kiểm tra. Sau khi qua kiểm tra, shop sẽ xác nhận đơn.'
-            : 'Shop sẽ xác nhận đơn của bạn trong thời gian sớm nhất.'}
-        </p>
-        <Actions orderId={s.orderId} />
-      </Frame>
+      <>
+        <Frame mock={mock}>
+          <Hero
+            tone="success"
+            title="Thanh toán thành công"
+            text={
+              checking
+                ? 'Đơn giá trị lớn đang được sàn kiểm tra. Sau khi qua kiểm tra, shop sẽ xác nhận đơn.'
+                : 'Shop sẽ xác nhận và chuẩn bị hàng cho bạn.'
+            }
+          />
+          <Receipt payment={s} order={order.data} />
+          <Actions orderId={s.orderId} />
+        </Frame>
+        <Suggestions />
+      </>
     );
   }
   if (s.status === 'EXPIRED' || s.status === 'CANCELLED') {
@@ -118,10 +131,10 @@ export function PaymentResultPage() {
       <Frame mock={mock}>
         <Hero
           tone="danger"
-          icon={XCircle}
           title={s.status === 'EXPIRED' ? 'Đơn đã hết hạn thanh toán' : 'Đơn đã bị hủy'}
-          text={`Đơn ${s.orderCode}. Nếu tài khoản đã bị trừ tiền, sàn sẽ tự hoàn lại.`}
+          text="Nếu tài khoản đã bị trừ tiền, sàn sẽ tự hoàn lại."
         />
+        <Receipt payment={s} order={order.data} />
         <Actions orderId={s.orderId} />
       </Frame>
     );
@@ -144,12 +157,12 @@ export function PaymentResultPage() {
     <Frame mock={mock}>
       <Hero
         tone="danger"
-        icon={XCircle}
         title="Thanh toán chưa thành công"
-        text={`Đơn ${s.orderCode} · ${formatMoney(s.amount)} · đã thử ${s.attempts}/${s.maxAttempts} lần`}
+        text={`Đã thử ${s.attempts}/${s.maxAttempts} lần. Tiền chưa bị trừ thì bạn có thể thanh toán lại.`}
       />
+      <Receipt payment={s} order={order.data} />
       <RetryBox payment={s} retrying={retrying} onRetry={retry} />
-      <Actions orderId={s.orderId} />
+      <Actions orderId={s.orderId} secondaryOnly />
     </Frame>
   );
 }
@@ -169,34 +182,41 @@ function RetryBox({
 }) {
   const left = useCountdown(payment.payBefore);
   const canRetry = payment.attempts < payment.maxAttempts && left;
+  if (!canRetry) {
+    return (
+      <p className="mt-4 text-center text-sm text-ink/60">
+        Đơn đã hết lượt hoặc hết hạn thanh toán và sẽ tự hủy. Bạn có thể đặt lại từ giỏ hàng.
+      </p>
+    );
+  }
   return (
-    <div className="mt-5 rounded-2xl bg-ivory/70 px-4 py-4 text-center text-sm">
-      {canRetry ? (
-        <>
-          <div className="flex items-center justify-center gap-1.5 text-ink/65">
-            <Clock className="size-4" /> Còn <b className="text-navy tabular-nums">{left}</b> để
-            thanh toán
-          </div>
-          <Button className="mt-3 h-11 rounded-xl px-8" onClick={onRetry} disabled={retrying}>
-            {retrying && <Loader2 className="size-4 animate-spin" />}
-            Thanh toán lại
-          </Button>
-        </>
-      ) : (
-        <span className="text-ink/65">
-          Đơn đã hết lượt hoặc hết hạn thanh toán và sẽ tự hủy. Bạn có thể đặt lại từ giỏ hàng.
-        </span>
-      )}
+    <div className="mt-5 flex flex-col items-center">
+      <div className="flex items-center gap-1.5 text-sm text-ink/60">
+        <IconClock className="size-4 [stroke-width:1.75]" />
+        Còn <b className="font-bold text-navy tabular-nums">{left}</b> để thanh toán
+      </div>
+      <button
+        type="button"
+        onClick={onRetry}
+        disabled={retrying}
+        className={cn(
+          PRIMARY_BUTTON,
+          'mt-3 flex h-12 w-full max-w-xs items-center justify-center gap-2 text-[15px]',
+        )}
+      >
+        {retrying && <IconLoader2 className="size-5 animate-spin" />}
+        Thanh toán lại
+      </button>
     </div>
   );
 }
 
 function Frame({ children, mock }: { children: React.ReactNode; mock?: boolean }) {
   return (
-    <div className="mx-auto max-w-xl px-4 py-10 md:py-16">
-      <div className="rounded-3xl border border-ivory-200 bg-card px-5 py-8 shadow-sm md:px-10">
+    <div className="mx-auto max-w-xl px-4 pt-8 pb-10 md:pt-12">
+      <div className={cn(CARD, 'rounded-3xl px-5 py-8 md:px-10')}>
         {mock && (
-          <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-center text-xs font-semibold tracking-wide text-amber-800">
+          <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-center text-xs font-semibold tracking-wide text-amber-800">
             MÔ PHỎNG · cổng thanh toán giả, không có tiền thật
           </div>
         )}
@@ -206,31 +226,74 @@ function Frame({ children, mock }: { children: React.ReactNode; mock?: boolean }
   );
 }
 
-function Hero({
-  tone,
-  icon: Icon,
-  title,
-  text,
-}: {
-  tone: 'success' | 'danger';
-  icon: typeof CheckCircle2;
-  title: string;
-  text: string;
-}) {
+function Hero({ tone, title, text }: { tone: 'success' | 'danger'; title: string; text: string }) {
+  const Icon = tone === 'success' ? IconCircleCheckFilled : IconCircleXFilled;
   return (
     <div className="flex flex-col items-center text-center">
-      <span
-        className={cn(
-          'flex size-20 items-center justify-center rounded-full ring-[10px]',
-          tone === 'success'
-            ? 'bg-emerald-50 text-emerald-600 ring-emerald-50/60'
-            : 'bg-red-50 text-red-600 ring-red-50/60',
+      <Icon className={cn('size-[4.5rem]', tone === 'success' ? 'text-ship' : 'text-red-500')} />
+      <h1 className="mt-4 text-xl font-bold tracking-tight text-charcoal md:text-2xl">{title}</h1>
+      <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-ink/60">{text}</p>
+    </div>
+  );
+}
+
+/** Biên nhận: mã đơn, số tiền, phương thức, nơi nhận và ảnh các sản phẩm trong đơn */
+function Receipt({ payment, order }: { payment: OrderPayment; order: Order | undefined }) {
+  const items = order?.shopOrders.flatMap((so) => so.items) ?? [];
+  const more = items.length - MAX_THUMBS;
+  return (
+    <div className="mt-6 rounded-xl bg-page px-4 py-4 text-sm">
+      <dl className="space-y-2.5">
+        <div className="flex justify-between gap-4">
+          <dt className="text-ink/60">Mã đơn hàng</dt>
+          <dd className="font-semibold text-charcoal">{payment.orderCode}</dd>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <dt className="text-ink/60">Phương thức</dt>
+          <dd className="font-medium text-charcoal">
+            {payment.gateway === 'MOCK' ? (
+              'Cổng mô phỏng'
+            ) : (
+              <img src="/partners/vnpay.svg" alt="VNPay" className="h-5 w-auto" />
+            )}
+          </dd>
+        </div>
+        {order && (
+          <div className="flex justify-between gap-4">
+            <dt className="shrink-0 text-ink/60">Giao đến</dt>
+            <dd className="text-right leading-5 text-charcoal">
+              <span className="font-medium">
+                {order.receiver.name} · {order.receiver.phone}
+              </span>
+              <span className="block text-ink/60">{order.receiver.address}</span>
+            </dd>
+          </div>
         )}
-      >
-        <Icon className="size-10" strokeWidth={1.6} />
-      </span>
-      <h1 className="mt-6 text-xl font-bold text-navy md:text-2xl">{title}</h1>
-      <p className="mt-1.5 text-sm text-ink/60">{text}</p>
+      </dl>
+      {items.length > 0 && (
+        <div className="mt-3.5 flex items-center gap-2 border-t border-dashed border-ink/15 pt-3.5">
+          {items.slice(0, MAX_THUMBS).map((it) => (
+            <span
+              key={it.id}
+              title={it.productName}
+              className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-card p-1 ring-1 ring-ink/[0.08]"
+            >
+              {it.image ? (
+                <img src={it.image} alt={it.productName} className="size-full object-contain" />
+              ) : (
+                <IconPhotoOff className="size-4 text-ink/25" />
+              )}
+            </span>
+          ))}
+          {more > 0 && <span className="text-xs font-medium text-ink/55">+{more}</span>}
+        </div>
+      )}
+      <div className="mt-3.5 flex items-end justify-between gap-4 border-t border-dashed border-ink/15 pt-3.5">
+        <span className="font-medium text-charcoal">Số tiền</span>
+        <span className="text-xl leading-none font-bold tracking-tight text-navy">
+          {formatMoney(payment.amount)}
+        </span>
+      </div>
     </div>
   );
 }
@@ -238,26 +301,44 @@ function Hero({
 function Pending({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center py-6 text-center">
-      <Loader2 className="size-10 animate-spin text-champagne-600" />
-      <p className="mt-5 max-w-sm text-sm text-ink/70">{text}</p>
+      <IconLoader2 className="size-10 animate-spin text-navy [stroke-width:1.5]" />
+      <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink/65">{text}</p>
     </div>
   );
 }
 
-function Actions({ orderId }: { orderId?: string }) {
+const SECONDARY =
+  'inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-ink/15 text-sm font-semibold text-charcoal transition hover:border-navy/40 hover:text-navy';
+
+function Actions({ orderId, secondaryOnly }: { orderId?: string; secondaryOnly?: boolean }) {
+  const orderLink = orderId ? `/tai-khoan/don-mua/${orderId}` : '/tai-khoan/don-mua';
   return (
-    <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
-      <Button asChild variant="outline" className="h-11 rounded-xl">
-        <Link to={orderId ? `/tai-khoan/don-mua/${orderId}` : '/tai-khoan/don-mua'}>
-          Xem đơn hàng
-        </Link>
-      </Button>
-      <Button asChild className="h-11 rounded-xl">
-        <Link to="/">
-          <ShoppingBag className="size-4" />
-          Tiếp tục mua sắm
-        </Link>
-      </Button>
+    <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
+      <Link to="/" className={SECONDARY}>
+        Tiếp tục mua sắm
+      </Link>
+      <Link
+        to={orderLink}
+        className={
+          secondaryOnly
+            ? SECONDARY
+            : cn(PRIMARY_BUTTON, 'inline-flex h-11 flex-1 items-center justify-center text-sm')
+        }
+      >
+        Xem đơn hàng
+      </Link>
     </div>
+  );
+}
+
+/** Gợi ý sau khi thanh toán xong: hàng bán chạy */
+function Suggestions() {
+  const q = useProductSearch({ sort: 'best_selling', pageSize: 10 });
+  if (q.isError || (q.data && q.data.items.length === 0)) return null;
+  return (
+    <section className="mx-auto max-w-7xl px-4 pb-12">
+      <SectionTitle title="Có thể bạn cũng thích" more="/tim-kiem?sort=best_selling" />
+      <ProductRow items={q.data?.items ?? []} loading={q.isPending} rows={1} />
+    </section>
   );
 }

@@ -1,28 +1,27 @@
 import {
-  Bell,
-  Banknote,
-  MessageCircle,
-  Package,
-  Scale,
-  Store,
-  Undo2,
-  Wallet,
-  type LucideIcon,
-} from 'lucide-react';
+  IconArrowBackUp,
+  IconBell,
+  IconBuildingStore,
+  IconCash,
+  IconMessageCircle,
+  IconPackage,
+  IconScale,
+  IconWallet,
+} from '@tabler/icons-react';
 import { formatDateTime } from '@/lib/format';
 import type { AppNotification } from '@/lib/chat-types';
 import { cn } from '@/lib/utils';
 
 /** Icon theo nhóm loại thông báo (docs/api: NotificationType) */
-function iconFor(type: string): LucideIcon {
-  if (type === 'CHAT_MESSAGE') return MessageCircle;
-  if (type === 'REFUND_DONE') return Wallet;
-  if (type.startsWith('WITHDRAWAL')) return Banknote;
-  if (type.startsWith('DISPUTE')) return Scale;
-  if (type.includes('RETURN')) return Undo2;
-  if (type.startsWith('SHOP_ORDER') || type.startsWith('ORDER')) return Package;
-  if (type.startsWith('SHOP')) return Store;
-  return Bell;
+function iconFor(type: string): React.ComponentType<{ className?: string }> {
+  if (type === 'CHAT_MESSAGE') return IconMessageCircle;
+  if (type === 'REFUND_DONE') return IconWallet;
+  if (type.startsWith('WITHDRAWAL')) return IconCash;
+  if (type.startsWith('DISPUTE')) return IconScale;
+  if (type.includes('RETURN')) return IconArrowBackUp;
+  if (type.startsWith('SHOP_ORDER') || type.startsWith('ORDER')) return IconPackage;
+  if (type.startsWith('SHOP')) return IconBuildingStore;
+  return IconBell;
 }
 
 /** Một dòng thông báo: icon, tiêu đề, nội dung, giờ; chưa đọc thì nền nhạt và có chấm */
@@ -59,7 +58,7 @@ export function NotificationItem({
           <span
             className={cn(
               'min-w-0 flex-1 text-sm',
-              n.read ? 'text-ink/80' : 'font-semibold text-navy',
+              n.read ? 'text-ink/80' : 'font-semibold text-charcoal',
             )}
           >
             {n.title}

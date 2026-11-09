@@ -1,4 +1,4 @@
-import { ShieldAlert } from 'lucide-react';
+import { IconShieldExclamation } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 
 /** Lý do sản phẩm bị gỡ, dòng nhỏ dưới nhãn "Bị gỡ" ở danh sách sản phẩm của seller (MOD-01) */
@@ -24,7 +24,7 @@ export function RemovedReasonLine({
 export function RemovedBanner({ reason }: { reason: string | null }) {
   return (
     <div className="flex gap-3 rounded-2xl border border-red-200 bg-red-50/70 px-4 py-3.5 text-sm">
-      <ShieldAlert className="mt-0.5 size-5 shrink-0 text-red-600" />
+      <IconShieldExclamation className="mt-0.5 size-5 shrink-0 text-red-600" />
       <div className="min-w-0">
         <div className="font-semibold text-red-800">Sản phẩm đã bị sàn gỡ do vi phạm</div>
         {reason && <p className="mt-0.5 break-words text-red-800/90">Lý do: {reason}</p>}

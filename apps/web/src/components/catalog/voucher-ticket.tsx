@@ -1,4 +1,4 @@
-import { Check, Copy, TicketPercent } from 'lucide-react';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import type { Voucher } from '@/lib/catalog-types';
@@ -37,8 +37,8 @@ export function shortValue(v: Pick<Voucher, 'discountType' | 'value'>) {
 }
 
 /**
- * Vé voucher (chỉ hiển thị ở P2; lưu và áp voucher có từ P3): cuống navy ghi mức giảm, thân vé ghi
- * điều kiện, hạn dùng và nút sao chép mã.
+ * Vé voucher cùng kiểu mã giảm giá ở trang chủ: cuống cam răng cưa ghi mức giảm, thân vé ghi điều kiện, hạn
+ * dùng và nút sao chép mã.
  */
 export function VoucherTicket({ voucher, className }: { voucher: Voucher; className?: string }) {
   const [copied, setCopied] = useState(false);
@@ -58,55 +58,39 @@ export function VoucherTicket({ voucher, className }: { voucher: Voucher; classN
   return (
     <div
       className={cn(
-        'relative flex min-h-28 overflow-hidden rounded-2xl border border-champagne/40 bg-card shadow-[0_1px_2px_rgba(15,26,61,0.05)]',
+        'flex min-h-24 overflow-hidden rounded-lg border border-navy/25 bg-card',
         className,
       )}
     >
-      {/* Cuống vé */}
-      <div className="relative flex w-24 shrink-0 flex-col items-center justify-center gap-1 bg-gradient-to-br from-navy to-navy-800 px-2 text-center text-white sm:w-28">
-        <TicketPercent className="size-5 text-champagne" />
-        <span className="text-[10px] font-medium tracking-[0.18em] text-champagne/90 uppercase">
-          Giảm
-        </span>
-        <span className="text-xl leading-none font-bold text-champagne">{shortValue(voucher)}</span>
-        {/* Răng cưa mép vé */}
-        <span aria-hidden className="absolute inset-y-2 -right-1 flex flex-col justify-between">
+      <div className="relative flex w-[5.5rem] shrink-0 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-header-from to-header-to px-2 text-center text-white">
+        <span
+          aria-hidden
+          className="absolute inset-y-1.5 -left-[3px] flex flex-col justify-between"
+        >
           {Array.from({ length: 7 }, (_, i) => (
-            <span key={i} className="size-2 rounded-full bg-card" />
+            <span key={i} className="size-1.5 rounded-full bg-card" />
           ))}
         </span>
+        <span className="text-[11px] font-medium opacity-90">Giảm</span>
+        <span className="text-xl leading-tight font-bold">{shortValue(voucher)}</span>
       </div>
-      {/* Hai khuyết tròn trên dưới chỗ nối cuống vé */}
-      <span
-        aria-hidden
-        className="absolute -top-2 left-[5.5rem] size-4 rounded-full border border-champagne/40 bg-ivory sm:left-[6.5rem]"
-      />
-      <span
-        aria-hidden
-        className="absolute -bottom-2 left-[5.5rem] size-4 rounded-full border border-champagne/40 bg-ivory sm:left-[6.5rem]"
-      />
 
-      <div className="flex min-w-0 flex-1 flex-col justify-between gap-2.5 py-3 pr-3 pl-4">
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 px-3 py-2.5">
         <div className="min-w-0">
-          <div className="text-[15px] leading-snug font-semibold text-navy">
+          <div className="text-sm leading-snug font-bold text-charcoal">
             {voucherDiscountText(voucher)}
           </div>
-          <div className="mt-0.5 text-xs text-ink/60">
+          <div className="mt-0.5 text-xs text-ink/55">
             Đơn từ {formatMoney(voucher.minOrder)}
             <span className="text-ink/30"> · </span>
             HSD {dayMonth(voucher.endAt)}
+            {left > 0 && left <= 20 && (
+              <span className="font-medium text-navy"> · Còn {left} lượt</span>
+            )}
           </div>
-          {left > 0 && left <= 20 && (
-            <div className="mt-0.5 text-[11px] font-medium text-champagne-600">
-              Chỉ còn {left} lượt
-            </div>
-          )}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span
-            title="Mã voucher"
-            className="min-w-0 truncate rounded-md border border-dashed border-champagne/60 bg-champagne-50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-navy"
-          >
+          <span title="Mã voucher" className="min-w-0 truncate text-xs font-semibold text-charcoal">
             {voucher.code}
           </span>
           <button
@@ -114,14 +98,18 @@ export function VoucherTicket({ voucher, className }: { voucher: Voucher; classN
             onClick={() => void copy()}
             aria-label={`Sao chép mã ${voucher.code}`}
             className={cn(
-              'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
+              'inline-flex h-7 shrink-0 items-center gap-1 rounded-lg border px-2.5 text-xs font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
               copied
-                ? 'border-navy bg-navy text-white'
-                : 'border-navy/20 text-navy hover:border-navy hover:bg-navy hover:text-white',
+                ? 'border-navy bg-champagne-50 text-navy'
+                : 'border-navy/40 text-navy hover:bg-champagne-50',
             )}
           >
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copied ? 'Đã chép' : 'Sao chép mã'}
+            {copied ? (
+              <IconCheck className="size-3.5 [stroke-width:2.5]" />
+            ) : (
+              <IconCopy className="size-3.5" />
+            )}
+            {copied ? 'Đã chép' : 'Sao chép'}
           </button>
         </div>
       </div>

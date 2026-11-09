@@ -1,5 +1,13 @@
+import {
+  IconBuildingStore,
+  IconCalendar,
+  IconPackage,
+  IconPlayerPause,
+  IconRosetteDiscountCheckFilled,
+  IconStarFilled,
+  IconUsers,
+} from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, MapPin, Package, PauseCircle, Store, TicketPercent } from 'lucide-react';
 import { useParams } from 'react-router';
 import { useBrowseState, useProductSearch } from '@/components/catalog/browse-query';
 import {
@@ -16,9 +24,12 @@ import { ShopLogo } from '@/components/console/shop-logo';
 import { ReportButton } from '@/components/moderation/report-button';
 import { ShopEngagement } from '@/components/reviews/engagement';
 import { ShopTabs } from '@/components/reviews/shop-tabs';
+import { formatCount, formatRating } from '@/components/reviews/stars';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, ApiError, api } from '@/lib/api';
 import type { ProductSort, PublicShop, Voucher } from '@/lib/catalog-types';
+import { cn } from '@/lib/utils';
+import { CARD, CardTitle } from '@/pages/checkout/checkout-parts';
 
 const SORTS: ProductSort[] = ['newest', 'best_selling', 'rating', 'price_asc', 'price_desc'];
 
@@ -28,91 +39,97 @@ const monthYear = new Intl.DateTimeFormat('vi-VN', {
   year: 'numeric',
 });
 
-/** "Tham gia tháng 6/2026" */
+/** "6/2026" */
 function joinedText(iso: string) {
   const parts = monthYear.formatToParts(new Date(iso));
   const m = parts.find((p) => p.type === 'month')?.value;
   const y = parts.find((p) => p.type === 'year')?.value;
-  return `Tham gia tháng ${m}/${y}`;
+  return `${m}/${y}`;
 }
 
-function Stat({ icon: Icon, children }: { icon: typeof Package; children: React.ReactNode }) {
+function Stat({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof IconPackage;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <Icon className="size-4 text-champagne-600" />
-      {children}
-    </span>
+    <div className="flex items-center gap-2.5 text-sm">
+      <Icon className="size-[1.125rem] shrink-0 text-navy [stroke-width:1.75]" />
+      <div className="min-w-0">
+        <dt className="text-[13px] leading-4 text-ink/55">{label}</dt>
+        <dd className="truncate font-semibold text-charcoal">{children}</dd>
+      </div>
+    </div>
   );
 }
 
 function ShopHeader({ shop }: { shop: PublicShop }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-ivory-200 bg-card shadow-[0_1px_2px_rgba(15,26,61,0.05)]">
-      {/* Dải bìa navy có hoa văn vòng tròn */}
-      <div className="relative h-24 overflow-hidden bg-gradient-to-r from-navy-900 via-navy to-navy-800 md:h-32">
-        <div
-          aria-hidden
-          className="absolute -top-16 right-10 size-56 rounded-full border border-champagne/25"
-        />
-        <div
-          aria-hidden
-          className="absolute -top-6 right-24 size-32 rounded-full border border-dashed border-champagne/30"
-        />
-        <div
-          aria-hidden
-          className="absolute -bottom-24 left-1/3 size-48 rounded-full bg-champagne/15 blur-3xl"
-        />
-      </div>
-      <div className="relative px-5 pb-5 md:px-8 md:pb-7">
-        <div className="-mt-10 flex flex-col gap-4 md:-mt-12 md:flex-row md:items-end md:gap-6">
-          <ShopLogo
-            url={shop.logoUrl}
-            className="size-20 border-4 border-card bg-card shadow-lg md:size-28"
-          />
-          <div className="min-w-0 flex-1 md:pb-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-navy md:text-2xl">{shop.name}</h1>
-              {shop.suspended ? (
-                <span className="rounded-lg bg-ink/10 px-2.5 py-0.5 text-xs font-medium text-ink/70">
-                  Tạm ngừng bán
-                </span>
-              ) : (
-                <span className="rounded-lg border border-champagne/50 bg-champagne-50 px-2.5 py-0.5 text-xs font-medium text-champagne-600">
-                  Shop đã duyệt
-                </span>
-              )}
-              <ReportButton
-                targetType="SHOP"
-                targetId={shop.id}
-                shopId={shop.id}
-                className="ml-auto"
+    <ShopEngagement
+      shop={shop}
+      actions={<ChatWithShopButton shopId={shop.id} className="h-10 rounded-lg" />}
+    >
+      {({ followerCount, buttons }) => (
+        <section className={cn(CARD, 'p-5 md:p-6')}>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center">
+            <div className="flex min-w-0 items-center gap-4">
+              <ShopLogo
+                url={shop.logoUrl}
+                className="size-20 rounded-xl ring-1 ring-ink/[0.08] md:size-24"
               />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <h1 className="text-xl font-bold tracking-tight text-charcoal md:text-2xl">
+                    {shop.name}
+                  </h1>
+                  {shop.suspended ? (
+                    <span className="rounded-md bg-ink/10 px-2 py-0.5 text-xs font-medium text-ink/70">
+                      Tạm ngừng bán
+                    </span>
+                  ) : (
+                    <IconRosetteDiscountCheckFilled className="size-5 text-navy" />
+                  )}
+                  <ReportButton targetType="SHOP" targetId={shop.id} shopId={shop.id} />
+                </div>
+                {shop.provinceName && (
+                  <div className="mt-0.5 text-[13px] text-ink/55">
+                    Gửi hàng từ {shop.provinceName}
+                  </div>
+                )}
+                <div className="mt-3">{buttons}</div>
+              </div>
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-ink/70">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-ink/[0.06] pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
               {!shop.suspended && (
-                <Stat icon={Package}>
-                  <b className="font-semibold text-navy">
-                    {shop.productCount.toLocaleString('vi-VN')}
-                  </b>{' '}
-                  sản phẩm
+                <Stat icon={IconPackage} label="Sản phẩm">
+                  {shop.productCount.toLocaleString('vi-VN')}
                 </Stat>
               )}
-              <Stat icon={CalendarDays}>{joinedText(shop.joinedAt)}</Stat>
-              {shop.provinceName && <Stat icon={MapPin}>Gửi hàng từ {shop.provinceName}</Stat>}
-            </div>
+              <Stat icon={IconStarFilled} label="Đánh giá">
+                {shop.ratingAvg !== null && shop.ratingCount > 0
+                  ? `${formatRating(shop.ratingAvg)} (${formatCount(shop.ratingCount)})`
+                  : 'Chưa có'}
+              </Stat>
+              <Stat icon={IconUsers} label="Người theo dõi">
+                {followerCount.toLocaleString('vi-VN')}
+              </Stat>
+              <Stat icon={IconCalendar} label="Tham gia">
+                {joinedText(shop.joinedAt)}
+              </Stat>
+            </dl>
           </div>
-          <ShopEngagement
-            shop={shop}
-            actions={<ChatWithShopButton shopId={shop.id} className="h-10 rounded-lg" />}
-          />
-        </div>
-        {shop.description && (
-          <p className="mt-4 max-w-3xl text-sm leading-6 whitespace-pre-line text-ink/70">
-            {shop.description}
-          </p>
-        )}
-      </div>
-    </section>
+          {shop.description && (
+            <p className="mt-4 border-t border-ink/[0.06] pt-4 text-sm leading-6 whitespace-pre-line text-ink/65">
+              {shop.description}
+            </p>
+          )}
+        </section>
+      )}
+    </ShopEngagement>
   );
 }
 
@@ -124,19 +141,13 @@ function ShopVouchers({ shopId }: { shopId: string }) {
   // Không có voucher (hoặc lỗi tải): không hiện khối này, phần hàng bên dưới vẫn dùng được
   if (q.isError || (q.data && q.data.length === 0)) return null;
   return (
-    <section className="mt-8">
-      <div className="mb-3 flex items-center gap-2">
-        <TicketPercent className="size-5 text-champagne-600" />
-        <h2 className="text-lg font-semibold text-navy">Voucher của shop</h2>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+    <section className={cn(CARD, 'mt-4 p-5')}>
+      <CardTitle>Mã giảm giá của shop</CardTitle>
+      <div className="mt-3.5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {q.isPending
-          ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)
+          ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-24 rounded-lg" />)
           : q.data.map((v) => <VoucherTicket key={v.id} voucher={v} />)}
       </div>
-      <p className="mt-2 text-xs text-ink/50">
-        Sao chép mã để dùng khi đặt hàng. Lưu và áp voucher sẽ có khi mở chức năng đặt hàng.
-      </p>
     </section>
   );
 }
@@ -153,11 +164,7 @@ function ShopProducts({ shopId }: { shopId: string }) {
     page: state.page,
   });
   return (
-    <section className="mt-10">
-      <div className="mb-4 flex items-center gap-2">
-        <Store className="size-5 text-champagne-600" />
-        <h2 className="text-lg font-semibold text-navy">Sản phẩm của shop</h2>
-      </div>
+    <section className="mt-4">
       <CatalogToolbar
         sort={state.sort}
         sorts={SORTS}
@@ -169,7 +176,7 @@ function ShopProducts({ shopId }: { shopId: string }) {
         onRating={browse.setRating}
         total={products.data?.total}
       />
-      <div className="mt-5">
+      <div className="mt-4">
         <ProductResults
           query={products}
           onPage={browse.setPage}
@@ -194,9 +201,9 @@ function ShopProducts({ shopId }: { shopId: string }) {
 
 function ShopSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-5">
-      <Skeleton className="h-5 w-40" />
-      <Skeleton className="mt-5 h-56 rounded-3xl" />
+    <div className="mx-auto max-w-7xl px-4 pb-12">
+      <Skeleton className="my-3.5 h-5 w-40" />
+      <Skeleton className="h-44 rounded-2xl" />
     </div>
   );
 }
@@ -215,7 +222,7 @@ export function ShopPage() {
     if (e instanceof ApiError && (e.status === 404 || e.status === 400)) {
       return (
         <NotFoundBlock
-          icon={Store}
+          icon={IconBuildingStore}
           title="Không tìm thấy shop"
           text="Shop này không có hoặc chưa được duyệt mở bán."
         />
@@ -223,7 +230,7 @@ export function ShopPage() {
     }
     return (
       <div className="mx-auto max-w-7xl px-4 py-10">
-        <div className="rounded-3xl border border-ivory-200 bg-card">
+        <div className={CARD}>
           <LoadError message={e.message} onRetry={() => void shop.refetch()} />
         </div>
       </div>
@@ -232,18 +239,16 @@ export function ShopPage() {
 
   const s = shop.data;
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-5 pb-4">
+    <div className="mx-auto max-w-7xl px-4 pb-12">
       <Breadcrumb items={[{ label: s.name }]} />
-      <div className="mt-5">
-        <ShopHeader shop={s} />
-      </div>
+      <ShopHeader shop={s} />
       {s.suspended ? (
-        <div className="mt-8 flex flex-col items-center rounded-3xl border border-dashed border-champagne/60 bg-champagne-50/60 px-6 py-14 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-card text-champagne-600 shadow-sm">
-            <PauseCircle className="size-7" />
+        <div className={cn(CARD, 'mt-4 flex flex-col items-center px-6 py-14 text-center')}>
+          <span className="flex size-16 items-center justify-center rounded-full bg-champagne-50 text-navy">
+            <IconPlayerPause className="size-7 [stroke-width:1.5]" />
           </span>
-          <h2 className="mt-4 text-lg font-semibold text-navy">Shop đang tạm ngừng bán</h2>
-          <p className="mt-1 max-w-md text-sm text-ink/65">
+          <h2 className="mt-4 text-lg font-bold text-charcoal">Shop đang tạm ngừng bán</h2>
+          <p className="mt-1 max-w-md text-sm text-ink/60">
             Sản phẩm của shop tạm thời không hiển thị. Bạn có thể xem hàng của các shop khác trong
             lúc chờ shop bán lại.
           </p>

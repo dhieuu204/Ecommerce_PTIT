@@ -1,19 +1,19 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Ban,
-  ChevronRight,
-  ExternalLink,
-  Flag,
-  History,
-  Loader2,
-  PackageX,
-  RotateCcw,
-  ShieldAlert,
-  ShieldCheck,
-  Store,
-  UserRound,
-  Users,
-} from 'lucide-react';
+  IconBan,
+  IconBuildingStore,
+  IconChevronRight,
+  IconExternalLink,
+  IconFlag,
+  IconHistory,
+  IconLoader2,
+  IconPackageOff,
+  IconRefresh,
+  IconShieldCheck,
+  IconShieldExclamation,
+  IconUser,
+  IconUsers,
+} from '@tabler/icons-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -106,7 +106,7 @@ export function ViolationReportsPage() {
         title="Báo cáo vi phạm"
         description="Người mua báo cáo sản phẩm hoặc shop. Xử lý một báo cáo thì mọi báo cáo đang chờ của cùng đối tượng được xử lý theo."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-2 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
           <nav className="-mb-px flex gap-1 overflow-x-auto">
             {TABS.map(([value, label]) => (
@@ -118,7 +118,7 @@ export function ViolationReportsPage() {
                   'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                   status === value
                     ? 'border-navy font-semibold text-navy'
-                    : 'border-transparent text-muted-foreground hover:text-ink',
+                    : 'border-transparent text-ink/60 hover:text-navy',
                 )}
               >
                 {label}
@@ -134,10 +134,10 @@ export function ViolationReportsPage() {
                 aria-checked={target === value}
                 onClick={() => set({ target: value === 'ALL' ? null : value })}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs transition',
+                  'rounded-lg border px-3 py-1 text-xs transition',
                   target === value
-                    ? 'border-navy bg-navy text-white'
-                    : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
                 )}
               >
                 {label}
@@ -154,13 +154,18 @@ export function ViolationReportsPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={Flag}
+            icon={IconFlag}
             title={status === 'PENDING' ? 'Không có báo cáo chờ xử lý' : 'Chưa có báo cáo nào'}
             text={status === 'PENDING' ? 'Báo cáo mới của người mua sẽ hiện ở đây.' : undefined}
           />
         ) : (
           <>
-            <ul className={cn('divide-y transition-opacity', list.isFetching && 'opacity-70')}>
+            <ul
+              className={cn(
+                'divide-y divide-ink/[0.06] transition-opacity',
+                list.isFetching && 'opacity-70',
+              )}
+            >
               {list.data.items.map((r) => (
                 <li key={r.id}>
                   <Link
@@ -170,7 +175,9 @@ export function ViolationReportsPage() {
                     <TargetThumb type={r.targetType} image={r.targetImage} className="size-12" />
                     <div className="min-w-0 flex-1 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="line-clamp-1 font-semibold text-navy">{r.targetName}</span>
+                        <span className="line-clamp-1 font-semibold text-charcoal">
+                          {r.targetName}
+                        </span>
                         <StatusBadge tone="info">{REPORT_TARGET_LABEL[r.targetType]}</StatusBadge>
                         {r.status === 'PENDING' && r.pendingCount > 1 && (
                           <StatusBadge tone="danger">{r.pendingCount} báo cáo đang chờ</StatusBadge>
@@ -186,7 +193,7 @@ export function ViolationReportsPage() {
                           : `Xử lý bởi ${r.handledByName ?? ''} · ${formatDateTime(r.handledAt)}`}
                       </div>
                     </div>
-                    <ChevronRight className="size-4 shrink-0 text-ink/35" />
+                    <IconChevronRight className="size-4 shrink-0 text-ink/35" />
                   </Link>
                 </li>
               ))}
@@ -220,7 +227,7 @@ export function ViolationReportDetailPage() {
   if (detail.isError) {
     return (
       <LoadError
-        className="mx-auto max-w-5xl rounded-2xl border bg-card"
+        className="mx-auto max-w-5xl rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
         message={detail.error.message}
         onRetry={() => detail.refetch()}
       />
@@ -240,16 +247,16 @@ export function ViolationReportDetailPage() {
         title={r.targetName}
         description={`${REPORT_TARGET_LABEL[r.targetType]} · ${REPORT_REASONS[r.reason].label} · gửi ${formatDateTime(r.createdAt)}`}
         actions={
-          <Button asChild variant="outline" size="sm" className="rounded-full">
+          <Button asChild variant="outline" size="sm" className="rounded-lg">
             <Link to={`/quan-tri/shop/${r.shopId}`}>
-              <Store /> Xem shop
+              <IconBuildingStore /> Xem shop
             </Link>
           </Button>
         }
       />
 
       {/* Trạng thái hiện tại của đối tượng và việc cần làm */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-ivory-200 bg-card px-4 py-4 sm:flex-row sm:items-center md:px-5">
+      <section className="flex flex-col gap-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 sm:flex-row sm:items-center md:px-5">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <TargetThumb type={r.targetType} image={r.targetImage} />
           <div className="min-w-0 text-sm">
@@ -268,7 +275,7 @@ export function ViolationReportDetailPage() {
                 rel="noreferrer"
                 className="mt-1 inline-flex items-center gap-1 text-xs text-ink/55 hover:text-navy"
               >
-                Xem sản phẩm trên sàn <ExternalLink className="size-3" />
+                Xem sản phẩm trên sàn <IconExternalLink className="size-3" />
               </Link>
             )}
           </div>
@@ -281,17 +288,13 @@ export function ViolationReportDetailPage() {
         ) : (
           <div className="flex flex-wrap gap-2">
             {isProduct && r.removed && (
-              <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => setDialog('restore')}
-              >
-                <RotateCcw /> Khôi phục sản phẩm
+              <Button variant="outline" className="rounded-lg" onClick={() => setDialog('restore')}>
+                <IconRefresh /> Khôi phục sản phẩm
               </Button>
             )}
             {r.status === 'PENDING' && (
-              <Button className="rounded-full px-5" onClick={() => setDialog('resolve')}>
-                <ShieldAlert /> Xử lý báo cáo
+              <Button className="rounded-lg px-5" onClick={() => setDialog('resolve')}>
+                <IconShieldExclamation /> Xử lý báo cáo
               </Button>
             )}
           </div>
@@ -300,14 +303,14 @@ export function ViolationReportDetailPage() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-4">
-          <Card title={`Người báo cáo: ${r.reporter.name}`} icon={UserRound}>
+          <Card title={`Người báo cáo: ${r.reporter.name}`} icon={IconUser}>
             <div className="text-sm font-medium text-ink">{REPORT_REASONS[r.reason].label}</div>
             <p className="mt-1 text-sm break-words whitespace-pre-line text-ink/75">{r.note}</p>
             <div className="mt-2">
               <EvidenceGallery keys={r.images} empty="Không gửi kèm ảnh." />
             </div>
             {r.status !== 'PENDING' && (
-              <div className="mt-3 border-t border-ivory-200 pt-3 text-sm">
+              <div className="mt-3 border-t border-ink/[0.06] pt-3 text-sm">
                 <div className="font-medium text-ink">
                   {r.status === 'RESOLVED' ? 'Đã xử lý' : 'Đã bác'} · {r.handledByName} ·{' '}
                   <span className="font-normal text-ink/55">{formatDateTime(r.handledAt)}</span>
@@ -317,11 +320,11 @@ export function ViolationReportDetailPage() {
             )}
           </Card>
 
-          <Card title={`Báo cáo khác về ${isProduct ? 'sản phẩm' : 'shop'} này`} icon={Users}>
+          <Card title={`Báo cáo khác về ${isProduct ? 'sản phẩm' : 'shop'} này`} icon={IconUsers}>
             {r.others.length === 0 ? (
               <p className="text-sm text-ink/55">Chưa có báo cáo nào khác.</p>
             ) : (
-              <ul className="divide-y divide-ivory-200">
+              <ul className="divide-y divide-ink/[0.06]">
                 {r.others.map((o) => (
                   <li key={o.id}>
                     <Link
@@ -346,7 +349,7 @@ export function ViolationReportDetailPage() {
           </Card>
         </div>
 
-        <Card title="Lịch sử xử lý" icon={History} className="lg:self-start">
+        <Card title="Lịch sử xử lý" icon={IconHistory} className="lg:self-start">
           <DecisionTimeline items={r.history} />
         </Card>
       </div>
@@ -431,13 +434,18 @@ function ResolveDialog({
   });
 
   const others = r.pendingCount > 1 ? ` (và ${r.pendingCount - 1} báo cáo khác đang chờ)` : '';
-  const options: Array<{ value: ReportDecision; title: string; text: string; icon: typeof Ban }> = [
+  const options: Array<{
+    value: ReportDecision;
+    title: string;
+    text: string;
+    icon: typeof IconBan;
+  }> = [
     ...(r.targetType === 'PRODUCT'
       ? [
           {
             value: 'REMOVE_PRODUCT' as const,
             title: 'Gỡ sản phẩm',
-            icon: PackageX,
+            icon: IconPackageOff,
             text: r.removed
               ? 'Sản phẩm đã bị gỡ từ trước: chỉ đánh dấu báo cáo đã xử lý.'
               : 'Sản phẩm biến mất khỏi sàn; seller sửa được nhưng không tự bật bán lại.',
@@ -447,7 +455,7 @@ function ResolveDialog({
     {
       value: 'SUSPEND_SHOP',
       title: 'Đình chỉ shop',
-      icon: Ban,
+      icon: IconBan,
       text: r.suspended
         ? 'Shop đang bị đình chỉ: chỉ đánh dấu báo cáo đã xử lý.'
         : 'Mọi hàng của shop ẩn khỏi sàn, đơn chưa giao bị hủy và hoàn tiền.',
@@ -455,7 +463,7 @@ function ResolveDialog({
     {
       value: 'DISMISS',
       title: 'Bác báo cáo',
-      icon: ShieldCheck,
+      icon: IconShieldCheck,
       text: 'Không thấy vi phạm, không có biện pháp nào.',
     },
   ];
@@ -464,7 +472,7 @@ function ResolveDialog({
     <Dialog open onOpenChange={(o) => !o && !resolve.isPending && onClose()}>
       <DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl sm:max-w-xl">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-navy">Xử lý báo cáo</DialogTitle>
+          <DialogTitle className="text-charcoal">Xử lý báo cáo</DialogTitle>
           <DialogDescription>
             Áp cho báo cáo này{others}. Lý do được ghi nhật ký; seller đọc khi bị gỡ/đình chỉ, người
             báo cáo đọc ở trang của họ.
@@ -482,7 +490,7 @@ function ResolveDialog({
                 'flex gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition',
                 decision === o.value
                   ? 'border-navy bg-navy/[0.04]'
-                  : 'border-ivory-200 hover:border-champagne',
+                  : 'border-ink/[0.06] hover:border-champagne',
               )}
             >
               <o.icon
@@ -513,19 +521,19 @@ function ResolveDialog({
         <DialogFooter className="gap-2 sm:gap-2">
           <Button
             variant="outline"
-            className="rounded-full"
+            className="rounded-lg"
             onClick={onClose}
             disabled={resolve.isPending}
           >
             Hủy
           </Button>
           <Button
-            className="rounded-full px-6"
+            className="rounded-lg px-6"
             variant={decision && decision !== 'DISMISS' ? 'destructive' : 'default'}
             disabled={!decision || reason.trim().length < 5 || resolve.isPending}
             onClick={() => resolve.mutate()}
           >
-            {resolve.isPending && <Loader2 className="size-4 animate-spin" />}
+            {resolve.isPending && <IconLoader2 className="size-4 animate-spin" />}
             Xác nhận
           </Button>
         </DialogFooter>
@@ -563,7 +571,7 @@ function RestoreDialog({
     <Dialog open onOpenChange={(o) => !o && !restore.isPending && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-lg">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-navy">Khôi phục sản phẩm</DialogTitle>
+          <DialogTitle className="text-charcoal">Khôi phục sản phẩm</DialogTitle>
           <DialogDescription>
             "{r.targetName}" về trạng thái ẩn; seller kiểm tra rồi tự bật bán lại. Seller nhận thông
             báo.
@@ -584,18 +592,18 @@ function RestoreDialog({
         <DialogFooter className="gap-2 sm:gap-2">
           <Button
             variant="outline"
-            className="rounded-full"
+            className="rounded-lg"
             onClick={onClose}
             disabled={restore.isPending}
           >
             Hủy
           </Button>
           <Button
-            className="rounded-full px-6"
+            className="rounded-lg px-6"
             disabled={reason.trim().length < 5 || restore.isPending}
             onClick={() => restore.mutate()}
           >
-            {restore.isPending && <Loader2 className="size-4 animate-spin" />}
+            {restore.isPending && <IconLoader2 className="size-4 animate-spin" />}
             Khôi phục
           </Button>
         </DialogFooter>

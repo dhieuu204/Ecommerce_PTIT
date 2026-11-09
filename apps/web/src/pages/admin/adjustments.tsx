@@ -1,5 +1,5 @@
+import { IconLoader2, IconPlus, IconScale, IconSearch } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Scale, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -92,11 +92,11 @@ export function AdjustmentsPage() {
         description="Dùng khi phát hiện sai sót sau khi tiền đã khả dụng hoặc đã chi: cộng/trừ ví seller, hoàn thêm cho người mua bằng chuyển khoản. Không sửa lịch sử cũ; trừ ví chỉ khi số dư khả dụng còn đủ."
         actions={
           <Button onClick={() => setCreating(true)}>
-            <Plus className="size-4" /> Lập đề nghị
+            <IconPlus className="size-4" /> Lập đề nghị
           </Button>
         }
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-wrap gap-2 border-b px-4 py-3 md:px-5">
           {(['ALL', 'PENDING', 'APPROVED', 'EXECUTED', 'FAILED', 'REJECTED'] as const).map((s) => (
             <button
@@ -104,10 +104,10 @@ export function AdjustmentsPage() {
               type="button"
               onClick={() => setParams(s === 'ALL' ? {} : { status: s }, { replace: true })}
               className={cn(
-                'rounded-full border px-3 py-1 text-xs transition',
+                'rounded-lg border px-3 py-1 text-xs transition',
                 status === s
-                  ? 'border-navy bg-navy text-white'
-                  : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                  ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                  : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
               )}
             >
               {s === 'ALL' ? 'Tất cả' : STATUS[s].label}
@@ -121,7 +121,7 @@ export function AdjustmentsPage() {
         ) : list.isError ? (
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
-          <EmptyState icon={Scale} title="Chưa có đề nghị điều chỉnh" />
+          <EmptyState icon={IconScale} title="Chưa có đề nghị điều chỉnh" />
         ) : (
           <>
             <ul className="divide-y">
@@ -328,7 +328,11 @@ function CreateDialog({
             onClick={lookup}
             disabled={looking || code.trim().length < 8}
           >
-            {looking ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+            {looking ? (
+              <IconLoader2 className="size-4 animate-spin" />
+            ) : (
+              <IconSearch className="size-4" />
+            )}
           </Button>
         </div>
         {money && (
@@ -352,8 +356,10 @@ function CreateDialog({
                 type="button"
                 onClick={() => setDirection(v)}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs',
-                  direction === v ? 'border-navy bg-navy text-white' : 'border-ivory-200',
+                  'rounded-lg border px-3 py-1 text-xs',
+                  direction === v
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06]',
                 )}
               >
                 {label}

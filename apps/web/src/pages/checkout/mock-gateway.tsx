@@ -1,5 +1,12 @@
+import {
+  IconCircleCheck,
+  IconCircleX,
+  IconClock,
+  IconFlask,
+  IconLoader2,
+  IconMailX,
+} from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Clock, FlaskConical, Loader2, MailX, XCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { LoadError } from '@/components/console/empty-state';
@@ -21,28 +28,28 @@ type Result = 'SUCCESS' | 'FAILED' | 'PAID_NO_NOTICE';
 
 const CHOICES: Array<{
   result: Result;
-  icon: typeof CheckCircle2;
+  icon: typeof IconCircleCheck;
   title: string;
   text: string;
   className: string;
 }> = [
   {
     result: 'SUCCESS',
-    icon: CheckCircle2,
+    icon: IconCircleCheck,
     title: 'Thanh toán thành công',
     text: 'Như VNPay báo kết quả (IPN) về sàn ngay.',
     className: 'border-emerald-300 hover:bg-emerald-50 text-emerald-700',
   },
   {
     result: 'FAILED',
-    icon: XCircle,
+    icon: IconCircleX,
     title: 'Thanh toán thất bại',
     text: 'Thẻ bị từ chối hoặc bạn bấm hủy. Được thử lại lần mới.',
     className: 'border-red-300 hover:bg-red-50 text-red-700',
   },
   {
     result: 'PAID_NO_NOTICE',
-    icon: MailX,
+    icon: IconMailX,
     title: 'Trả tiền nhưng mất tin báo',
     text: 'Ngân hàng đã trừ tiền nhưng IPN không tới; sàn phải tra cứu mới biết.',
     className: 'border-amber-300 hover:bg-amber-50 text-amber-800',
@@ -77,16 +84,16 @@ export function MockGatewayPage() {
   const left = useCountdown(info.data?.payBefore);
 
   return (
-    <div className="min-h-[70vh] bg-[radial-gradient(circle_at_top,rgba(200,169,107,0.15),transparent_60%)] px-4 py-10 md:py-16">
+    <div className="min-h-[70vh] bg-page px-4 py-10 md:py-16">
       <div className="mx-auto max-w-lg">
-        <div className="mb-4 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3 text-center text-sm font-bold tracking-wide text-amber-800">
-          <FlaskConical className="size-5" />
+        <div className="mb-4 flex items-center justify-center gap-2 rounded-lg border border-dashed border-amber-400 bg-amber-50 px-4 py-3 text-center text-sm font-bold tracking-wide text-amber-800">
+          <IconFlask className="size-5" />
           CỔNG THANH TOÁN MÔ PHỎNG · KHÔNG CÓ TIỀN THẬT
         </div>
-        <div className="overflow-hidden rounded-3xl border border-ivory-200 bg-card shadow-sm">
-          <div className="bg-navy px-6 py-5 text-white">
-            <div className="text-xs uppercase tracking-widest text-champagne">
-              Sàn TMĐT · Thanh toán
+        <div className="overflow-hidden rounded-3xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
+          <div className="bg-gradient-to-r from-header-from to-header-to px-6 py-5 text-white">
+            <div className="text-xs tracking-widest text-white/80 uppercase">
+              HK Shop · Thanh toán
             </div>
             {info.data ? (
               <>
@@ -110,7 +117,7 @@ export function MockGatewayPage() {
               <>
                 {left && (
                   <div className="mb-4 flex items-center justify-center gap-1.5 text-sm text-ink/60">
-                    <Clock className="size-4" /> Hết hạn sau{' '}
+                    <IconClock className="size-4" /> Hết hạn sau{' '}
                     <b className="tabular-nums text-navy">{left}</b>
                   </div>
                 )}
@@ -122,12 +129,12 @@ export function MockGatewayPage() {
                       disabled={complete.isPending || !info.data}
                       onClick={() => complete.mutate(c.result)}
                       className={cn(
-                        'flex w-full items-center gap-3 rounded-2xl border bg-card px-4 py-3.5 text-left transition disabled:opacity-50',
+                        'flex w-full items-center gap-3 rounded-lg border bg-card px-4 py-3.5 text-left transition disabled:opacity-50',
                         c.className,
                       )}
                     >
                       {complete.isPending && complete.variables === c.result ? (
-                        <Loader2 className="size-6 shrink-0 animate-spin" />
+                        <IconLoader2 className="size-6 shrink-0 animate-spin" />
                       ) : (
                         <c.icon className="size-6 shrink-0" />
                       )}

@@ -1,4 +1,4 @@
-import { Store } from 'lucide-react';
+import { IconBuildingStore } from '@tabler/icons-react';
 import { maskAccount } from '@/lib/format';
 import type { ApplicationView, ShopView } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,7 @@ export function ShopLogo({ url, className }: { url: string | null; className?: s
         className,
       )}
     >
-      <Store className="size-1/2" />
+      <IconBuildingStore className="size-1/2" />
     </span>
   );
 }
@@ -31,7 +31,7 @@ export function ShopSummary({ shop }: { shop: ShopView }) {
       <ShopLogo url={shop.logoUrl} className="size-20" />
       <dl className="min-w-0 flex-1 divide-y">
         <InfoRow label="Tên shop">
-          <span className="font-medium text-navy">{shop.name ?? '—'}</span>
+          <span className="font-medium text-charcoal">{shop.name ?? '—'}</span>
         </InfoRow>
         <InfoRow label="Mô tả">
           <span className="whitespace-pre-line">{shop.description ?? '—'}</span>

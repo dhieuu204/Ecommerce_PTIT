@@ -1,4 +1,12 @@
-import { GripVertical, PackagePlus, Plus, RotateCcw, Trash2, Wand2, X } from 'lucide-react';
+import {
+  IconGripVertical,
+  IconPackage,
+  IconPlus,
+  IconRefresh,
+  IconTrash,
+  IconWand,
+  IconX,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { Controller, type Control, type FieldErrors, type UseFormGetValues } from 'react-hook-form';
 import { NumberInput } from '@/components/console/money-input';
@@ -87,7 +95,7 @@ export function VariantGroupsEditor({
       {groups.map((g, gi) => (
         <div key={g.key} className="rounded-xl border bg-ivory/60 p-4">
           <div className="flex items-start gap-3">
-            <span className="mt-2 inline-flex h-6 shrink-0 items-center rounded-full bg-navy px-2.5 text-[11px] font-semibold text-white">
+            <span className="mt-2 inline-flex h-6 shrink-0 items-center rounded-md bg-navy px-2.5 text-[11px] font-semibold text-white">
               Nhóm {gi + 1}
             </span>
             <div className="min-w-0 flex-1 space-y-1">
@@ -112,7 +120,7 @@ export function VariantGroupsEditor({
               onClick={() => onRemoveGroup(gi)}
               aria-label={`Xóa nhóm phân loại ${gi + 1}`}
             >
-              <X />
+              <IconX />
             </Button>
           </div>
 
@@ -150,7 +158,7 @@ export function VariantGroupsEditor({
                         className="absolute top-1/2 right-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-red-50 hover:text-red-600 disabled:pointer-events-none disabled:opacity-30"
                         aria-label={`Xóa lựa chọn ${v.label || vi + 1}`}
                       >
-                        <Trash2 className="size-3.5" />
+                        <IconTrash className="size-3.5" />
                       </button>
                     </div>
                   </div>
@@ -164,7 +172,7 @@ export function VariantGroupsEditor({
                 onClick={() => onAddValue(gi)}
                 className="flex h-10 items-center justify-center gap-1.5 rounded-lg border border-dashed border-champagne/60 bg-white text-sm text-navy transition hover:border-champagne hover:bg-champagne-50/60"
               >
-                <Plus className="size-4" /> Thêm lựa chọn
+                <IconPlus className="size-4" /> Thêm lựa chọn
                 <span className="text-xs text-muted-foreground">
                   ({g.values.length}/{PRODUCT_LIMITS.maxOptions})
                 </span>
@@ -182,10 +190,10 @@ export function VariantGroupsEditor({
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-xl border-dashed border-champagne/60 text-navy sm:w-auto"
+          className="w-full rounded-xl border-dashed border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy sm:w-auto"
           onClick={onAddGroup}
         >
-          <Plus /> Thêm nhóm phân loại {groups.length + 1}
+          <IconPlus /> Thêm nhóm phân loại {groups.length + 1}
         </Button>
       )}
     </div>
@@ -328,7 +336,7 @@ export function VariantTable({
     <div className="space-y-3">
       <div className="flex flex-col gap-2 rounded-xl border border-champagne/40 bg-champagne-50/50 p-3 md:flex-row md:items-center">
         <div className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-navy">
-          <Wand2 className="size-4 text-champagne-600" /> Điền nhanh
+          <IconWand className="size-4 text-navy" /> Điền nhanh
         </div>
         <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-3">
           <NumberInput
@@ -361,7 +369,7 @@ export function VariantTable({
         </div>
         <Button
           type="button"
-          className="h-9 rounded-full px-4"
+          className="h-9 rounded-lg px-4"
           disabled={bulk.price === null && bulk.originalPrice === null && bulk.stock === null}
           onClick={() => onApplyAll(bulk)}
         >
@@ -373,14 +381,14 @@ export function VariantTable({
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
-            <tr className="bg-ivory text-left text-xs tracking-wide text-muted-foreground uppercase">
-              <th className="px-3 py-2.5 font-medium">{g1?.name || 'Nhóm 1'}</th>
-              {g2 && <th className="px-3 py-2.5 font-medium">{g2.name || 'Nhóm 2'}</th>}
-              <th className="w-40 px-3 py-2.5 font-medium">
+            <tr className="border-b border-ink/[0.06] text-left text-[13px] text-ink/55">
+              <th className="px-3 py-2.5 font-normal">{g1?.name || 'Nhóm 1'}</th>
+              {g2 && <th className="px-3 py-2.5 font-normal">{g2.name || 'Nhóm 2'}</th>}
+              <th className="w-40 px-3 py-2.5 font-normal">
                 Giá bán<span className="text-destructive">*</span>
               </th>
-              <th className="w-40 px-3 py-2.5 font-medium">Giá gốc</th>
-              <th className="w-44 px-3 py-2.5 font-medium">Kho</th>
+              <th className="w-40 px-3 py-2.5 font-normal">Giá gốc</th>
+              <th className="w-44 px-3 py-2.5 font-normal">Kho</th>
               <th className="w-10" />
             </tr>
           </thead>
@@ -462,10 +470,10 @@ export function VariantTable({
                             type="button"
                             variant="outline"
                             size="xs"
-                            className="ml-auto rounded-full border-champagne/60 text-navy"
+                            className="ml-auto rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
                             onClick={() => onAdjustStock(id)}
                           >
-                            <PackagePlus /> Điều chỉnh
+                            <IconPackage /> Điều chỉnh
                           </Button>
                         )}
                       </div>
@@ -489,7 +497,7 @@ export function VariantTable({
                       aria-label="Bỏ tổ hợp này"
                       title="Bỏ tổ hợp này (không bán)"
                     >
-                      <Trash2 className="size-4" />
+                      <IconTrash className="size-4" />
                     </button>
                   </td>
                 </tr>
@@ -500,8 +508,8 @@ export function VariantTable({
       </div>
       <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span className="inline-flex items-center gap-1">
-          <GripVertical className="size-3.5" /> {rows.length} biến thể. Biến thể đã có đổi tồn bằng
-          nút "Điều chỉnh" (ghi lịch sử).
+          <IconGripVertical className="size-3.5" /> {rows.length} biến thể. Biến thể đã có đổi tồn
+          bằng nút "Điều chỉnh" (ghi lịch sử).
         </span>
         {removedCount > 0 && (
           <button
@@ -509,7 +517,7 @@ export function VariantTable({
             onClick={onRestoreRows}
             className="inline-flex items-center gap-1 font-medium text-navy hover:underline"
           >
-            <RotateCcw className="size-3.5" /> Khôi phục {removedCount} tổ hợp đã bỏ
+            <IconRefresh className="size-3.5" /> Khôi phục {removedCount} tổ hợp đã bỏ
           </button>
         )}
       </div>
@@ -590,10 +598,10 @@ export function SingleVariantFields({
                 type="button"
                 variant="outline"
                 size="xs"
-                className="ml-auto rounded-full border-champagne/60 text-navy"
+                className="ml-auto rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
                 onClick={() => onAdjustStock(existingId)}
               >
-                <PackagePlus /> Điều chỉnh
+                <IconPackage /> Điều chỉnh
               </Button>
             )}
           </div>

@@ -5,9 +5,14 @@ import {
   IconList,
   IconPhotoOff,
 } from '@tabler/icons-react';
+import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { useProductSearch } from '@/components/catalog/browse-query';
+import {
+  type ProductSearchParams,
+  productSearchOptions,
+  useProductSearch,
+} from '@/components/catalog/browse-query';
 import { CategoryIcon } from '@/components/catalog/category-icon';
 import {
   Sheet,
@@ -36,6 +41,42 @@ function useActiveCategory(tree: CategoryNode[] | undefined) {
 /** Bóng chung của hai khung mega menu: mềm, lan rộng, không viền */
 const MEGA_SURFACE = 'rounded-xl bg-card shadow-[0_20px_50px_-24px_rgba(15,26,61,0.28)]';
 
+/** Chuột dừng ở một mục mới chưa xem bao lâu thì mới dựng khung phải (ms): lướt qua nhiều mục không dựng thừa */
+const PANEL_SWITCH_DELAY = 80;
+
+const columnQuery = (categoryId: string): ProductSearchParams => ({
+  categoryId,
+  sort: 'best_selling',
+  pageSize: 6,
+});
+const promoQuery = (categoryId: string): ProductSearchParams => ({
+  categoryId,
+  sort: 'best_selling',
+  pageSize: 3,
+});
+
+/** Các cột của khung phải: danh mục con, không có thì chính nó */
+const panelColumns = (category: CategoryNode) =>
+  (category.children?.length ? category.children : [category]).slice(0, 10);
+
+/**
+ * Tải sẵn dữ liệu của mọi khung khi menu mở lần đầu, mục đang chọn trước, mỗi lúc 3 yêu cầu để không chiếm hết
+ * kết nối của trang. Nhờ vậy rê sang mục khác là có nội dung ngay, không hiện khung xương.
+ */
+async function prefetchPanels(qc: QueryClient, tree: CategoryNode[], firstId: string) {
+  const ordered = [...tree].sort((a, b) => Number(b.id === firstId) - Number(a.id === firstId));
+  const jobs = ordered.flatMap((cat) => [
+    ...panelColumns(cat).map((c) => columnQuery(c.id)),
+    promoQuery(cat.id),
+  ]);
+  const worker = async () => {
+    for (let job = jobs.shift(); job; job = jobs.shift()) {
+      await qc.prefetchQuery(productSearchOptions(job));
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
+}
+
 /** Tên gọn trong mega menu: bỏ chữ loại hàng ở đầu ("Điện thoại iPhone 17" → "iPhone 17") */
 function shortName(name: string): string {
   return name.replace(/^(Điện thoại|Máy tính bảng|Laptop|Đồng hồ thông minh)\s+/i, '');
@@ -46,7 +87,7 @@ function shortName(name: string): string {
  * (như cột "iPhone / iPhone 17 Series…" trên onewaymobile.vn). Chỉ tải khi mega menu mở.
  */
 function MegaColumn({ category }: { category: CategoryNode }) {
-  const q = useProductSearch({ categoryId: category.id, sort: 'best_selling', pageSize: 6 });
+  const q = useProductSearch(columnQuery(category.id));
   const items = q.data?.items ?? [];
   return (
     <div className="min-w-0">
@@ -58,7 +99,7 @@ function MegaColumn({ category }: { category: CategoryNode }) {
       </Link>
       <ul className="mt-3 space-y-0.5">
         {q.isPending
-          ? Array.from({ length: 4 }, (_, i) => (
+          ? Array.from({ length: 6 }, (_, i) => (
               <li key={i} className="py-2">
                 <Skeleton className="h-4 w-3/4" />
               </li>
@@ -84,7 +125,7 @@ function MegaColumn({ category }: { category: CategoryNode }) {
  * tên, giá, nút "Mua ngay" và ảnh lớn bên phải (chưa có ảnh banner riêng do admin đặt).
  */
 function MegaPromos({ category }: { category: CategoryNode }) {
-  const q = useProductSearch({ categoryId: category.id, sort: 'best_selling', pageSize: 3 });
+  const q = useProductSearch(promoQuery(category.id));
   const tones = ['bg-ivory-200', 'bg-champagne-50', 'bg-mist'];
   if (!q.isPending && (q.data?.items.length ?? 0) === 0) return null;
   return (
@@ -113,7 +154,7 @@ function MegaPromos({ category }: { category: CategoryNode }) {
                 <img
                   src={p.image}
                   alt=""
-                  loading="lazy"
+                  decoding="async"
                   className="absolute top-1/2 right-2 -z-10 h-[88%] -translate-y-1/2 object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
@@ -130,11 +171,10 @@ function MegaPromos({ category }: { category: CategoryNode }) {
  * hàng ô quảng cáo. Danh mục không có danh mục con thì cột duy nhất là chính nó.
  */
 function CategoryPanel({ category }: { category: CategoryNode }) {
-  const columns = category.children?.length ? category.children : [category];
   return (
     <div className="flex h-full flex-col px-10 pt-8 pb-9">
       <div className="grid grid-cols-4 gap-x-10 gap-y-8 xl:grid-cols-5">
-        {columns.slice(0, 10).map((c) => (
+        {panelColumns(category).map((c) => (
           <MegaColumn key={c.id} category={c} />
         ))}
       </div>
@@ -145,7 +185,8 @@ function CategoryPanel({ category }: { category: CategoryNode }) {
 
 /**
  * Mega menu hai khung (theo onewaymobile.vn): cột trái danh sách danh mục cấp 1 (icon, tên, ›); rê chuột
- * vào mục nào thì mục đó chuyển cam và khung phải hiện danh mục đó.
+ * vào mục nào thì mục đó chuyển cam ngay và khung phải hiện danh mục đó. Khung đã xem được giữ lại (chỉ ẩn đi)
+ * nên quay lại là hiện tức thì, không dựng và tải lại.
  */
 function MegaMenu({
   tree,
@@ -156,12 +197,27 @@ function MegaMenu({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
-  const selected = tree.find((c) => c.id === selectedId) ?? tree[0];
+  const wantedId = (tree.find((c) => c.id === selectedId) ?? tree[0])?.id ?? '';
+  const [panelId, setPanelId] = useState(wantedId);
+  const [visited, setVisited] = useState([wantedId]);
+
+  useEffect(() => {
+    if (wantedId === panelId) return;
+    const timer = window.setTimeout(
+      () => {
+        setPanelId(wantedId);
+        setVisited((v) => (v.includes(wantedId) ? v : [...v, wantedId]));
+      },
+      visited.includes(wantedId) ? 0 : PANEL_SWITCH_DELAY,
+    );
+    return () => window.clearTimeout(timer);
+  }, [wantedId, panelId, visited]);
+
   return (
     <div className="grid grid-cols-[18.5rem_1fr] items-start gap-1.5">
       <ul className={cn(MEGA_SURFACE, 'py-3')}>
         {tree.map((cat) => {
-          const on = cat.id === selected?.id;
+          const on = cat.id === wantedId;
           return (
             <li key={cat.id}>
               <Link
@@ -187,7 +243,20 @@ function MegaMenu({
         })}
       </ul>
       <div className={cn(MEGA_SURFACE, 'min-h-[30rem]')}>
-        {selected && <CategoryPanel key={selected.id} category={selected} />}
+        {tree
+          .filter((c) => visited.includes(c.id))
+          .map((c) => (
+            <div
+              key={c.id}
+              className={
+                c.id === panelId
+                  ? 'animate-in fade-in-0 duration-150 motion-reduce:animate-none'
+                  : 'hidden'
+              }
+            >
+              <CategoryPanel category={c} />
+            </div>
+          ))}
       </div>
     </div>
   );
@@ -196,37 +265,51 @@ function MegaMenu({
 /**
  * Thanh danh mục máy tính (theo onewaymobile.vn): nền trắng, nút ☰ tròn cam nhạt + danh mục cấp 1 có icon
  * nét mảnh trải đều; dính đầu trang khi cuộn.
- * Rê chuột / focus vào ☰ hoặc một mục thì mở mega menu.
+ * Chỉ rê chuột vào ☰ mới mở mega menu; các mục trên thanh là đường dẫn bình thường. Menu được dựng từ lần mở
+ * đầu rồi giữ lại, đóng mở chỉ đổi độ mờ và vị trí nên trình duyệt không phải vẽ lại.
  */
 function DesktopBar({ tree, activeId }: { tree: CategoryNode[]; activeId: string | null }) {
-  /** null = đóng; còn lại = id danh mục đang hiện ở khung phải */
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  /** Mục đang chọn trong menu; rỗng = chưa mở lần nào nên chưa dựng */
+  const [selectedId, setSelectedId] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<number | undefined>(undefined);
+  const prefetched = useRef(false);
+  const qc = useQueryClient();
   const { pathname, search } = useLocation();
 
   // Chuyển trang thì đóng menu
-  useEffect(() => setOpenId(null), [pathname, search]);
+  useEffect(() => setOpen(false), [pathname, search]);
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
-  const open = (id: string) => {
-    window.clearTimeout(closeTimer.current);
-    setOpenId(id);
+  const defaultId = activeId ?? tree[0]?.id ?? '';
+  const cancelClose = () => window.clearTimeout(closeTimer.current);
+  const openMenu = () => {
+    cancelClose();
+    if (!open) setSelectedId(defaultId);
+    setOpen(true);
+    if (!prefetched.current) {
+      prefetched.current = true;
+      void prefetchPanels(qc, tree, defaultId);
+    }
   };
   const scheduleClose = () => {
-    window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => setOpenId(null), 150);
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => setOpen(false), 150);
   };
-  const defaultId = activeId ?? tree[0]?.id ?? '';
+  const select = (id: string) => {
+    cancelClose();
+    setSelectedId(id);
+  };
 
   /** ↓ vào menu, Esc đóng menu */
-  const onTriggerKey = (e: React.KeyboardEvent, id: string) => {
+  const onTriggerKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      open(id);
+      openMenu();
       requestAnimationFrame(() => panelRef.current?.querySelector<HTMLElement>('a')?.focus());
     } else if (e.key === 'Escape') {
-      setOpenId(null);
+      setOpen(false);
     }
   };
 
@@ -234,28 +317,24 @@ function DesktopBar({ tree, activeId }: { tree: CategoryNode[]; activeId: string
     <div
       className="sticky top-0 z-40 hidden border-b border-black/[0.06] bg-card md:block"
       onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpenId(null);
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
       }}
     >
-      {/* Vùng rê chuột chỉ gồm khung nội dung (thanh + mega menu), không gồm lề trống hai bên màn rộng */}
-      <div
-        className="relative mx-auto max-w-7xl px-4"
-        onMouseLeave={scheduleClose}
-        onMouseEnter={() => window.clearTimeout(closeTimer.current)}
-      >
+      <div className="relative mx-auto max-w-7xl px-4">
         <div className="flex h-14 items-center gap-2">
           <button
             type="button"
-            aria-expanded={openId !== null}
+            aria-expanded={open}
             aria-controls="mega-menu"
             aria-label="Tất cả danh mục"
-            onMouseEnter={() => open(defaultId)}
-            onFocus={() => open(defaultId)}
-            onClick={() => (openId ? setOpenId(null) : open(defaultId))}
-            onKeyDown={(e) => onTriggerKey(e, defaultId)}
+            // Chỉ chuột mới mở bằng rê; màn cảm ứng dùng cú chạm (onClick)
+            onPointerEnter={(e) => e.pointerType === 'mouse' && openMenu()}
+            onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClose()}
+            onClick={() => (open ? setOpen(false) : openMenu())}
+            onKeyDown={onTriggerKey}
             className={cn(
               'flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-champagne-50 text-navy outline-none transition-colors focus-visible:ring-2 focus-visible:ring-champagne',
-              openId ? 'bg-champagne/25' : 'hover:bg-champagne/20',
+              open ? 'bg-champagne/25' : 'hover:bg-champagne/20',
             )}
           >
             <IconList className="size-6 [stroke-width:1.6]" />
@@ -263,20 +342,14 @@ function DesktopBar({ tree, activeId }: { tree: CategoryNode[]; activeId: string
           <ul className="flex min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] lg:justify-between [&::-webkit-scrollbar]:hidden">
             {tree.map((cat) => {
               const active = cat.id === activeId;
-              const isOpen = cat.id === openId;
               return (
                 <li key={cat.id} className="shrink-0">
                   <Link
                     to={`/danh-muc/${cat.slug}`}
                     aria-current={active ? 'page' : undefined}
-                    aria-expanded={isOpen}
-                    aria-controls="mega-menu"
-                    onMouseEnter={() => open(cat.id)}
-                    onFocus={() => open(cat.id)}
-                    onKeyDown={(e) => onTriggerKey(e, cat.id)}
                     className={cn(
                       'relative flex h-14 items-center gap-1.5 px-3 text-[13px] font-medium whitespace-nowrap outline-none transition-colors focus-visible:text-navy xl:px-2.5 2xl:text-sm',
-                      active || isOpen ? 'text-navy' : 'text-ink hover:text-navy',
+                      active ? 'text-navy' : 'text-ink hover:text-navy',
                     )}
                   >
                     <CategoryIcon icon={cat.icon} className="size-5" />
@@ -295,16 +368,24 @@ function DesktopBar({ tree, activeId }: { tree: CategoryNode[]; activeId: string
           </ul>
         </div>
 
-        {openId && (
+        {selectedId && (
           <div
             id="mega-menu"
             ref={panelRef}
-            className="absolute inset-x-4 top-full z-30 pt-1.5 animate-in fade-in-0 slide-in-from-top-1 duration-150"
+            inert={!open}
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') setOpenId(null);
+              if (e.key === 'Escape') setOpen(false);
             }}
+            className={cn(
+              'absolute inset-x-4 top-full z-30 pt-1.5 transition-[opacity,transform,visibility] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] motion-reduce:transition-none',
+              open
+                ? 'visible translate-y-0 opacity-100 starting:-translate-y-1.5 starting:opacity-0'
+                : 'pointer-events-none invisible -translate-y-1.5 opacity-0',
+            )}
           >
-            <MegaMenu tree={tree} selectedId={openId} onSelect={open} />
+            <MegaMenu tree={tree} selectedId={selectedId} onSelect={select} />
           </div>
         )}
       </div>
@@ -343,7 +424,7 @@ function MobileDrawer({
         side="left"
         className="w-[85%] gap-0 overflow-y-auto bg-card p-0 [&>button:last-child]:text-white [&>button:last-child]:opacity-90"
       >
-        <SheetHeader className="border-b border-ivory-200 bg-navy p-5 text-white">
+        <SheetHeader className="border-b border-ink/[0.06] bg-navy p-5 text-white">
           <SheetTitle className="flex items-center gap-2 text-white">
             <IconLayoutGrid className="size-5 text-white" /> Danh mục sản phẩm
           </SheetTitle>
@@ -351,7 +432,7 @@ function MobileDrawer({
             Chọn một danh mục để xem hàng đang bán.
           </SheetDescription>
         </SheetHeader>
-        <ul className="divide-y divide-ivory-200 px-2 py-2">
+        <ul className="divide-y divide-ink/[0.06] px-2 py-2">
           {tree.map((cat) => {
             const isOpen = expanded === cat.id;
             return (
@@ -420,7 +501,7 @@ function MobileBar({
   activeChildId: string | null;
 }) {
   return (
-    <div className="border-b border-ivory-200 bg-card md:hidden">
+    <div className="border-b border-ink/[0.06] bg-card md:hidden">
       <div className="flex gap-1 overflow-x-auto px-2 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <MobileDrawer tree={tree} activeId={activeId} activeChildId={activeChildId} />
         {tree.map((cat) => {
@@ -463,7 +544,7 @@ export function CategoryBar() {
 
   if (isPending) {
     return (
-      <div className="border-b border-ivory-200 bg-card">
+      <div className="border-b border-ink/[0.06] bg-card">
         <div className="mx-auto flex h-[4.75rem] max-w-7xl items-center gap-4 overflow-hidden px-4 md:h-[60px]">
           {Array.from({ length: 8 }, (_, i) => (
             <Skeleton key={i} className="h-5 w-24 shrink-0" />

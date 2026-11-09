@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 
 /** Các số trang cần hiện: 1 … 4 5 6 … 12 */
@@ -36,13 +36,13 @@ export function Pager({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground sm:flex-row',
+        'flex flex-col items-center justify-between gap-3 text-sm text-ink/55 sm:flex-row',
         className,
       )}
     >
       <span>
         Hiển thị{' '}
-        <b className="font-medium text-ink">
+        <b className="font-medium text-charcoal">
           {from}–{to}
         </b>{' '}
         / {total.toLocaleString('vi-VN')}
@@ -51,12 +51,12 @@ export function Pager({
         <nav className="flex items-center gap-1" aria-label="Phân trang">
           <button
             type="button"
-            className={cn(btn, 'hover:bg-ivory-200')}
+            className={cn(btn, 'hover:bg-page hover:text-navy')}
             disabled={page <= 1}
             onClick={() => onChange(page - 1)}
             aria-label="Trang trước"
           >
-            <ChevronLeft className="size-4" />
+            <IconChevronLeft className="size-4 [stroke-width:2]" />
           </button>
           {pageList(page, last).map((p, i) =>
             p === '…' ? (
@@ -71,7 +71,9 @@ export function Pager({
                 aria-current={p === page ? 'page' : undefined}
                 className={cn(
                   btn,
-                  p === page ? 'bg-navy font-semibold text-white' : 'text-ink hover:bg-ivory-200',
+                  p === page
+                    ? 'bg-navy font-semibold text-white'
+                    : 'text-ink hover:bg-page hover:text-navy',
                 )}
               >
                 {p}
@@ -80,12 +82,12 @@ export function Pager({
           )}
           <button
             type="button"
-            className={cn(btn, 'hover:bg-ivory-200')}
+            className={cn(btn, 'hover:bg-page hover:text-navy')}
             disabled={page >= last}
             onClick={() => onChange(page + 1)}
             aria-label="Trang sau"
           >
-            <ChevronRight className="size-4" />
+            <IconChevronRight className="size-4 [stroke-width:2]" />
           </button>
         </nav>
       )}

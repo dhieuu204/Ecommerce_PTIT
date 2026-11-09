@@ -1,4 +1,4 @@
-import { Minus, Plus } from 'lucide-react';
+import { IconMinus, IconPlus } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -52,13 +52,13 @@ export function QuantityStepper({
         disabled={disabled || value <= 1}
         onClick={() => onChange(value - 1)}
       >
-        <Minus className="size-3.5" />
+        <IconMinus className="size-3.5" />
       </button>
       <input
         aria-label="Số lượng"
         inputMode="numeric"
         className={cn(
-          'border-x border-ivory-200 bg-transparent text-center text-sm font-semibold text-ink tabular-nums outline-none focus:bg-champagne-50/60',
+          'border-x border-ink/[0.06] bg-transparent text-center text-sm font-semibold text-ink tabular-nums outline-none focus:bg-champagne-50/60',
           size === 'sm' ? 'h-8 w-10' : 'h-10 w-14',
         )}
         value={text}
@@ -76,7 +76,7 @@ export function QuantityStepper({
         disabled={disabled || value >= limit}
         onClick={() => onChange(value + 1)}
       >
-        <Plus className="size-3.5" />
+        <IconPlus className="size-3.5" />
       </button>
     </div>
   );

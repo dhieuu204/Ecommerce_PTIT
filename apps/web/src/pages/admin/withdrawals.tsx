@@ -1,5 +1,5 @@
+import { IconBuildingBank, IconLoader2, IconPhoto, IconUpload } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ImageIcon, Landmark, Loader2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -57,7 +57,7 @@ export function WithdrawalsPage() {
         title="Rút tiền của seller"
         description="Mọi yêu cầu rút đều cần duyệt. Sau khi duyệt, chuyển khoản ngoài hệ thống rồi nhập mã giao dịch và ảnh biên lai; chỉ khi đó tiền mới ghi là đã chi. Chủ shop không tự duyệt, không tự chi cho shop mình."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav className="-mb-px flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5">
           {(
             [
@@ -74,7 +74,7 @@ export function WithdrawalsPage() {
                 'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                 tab === value
                   ? 'border-navy font-semibold text-navy'
-                  : 'border-transparent text-muted-foreground hover:text-ink',
+                  : 'border-transparent text-ink/60 hover:text-navy',
               )}
             >
               {label}
@@ -136,7 +136,7 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
   if (list.isError)
     return <LoadError message={list.error.message} onRetry={() => list.refetch()} />;
   if (list.data.items.length === 0) {
-    return <EmptyState icon={Landmark} title="Không có yêu cầu rút chờ duyệt" />;
+    return <EmptyState icon={IconBuildingBank} title="Không có yêu cầu rút chờ duyệt" />;
   }
   return (
     <>
@@ -144,7 +144,7 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
         {list.data.items.map((a) => (
           <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5 md:px-5">
             <div className="min-w-0 flex-1 text-sm">
-              <div className="font-semibold text-navy">
+              <div className="font-bold tracking-tight text-charcoal">
                 {a.shop.name} · {formatMoney(a.amount)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -235,7 +235,7 @@ function WalletSource({ shopId }: { shopId: string }) {
           </div>
         ))}
       </div>
-      <ul className="max-h-48 divide-y overflow-y-auto rounded-lg border">
+      <ul className="max-h-48 divide-y divide-ink/[0.06] overflow-y-auto rounded-lg border">
         {w.recentTransactions.map((t) => (
           <li key={t.id} className="flex justify-between gap-2 px-3 py-1.5 text-xs">
             <span className="min-w-0 truncate">
@@ -295,10 +295,10 @@ function PayoutList({
                 type="button"
                 onClick={() => setStatus(s)}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs transition',
+                  'rounded-lg border px-3 py-1 text-xs transition',
                   status === s
-                    ? 'border-navy bg-navy text-white'
-                    : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
                 )}
               >
                 {s === 'ALL' ? 'Tất cả' : WITHDRAWAL_STATUS[s].label}
@@ -319,7 +319,7 @@ function PayoutList({
         <LoadError message={list.error.message} onRetry={() => list.refetch()} />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          icon={Landmark}
+          icon={IconBuildingBank}
           title={mode === 'PAY' ? 'Không có yêu cầu chờ chuyển khoản' : 'Chưa có yêu cầu rút nào'}
         />
       ) : (
@@ -470,9 +470,9 @@ function PaidDialog({
             disabled={uploading}
           >
             {uploading ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : (
-              <Upload className="size-4" />
+              <IconUpload className="size-4" />
             )}
             {receipt ? receipt.name : 'Chọn ảnh biên lai (JPG, PNG, WebP; tối đa 5 MB)'}
           </Button>
@@ -504,7 +504,7 @@ function ReceiptLink({ id }: { id: string }) {
   };
   return (
     <Button variant="ghost" size="sm" onClick={open} disabled={loading}>
-      {loading ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+      {loading ? <IconLoader2 className="size-4 animate-spin" /> : <IconPhoto className="size-4" />}
       Biên lai
     </Button>
   );

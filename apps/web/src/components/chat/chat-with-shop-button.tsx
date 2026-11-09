@@ -1,4 +1,4 @@
-import { Loader2, MessageCircle } from 'lucide-react';
+import { IconLoader2, IconMessageCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -66,7 +66,7 @@ export function ChatWithShopButton({
       onClick={() => void onClick()}
       className={cn('border-navy text-navy', className)}
     >
-      {busy ? <Loader2 className="animate-spin" /> : <MessageCircle />}
+      {busy ? <IconLoader2 className="animate-spin" /> : <IconMessageCircle />}
       Chat với shop
     </Button>
   );

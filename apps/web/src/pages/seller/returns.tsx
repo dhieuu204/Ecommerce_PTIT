@@ -1,5 +1,5 @@
+import { IconArrowBackUp, IconChevronRight } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, Undo2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { Pager } from '@/components/console/pager';
@@ -47,7 +47,7 @@ export function SellerReturnsPage() {
         title="Trả hàng / Hoàn tiền"
         description="Trả lời yêu cầu trong hạn (quá hạn thì tự chấp nhận). Khi hàng trả về tới shop, kiểm hàng rồi xác nhận để sàn hoàn tiền cho người mua."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav
           className="flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5"
           aria-label="Trạng thái"
@@ -65,7 +65,7 @@ export function SellerReturnsPage() {
                   '-mb-px shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                   status === t.value
                     ? 'border-navy font-semibold text-navy'
-                    : 'border-transparent text-muted-foreground hover:text-ink',
+                    : 'border-transparent text-ink/60 hover:text-navy',
                 )}
               >
                 {t.label}
@@ -87,7 +87,7 @@ export function SellerReturnsPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={Undo2}
+            icon={IconArrowBackUp}
             title="Không có yêu cầu trả hàng"
             text="Người mua gửi yêu cầu từ đơn đã giao, trong hạn trước khi đơn tự hoàn tất."
           />
@@ -102,7 +102,7 @@ export function SellerReturnsPage() {
                   >
                     <div className="min-w-0 flex-1 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold text-navy">{r.code}</span>
+                        <span className="font-semibold text-charcoal">{r.code}</span>
                         <ReturnStatusBadge status={r.status} />
                         {r.paymentMethod === 'COD' && (
                           <span className="rounded-md bg-champagne-50 px-1.5 text-xs font-semibold text-champagne-600">
@@ -127,11 +127,11 @@ export function SellerReturnsPage() {
                       <div className="text-xs text-muted-foreground">
                         {r.decidedRefund !== null ? 'Hoàn' : 'Hoàn tối đa'}
                       </div>
-                      <div className="font-semibold text-navy">
+                      <div className="font-bold tracking-tight text-charcoal">
                         {formatMoney(r.decidedRefund ?? r.refundAmount)}
                       </div>
                     </div>
-                    <ChevronRight className="size-4 text-ink/35" />
+                    <IconChevronRight className="size-4 text-ink/35" />
                   </Link>
                 </li>
               ))}

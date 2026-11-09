@@ -1,5 +1,11 @@
+import {
+  IconCash,
+  IconInfoCircle,
+  IconLoader2,
+  IconLock,
+  IconRosetteDiscount,
+} from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgePercent, Banknote, Info, Loader2, Lock } from 'lucide-react';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -199,7 +205,7 @@ export function VoucherFormDialog({
       <DialogContent className="max-h-[94vh] overflow-y-auto rounded-2xl p-0 sm:max-w-2xl">
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <DialogHeader className="border-b px-5 py-4 text-left md:px-6">
-            <DialogTitle className="text-navy">
+            <DialogTitle className="text-charcoal">
               {isEdit
                 ? `Sửa voucher ${voucher.code}`
                 : kind === 'shop'
@@ -216,7 +222,7 @@ export function VoucherFormDialog({
           <div className="space-y-6 px-5 py-5 md:px-6">
             {locked && (
               <div className="flex gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                <Lock className="mt-0.5 size-4 shrink-0 text-amber-700" />
+                <IconLock className="mt-0.5 size-4 shrink-0 text-amber-700" />
                 <div>
                   <b className="font-semibold">Voucher đang diễn ra.</b> Chỉ lùi được giờ kết thúc
                   về sau và tăng tổng số lượt; các ô khác đã khóa.
@@ -302,8 +308,8 @@ export function VoucherFormDialog({
                   >
                     {(
                       [
-                        { value: 'AMOUNT', label: 'Giảm số tiền', icon: Banknote },
-                        { value: 'PERCENT', label: 'Giảm theo %', icon: BadgePercent },
+                        { value: 'AMOUNT', label: 'Giảm số tiền', icon: IconCash },
+                        { value: 'PERCENT', label: 'Giảm theo %', icon: IconRosetteDiscount },
                       ] as const
                     ).map(({ value, label, icon: Icon }) => (
                       <button
@@ -582,25 +588,26 @@ export function VoucherFormDialog({
               </div>
             </fieldset>
 
-            <p className="flex gap-2 rounded-lg bg-ivory px-3 py-2 text-xs text-muted-foreground">
-              <Info className="mt-px size-3.5 shrink-0 text-champagne-600" />
-              Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt.
-              {kind === 'platform' && ' Voucher sàn do sàn chịu chi phí.'}
-            </p>
+            {kind === 'platform' && (
+              <p className="flex gap-2 rounded-lg bg-page px-3 py-2 text-xs text-ink/55">
+                <IconInfoCircle className="mt-px size-3.5 shrink-0 text-navy" />
+                Voucher sàn do sàn chịu chi phí.
+              </p>
+            )}
           </div>
 
           <DialogFooter className="sticky bottom-0 border-t bg-white/95 px-5 py-3 backdrop-blur md:px-6">
             <Button
               type="button"
               variant="outline"
-              className="rounded-full"
+              className="rounded-lg"
               disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
             >
               Hủy
             </Button>
-            <Button type="submit" className="min-w-32 rounded-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="animate-spin" />}
+            <Button type="submit" className="min-w-32 rounded-lg" disabled={isSubmitting}>
+              {isSubmitting && <IconLoader2 className="animate-spin" />}
               {isEdit ? 'Lưu thay đổi' : 'Tạo voucher'}
             </Button>
           </DialogFooter>

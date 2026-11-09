@@ -1,18 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Loader2,
-  MapPin,
-  PackageCheck,
-  RotateCcw,
-  Truck,
-  Undo2,
-  UserRound,
-  Wallet,
-} from 'lucide-react';
+  IconAlertTriangle,
+  IconArrowBackUp,
+  IconChevronRight,
+  IconCircleCheck,
+  IconClock,
+  IconLoader2,
+  IconMapPin,
+  IconPackage,
+  IconRefresh,
+  IconTruck,
+  IconUser,
+  IconWallet,
+} from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ import {
   DECLINE_CANCEL_REASONS,
   MoneyRow,
   OrderItemRow,
+  OrderProgress,
   OrderTimeline,
   ReasonDialog,
   RefundBadge,
@@ -40,7 +41,16 @@ import { API, api } from '@/lib/api';
 import { formatDateTime, formatMoney } from '@/lib/format';
 import type { SellerOrder } from '@/lib/order-types';
 import { cn } from '@/lib/utils';
+import { CARD, CardTitle, PRIMARY_BUTTON } from '@/pages/checkout/checkout-parts';
 import { sellerOrdersKey } from './orders';
+
+/** Nút chính và nút phụ của dải việc cần làm */
+const PRIMARY = cn(
+  PRIMARY_BUTTON,
+  'inline-flex h-11 items-center justify-center gap-2 px-5 text-sm',
+);
+const OUTLINE =
+  'h-11 rounded-lg border-ink/15 px-5 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy';
 
 type Dialog = null | 'CANCEL' | 'DECLINE' | 'CONFIRM' | 'RETURN';
 
@@ -113,7 +123,7 @@ export function SellerOrderDetailPage() {
   if (detail.isError) {
     return (
       <LoadError
-        className="mx-auto max-w-5xl rounded-2xl border bg-card"
+        className={cn(CARD, 'mx-auto max-w-5xl')}
         message={detail.error.message}
         onRetry={() => detail.refetch()}
       />
@@ -156,62 +166,76 @@ export function SellerOrderDetailPage() {
       {o.returnRequest && (
         <Link
           to={`/kenh-nguoi-ban/tra-hang/${o.returnRequest.id}`}
-          className="mb-4 flex items-center gap-3 rounded-2xl border border-champagne/50 bg-champagne-50 px-4 py-3 text-sm text-navy transition hover:border-champagne md:px-5"
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-champagne-50 px-4 py-3 text-sm text-charcoal ring-1 ring-champagne/40 transition hover:ring-navy/30 md:px-5"
         >
-          <Undo2 className="size-5 shrink-0 text-champagne-600" />
+          <IconArrowBackUp className="size-5 shrink-0 text-navy [stroke-width:1.75]" />
           <span className="min-w-0 flex-1">
             Người mua yêu cầu trả hàng <b>{o.returnRequest.code}</b> (hoàn tối đa{' '}
             {formatMoney(o.returnRequest.refundAmount)})
           </span>
           <ReturnStatusBadge status={o.returnRequest.status} />
-          <ChevronRight className="size-4 shrink-0 opacity-50" />
+          <IconChevronRight className="size-4 shrink-0 text-ink/40 [stroke-width:2]" />
         </Link>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-4">
-          <section className="rounded-2xl border bg-card px-4 md:px-5">
-            <div className="border-b py-3 font-semibold text-navy">
-              Sản phẩm ({o.items.reduce((a, i) => a + i.quantity, 0)})
-            </div>
-            <div className="divide-y">
+      <OrderProgress
+        status={o.status}
+        cod={cod}
+        paid={paid}
+        at={{
+          placed: o.createdAt,
+          paid: o.paidAt,
+          confirmed: o.confirmedAt,
+          shipped: o.pickedAt,
+          delivered: o.deliveredAt,
+          completed: o.completedAt,
+        }}
+        className={cn(CARD, 'mb-4')}
+      />
+
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 space-y-4">
+          <section className={cn(CARD, 'px-4 pt-4 lg:px-5')}>
+            <CardTitle>Sản phẩm ({o.items.reduce((a, i) => a + i.quantity, 0)})</CardTitle>
+            <div className="divide-y divide-ink/[0.06]">
               {o.items.map((it) => (
                 <OrderItemRow key={it.id} item={it} />
               ))}
             </div>
           </section>
           {o.shipment && (
-            <section className="rounded-2xl border bg-card px-4 py-4 md:px-5">
-              <div className="mb-3 flex items-center gap-2 font-semibold text-navy">
-                <Truck className="size-4 text-champagne-600" /> Vận chuyển
-              </div>
-              <ShipmentPanel shipment={o.shipment} forSeller />
+            <section className={cn(CARD, 'px-4 py-4 lg:px-5')}>
+              <CardTitle>Vận chuyển</CardTitle>
+              <ShipmentPanel shipment={o.shipment} forSeller className="mt-3" />
             </section>
           )}
           {o.history && (
-            <section className="rounded-2xl border bg-card px-4 py-4 md:px-5">
-              <div className="mb-3 font-semibold text-navy">Lịch sử đơn</div>
-              <OrderTimeline history={o.history} paid={paid} />
+            <section className={cn(CARD, 'px-4 py-4 lg:px-5')}>
+              <CardTitle>Lịch sử đơn</CardTitle>
+              <div className="mt-3">
+                <OrderTimeline history={o.history} paid={paid} />
+              </div>
             </section>
           )}
         </div>
-        <div className="space-y-4">
-          <section className="rounded-2xl border bg-card px-4 py-4 text-sm md:px-5">
-            <div className="mb-2 font-semibold text-navy">Người nhận</div>
-            <div className="flex gap-2">
-              <UserRound className="mt-0.5 size-4 shrink-0 text-champagne-600" />
-              <span>
+        <aside className="space-y-4 lg:sticky lg:top-20">
+          <section className={cn(CARD, 'p-5 text-sm')}>
+            <CardTitle>Người nhận</CardTitle>
+            <div className="mt-3 flex gap-2.5">
+              <IconUser className="mt-0.5 size-[1.125rem] shrink-0 text-navy [stroke-width:1.75]" />
+              <span className="font-medium text-charcoal">
                 {o.receiver.name} · {o.receiver.phone}
               </span>
             </div>
-            <div className="mt-1 flex gap-2">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-champagne-600" />
-              <span className="text-ink/70">{o.receiver.address}</span>
+            <div className="mt-1.5 flex gap-2.5">
+              <IconMapPin className="mt-0.5 size-[1.125rem] shrink-0 text-navy [stroke-width:1.75]" />
+              <span className="leading-6 text-ink/65">{o.receiver.address}</span>
             </div>
           </section>
-          <section className="rounded-2xl border bg-card px-4 py-4 md:px-5">
-            <div className="mb-1 flex items-center justify-between font-semibold text-navy">
-              Tiền của shop <RefundBadge status={o.refundStatus} />
+          <section className={cn(CARD, 'p-5')}>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <CardTitle>Tiền của shop</CardTitle>
+              <RefundBadge status={o.refundStatus} />
             </div>
             <MoneyRow label="Tiền hàng" value={o.subtotal} />
             <MoneyRow
@@ -230,31 +254,36 @@ export function SellerOrderDetailPage() {
               value={o.platformFee ?? 0}
               minus
             />
-            <div className="my-2 border-t" />
+            <div className="my-2.5 border-t border-dashed border-ink/15" />
             {o.sellerAmount !== null ? (
               <MoneyRow label="Dự kiến nhận" value={o.sellerAmount} strong />
             ) : (
-              <p className="text-sm text-muted-foreground">Chưa thanh toán.</p>
+              <p className="text-sm text-ink/55">Chưa thanh toán.</p>
             )}
             {cod && o.codAmount > 0 && (
               <div className="mt-2 flex items-center justify-between rounded-lg bg-champagne-50 px-3 py-2 text-sm">
-                <span className="text-ink/70">GHN thu hộ người mua</span>
+                <span className="text-ink/65">GHN thu hộ người mua</span>
                 <b className="text-navy">{formatMoney(o.codAmount)}</b>
               </div>
             )}
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-3 text-xs leading-relaxed text-ink/50">
               Phí vận chuyển {formatMoney(o.shippingFee)} ({SHIPPING_SOURCE[o.shippingFeeSource]})
               và voucher của sàn không tính vào tiền của shop. Tiền vào ngăn <b>đang giữ</b> khi{' '}
               {cod ? 'GHN giao xong' : 'người mua đã trả'}, sang <b>khả dụng</b> khi đơn hoàn tất
               {cod ? ' và sàn đã đối soát tiền COD với GHN' : ''}.
             </p>
-            <Button asChild variant="outline" size="sm" className="mt-3 w-full rounded-lg">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
+            >
               <Link to="/kenh-nguoi-ban/tai-chinh">
-                <Wallet className="size-4" /> Xem ví của shop
+                <IconWallet className="size-4 [stroke-width:1.75]" /> Xem ví của shop
               </Link>
             </Button>
           </section>
-        </div>
+        </aside>
       </div>
 
       <ConfirmDialog
@@ -310,9 +339,6 @@ export function SellerOrderDetailPage() {
   );
 }
 
-const BOX =
-  'mb-4 flex flex-col gap-3 rounded-2xl border px-4 py-4 sm:flex-row sm:items-center md:px-5';
-
 /** Dải trên cùng: trạng thái hiện tại và việc seller cần làm */
 function ActionBar({
   order: o,
@@ -336,33 +362,37 @@ function ActionBar({
   const cod = o.paymentMethod === 'COD';
   const bar = (
     tone: 'info' | 'warn' | 'danger' | 'success' | 'muted',
-    Icon: typeof Clock,
+    Icon: typeof IconClock,
     title: React.ReactNode,
     text?: React.ReactNode,
     actions?: React.ReactNode,
   ) => (
-    <div
-      className={cn(
-        BOX,
-        {
-          info: 'border-champagne/50 bg-champagne-50 text-navy',
-          warn: 'border-amber-200 bg-amber-50 text-amber-900',
-          danger: 'border-red-200 bg-red-50 text-red-900',
-          success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-          muted: 'bg-ivory text-ink/75',
-        }[tone],
-      )}
-    >
-      <Icon className="hidden size-6 shrink-0 opacity-70 sm:block" />
-      <div className="min-w-0 flex-1 text-sm">
-        <div className="font-semibold">{title}</div>
-        {text && <div className="opacity-90">{text}</div>}
+    <div className={cn(CARD, 'mb-4 flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center')}>
+      <div className="flex min-w-0 flex-1 items-center gap-3.5">
+        <span
+          className={cn(
+            'flex size-12 shrink-0 items-center justify-center rounded-full',
+            {
+              info: 'bg-champagne-50 text-navy',
+              warn: 'bg-amber-50 text-amber-600',
+              danger: 'bg-red-50 text-red-500',
+              success: 'bg-ship/10 text-ship',
+              muted: 'bg-page text-ink/50',
+            }[tone],
+          )}
+        >
+          <Icon className="size-6 [stroke-width:1.75]" />
+        </span>
+        <div className="min-w-0 text-sm">
+          <div className="text-base font-bold tracking-tight text-charcoal">{title}</div>
+          {text && <div className="mt-0.5 leading-relaxed text-ink/60">{text}</div>}
+        </div>
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </div>
   );
   const cancelBtn = (
-    <Button variant="outline" onClick={onCancel} disabled={busy}>
+    <Button variant="outline" onClick={onCancel} disabled={busy} className={OUTLINE}>
       Hủy đơn
     </Button>
   );
@@ -371,7 +401,7 @@ function ActionBar({
     case 'TO_CONFIRM':
       return bar(
         'info',
-        Clock,
+        IconClock,
         cod
           ? 'Người mua đặt hàng COD, chờ bạn xác nhận'
           : 'Người mua đã thanh toán, chờ bạn xác nhận',
@@ -390,29 +420,33 @@ function ActionBar({
         </>,
         <>
           {cancelBtn}
-          <Button onClick={onConfirm} disabled={busy}>
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <Truck className="size-4" />}
+          <button type="button" onClick={onConfirm} disabled={busy} className={PRIMARY}>
+            {busy ? (
+              <IconLoader2 className="size-4 animate-spin" />
+            ) : (
+              <IconTruck className="size-4" />
+            )}
             Xác nhận và giao cho GHN
-          </Button>
+          </button>
         </>,
       );
     case 'CANCEL_REQUESTED':
       return bar(
         'warn',
-        AlertTriangle,
+        IconAlertTriangle,
         'Người mua xin hủy đơn',
         <>
           Lý do: {o.cancelRequestReason}. Nếu GHN lấy hàng trước khi bạn trả lời, yêu cầu hủy hết
           hiệu lực.
         </>,
         <>
-          <Button variant="outline" onClick={onDecline} disabled={busy}>
+          <Button variant="outline" onClick={onDecline} disabled={busy} className={OUTLINE}>
             Từ chối
           </Button>
-          <Button onClick={onAccept} disabled={busy}>
-            {busy && <Loader2 className="size-4 animate-spin" />}
+          <button type="button" onClick={onAccept} disabled={busy} className={PRIMARY}>
+            {busy && <IconLoader2 className="size-4 animate-spin" />}
             Đồng ý hủy
-          </Button>
+          </button>
         </>,
       );
     case 'CONFIRMED': {
@@ -420,7 +454,7 @@ function ActionBar({
       if (s === 'CREATE_FAILED') {
         return bar(
           'danger',
-          AlertTriangle,
+          IconAlertTriangle,
           'GHN chưa nhận vận đơn',
           <>
             {o.shipment?.lastError ?? 'GHN từ chối tạo vận đơn.'} Kiểm tra địa chỉ lấy hàng trong{' '}
@@ -431,21 +465,21 @@ function ActionBar({
           </>,
           <>
             {cancelBtn}
-            <Button onClick={onRetry} disabled={busy}>
+            <button type="button" onClick={onRetry} disabled={busy} className={PRIMARY}>
               {busy ? (
-                <Loader2 className="size-4 animate-spin" />
+                <IconLoader2 className="size-4 animate-spin" />
               ) : (
-                <RotateCcw className="size-4" />
+                <IconRefresh className="size-4" />
               )}
               Tạo lại vận đơn
-            </Button>
+            </button>
           </>,
         );
       }
       if (s === 'CREATING' || s === 'UNKNOWN') {
         return bar(
           'warn',
-          Clock,
+          IconClock,
           'Đang tạo vận đơn với GHN',
           'GHN chưa trả lời, hệ thống tự kiểm tra lại sau ít phút. Bạn không cần bấm lại.',
           cancelBtn,
@@ -453,7 +487,7 @@ function ActionBar({
       }
       return bar(
         'success',
-        PackageCheck,
+        IconPackage,
         'Đã tạo vận đơn, chờ GHN đến lấy hàng',
         <>
           Đóng gói kiện hàng
@@ -471,14 +505,14 @@ function ActionBar({
     case 'SHIPPING':
       return bar(
         'info',
-        Truck,
+        IconTruck,
         'GHN đang giao hàng',
         `Đã lấy hàng lúc ${formatDateTime(o.pickedAt)}.`,
       );
     case 'DELIVERED':
       return bar(
         'success',
-        PackageCheck,
+        IconPackage,
         'Đã giao hàng thành công',
         <>
           Giao lúc {formatDateTime(o.deliveredAt)}. Đơn tự hoàn tất lúc{' '}
@@ -488,7 +522,7 @@ function ActionBar({
     case 'COMPLETED':
       return bar(
         'success',
-        CheckCircle2,
+        IconCircleCheck,
         'Đơn đã hoàn tất',
         cod
           ? 'Tiền chuyển sang khả dụng sau khi sàn đối soát tiền COD với GHN.'
@@ -497,7 +531,7 @@ function ActionBar({
     case 'RETURNING':
       return bar(
         'warn',
-        Undo2,
+        IconArrowBackUp,
         'Giao không thành công, GHN đang hoàn hàng về shop',
         cod
           ? 'Người mua không phải trả tiền. Khi nhận lại kiện hàng, bạn xác nhận để nhập lại kho.'
@@ -506,29 +540,29 @@ function ActionBar({
     case 'RETURNED':
       return bar(
         'warn',
-        Undo2,
+        IconArrowBackUp,
         'GHN đã hoàn kiện hàng về shop',
         <>
           Kiểm tra hàng rồi xác nhận trước <b>{formatDateTime(o.returnCloseBefore)}</b>. Quá hạn đơn
           tự đóng và hàng <b>không</b> được cộng lại kho.
         </>,
-        <Button onClick={onReturnReceived} disabled={busy}>
-          <PackageCheck className="size-4" /> Đã nhận hàng hoàn
-        </Button>,
+        <button type="button" onClick={onReturnReceived} disabled={busy} className={PRIMARY}>
+          <IconPackage className="size-4" /> Đã nhận hàng hoàn
+        </button>,
       );
     case 'FAILED':
-      return bar('muted', Undo2, 'Đơn đã đóng: giao hàng không thành công');
+      return bar('muted', IconArrowBackUp, 'Đơn đã đóng: giao hàng không thành công');
     case 'INCIDENT':
       return bar(
         'danger',
-        AlertTriangle,
+        IconAlertTriangle,
         'GHN báo kiện hàng gặp sự cố (thất lạc / hư hỏng)',
         'Sàn đang xác minh với GHN. Nếu xác nhận sự cố, bạn được đền tiền hàng vào ví.',
       );
     case 'INCIDENT_RESOLVED':
       return bar(
         'muted',
-        CheckCircle2,
+        IconCircleCheck,
         'Sàn đã xác nhận sự cố vận chuyển',
         <>
           {o.incidentNote}
@@ -539,7 +573,7 @@ function ActionBar({
     case 'CANCELLED':
       return bar(
         'muted',
-        AlertTriangle,
+        IconAlertTriangle,
         <>
           Đã hủy bởi {CANCEL_ACTOR[o.cancelledBy ?? 'SYSTEM']}
           {o.cancelledAt && ` lúc ${formatDateTime(o.cancelledAt)}`}
@@ -549,7 +583,7 @@ function ActionBar({
     default:
       return bar(
         'muted',
-        Clock,
+        IconClock,
         o.paymentStatus === 'UNPAID' ? 'Người mua chưa thanh toán' : 'Đơn đang được sàn kiểm tra',
         o.paymentStatus === 'UNPAID'
           ? 'Bạn chưa cần làm gì, đơn chưa trả sẽ tự hủy khi hết hạn.'
@@ -592,8 +626,8 @@ function ReturnReceivedDialog({
             <label
               key={it.id}
               className={cn(
-                'flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 transition',
-                on ? 'border-navy/40 bg-navy/[0.03]' : 'border-ivory-200',
+                'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition',
+                on ? 'border-navy bg-champagne-50' : 'border-ink/15',
               )}
             >
               <Checkbox checked={on} onCheckedChange={(v) => toggle(it.id, v === true)} />

@@ -1,5 +1,5 @@
+import { IconInfoCircle, IconLoader2 } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Info, Loader2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -125,7 +125,7 @@ export function ChangeRequestDialog({
       <DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl sm:max-w-lg">
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-5">
           <DialogHeader className="text-left">
-            <DialogTitle className="text-navy">
+            <DialogTitle className="text-charcoal">
               {field === 'name' ? 'Yêu cầu đổi tên shop' : 'Yêu cầu đổi tài khoản ngân hàng'}
             </DialogTitle>
             <DialogDescription>
@@ -228,7 +228,7 @@ export function ChangeRequestDialog({
 
           {(keepName || keepBank || pending?.fields.includes(field ?? 'name')) && (
             <div className="flex gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs leading-relaxed text-amber-900">
-              <Info className="mt-0.5 size-4 shrink-0 text-amber-600" />
+              <IconInfoCircle className="mt-0.5 size-4 shrink-0 text-amber-600" />
               <div>
                 Bạn đang có một yêu cầu đổi chờ duyệt. Gửi yêu cầu này sẽ thay yêu cầu cũ.
                 {keepName && <> Tên shop mới "{pending?.name}" vẫn được giữ trong yêu cầu.</>}
@@ -253,7 +253,7 @@ export function ChangeRequestDialog({
               Hủy
             </Button>
             <Button type="submit" disabled={isSubmitting} className="min-w-36">
-              {isSubmitting && <Loader2 className="animate-spin" />}
+              {isSubmitting && <IconLoader2 className="animate-spin" />}
               Gửi yêu cầu
             </Button>
           </DialogFooter>

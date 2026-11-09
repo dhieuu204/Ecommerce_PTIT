@@ -1,5 +1,14 @@
+import {
+  IconAlertCircle,
+  IconLoader2,
+  IconMapPin,
+  IconPencil,
+  IconPhone,
+  IconPlus,
+  IconStar,
+  IconTrash,
+} from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Loader2, MapPin, Pencil, Phone, Plus, Star, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -88,7 +97,7 @@ export function AddressesPage() {
             title={full ? `Tối đa ${LIMITS.maxAddresses} địa chỉ` : undefined}
             className="h-10 w-full rounded-lg bg-navy px-5 text-white hover:bg-navy-800 sm:w-auto"
           >
-            <Plus /> Thêm địa chỉ
+            <IconPlus /> Thêm địa chỉ
           </Button>
         )
       }
@@ -113,17 +122,17 @@ export function AddressesPage() {
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center py-12 text-center">
           <span className="flex size-16 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
-            <MapPin className="size-7" />
+            <IconMapPin className="size-7" />
           </span>
-          <h2 className="mt-4 font-semibold text-navy">Chưa có địa chỉ nào</h2>
+          <h2 className="mt-4 font-semibold text-charcoal">Chưa có địa chỉ nào</h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             Thêm địa chỉ nhận hàng để đặt hàng nhanh hơn. Địa chỉ đầu tiên sẽ là địa chỉ mặc định.
           </p>
           <Button
             onClick={() => setEditing('new')}
-            className="mt-5 rounded-full bg-navy px-6 text-white hover:bg-navy-800"
+            className="mt-5 rounded-lg bg-navy px-6 text-white hover:bg-navy-800"
           >
-            <Plus /> Thêm địa chỉ đầu tiên
+            <IconPlus /> Thêm địa chỉ đầu tiên
           </Button>
         </div>
       ) : (
@@ -135,17 +144,17 @@ export function AddressesPage() {
             >
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="font-semibold break-words text-navy">{a.receiverName}</span>
+                  <span className="font-semibold break-words text-charcoal">{a.receiverName}</span>
                   <span className="hidden h-4 w-px bg-border sm:block" />
                   <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                    <Phone className="size-3.5" /> {a.phone}
+                    <IconPhone className="size-3.5" /> {a.phone}
                   </span>
                 </div>
                 <p className="text-sm break-words text-ink">{a.street}</p>
                 <p className="text-sm text-muted-foreground">{placeText(a)}</p>
                 {a.isDefault && (
                   <span className="mt-1 inline-flex items-center gap-1 rounded-md border border-champagne bg-champagne-50 px-2 py-0.5 text-xs font-medium text-champagne-600">
-                    <Star className="size-3 fill-current" /> Mặc định
+                    <IconStar className="size-3 fill-current" /> Mặc định
                   </span>
                 )}
               </div>
@@ -157,7 +166,7 @@ export function AddressesPage() {
                     className="text-navy"
                     onClick={() => setEditing(a)}
                   >
-                    <Pencil /> Sửa
+                    <IconPencil /> Sửa
                   </Button>
                   <Button
                     variant="ghost"
@@ -165,7 +174,7 @@ export function AddressesPage() {
                     className="text-destructive hover:bg-red-50 hover:text-destructive"
                     onClick={() => setDeleting(a)}
                   >
-                    <Trash2 /> Xóa
+                    <IconTrash /> Xóa
                   </Button>
                 </div>
                 {!a.isDefault && (
@@ -177,7 +186,7 @@ export function AddressesPage() {
                     className="rounded-lg"
                   >
                     {setDefault.isPending && setDefault.variables === a.id && (
-                      <Loader2 className="animate-spin" />
+                      <IconLoader2 className="animate-spin" />
                     )}
                     Đặt làm mặc định
                   </Button>
@@ -199,7 +208,7 @@ export function AddressesPage() {
       <Dialog open={!!deleting} onOpenChange={(o) => !o && !remove.isPending && setDeleting(null)}>
         <DialogContent className="rounded-2xl bg-card sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-navy">Xóa địa chỉ này?</DialogTitle>
+            <DialogTitle className="text-charcoal">Xóa địa chỉ này?</DialogTitle>
             <DialogDescription>
               {deleting?.isDefault
                 ? 'Đây là địa chỉ mặc định. Sau khi xóa, địa chỉ mới nhất còn lại sẽ thành mặc định.'
@@ -225,7 +234,7 @@ export function AddressesPage() {
               disabled={remove.isPending}
               onClick={() => deleting && remove.mutate(deleting.id)}
             >
-              {remove.isPending && <Loader2 className="animate-spin" />}
+              {remove.isPending && <IconLoader2 className="animate-spin" />}
               Xóa địa chỉ
             </Button>
           </DialogFooter>
@@ -345,14 +354,14 @@ function AddressDialog({
     <Dialog open={editing !== null} onOpenChange={(o) => !o && !isSubmitting && onClose()}>
       <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto rounded-2xl bg-card p-0 sm:max-w-lg">
         <DialogHeader className="border-b px-6 py-4 text-left">
-          <DialogTitle className="text-navy">
+          <DialogTitle className="text-charcoal">
             {current ? 'Sửa địa chỉ' : 'Thêm địa chỉ'}
           </DialogTitle>
           <DialogDescription>Shipper GHN sẽ giao tới địa chỉ này.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} noValidate className="space-y-4 px-6 py-5">
           {formError && (
-            <Notice tone="danger" icon={<AlertCircle />}>
+            <Notice tone="danger" icon={<IconAlertCircle />}>
               {formError}
             </Notice>
           )}

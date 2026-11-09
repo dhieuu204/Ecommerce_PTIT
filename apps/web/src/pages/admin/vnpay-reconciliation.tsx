@@ -1,5 +1,5 @@
+import { IconCircleCheck, IconLoader2, IconPlayerPlay, IconZoomScan } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Loader2, PlayCircle, ScanSearch } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -95,9 +95,9 @@ export function VnpayReconciliationPage() {
         actions={
           <Button onClick={() => run.mutate()} disabled={run.isPending}>
             {run.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : (
-              <PlayCircle className="size-4" />
+              <IconPlayerPlay className="size-4" />
             )}
             Chạy đối soát ngay
           </Button>
@@ -107,7 +107,7 @@ export function VnpayReconciliationPage() {
         <Skeleton className="h-72 rounded-2xl" />
       ) : view.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={view.error.message}
           onRetry={() => view.refetch()}
         />
@@ -120,13 +120,13 @@ export function VnpayReconciliationPage() {
             </b>
           </p>
 
-          <section className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
-            <header className="border-b px-4 py-3 font-semibold text-navy md:px-5">
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
+            <header className="border-b px-4 py-3 font-semibold text-charcoal md:px-5">
               Giao dịch cần xem ({view.data.payments.length})
             </header>
             {view.data.payments.length === 0 ? (
               <EmptyState
-                icon={CheckCircle2}
+                icon={IconCircleCheck}
                 title="Không có khoản lệch"
                 text="Mọi giao dịch đã tra cứu đều khớp với VNPay."
               />
@@ -143,7 +143,7 @@ export function VnpayReconciliationPage() {
             )}
           </section>
 
-          <section className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
             <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 md:px-5">
               <span className="font-semibold text-navy">
                 Khoản hoàn chưa rõ / chờ hoàn tay ({view.data.refunds.length})
@@ -153,7 +153,7 @@ export function VnpayReconciliationPage() {
               </Link>
             </header>
             {view.data.refunds.length === 0 ? (
-              <EmptyState icon={CheckCircle2} title="Không có khoản hoàn cần xem" />
+              <EmptyState icon={IconCircleCheck} title="Không có khoản hoàn cần xem" />
             ) : (
               <ul className="divide-y">
                 {view.data.refunds.map((r) => (
@@ -181,8 +181,8 @@ export function VnpayReconciliationPage() {
           </section>
 
           {view.data.resolved.length > 0 && (
-            <section className="rounded-2xl border bg-card">
-              <header className="border-b px-4 py-3 font-semibold text-navy md:px-5">
+            <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
+              <header className="border-b px-4 py-3 font-semibold text-charcoal md:px-5">
                 Đã xử lý gần đây
               </header>
               <ul className="divide-y">
@@ -221,7 +221,7 @@ function PaymentRow({ p, onNote }: { p: VnpayPaymentException; onNote?: () => vo
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to={`/quan-tri/don-hang/${p.orderId}`}
-            className="font-semibold text-navy hover:underline"
+            className="font-semibold text-charcoal transition hover:text-navy"
           >
             {p.orderCode ?? p.orderId}
           </Link>
@@ -242,7 +242,7 @@ function PaymentRow({ p, onNote }: { p: VnpayPaymentException; onNote?: () => vo
       <div className="md:text-right">
         {onNote && !resolved && (
           <Button size="sm" variant="outline" onClick={onNote}>
-            <ScanSearch className="size-4" /> Ghi chú xử lý
+            <IconZoomScan className="size-4" /> Ghi chú xử lý
           </Button>
         )}
       </div>

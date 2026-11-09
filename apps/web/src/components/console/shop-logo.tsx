@@ -1,4 +1,4 @@
-import { Store } from 'lucide-react';
+import { IconBuildingStore } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 
 /** Logo shop vuông bo tròn; chưa có ảnh thì hiện icon cửa hàng */
@@ -13,7 +13,7 @@ export function ShopLogo({ url, className }: { url: string | null; className?: s
       {url ? (
         <img src={url} alt="Logo shop" className="size-full object-cover" />
       ) : (
-        <Store className="size-1/2" />
+        <IconBuildingStore className="size-1/2" />
       )}
     </span>
   );

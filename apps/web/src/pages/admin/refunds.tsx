@@ -1,5 +1,5 @@
+import { IconCashBanknote, IconLoader2, IconPhoto, IconUpload } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HandCoins, ImageIcon, Loader2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -83,7 +83,7 @@ export function RefundsPage() {
         title="Hoàn tiền"
         description="Lệnh hoàn tự gửi qua cổng và thử lại theo lịch. Chỉ khoản ở mục Cần hoàn tay mới phải xử lý: chuyển khoản cho người mua rồi nhập chứng từ."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav className="-mb-px flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5">
           {TABS.map((t) => (
             <button
@@ -96,7 +96,7 @@ export function RefundsPage() {
                 'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                 status === t.value
                   ? 'border-navy font-semibold text-navy'
-                  : 'border-transparent text-muted-foreground hover:text-ink',
+                  : 'border-transparent text-ink/60 hover:text-navy',
               )}
             >
               {t.label}
@@ -113,7 +113,7 @@ export function RefundsPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={HandCoins}
+            icon={IconCashBanknote}
             title={
               status === 'NEEDS_MANUAL'
                 ? 'Không có khoản nào cần hoàn tay'
@@ -133,7 +133,7 @@ export function RefundsPage() {
                     <div className="min-w-0 text-sm">
                       <Link
                         to={`/quan-tri/don-hang/${r.orderId}`}
-                        className="font-semibold text-navy hover:underline"
+                        className="font-semibold text-charcoal transition hover:text-navy"
                       >
                         {r.shopOrderCode ?? r.orderCode ?? r.orderId}
                       </Link>
@@ -207,7 +207,7 @@ function ReceiptLink({ id }: { id: string }) {
   };
   return (
     <Button variant="ghost" size="sm" onClick={open} disabled={loading}>
-      {loading ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+      {loading ? <IconLoader2 className="size-4 animate-spin" /> : <IconPhoto className="size-4" />}
       Biên lai
     </Button>
   );
@@ -275,7 +275,7 @@ function ManualDialog({ refund, onClose }: { refund: AdminRefund | null; onClose
     >
       <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-navy">
+          <DialogTitle className="text-charcoal">
             Hoàn tay {refund && formatMoney(refund.amount)}
           </DialogTitle>
           <DialogDescription>
@@ -315,9 +315,9 @@ function ManualDialog({ refund, onClose }: { refund: AdminRefund | null; onClose
               disabled={uploading}
             >
               {uploading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <IconLoader2 className="size-4 animate-spin" />
               ) : (
-                <Upload className="size-4" />
+                <IconUpload className="size-4" />
               )}
               {receipt ? receipt.name : 'Chọn ảnh (JPG, PNG, WebP; tối đa 5 MB)'}
             </Button>
@@ -341,7 +341,7 @@ function ManualDialog({ refund, onClose }: { refund: AdminRefund | null; onClose
             onClick={() => save.mutate()}
             disabled={transferCode.trim().length < 3 || !receipt || save.isPending}
           >
-            {save.isPending && <Loader2 className="size-4 animate-spin" />}
+            {save.isPending && <IconLoader2 className="size-4 animate-spin" />}
             Xác nhận đã hoàn
           </Button>
         </DialogFooter>

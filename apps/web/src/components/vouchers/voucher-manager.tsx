@@ -1,5 +1,13 @@
+import {
+  IconBan,
+  IconInfoCircle,
+  IconLoader2,
+  IconPencil,
+  IconPlus,
+  IconTicket,
+  IconTrash,
+} from '@tabler/icons-react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, Info, Loader2, Pencil, Plus, TicketPercent, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -50,14 +58,14 @@ const CONFIG: Record<
     crumbs: [{ label: 'Marketing' }, { label: 'Voucher của shop' }],
     title: 'Voucher của shop',
     description: 'Mã giảm giá riêng của shop, shop chịu phần tiền giảm.',
-    note: 'Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt. Voucher đang diễn ra và còn lượt đã hiện trên trang shop và trang sản phẩm của bạn.',
+    note: 'Voucher đang diễn ra và còn lượt đã hiện trên trang shop và trang sản phẩm của bạn.',
   },
   platform: {
     path: `${API.market}/admin/vouchers`,
     crumbs: [{ label: 'Tài chính' }, { label: 'Voucher sàn' }],
     title: 'Voucher sàn',
     description: 'Mã giảm giá dùng cho đơn của mọi shop. Mọi thay đổi đều ghi nhật ký.',
-    note: 'Voucher sàn do sàn chịu chi phí. Người mua sẽ áp được voucher khi tính năng đặt hàng ra mắt.',
+    note: 'Voucher sàn do sàn chịu chi phí.',
   },
 };
 
@@ -155,18 +163,18 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
         title={cfg.title}
         description={cfg.description}
         actions={
-          <Button className="h-10 rounded-full px-5" onClick={openCreate}>
-            <Plus /> Tạo voucher
+          <Button className="h-10 rounded-lg px-5" onClick={openCreate}>
+            <IconPlus /> Tạo voucher
           </Button>
         }
       />
 
       <div className="mb-4 flex gap-2.5 rounded-xl border border-champagne/40 bg-champagne-50/60 px-4 py-3 text-sm text-navy">
-        <Info className="mt-0.5 size-4 shrink-0 text-champagne-600" />
+        <IconInfoCircle className="mt-0.5 size-4 shrink-0 text-champagne-600" />
         <p>{cfg.note}</p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav
           className="-mb-px flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5"
           aria-label="Trạng thái voucher"
@@ -183,7 +191,7 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
                   'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                   active
                     ? 'border-navy font-semibold text-navy'
-                    : 'border-transparent text-muted-foreground hover:text-ink',
+                    : 'border-transparent text-ink/60 hover:text-navy',
                 )}
               >
                 {t.label}
@@ -212,7 +220,7 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
           <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
         ) : rows.length === 0 ? (
           <EmptyState
-            icon={TicketPercent}
+            icon={IconTicket}
             title={
               tab === 'ALL'
                 ? 'Chưa có voucher nào'
@@ -225,8 +233,8 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
             }
             action={
               tab !== 'ENDED' && (
-                <Button className="rounded-full px-5" onClick={openCreate}>
-                  <Plus /> Tạo voucher
+                <Button className="rounded-lg px-5" onClick={openCreate}>
+                  <IconPlus /> Tạo voucher
                 </Button>
               )
             }
@@ -291,7 +299,7 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
           {confirm && (
             <>
               <DialogHeader className="text-left">
-                <DialogTitle className="text-navy">
+                <DialogTitle className="text-charcoal">
                   {confirm.action === 'end' ? 'Kết thúc voucher ngay?' : 'Xóa voucher?'}
                 </DialogTitle>
                 <DialogDescription>
@@ -313,7 +321,7 @@ export function VoucherManager({ kind }: { kind: VoucherKind }) {
                   onClick={() => void runConfirm()}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  {busy && <Loader2 className="animate-spin" />}
+                  {busy && <IconLoader2 className="animate-spin" />}
                   {confirm.action === 'end' ? 'Kết thúc voucher' : 'Xóa voucher'}
                 </Button>
               </DialogFooter>
@@ -345,18 +353,18 @@ function TicketActions({
       <Button
         size="sm"
         variant="outline"
-        className="rounded-full border-navy/30 text-navy"
+        className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
         onClick={onEdit}
       >
-        <Pencil /> Sửa
+        <IconPencil /> Sửa
       </Button>
       <Button
         size="sm"
         variant="ghost"
-        className="rounded-full text-red-700 hover:bg-red-50 hover:text-red-700"
+        className="rounded-lg text-red-700 hover:bg-red-50 hover:text-red-700"
         onClick={() => onConfirm({ action: 'end', voucher: v })}
       >
-        <Ban /> Kết thúc
+        <IconBan /> Kết thúc
       </Button>
       {v.state === 'UPCOMING' && (
         <Button
@@ -367,7 +375,7 @@ function TicketActions({
           aria-label={`Xóa voucher ${v.code}`}
           title="Xóa voucher"
         >
-          <Trash2 />
+          <IconTrash />
         </Button>
       )}
     </>

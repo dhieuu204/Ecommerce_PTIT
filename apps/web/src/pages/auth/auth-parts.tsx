@@ -13,7 +13,7 @@ export function maskEmail(email: string): string {
   return `${name.slice(0, Math.min(2, Math.max(1, name.length - 1)))}***@${domain}`;
 }
 
-/** Khung trang đăng nhập/đăng ký: thẻ trắng bo tròn giữa trang, tiêu đề lớn navy, vạch champagne */
+/** Khung trang đăng nhập/đăng ký: thẻ trắng giữa trang */
 export function AuthCard({
   title,
   subtitle,
@@ -28,28 +28,19 @@ export function AuthCard({
   wide?: boolean;
 }) {
   return (
-    <div className="relative overflow-hidden px-4 py-8 md:py-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-champagne/10 blur-3xl"
-      />
+    <div className="px-4 py-8 md:py-14">
       <div
         className={cn(
-          'relative mx-auto w-full rounded-3xl border border-border/70 bg-card px-5 py-8 shadow-xl shadow-navy/5 sm:px-10 sm:py-10 md:px-14 md:py-12',
-          wide ? 'max-w-2xl' : 'max-w-[34rem]',
+          'rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] mx-auto w-full px-5 py-7 sm:px-8 sm:py-9',
+          wide ? 'max-w-2xl' : 'max-w-md',
         )}
       >
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy md:text-[2.5rem] md:leading-tight">
-            {title}
-          </h1>
-          <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-champagne" />
-          {subtitle && (
-            <div className="mt-4 text-sm text-balance text-ink/80 md:text-[15px]">{subtitle}</div>
-          )}
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-charcoal">{title}</h1>
+          {subtitle && <div className="mt-1.5 text-sm text-ink/60">{subtitle}</div>}
         </div>
-        <div className="mt-8">{children}</div>
-        {footer && <div className="mt-6 text-center text-xs text-muted-foreground">{footer}</div>}
+        <div className="mt-6">{children}</div>
+        {footer && <div className="mt-5 text-center text-xs text-ink/50">{footer}</div>}
       </div>
     </div>
   );
@@ -58,10 +49,10 @@ export function AuthCard({
 /** Đường kẻ có chữ "hoặc" ở giữa */
 export function OrDivider() {
   return (
-    <div className="my-6 flex items-center gap-3 text-xs tracking-wide text-muted-foreground uppercase">
-      <span className="h-px flex-1 bg-border" />
+    <div className="my-5 flex items-center gap-3 text-xs text-ink/45">
+      <span className="h-px flex-1 bg-ink/10" />
       hoặc
-      <span className="h-px flex-1 bg-border" />
+      <span className="h-px flex-1 bg-ink/10" />
     </div>
   );
 }
@@ -82,12 +73,12 @@ export function Notice({
     danger: 'border-red-200 bg-red-50 text-red-800',
     warning: 'border-amber-200 bg-amber-50 text-amber-900',
     success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    info: 'border-champagne/40 bg-champagne-50 text-navy',
+    info: 'border-champagne/40 bg-champagne-50 text-charcoal',
   };
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('flex gap-3 rounded-xl border px-4 py-3 text-sm', tones[tone], className)}
+      className={cn('flex gap-3 rounded-lg border px-4 py-3 text-sm', tones[tone], className)}
     >
       {icon && <span className="mt-0.5 shrink-0 [&_svg]:size-4">{icon}</span>}
       <div className="min-w-0 flex-1 space-y-2">{children}</div>
@@ -251,9 +242,9 @@ export function CodeInput({
             }
           }}
           className={cn(
-            'size-11 rounded-xl border-2 border-input bg-white text-center text-xl font-semibold text-navy caret-champagne transition outline-none sm:size-14 sm:text-2xl',
-            'focus:border-champagne focus:ring-4 focus:ring-champagne/20',
-            d && 'border-navy/40 bg-ivory',
+            'size-11 rounded-lg border border-input bg-card text-center text-xl font-bold text-charcoal caret-navy transition outline-none sm:size-14 sm:text-2xl',
+            'focus:border-navy',
+            d && 'border-navy/40 bg-champagne-50',
             invalid &&
               'border-destructive/70 bg-red-50/50 focus:border-destructive focus:ring-destructive/15',
             disabled && 'opacity-60',
@@ -315,7 +306,7 @@ export function CodeTimers({
                 setSending(false);
               }
             }}
-            className="font-semibold text-champagne-600 hover:underline disabled:opacity-60"
+            className="font-semibold text-charcoal transition hover:text-navy disabled:opacity-60"
           >
             {sending ? 'Đang gửi…' : 'Gửi lại mã'}
           </button>
@@ -329,9 +320,9 @@ export function CodeTimers({
 export function DevMailHint() {
   if (!import.meta.env.DEV) return null;
   return (
-    <p className="rounded-lg border border-dashed border-champagne/50 bg-ivory px-3 py-2 text-center text-xs text-muted-foreground">
-      <span className="font-semibold text-champagne-600">Môi trường thử:</span> thư không gửi thật,
-      xem mã trong hộp thư giả Mailpit (
+    <p className="rounded-lg bg-page px-3 py-2 text-center text-xs text-ink/55">
+      <span className="font-semibold text-navy">Môi trường thử:</span> thư không gửi thật, xem mã
+      trong hộp thư giả Mailpit (
       <a href="http://localhost:8025" target="_blank" rel="noreferrer" className="underline">
         localhost:8025
       </a>

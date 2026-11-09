@@ -35,7 +35,7 @@ import { LoadError } from '@/components/console/empty-state';
 import { ShopLogo } from '@/components/console/shop-logo';
 import { ReportButton } from '@/components/moderation/report-button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAddToCart } from '@/hooks/use-cart';
+import { useAddToCart, useBuyNow } from '@/hooks/use-cart';
 import { API, ApiError, api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
 import { toastCartError } from '@/lib/cart-errors';
@@ -861,13 +861,14 @@ function ProductRow({
 
 /**
  * Thêm vào giỏ / Mua ngay: khách chưa đăng nhập thì sang trang đăng nhập rồi quay lại trang này. Thêm vào
- * giỏ hiện thông báo có ảnh; Mua ngay thêm vào giỏ rồi sang trang giỏ hàng.
+ * giỏ hiện thông báo có ảnh; Mua ngay sang thẳng trang đặt hàng.
  */
 function useCartActions(product: ProductDetail, thumb: string | null) {
   const session = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   const mutation = useAddToCart();
+  const buying = useBuyNow();
 
   const ready = () => {
     if (session.status === 'loading') return false;
@@ -900,13 +901,9 @@ function useCartActions(product: ProductDetail, thumb: string | null) {
     );
   };
   const buyNow = (variantId: string, quantity: number) => {
-    if (!ready()) return;
-    mutation.mutate(
-      { variantId, quantity },
-      { onSuccess: () => navigate('/gio-hang'), onError: toastCartError },
-    );
+    if (ready()) buying.mutate({ variantId, quantity });
   };
-  return { add, buyNow, pending: mutation.isPending };
+  return { add, buyNow, pending: mutation.isPending || buying.isPending };
 }
 
 function AddedToast({

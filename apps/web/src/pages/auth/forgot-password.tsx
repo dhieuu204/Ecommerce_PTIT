@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, KeyRound, MailCheck } from 'lucide-react';
+import { IconAlertCircle, IconArrowLeft, IconKey, IconMailCheck } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router';
@@ -65,7 +65,7 @@ function Steps({ step }: { step: 1 | 2 }) {
       <span
         className={cn(
           'flex size-6 items-center justify-center rounded-full text-xs font-semibold',
-          step === n ? 'bg-navy text-white' : step > n ? 'bg-champagne text-navy' : 'bg-ivory-200',
+          step === n ? 'bg-navy text-white' : step > n ? 'bg-navy text-white' : 'bg-ivory-200',
         )}
       >
         {n}
@@ -191,7 +191,7 @@ function ResetStep({ email, onBack }: { email: string; onBack: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
-      <Notice tone="info" icon={<MailCheck />}>
+      <Notice tone="info" icon={<IconMailCheck />}>
         <p>
           Nếu <strong>{maskEmail(email)}</strong> có tài khoản, mã 6 số đã được gửi tới hộp thư.{' '}
           <button
@@ -199,7 +199,7 @@ function ResetStep({ email, onBack }: { email: string; onBack: () => void }) {
             onClick={onBack}
             className="inline-flex items-center gap-1 font-semibold underline-offset-2 hover:underline"
           >
-            <ArrowLeft className="size-3.5" /> Đổi email
+            <IconArrowLeft className="size-3.5" /> Đổi email
           </button>
         </p>
       </Notice>
@@ -218,7 +218,7 @@ function ResetStep({ email, onBack }: { email: string; onBack: () => void }) {
         {codeError && (
           <Notice
             tone={codeError.code === 'CODE_EXPIRED' ? 'warning' : 'danger'}
-            icon={<AlertCircle />}
+            icon={<IconAlertCircle />}
           >
             {codeError.message}
           </Notice>
@@ -256,7 +256,7 @@ function ResetStep({ email, onBack }: { email: string; onBack: () => void }) {
         />
       </Field>
       <SubmitButton pill pending={isSubmitting}>
-        {!isSubmitting && <KeyRound className="size-4" />}
+        {!isSubmitting && <IconKey className="size-4" />}
         {isSubmitting ? 'Đang đặt lại…' : 'Đặt lại mật khẩu'}
       </SubmitButton>
       <p className="text-center text-xs text-muted-foreground">

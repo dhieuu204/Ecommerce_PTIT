@@ -1,17 +1,17 @@
 import {
-  ArrowDownLeft,
-  ArrowRightLeft,
-  Banknote,
-  CircleDollarSign,
-  HandCoins,
-  Hourglass,
-  Landmark,
-  Lock,
-  Percent,
-  TicketPercent,
-  Undo2,
-  Wallet,
-} from 'lucide-react';
+  IconArrowBackUp,
+  IconArrowDownLeft,
+  IconArrowsLeftRight,
+  IconBuildingBank,
+  IconCash,
+  IconCashBanknote,
+  IconCoin,
+  IconHourglass,
+  IconLock,
+  IconPercentage,
+  IconTicket,
+  IconWallet,
+} from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { EmptyState } from '@/components/console/empty-state';
 import { formatMoney } from '@/lib/format';
@@ -105,9 +105,14 @@ const ADMIN_FORMULAS: Array<[string, string]> = [
 /** Số dư 3 ngăn: thanh chia tỉ lệ + từng ngăn */
 function BalanceBreakdown({ b, dark }: { b: BalanceView; dark?: boolean }) {
   const parts = [
-    { label: 'Đang giữ', value: b.pending, icon: Hourglass, bar: 'bg-champagne' },
-    { label: 'Khả dụng', value: b.available, icon: Wallet, bar: dark ? 'bg-white' : 'bg-navy' },
-    { label: 'Đang khóa', value: b.locked, icon: Lock, bar: dark ? 'bg-white/40' : 'bg-ink/30' },
+    { label: 'Đang giữ', value: b.pending, icon: IconHourglass, bar: 'bg-white/60' },
+    { label: 'Khả dụng', value: b.available, icon: IconWallet, bar: dark ? 'bg-white' : 'bg-navy' },
+    {
+      label: 'Đang khóa',
+      value: b.locked,
+      icon: IconLock,
+      bar: dark ? 'bg-white/40' : 'bg-ink/30',
+    },
   ];
   return (
     <div>
@@ -161,7 +166,7 @@ export function SellerFinanceView({ data }: { data: SellerFinanceReport }) {
     return (
       <ReportSection title="Tài chính của shop">
         <EmptyState
-          icon={Wallet}
+          icon={IconWallet}
           title="Chưa có số liệu tài chính"
           text="Số liệu hiện khi shop có đơn đầu tiên được người mua thanh toán hoặc giao thành công (COD)."
         />
@@ -170,17 +175,13 @@ export function SellerFinanceView({ data }: { data: SellerFinanceReport }) {
   }
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl bg-navy p-5 text-white shadow-lg shadow-navy/20">
-        <div
-          className="absolute -top-12 -right-12 size-40 rounded-full bg-champagne/15"
-          aria-hidden
-        />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-header-from to-header-to p-5 text-white">
         <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
           <div className="md:w-64">
             <div className="flex items-center gap-2 text-sm text-white/75">
-              <Landmark className="size-4 text-champagne" /> Số dư ví hiện tại
+              <IconBuildingBank className="size-4" /> Số dư ví hiện tại
             </div>
-            <div className="mt-1 text-3xl font-bold text-champagne tabular-nums">
+            <div className="mt-1 text-3xl font-bold text-white tabular-nums">
               {formatMoney(data.balance.total)}
             </div>
             <Link
@@ -198,37 +199,37 @@ export function SellerFinanceView({ data }: { data: SellerFinanceReport }) {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatTile
-          icon={CircleDollarSign}
+          icon={IconCoin}
           label="Giá trị đơn"
           value={formatMoney(s.orderValue)}
           hint={`${formatCount(s.orderCount)} đơn ghi nhận`}
         />
         <StatTile
-          icon={HandCoins}
+          icon={IconCashBanknote}
           label="Tiền shop nhận"
           value={formatMoney(s.sellerReceives)}
           hint="Sau phí sàn và trả hàng"
         />
         <StatTile
-          icon={Percent}
+          icon={IconPercentage}
           label="Phí sàn"
           value={formatMoney(s.platformFee)}
           hint="Đã đảo phần hàng trả"
         />
         <StatTile
-          icon={Undo2}
+          icon={IconArrowBackUp}
           label="Khoản hoàn"
           value={formatMoney(s.refunded)}
           hint="Đã hoàn xong cho người mua"
         />
         <StatTile
-          icon={ArrowRightLeft}
+          icon={IconArrowsLeftRight}
           label="Chuyển sang khả dụng"
           value={formatMoney(s.released)}
           hint="Rút được về ngân hàng"
         />
         <StatTile
-          icon={Banknote}
+          icon={IconCash}
           label="Đã rút"
           value={formatMoney(s.withdrawn)}
           hint="Đã chuyển khoản cho shop"
@@ -256,46 +257,46 @@ export function AdminFinanceView({ data }: { data: AdminFinanceReport }) {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
           highlight
-          icon={ArrowDownLeft}
+          icon={IconArrowDownLeft}
           label="Tiền thực thu"
           value={formatMoney(s.collected)}
           hint={`VNPay ${formatMoney(s.collectedVnpay)} · COD ${formatMoney(s.collectedCod)}`}
         />
         <StatTile
-          icon={CircleDollarSign}
+          icon={IconCoin}
           label="Giá trị đơn"
           value={formatMoney(s.orderValue)}
           hint={`${formatCount(s.orderCount)} đơn ghi nhận`}
         />
         <StatTile
-          icon={Undo2}
+          icon={IconArrowBackUp}
           label="Khoản hoàn"
           value={formatMoney(s.refunded)}
           hint="Qua cổng và hoàn tay"
         />
         <StatTile
-          icon={Percent}
+          icon={IconPercentage}
           label="Phí sàn"
           value={formatMoney(s.platformFee)}
           hint="Đã đảo phần hàng trả"
         />
         <StatTile
-          icon={TicketPercent}
+          icon={IconTicket}
           label="Trợ giá voucher sàn"
           value={formatMoney(s.platformSubsidy)}
           hint="Sàn chịu"
         />
         <StatTile
-          icon={Banknote}
+          icon={IconCash}
           label="Đã chi cho seller"
           value={formatMoney(s.paidToSellers)}
           hint="Yêu cầu rút đã chuyển khoản"
         />
-        <div className="col-span-2 min-w-0 rounded-2xl border bg-card p-4 shadow-sm shadow-navy/[0.03] md:p-5">
+        <div className="col-span-2 min-w-0 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs font-medium text-ink/60">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
-                <Landmark className="size-4" />
+                <IconBuildingBank className="size-4" />
               </span>
               Phải trả seller (hiện tại)
             </div>

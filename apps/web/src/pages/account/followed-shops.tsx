@@ -1,5 +1,5 @@
+import { IconBuildingStore, IconLoader2, IconPackage, IconPlayerPause } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Package, PauseCircle, Store } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -42,8 +42,8 @@ export function FollowedShopsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Shop đang theo dõi</h1>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Shop đang theo dõi</h1>
         <p className="mt-1 text-sm text-ink/60">
           Theo dõi shop ở trang shop để quay lại nhanh khi cần mua tiếp.
         </p>
@@ -57,18 +57,18 @@ export function FollowedShopsPage() {
         </div>
       ) : list.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={list.error.message}
           onRetry={() => list.refetch()}
         />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={Store}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={IconBuildingStore}
           title="Bạn chưa theo dõi shop nào"
           text="Bấm “Theo dõi” ở trang shop yêu thích để thấy shop ở đây."
           action={
-            <Button asChild variant="outline" className="rounded-full px-5">
+            <Button asChild variant="outline" className="rounded-lg px-5">
               <Link to="/tim-kiem">Khám phá sản phẩm</Link>
             </Button>
           }
@@ -79,12 +79,14 @@ export function FollowedShopsPage() {
             {list.data.items.map((s) => (
               <div
                 key={s.id}
-                className="flex flex-col gap-3 rounded-2xl border border-ivory-200 bg-card p-4 transition hover:border-champagne/60"
+                className="flex flex-col gap-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 transition hover:border-champagne/60"
               >
                 <Link to={`/shop/${s.id}`} className="flex min-w-0 items-center gap-3">
                   <ShopLogo url={s.logoUrl} className="size-14 rounded-xl border" />
                   <div className="min-w-0">
-                    <div className="truncate font-semibold text-navy hover:underline">{s.name}</div>
+                    <div className="truncate font-semibold text-charcoal transition hover:text-navy">
+                      {s.name}
+                    </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/60">
                       {s.ratingCount > 0 ? (
                         <RatingInline avg={s.ratingAvg} count={s.ratingCount} />
@@ -92,19 +94,19 @@ export function FollowedShopsPage() {
                         <span>Chưa có đánh giá</span>
                       )}
                       {s.suspended ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-ink/10 px-2 py-0.5 font-medium text-ink/70">
-                          <PauseCircle className="size-3" /> Tạm ngừng bán
+                        <span className="inline-flex items-center gap-1 rounded-md bg-ink/10 px-2 py-0.5 font-medium text-ink/70">
+                          <IconPlayerPause className="size-3" /> Tạm ngừng bán
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1">
-                          <Package className="size-3.5 text-champagne-600" />
+                          <IconPackage className="size-3.5 text-navy" />
                           {s.productCount.toLocaleString('vi-VN')} sản phẩm
                         </span>
                       )}
                     </div>
                   </div>
                 </Link>
-                <div className="flex items-center justify-between gap-2 border-t border-dashed border-ivory-200 pt-3">
+                <div className="flex items-center justify-between gap-2 border-t border-dashed border-ink/[0.06] pt-3">
                   <span className="text-xs text-ink/45">
                     Theo dõi từ {formatDate(s.followedAt)}
                   </span>
@@ -117,7 +119,7 @@ export function FollowedShopsPage() {
                       onClick={() => unfollow.mutate(s.id)}
                     >
                       {unfollow.isPending && unfollow.variables === s.id && (
-                        <Loader2 className="size-3.5 animate-spin" />
+                        <IconLoader2 className="size-3.5 animate-spin" />
                       )}
                       Bỏ theo dõi
                     </Button>

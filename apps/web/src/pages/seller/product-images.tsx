@@ -1,4 +1,11 @@
-import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, X } from 'lucide-react';
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconLoader2,
+  IconPhotoPlus,
+  IconStar,
+  IconX,
+} from '@tabler/icons-react';
 import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { toast } from 'sonner';
 import { API, api, ApiError } from '@/lib/api';
@@ -140,7 +147,7 @@ export function ImageGallery({
             <img src={url} alt={`Ảnh ${i + 1}`} className="size-full object-contain p-1" />
             {i === 0 && (
               <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-navy/85 py-0.5 text-[11px] font-medium text-champagne">
-                <Star className="size-3 fill-current" /> Ảnh bìa
+                <IconStar className="size-3 fill-current" /> Ảnh bìa
               </span>
             )}
             <button
@@ -152,7 +159,7 @@ export function ImageGallery({
               className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-ink/70 text-white opacity-100 transition hover:bg-red-600 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
               aria-label={`Xóa ảnh ${i + 1}`}
             >
-              <X className="size-3.5" />
+              <IconX className="size-3.5" />
             </button>
             <div
               className={cn(
@@ -166,7 +173,7 @@ export function ImageGallery({
                   className="flex size-6 items-center justify-center rounded-full bg-white/90 text-navy shadow-sm ring-1 ring-border hover:bg-white"
                   aria-label={`Đưa ảnh ${i + 1} lên trước`}
                 >
-                  <ArrowLeft className="size-3.5" />
+                  <IconArrowLeft className="size-3.5" />
                 </button>
               )}
               {i < images.length - 1 && (
@@ -176,7 +183,7 @@ export function ImageGallery({
                   className="flex size-6 items-center justify-center rounded-full bg-white/90 text-navy shadow-sm ring-1 ring-border hover:bg-white"
                   aria-label={`Đưa ảnh ${i + 1} ra sau`}
                 >
-                  <ArrowRight className="size-3.5" />
+                  <IconArrowRight className="size-3.5" />
                 </button>
               )}
             </div>
@@ -189,7 +196,7 @@ export function ImageGallery({
           >
             <img src={p.preview} alt="" className="size-full object-contain p-1 opacity-40" />
             <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-xs text-navy">
-              <Loader2 className="size-5 animate-spin" /> Đang tải…
+              <IconLoader2 className="size-5 animate-spin" /> Đang tải…
             </span>
           </li>
         ))}
@@ -203,7 +210,7 @@ export function ImageGallery({
                 error ? 'border-destructive/60' : 'border-champagne/50',
               )}
             >
-              <ImagePlus className="size-6" />
+              <IconPhotoPlus className="size-6" />
               <span className="font-medium text-navy">Thêm ảnh</span>
               <span className="text-muted-foreground">
                 ({images.length + pending.length}/{max})
@@ -282,11 +289,11 @@ export function ValueImageButton({
         title={url ? 'Đổi ảnh' : 'Thêm ảnh cho lựa chọn này'}
       >
         {busy ? (
-          <Loader2 className="size-4 animate-spin text-navy" />
+          <IconLoader2 className="size-4 animate-spin text-navy" />
         ) : url ? (
           <img src={url} alt="" className="size-full object-contain" />
         ) : (
-          <ImagePlus className="size-4" />
+          <IconPhotoPlus className="size-4" />
         )}
       </button>
       {url && !busy && (
@@ -296,7 +303,7 @@ export function ValueImageButton({
           className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-ink/80 text-white hover:bg-red-600"
           aria-label={`Xóa ảnh của ${label}`}
         >
-          <X className="size-2.5" />
+          <IconX className="size-2.5" />
         </button>
       )}
       <input

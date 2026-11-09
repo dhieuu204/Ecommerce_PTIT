@@ -1,5 +1,5 @@
+import { IconPhotoOff } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { ImageOff } from 'lucide-react';
 import { StatusBadge } from '@/components/status-badge';
 import { API, api } from '@/lib/api';
 import type { ProductStatus, SellerProduct } from '@/lib/catalog-types';
@@ -53,7 +53,7 @@ export function ProductThumb({ url, className }: { url: string | null; className
       {url ? (
         <img src={url} alt="" loading="lazy" className="size-full object-contain p-0.5" />
       ) : (
-        <ImageOff className="size-1/3 text-muted-foreground/60" />
+        <IconPhotoOff className="size-1/3 text-muted-foreground/60" />
       )}
     </span>
   );

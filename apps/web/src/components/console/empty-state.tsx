@@ -1,5 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle } from 'lucide-react';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +10,7 @@ export function EmptyState({
   action,
   className,
 }: {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   text?: string;
   action?: React.ReactNode;
@@ -19,10 +18,10 @@ export function EmptyState({
 }) {
   return (
     <div className={cn('flex flex-col items-center px-6 py-14 text-center', className)}>
-      <span className="flex size-14 items-center justify-center rounded-full bg-champagne-50 text-champagne-600 ring-8 ring-champagne-50/50">
+      <span className="flex size-16 items-center justify-center rounded-full bg-champagne-50 text-navy">
         <Icon className="size-6" />
       </span>
-      <div className="mt-4 font-semibold text-navy">{title}</div>
+      <div className="mt-4 font-semibold text-charcoal">{title}</div>
       {text && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{text}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -42,7 +41,7 @@ export function LoadError({
   return (
     <EmptyState
       className={className}
-      icon={AlertTriangle}
+      icon={IconAlertTriangle}
       title="Chưa tải được dữ liệu"
       text={message}
       action={

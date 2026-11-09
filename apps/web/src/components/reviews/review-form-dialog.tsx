@@ -1,5 +1,5 @@
+import { IconCalendarTime, IconLoader2, IconPhotoPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -117,7 +117,7 @@ export function ReviewFormDialog({
     <Dialog open={!!target} onOpenChange={(o) => !o && !save.isPending && onClose()}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-navy">
+          <DialogTitle className="text-charcoal">
             {target?.mode === 'edit' ? 'Sửa đánh giá' : 'Đánh giá sản phẩm'}
           </DialogTitle>
           <DialogDescription>
@@ -129,7 +129,7 @@ export function ReviewFormDialog({
 
         {info && (
           <div className="flex items-center gap-3 rounded-xl bg-ivory px-3 py-2.5">
-            <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ivory-200 bg-card p-0.5">
+            <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink/[0.06] bg-card p-0.5">
               {info.image && <img src={info.image} alt="" className="size-full object-contain" />}
             </span>
             <div className="min-w-0 text-sm">
@@ -181,7 +181,7 @@ export function ReviewFormDialog({
           </div>
           {info && (
             <p className="flex items-center gap-1.5 text-xs text-ink/60">
-              <CalendarClock className="size-3.5 text-champagne-600" />
+              <IconCalendarTime className="size-3.5 text-navy" />
               {target?.mode === 'edit' ? 'Hạn sửa: ' : 'Hạn đánh giá: '}
               {deadlineText(info.deadline)}
             </p>
@@ -201,7 +201,7 @@ export function ReviewFormDialog({
             Để sau
           </Button>
           <Button onClick={() => save.mutate()} disabled={busy || !rating}>
-            {save.isPending && <Loader2 className="size-4 animate-spin" />}
+            {save.isPending && <IconLoader2 className="size-4 animate-spin" />}
             {target?.mode === 'edit' ? 'Lưu thay đổi' : 'Gửi đánh giá'}
           </Button>
         </DialogFooter>
@@ -265,7 +265,7 @@ function ReviewImagePicker({
       {value.map((url) => (
         <div
           key={url}
-          className="relative size-20 overflow-hidden rounded-xl border border-ivory-200"
+          className="relative size-20 overflow-hidden rounded-xl border border-ink/[0.06]"
         >
           <img src={url} alt="" className="size-full object-cover" />
           <button
@@ -275,7 +275,7 @@ function ReviewImagePicker({
             className="absolute top-1 right-1 rounded-full bg-black/55 p-0.5 text-white hover:bg-black/75"
             aria-label="Bỏ ảnh"
           >
-            <X className="size-3.5" />
+            <IconX className="size-3.5" />
           </button>
         </div>
       ))}
@@ -284,7 +284,7 @@ function ReviewImagePicker({
           key={`up-${i}`}
           className="flex size-20 items-center justify-center rounded-xl border border-dashed border-champagne"
         >
-          <Loader2 className="size-5 animate-spin text-champagne-600" />
+          <IconLoader2 className="size-5 animate-spin text-champagne-600" />
         </div>
       ))}
       {value.length + uploading < max && (
@@ -294,7 +294,7 @@ function ReviewImagePicker({
           onClick={() => input.current?.click()}
           className="flex size-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-champagne text-xs text-champagne-600 transition hover:bg-champagne-50 disabled:opacity-50"
         >
-          <ImagePlus className="size-5" />
+          <IconPhotoPlus className="size-5" />
           Thêm ảnh
         </button>
       )}

@@ -1,4 +1,4 @@
-import { BarChart3 } from 'lucide-react';
+import { IconChartBar } from '@tabler/icons-react';
 import {
   Bar,
   CartesianGrid,
@@ -77,7 +77,12 @@ export function DailyChart<K extends string>({
         ))}
       </ul>
       {empty ? (
-        <EmptyState icon={BarChart3} title="Chưa có số liệu" text={emptyText} className="py-12" />
+        <EmptyState
+          icon={IconChartBar}
+          title="Chưa có số liệu"
+          text={emptyText}
+          className="py-12"
+        />
       ) : (
         <div style={{ height }} className="-ml-2">
           <ResponsiveContainer width="100%" height="100%">
@@ -171,7 +176,7 @@ function ChartTooltip<K extends string>({
   if (!active || !row || typeof label !== 'string') return null;
   return (
     <div className="min-w-44 rounded-xl border bg-card px-3 py-2 text-xs shadow-lg shadow-navy/10">
-      <div className="mb-1.5 font-semibold text-navy">
+      <div className="mb-1.5 font-bold tracking-tight text-charcoal">
         {weekday(label)}, {fullDayLabel(label)}
       </div>
       <dl className="space-y-1">

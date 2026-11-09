@@ -31,10 +31,12 @@ export function AccountCard({
   className?: string;
 }) {
   return (
-    <section className={cn('rounded-2xl border bg-card shadow-sm', className)}>
+    <section
+      className={cn('rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]', className)}
+    >
       <header className="flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-7 md:py-5">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold text-navy">{title}</h1>
+          <h1 className="text-xl font-semibold text-charcoal">{title}</h1>
           {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         </div>
         {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
@@ -62,7 +64,7 @@ export function SectionTitle({
         {index}
       </span>
       <div>
-        <h2 className="text-base font-semibold text-navy md:text-lg">{title}</h2>
+        <h2 className="text-base font-semibold text-charcoal md:text-lg">{title}</h2>
         {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
       </div>
     </div>

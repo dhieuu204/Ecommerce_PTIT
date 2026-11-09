@@ -1,17 +1,17 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  CalendarDays,
-  Clock3,
-  Info,
-  Loader2,
-  Lock,
-  LockOpen,
-  Mail,
-  MonitorSmartphone,
-  Phone,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
+  IconCalendar,
+  IconClock,
+  IconDevices,
+  IconInfoCircle,
+  IconLoader2,
+  IconLock,
+  IconLockOpen,
+  IconMail,
+  IconPhone,
+  IconShieldCheck,
+  IconX,
+} from '@tabler/icons-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { LoadError } from '@/components/console/empty-state';
@@ -94,7 +94,7 @@ export function UserDetailPanel({ userId }: { userId: string }) {
           className="absolute top-3 right-3 rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
           aria-label="Đóng"
         >
-          <X className="size-5" />
+          <IconX className="size-5" />
         </SheetClose>
         <div className="relative flex items-center gap-4">
           <UserAvatar name={u.fullName} className="size-14 text-base ring-champagne/60" />
@@ -112,17 +112,17 @@ export function UserDetailPanel({ userId }: { userId: string }) {
       </div>
 
       <div className="space-y-4 p-4 sm:p-5">
-        <dl className="grid gap-3 rounded-2xl border bg-card p-4 text-sm">
-          <Info2 icon={Mail} label="Email" value={u.email} />
-          <Info2 icon={Phone} label="Số điện thoại" value={u.phone ?? 'Chưa có'} />
-          <Info2 icon={CalendarDays} label="Đăng ký" value={formatDate(u.createdAt)} />
+        <dl className="grid gap-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4 text-sm">
+          <Info2 icon={IconMail} label="Email" value={u.email} />
+          <Info2 icon={IconPhone} label="Số điện thoại" value={u.phone ?? 'Chưa có'} />
+          <Info2 icon={IconCalendar} label="Đăng ký" value={formatDate(u.createdAt)} />
           <Info2
-            icon={Clock3}
+            icon={IconClock}
             label="Đăng nhập gần nhất"
             value={u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Chưa đăng nhập'}
           />
           <Info2
-            icon={MonitorSmartphone}
+            icon={IconDevices}
             label="Đang đăng nhập"
             value={
               <span className={cn(u.activeSessions > 0 && 'font-medium text-emerald-700')}>
@@ -131,7 +131,7 @@ export function UserDetailPanel({ userId }: { userId: string }) {
             }
           />
           <Info2
-            icon={ShieldCheck}
+            icon={IconShieldCheck}
             label="Đăng nhập Google"
             value={u.hasGoogle ? 'Đã liên kết' : 'Chưa liên kết'}
           />
@@ -156,7 +156,7 @@ function Info2({
   label,
   value,
 }: {
-  icon: typeof Mail;
+  icon: typeof IconMail;
   label: string;
   value: React.ReactNode;
 }) {
@@ -230,12 +230,12 @@ function PermissionsForm({ user, isMe }: { user: AdminUserDetail; isMe: boolean 
   }
 
   return (
-    <section className="rounded-2xl border bg-card p-4">
-      <h3 className="flex items-center gap-2 font-semibold text-navy">
-        <span className="h-4 w-1 rounded-full bg-champagne" aria-hidden />
+    <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-4">
+      <h3 className="flex items-center gap-2 font-semibold text-charcoal">
+        <span className="h-[3px] w-5 shrink-0 rounded-full bg-navy" aria-hidden />
         Bộ quyền quản trị
       </h3>
-      <ul className="mt-3 divide-y rounded-xl border">
+      <ul className="mt-3 divide-y divide-ink/[0.06] rounded-xl border">
         {ALL_PERMISSIONS.map((p) => {
           const locked = isMe && p === 'SYSTEM';
           const id = `perm-${p}`;
@@ -273,7 +273,7 @@ function PermissionsForm({ user, isMe }: { user: AdminUserDetail; isMe: boolean 
         <div className="mt-3 space-y-2">
           {removing && (
             <p className="flex gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              <Info className="mt-px size-3.5 shrink-0" />
+              <IconInfoCircle className="mt-px size-3.5 shrink-0" />
               Bỏ bớt quyền sẽ đăng xuất người này ở mọi nơi. Vé đăng nhập hiện tại còn hiệu lực tối
               đa 15 phút.
             </p>
@@ -311,11 +311,11 @@ function PermissionsForm({ user, isMe }: { user: AdminUserDetail; isMe: boolean 
           </Button>
         )}
         <Button
-          className="flex-1 rounded-full"
+          className="flex-1 rounded-lg"
           disabled={!changed || busy}
           onClick={() => void save()}
         >
-          {busy && <Loader2 className="animate-spin" />}
+          {busy && <IconLoader2 className="animate-spin" />}
           Lưu bộ quyền
         </Button>
       </div>
@@ -376,7 +376,7 @@ function LockSection({ user, isMe }: { user: AdminUserDetail; isMe: boolean }) {
         locked ? 'border-emerald-200 bg-card' : 'border-red-200 bg-card',
       )}
     >
-      <h3 className="flex items-center gap-2 font-semibold text-navy">
+      <h3 className="flex items-center gap-2 font-semibold text-charcoal">
         <span className={cn('h-4 w-1 rounded-full', locked ? 'bg-emerald-500' : 'bg-red-500')} />
         {locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
       </h3>
@@ -393,7 +393,7 @@ function LockSection({ user, isMe }: { user: AdminUserDetail; isMe: boolean }) {
         <Button
           variant="outline"
           className={cn(
-            'mt-3 w-full rounded-full',
+            'mt-3 w-full rounded-lg',
             locked
               ? 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800'
               : 'border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800',
@@ -404,7 +404,7 @@ function LockSection({ user, isMe }: { user: AdminUserDetail; isMe: boolean }) {
             setOpen(true);
           }}
         >
-          {locked ? <LockOpen /> : <Lock />}
+          {locked ? <IconLockOpen /> : <IconLock />}
           {locked ? 'Mở khóa tài khoản…' : 'Khóa tài khoản…'}
         </Button>
       )}
@@ -412,7 +412,7 @@ function LockSection({ user, isMe }: { user: AdminUserDetail; isMe: boolean }) {
       <Dialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
         <DialogContent className="rounded-2xl sm:max-w-md">
           <DialogHeader className="text-left">
-            <DialogTitle className={locked ? 'text-navy' : 'text-red-700'}>
+            <DialogTitle className={locked ? 'text-charcoal' : 'text-red-700'}>
               {locked ? 'Mở khóa' : 'Khóa'} tài khoản {user.fullName}
             </DialogTitle>
             <DialogDescription>
@@ -449,7 +449,7 @@ function LockSection({ user, isMe }: { user: AdminUserDetail; isMe: boolean }) {
               onClick={() => void submit()}
               className={cn('min-w-36', !locked && 'bg-red-600 hover:bg-red-700')}
             >
-              {busy && <Loader2 className="animate-spin" />}
+              {busy && <IconLoader2 className="animate-spin" />}
               {locked ? 'Xác nhận mở khóa' : 'Xác nhận khóa'}
             </Button>
           </DialogFooter>

@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { IconStar } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 
@@ -8,7 +8,7 @@ export function ReviewOrderButton({ status }: { status: string }) {
   return (
     <Button asChild size="sm" className="rounded-lg">
       <Link to="/tai-khoan/danh-gia">
-        <Star className="size-4" /> Đánh giá
+        <IconStar className="size-4" /> Đánh giá
       </Link>
     </Button>
   );

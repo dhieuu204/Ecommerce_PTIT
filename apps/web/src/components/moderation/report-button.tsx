@@ -1,5 +1,5 @@
+import { IconFlag, IconLoader2, IconShieldCheck } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Flag, Loader2, ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -70,12 +70,12 @@ export function ReportButton({
         type="button"
         onClick={onClick}
         className={cn(
-          'inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs text-ink/45 transition hover:bg-ivory-200 hover:text-ink/75',
+          'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-ink/45 transition hover:bg-ivory-200 hover:text-ink/75',
           className,
         )}
         title={targetType === 'SHOP' ? 'Báo cáo shop vi phạm' : 'Báo cáo sản phẩm vi phạm'}
       >
-        <Flag className="size-3.5" />
+        <IconFlag className="size-3.5" />
         Báo cáo
       </button>
       {user && (
@@ -169,18 +169,18 @@ function ReportDialog({
         {done ? (
           <div className="flex flex-col items-center px-2 py-4 text-center">
             <span className="flex size-14 items-center justify-center rounded-full bg-champagne-50 text-champagne-600 ring-8 ring-champagne-50/50">
-              <ShieldCheck className="size-6" />
+              <IconShieldCheck className="size-6" />
             </span>
-            <DialogTitle className="mt-4 text-navy">Đã gửi báo cáo</DialogTitle>
+            <DialogTitle className="mt-4 text-charcoal">Đã gửi báo cáo</DialogTitle>
             <DialogDescription className="mt-1 max-w-sm">
               Cảm ơn bạn. Bộ phận kiểm duyệt của sàn sẽ xem xét và xử lý. Bạn theo dõi kết quả ở
               trang Báo cáo vi phạm của tôi.
             </DialogDescription>
             <div className="mt-5 flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <Button variant="outline" className="rounded-full" onClick={() => change(false)}>
+              <Button variant="outline" className="rounded-lg" onClick={() => change(false)}>
                 Đóng
               </Button>
-              <Button asChild className="rounded-full">
+              <Button asChild className="rounded-lg">
                 <Link to="/tai-khoan/bao-cao-vi-pham" onClick={() => change(false)}>
                   Xem báo cáo của tôi
                 </Link>
@@ -190,8 +190,8 @@ function ReportDialog({
         ) : (
           <>
             <DialogHeader className="text-left">
-              <DialogTitle className="flex items-center gap-2 text-navy">
-                <Flag className="size-4 text-champagne-600" />
+              <DialogTitle className="flex items-center gap-2 text-charcoal">
+                <IconFlag className="size-4 text-navy" />
                 Báo cáo {what} vi phạm
               </DialogTitle>
               <DialogDescription>
@@ -215,7 +215,7 @@ function ReportDialog({
                       'rounded-xl border px-3 py-2.5 text-left text-sm transition',
                       reason === r
                         ? 'border-navy bg-navy/[0.04]'
-                        : 'border-ivory-200 hover:border-champagne',
+                        : 'border-ink/[0.06] hover:border-champagne',
                     )}
                   >
                     <div className="font-medium text-navy">{REPORT_REASONS[r].label}</div>
@@ -263,7 +263,7 @@ function ReportDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full"
+                className="rounded-lg"
                 disabled={busy}
                 onClick={() => change(false)}
               >
@@ -271,11 +271,11 @@ function ReportDialog({
               </Button>
               <Button
                 type="button"
-                className="rounded-full px-6"
+                className="rounded-lg px-6"
                 disabled={!valid || busy}
                 onClick={() => void submit()}
               >
-                {busy && <Loader2 className="size-4 animate-spin" />}
+                {busy && <IconLoader2 className="size-4 animate-spin" />}
                 Gửi báo cáo
               </Button>
             </DialogFooter>

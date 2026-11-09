@@ -1,4 +1,4 @@
-import { AlertCircle, MailCheck, MailWarning } from 'lucide-react';
+import { IconAlertCircle, IconMailCheck, IconMailExclamation } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
@@ -103,12 +103,12 @@ function VerifyForm({ email, returnTo }: { email: string; returnTo: string }) {
         className="space-y-6"
       >
         {mailFailed && !resent && (
-          <Notice tone="warning" icon={<MailWarning />}>
+          <Notice tone="warning" icon={<IconMailExclamation />}>
             Tài khoản đã được tạo nhưng chưa gửi được email. Bạn bấm "Gửi lại mã" sau ít phút.
           </Notice>
         )}
         {resent && !error && (
-          <Notice tone="success" icon={<MailCheck />}>
+          <Notice tone="success" icon={<IconMailCheck />}>
             Mã mới đã được gửi. Mã cũ không còn dùng được.
           </Notice>
         )}
@@ -126,7 +126,7 @@ function VerifyForm({ email, returnTo }: { email: string; returnTo: string }) {
         {error && (
           <Notice
             tone={error.code === 'CODE_EXPIRED' ? 'warning' : 'danger'}
-            icon={<AlertCircle />}
+            icon={<IconAlertCircle />}
           >
             {error.message}
           </Notice>

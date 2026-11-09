@@ -1,5 +1,5 @@
+import { IconChevronRight, IconSearch, IconUsers, IconX } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, Search, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -89,15 +89,15 @@ export function UsersPage() {
         description="Cấp bộ quyền quản trị, khóa hoặc mở khóa tài khoản. Mọi thay đổi cần lý do và được ghi nhật ký."
       />
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-2 border-b p-3 sm:flex-row md:p-4">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo email hoặc họ tên"
-              className="h-10 rounded-full bg-white pr-9 pl-9"
+              className="h-10 rounded-lg bg-white pr-9 pl-9"
               aria-label="Tìm người dùng"
             />
             {search && (
@@ -107,14 +107,14 @@ export function UsersPage() {
                 onClick={() => setSearch('')}
                 aria-label="Xóa tìm kiếm"
               >
-                <X className="size-4" />
+                <IconX className="size-4" />
               </button>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex">
             <select
               aria-label="Trạng thái"
-              className={cn(nativeSelectClass, 'rounded-full sm:w-44')}
+              className={cn(nativeSelectClass, 'rounded-lg sm:w-44')}
               value={status}
               onChange={(e) => update({ status: e.target.value || null })}
             >
@@ -127,7 +127,7 @@ export function UsersPage() {
             </select>
             <select
               aria-label="Bộ quyền"
-              className={cn(nativeSelectClass, 'rounded-full sm:w-48')}
+              className={cn(nativeSelectClass, 'rounded-lg sm:w-48')}
               value={permission}
               onChange={(e) => update({ permission: e.target.value || null })}
             >
@@ -150,7 +150,7 @@ export function UsersPage() {
                   <Skeleton className="h-4 w-40" />
                   <Skeleton className="h-3 w-52" />
                 </div>
-                <Skeleton className="ml-auto h-5 w-20 rounded-full" />
+                <Skeleton className="ml-auto h-5 w-20 rounded-lg" />
               </div>
             ))}
           </div>
@@ -158,7 +158,7 @@ export function UsersPage() {
           <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
         ) : rows.length === 0 ? (
           <EmptyState
-            icon={Users}
+            icon={IconUsers}
             title={filtered ? 'Không có người dùng khớp bộ lọc' : 'Chưa có người dùng'}
             text={filtered ? 'Thử từ khóa khác hoặc bỏ bớt bộ lọc.' : undefined}
           />
@@ -166,12 +166,12 @@ export function UsersPage() {
           <div className={cn('transition-opacity', list.isFetching && 'opacity-60')}>
             <table className="hidden w-full text-sm md:table">
               <thead>
-                <tr className="bg-ivory text-left text-xs tracking-wide text-muted-foreground uppercase">
-                  <th className="px-5 py-3 font-medium">Người dùng</th>
-                  <th className="px-3 py-3 font-medium">Trạng thái</th>
-                  <th className="px-3 py-3 font-medium">Bộ quyền</th>
-                  <th className="px-3 py-3 font-medium">Đăng nhập gần nhất</th>
-                  <th className="px-3 py-3 font-medium">Đăng ký</th>
+                <tr className="border-b border-ink/[0.06] text-left text-[13px] text-ink/55">
+                  <th className="px-5 py-3 font-normal">Người dùng</th>
+                  <th className="px-3 py-3 font-normal">Trạng thái</th>
+                  <th className="px-3 py-3 font-normal">Bộ quyền</th>
+                  <th className="px-3 py-3 font-normal">Đăng nhập gần nhất</th>
+                  <th className="px-3 py-3 font-normal">Đăng ký</th>
                   <th className="w-10" />
                 </tr>
               </thead>
@@ -216,7 +216,7 @@ export function UsersPage() {
                       {formatDate(u.createdAt)}
                     </td>
                     <td className="pr-4">
-                      <ChevronRight className="size-4 text-champagne-600" />
+                      <IconChevronRight className="size-4 text-navy" />
                     </td>
                   </tr>
                 ))}
@@ -245,7 +245,7 @@ export function UsersPage() {
                         {u.permissions.length > 0 && <PermissionChips perms={u.permissions} />}
                       </div>
                     </div>
-                    <ChevronRight className="size-5 shrink-0 text-champagne-600" />
+                    <IconChevronRight className="size-5 shrink-0 text-champagne-600" />
                   </button>
                 </li>
               ))}

@@ -1,19 +1,19 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowRight,
-  Banknote,
-  BadgeCheck,
-  CalendarDays,
-  Camera,
-  Clock3,
-  Landmark,
-  Loader2,
-  MapPin,
-  Phone,
-  ShieldAlert,
-  Store,
-  XCircle,
-} from 'lucide-react';
+  IconArrowRight,
+  IconBuildingBank,
+  IconBuildingStore,
+  IconCalendar,
+  IconCamera,
+  IconCash,
+  IconCircleX,
+  IconClock,
+  IconLoader2,
+  IconMapPin,
+  IconPhone,
+  IconRosetteDiscountCheck,
+  IconShieldExclamation,
+} from '@tabler/icons-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router';
@@ -128,43 +128,35 @@ function ProfileSkeleton() {
 /** Dải đầu trang: logo, tên shop, trạng thái */
 function ShopHero({ shop }: { shop: ShopView }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-navy text-white shadow-lg shadow-navy/10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-champagne/20 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/3 bg-gradient-to-l from-navy-800 to-transparent md:block"
-      />
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-header-from to-header-to text-white">
       <div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center md:p-7">
-        <ShopLogo url={shop.logoUrl} className="size-20 ring-4 ring-champagne/40" />
+        <ShopLogo url={shop.logoUrl} className="size-20 rounded-xl ring-2 ring-white/40" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-xl font-semibold md:text-2xl">{shop.name}</h2>
             {shop.status === 'SUSPENDED' ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-medium text-amber-200 ring-1 ring-amber-300/30">
-                <ShieldAlert className="size-3.5" /> Bị đình chỉ
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/15 px-2.5 py-0.5 text-xs font-medium text-amber-200 ring-1 ring-amber-300/30">
+                <IconShieldExclamation className="size-3.5" /> Bị đình chỉ
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200 ring-1 ring-emerald-300/30">
-                <BadgeCheck className="size-3.5" /> Đang hoạt động
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-400/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200 ring-1 ring-emerald-300/30">
+                <IconRosetteDiscountCheck className="size-3.5" /> Đang hoạt động
               </span>
             )}
           </div>
-          <div className="mt-3 flex flex-col gap-1.5 text-sm text-white/75 sm:flex-row sm:flex-wrap sm:gap-x-5">
+          <div className="mt-3 flex flex-col gap-1.5 text-sm text-white/90 sm:flex-row sm:flex-wrap sm:gap-x-5">
             <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="size-4 text-champagne" /> Mở shop từ{' '}
+              <IconCalendar className="size-4 text-white/80" /> Mở shop từ{' '}
               {formatDate(shop.createdAt)}
             </span>
             {shop.phone && (
               <span className="inline-flex items-center gap-1.5">
-                <Phone className="size-4 text-champagne" /> {shop.phone}
+                <IconPhone className="size-4 text-white/80" /> {shop.phone}
               </span>
             )}
             {shop.pickupAddress && (
               <span className="inline-flex min-w-0 items-center gap-1.5">
-                <MapPin className="size-4 shrink-0 text-champagne" />
+                <IconMapPin className="size-4 shrink-0 text-champagne" />
                 <span className="truncate">{shop.pickupAddress.fullText}</span>
               </span>
             )}
@@ -196,7 +188,7 @@ function ChangeLines({
             {!rejected && (
               <>
                 <span className="line-through decoration-1 opacity-70">{shop.name}</span>
-                <ArrowRight className="size-3.5 shrink-0" />
+                <IconArrowRight className="size-3.5 shrink-0" />
               </>
             )}
             <span className="font-semibold">{change.name}</span>
@@ -212,7 +204,7 @@ function ChangeLines({
                 <span className="line-through decoration-1 opacity-70">
                   {bankText(shop.bankAccount)}
                 </span>
-                <ArrowRight className="size-3.5 shrink-0" />
+                <IconArrowRight className="size-3.5 shrink-0" />
               </>
             )}
             <span className="font-semibold">{bankText(change.bankAccount)}</span>
@@ -233,7 +225,7 @@ function ChangeRequestBanner({ data }: { data: MyShop }) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 md:p-5">
         <div className="flex gap-3">
-          <Clock3 className="mt-0.5 size-5 shrink-0 text-amber-600" />
+          <IconClock className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div className="min-w-0 flex-1">
             <div className="font-semibold">Yêu cầu đổi thông tin đang chờ duyệt</div>
             <p className="mt-0.5 text-sm text-amber-800/90">
@@ -250,7 +242,7 @@ function ChangeRequestBanner({ data }: { data: MyShop }) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-900 md:p-5">
         <div className="flex gap-3">
-          <XCircle className="mt-0.5 size-5 shrink-0 text-red-600" />
+          <IconCircleX className="mt-0.5 size-5 shrink-0 text-red-600" />
           <div className="min-w-0 flex-1">
             <div className="font-semibold">Yêu cầu đổi thông tin chưa được duyệt</div>
             <p className="mt-1 text-sm">
@@ -274,7 +266,7 @@ function ChangeRequestBanner({ data }: { data: MyShop }) {
   if (!recent) return null;
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-      <BadgeCheck className="size-5 shrink-0 text-emerald-600" />
+      <IconRosetteDiscountCheck className="size-5 shrink-0 text-emerald-600" />
       Yêu cầu đổi thông tin (phiên bản {req.version}) đã được duyệt lúc{' '}
       {formatDateTime(req.decidedAt)}.
     </div>
@@ -310,7 +302,7 @@ function CodCard({ shop, suspended }: { shop: ShopView; suspended: boolean }) {
       description="Người mua trả tiền mặt cho GHN khi nhận hàng; sàn đối soát với GHN rồi chuyển tiền vào ví của shop."
     >
       <label className="flex items-start gap-4 px-5 py-4 md:px-6">
-        <Banknote className="mt-0.5 size-5 shrink-0 text-champagne-600" />
+        <IconCash className="mt-0.5 size-5 shrink-0 text-champagne-600" />
         <span className="min-w-0 flex-1 text-sm">
           <span className="block font-medium text-ink">Nhận đơn COD</span>
           <span className="block text-muted-foreground">
@@ -318,7 +310,7 @@ function CodCard({ shop, suspended }: { shop: ShopView; suspended: boolean }) {
             giữ nguyên.
           </span>
         </span>
-        {saving && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+        {saving && <IconLoader2 className="size-4 animate-spin text-muted-foreground" />}
         <Switch
           checked={shop.codEnabled}
           onCheckedChange={(v) => void toggle(v)}
@@ -450,11 +442,11 @@ function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }
                 className="size-32 border border-champagne/40 shadow-sm md:size-36"
               />
               <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-navy/60 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
-                <Camera className="size-5" /> Đổi logo
+                <IconCamera className="size-5" /> Đổi logo
               </span>
               {uploading && (
                 <span className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white/70">
-                  <Loader2 className="size-6 animate-spin text-navy" />
+                  <IconLoader2 className="size-6 animate-spin text-navy" />
                 </span>
               )}
             </button>
@@ -469,11 +461,11 @@ function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }
               type="button"
               variant="outline"
               size="sm"
-              className="rounded-full border-champagne/60"
+              className="rounded-lg border-champagne/60"
               disabled={uploading}
               onClick={() => fileRef.current?.click()}
             >
-              <Camera /> Đổi logo
+              <IconCamera /> Đổi logo
             </Button>
             <p className="text-center text-xs text-muted-foreground md:text-left">
               JPG, PNG hoặc WebP, tối đa {LOGO_MAX_MB} MB.
@@ -527,8 +519,8 @@ function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }
 
             <div id="dia-chi-lay-hang" className="scroll-mt-20 space-y-4 rounded-xl bg-ivory p-4">
               <div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-navy">
-                  <MapPin className="size-4 text-champagne-600" /> Địa chỉ lấy hàng
+                <div className="flex items-center gap-2 text-sm font-semibold text-charcoal">
+                  <IconMapPin className="size-4 text-navy" /> Địa chỉ lấy hàng
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   GHN tới lấy hàng ở địa chỉ này.
@@ -590,10 +582,10 @@ function EditNowCard({ shop, suspended }: { shop: ShopView; suspended: boolean }
           <Button
             type="submit"
             size="lg"
-            className="rounded-full px-8"
+            className="rounded-lg px-8"
             disabled={!dirty || isSubmitting || uploading || suspended}
           >
-            {isSubmitting && <Loader2 className="animate-spin" />}
+            {isSubmitting && <IconLoader2 className="animate-spin" />}
             Lưu thay đổi
           </Button>
         </div>
@@ -611,14 +603,14 @@ function ReviewCard({ data, suspended }: { data: MyShop; suspended: boolean }) {
 
   const rows: Array<{
     field: ChangeField;
-    icon: typeof Store;
+    icon: typeof IconBuildingStore;
     label: string;
     value: React.ReactNode;
   }> = [
-    { field: 'name', icon: Store, label: 'Tên shop', value: shop.name },
+    { field: 'name', icon: IconBuildingStore, label: 'Tên shop', value: shop.name },
     {
       field: 'bankAccount',
-      icon: Landmark,
+      icon: IconBuildingBank,
       label: 'Tài khoản ngân hàng',
       value: shop.bankAccount ? (
         <span className="flex flex-wrap gap-x-1.5">
@@ -665,7 +657,7 @@ function ReviewCard({ data, suspended }: { data: MyShop; suspended: boolean }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full border-navy/30 text-navy"
+                className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
                 disabled={suspended}
                 onClick={() => setDialog(field)}
               >
@@ -694,7 +686,7 @@ function SuspendedNote({ className }: { className?: string }) {
         className,
       )}
     >
-      <ShieldAlert className="size-3.5 shrink-0" />
+      <IconShieldExclamation className="size-3.5 shrink-0" />
       Shop đang bị đình chỉ nên tạm chưa sửa được hồ sơ shop.
     </p>
   );

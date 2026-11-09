@@ -1,5 +1,12 @@
+import {
+  IconBuildingStore,
+  IconLoader2,
+  IconMessage2,
+  IconMessageReply,
+  IconPencil,
+  IconStar,
+} from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, MessageSquareReply, MessageSquareText, Pencil, Star, Store } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -69,7 +76,7 @@ export function SellerReviewsPage() {
       <PageHeader
         crumbs={[{ label: 'Shop' }, { label: 'Đánh giá' }]}
         title="Đánh giá của shop"
-        description="Người mua đánh giá sau khi đơn hoàn tất. Trả lời lịch sự, rõ ràng để người mua khác yên tâm; câu trả lời hiện công khai dưới đánh giá."
+        description="Câu trả lời của shop hiện công khai dưới đánh giá."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
@@ -99,7 +106,7 @@ export function SellerReviewsPage() {
         </SummaryTile>
       </div>
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav className="flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5" aria-label="Trả lời">
           {REPLIED_TABS.map((t) => (
             <button
@@ -110,7 +117,7 @@ export function SellerReviewsPage() {
                 '-mb-px shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                 replied === t.value
                   ? 'border-navy font-semibold text-navy'
-                  : 'border-transparent text-muted-foreground hover:text-ink',
+                  : 'border-transparent text-ink/60 hover:text-navy',
               )}
             >
               {t.label}
@@ -133,7 +140,7 @@ export function SellerReviewsPage() {
           {[5, 4, 3, 2, 1].map((n) => (
             <StarChip key={n} active={rating === n} onClick={() => set({ sao: String(n) })}>
               {n}
-              <Star className="size-3.5 fill-champagne text-champagne" />
+              <IconStar className="size-3.5 fill-champagne text-champagne" />
               {summary && (
                 <span className="text-xs opacity-70">
                   ({summary.stars[String(n) as keyof typeof summary.stars]})
@@ -152,14 +159,17 @@ export function SellerReviewsPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={MessageSquareText}
+            icon={IconMessage2}
             title={summary?.ratingCount ? 'Không có đánh giá hợp bộ lọc' : 'Shop chưa có đánh giá'}
             text="Khi đơn hoàn tất, người mua có thể đánh giá sản phẩm; bạn sẽ nhận thông báo và trả lời tại đây."
           />
         ) : (
           <>
             <ul
-              className={cn('divide-y transition-opacity', list.isPlaceholderData && 'opacity-60')}
+              className={cn(
+                'divide-y divide-ink/[0.06] transition-opacity',
+                list.isPlaceholderData && 'opacity-60',
+              )}
             >
               {list.data.items.map((r) => (
                 <li key={r.id}>
@@ -195,12 +205,14 @@ function SummaryTile({
   return (
     <div
       className={cn(
-        'rounded-2xl border bg-card px-5 py-4 shadow-sm shadow-navy/[0.03]',
+        'rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-5 py-4',
         accent && 'border-champagne/60 bg-champagne-50/50',
       )}
     >
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold text-navy">{children}</div>
+      <div className="mt-1 text-xl font-bold tracking-tight text-charcoal md:text-2xl">
+        {children}
+      </div>
     </div>
   );
 }
@@ -220,10 +232,10 @@ function StarChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'inline-flex h-8 shrink-0 items-center gap-1 rounded-full border px-3 text-[13px] font-medium transition',
+        'inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border px-3 text-[13px] font-medium transition',
         active
-          ? 'border-navy bg-navy text-white'
-          : 'border-ivory-200 bg-ivory/60 text-ink/75 hover:border-champagne hover:text-navy',
+          ? 'border-navy bg-champagne-50 font-semibold text-navy'
+          : 'border-ink/[0.06] bg-ivory/60 text-ink/75 hover:border-champagne hover:text-navy',
       )}
     >
       {children}
@@ -238,11 +250,11 @@ function ReviewRow({ review: r, onReply }: { review: SellerReview; onReply: () =
         to={`/san-pham/${r.product.id}`}
         className="flex min-w-0 items-center gap-3 md:w-60 md:shrink-0 md:items-start"
       >
-        <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-card p-1">
+        <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-card p-1">
           {r.product.image ? (
             <img src={r.product.image} alt="" className="size-full object-contain" />
           ) : (
-            <Store className="size-5 text-champagne-600" />
+            <IconBuildingStore className="size-5 text-navy" />
           )}
         </span>
         <span className="min-w-0 text-sm">
@@ -288,7 +300,7 @@ function ReviewRow({ review: r, onReply }: { review: SellerReview; onReply: () =
                 )}
               </span>
               <Button variant="ghost" size="xs" onClick={onReply} className="text-champagne-600">
-                <Pencil /> Sửa
+                <IconPencil /> Sửa
               </Button>
             </div>
             <p className="mt-1 leading-6 break-words whitespace-pre-line text-ink/80">
@@ -298,7 +310,7 @@ function ReviewRow({ review: r, onReply }: { review: SellerReview; onReply: () =
         ) : (
           <div className="mt-3 flex justify-end">
             <Button size="sm" onClick={onReply} className="w-full rounded-lg sm:w-auto">
-              <MessageSquareReply className="size-4" /> Trả lời
+              <IconMessageReply className="size-4" /> Trả lời
             </Button>
           </div>
         )}
@@ -332,7 +344,7 @@ function ReplyDialog({ review, onClose }: { review: SellerReview | null; onClose
     <Dialog open={!!review} onOpenChange={(o) => !o && !save.isPending && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-navy">
+          <DialogTitle className="text-charcoal">
             {review?.sellerReply ? 'Sửa câu trả lời' : 'Trả lời đánh giá'}
           </DialogTitle>
           <DialogDescription>
@@ -368,7 +380,7 @@ function ReplyDialog({ review, onClose }: { review: SellerReview | null; onClose
             Hủy
           </Button>
           <Button onClick={() => save.mutate()} disabled={!text || save.isPending}>
-            {save.isPending && <Loader2 className="size-4 animate-spin" />}
+            {save.isPending && <IconLoader2 className="size-4 animate-spin" />}
             {review?.sellerReply ? 'Lưu câu trả lời' : 'Gửi trả lời'}
           </Button>
         </DialogFooter>

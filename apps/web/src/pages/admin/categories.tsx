@@ -1,18 +1,18 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ChevronDown,
-  ChevronsDownUp,
-  ChevronsUpDown,
-  Eye,
-  EyeOff,
-  FolderPlus,
-  FolderTree,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react';
+  IconChevronDown,
+  IconDots,
+  IconEye,
+  IconEyeOff,
+  IconFold,
+  IconFolderPlus,
+  IconFolders,
+  IconLoader2,
+  IconPencil,
+  IconPlus,
+  IconSelector,
+  IconTrash,
+} from '@tabler/icons-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -125,15 +125,15 @@ export function CategoriesPage() {
         description="Cây 2 cấp: sản phẩm gắn vào danh mục cấp 2. Số nhỏ ở cột Thứ tự đứng trước."
         actions={
           <Button
-            className="h-10 rounded-full px-5"
+            className="h-10 rounded-lg px-5"
             onClick={() => setEditing({ mode: 'create', parentId: null })}
           >
-            <Plus /> Thêm danh mục cấp 1
+            <IconPlus /> Thêm danh mục cấp 1
           </Button>
         }
       />
 
-      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 md:px-5">
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {tree.data && (
@@ -156,10 +156,10 @@ export function CategoriesPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full text-navy"
+              className="rounded-lg text-navy"
               onClick={() => setExpanded(allOpen ? new Set() : 'all')}
             >
-              {allOpen ? <ChevronsDownUp /> : <ChevronsUpDown />}
+              {allOpen ? <IconFold /> : <IconSelector />}
               {allOpen ? 'Thu gọn tất cả' : 'Mở tất cả'}
             </Button>
           )}
@@ -180,7 +180,7 @@ export function CategoriesPage() {
               <div key={i} className="flex items-center gap-3 px-5 py-4">
                 <Skeleton className="size-9 rounded-xl" />
                 <Skeleton className="h-4 w-48" />
-                <Skeleton className="ml-auto h-8 w-20 rounded-full" />
+                <Skeleton className="ml-auto h-8 w-20 rounded-lg" />
               </div>
             ))}
           </div>
@@ -188,15 +188,15 @@ export function CategoriesPage() {
           <LoadError message={tree.error.message} onRetry={() => void tree.refetch()} />
         ) : roots.length === 0 ? (
           <EmptyState
-            icon={FolderTree}
+            icon={IconFolders}
             title="Chưa có danh mục nào"
             text="Thêm danh mục cấp 1 (ngành hàng) trước, rồi thêm các danh mục cấp 2 bên trong."
             action={
               <Button
-                className="rounded-full px-5"
+                className="rounded-lg px-5"
                 onClick={() => setEditing({ mode: 'create', parentId: null })}
               >
-                <Plus /> Thêm danh mục cấp 1
+                <IconPlus /> Thêm danh mục cấp 1
               </Button>
             }
           />
@@ -236,9 +236,9 @@ export function CategoriesPage() {
                         <button
                           type="button"
                           onClick={() => setEditing({ mode: 'create', parentId: root.id })}
-                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-navy transition hover:bg-champagne-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-navy transition hover:bg-champagne-50"
                         >
-                          <Plus className="size-4 text-champagne-600" /> Thêm danh mục con
+                          <IconPlus className="size-4 text-navy" /> Thêm danh mục con
                         </button>
                       </li>
                     </ul>
@@ -306,7 +306,7 @@ function CategoryRow({
             aria-label={open ? `Thu gọn ${c.name}` : `Mở ${c.name}`}
             className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-ivory-200 hover:text-navy"
           >
-            <ChevronDown className={cn('size-4 transition-transform', !open && '-rotate-90')} />
+            <IconChevronDown className={cn('size-4 transition-transform', !open && '-rotate-90')} />
           </button>
         ) : (
           <span aria-hidden className="h-px w-4 shrink-0 bg-champagne/70" />
@@ -361,10 +361,10 @@ function CategoryRow({
         <Button
           size="sm"
           variant="outline"
-          className="hidden rounded-full border-navy/30 text-navy sm:inline-flex"
+          className="hidden rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy sm:inline-flex"
           onClick={onEdit}
         >
-          <Pencil /> Sửa
+          <IconPencil /> Sửa
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -374,30 +374,31 @@ function CategoryRow({
               className="rounded-full"
               aria-label={`Thao tác với ${c.name}`}
             >
-              <MoreHorizontal />
+              <IconDots />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuItem onSelect={onEdit}>
-              <Pencil /> Sửa
+              <IconPencil /> Sửa
             </DropdownMenuItem>
             {level === 1 && (
               <DropdownMenuItem onSelect={onAddChild}>
-                <FolderPlus /> Thêm danh mục con
+                <IconFolderPlus /> Thêm danh mục con
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onSelect={onToggleHidden}>
-              {c.hidden ? <Eye /> : <EyeOff />} {c.hidden ? 'Hiện lại trên sàn' : 'Ẩn khỏi menu'}
+              {c.hidden ? <IconEye /> : <IconEyeOff />}{' '}
+              {c.hidden ? 'Hiện lại trên sàn' : 'Ẩn khỏi menu'}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {canDelete ? (
               <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-                <Trash2 /> Xóa
+                <IconTrash /> Xóa
               </DropdownMenuItem>
             ) : (
               <div className="px-2 py-1.5 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2 text-sm opacity-60">
-                  <Trash2 className="size-4" /> Xóa
+                  <IconTrash className="size-4" /> Xóa
                 </div>
                 <p className="mt-0.5 pl-6 leading-snug">
                   {childCount > 0
@@ -557,7 +558,7 @@ function CategoryDialog({
       <DialogContent className="max-h-[94vh] overflow-y-auto rounded-2xl sm:max-w-lg">
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
           <DialogHeader className="text-left">
-            <DialogTitle className="pr-6 text-navy">{title}</DialogTitle>
+            <DialogTitle className="pr-6 text-charcoal">{title}</DialogTitle>
             <DialogDescription>
               {isRoot
                 ? 'Danh mục cấp 1 là ngành hàng trên thanh danh mục, có icon riêng.'
@@ -747,7 +748,7 @@ function CategoryDialog({
               Hủy
             </Button>
             <Button type="submit" className="min-w-28" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="animate-spin" />}
+              {isSubmitting && <IconLoader2 className="animate-spin" />}
               {cat ? 'Lưu' : 'Thêm danh mục'}
             </Button>
           </DialogFooter>
@@ -794,7 +795,7 @@ function DeleteDialog({
     <Dialog open={!!category} onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader className="text-left">
-          <DialogTitle className="pr-6 text-navy">Xóa danh mục "{category?.name}"?</DialogTitle>
+          <DialogTitle className="pr-6 text-charcoal">Xóa danh mục "{category?.name}"?</DialogTitle>
           <DialogDescription>
             Danh mục chưa có sản phẩm nào nên xóa hẳn được. Thao tác không hoàn tác.
           </DialogDescription>
@@ -814,7 +815,7 @@ function DeleteDialog({
               onClick={() => void remove()}
               className="bg-red-600 hover:bg-red-700"
             >
-              {busy && <Loader2 className="animate-spin" />} Xóa danh mục
+              {busy && <IconLoader2 className="animate-spin" />} Xóa danh mục
             </Button>
           )}
         </DialogFooter>

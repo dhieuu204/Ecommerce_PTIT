@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, Loader2 } from 'lucide-react';
+import { IconBell, IconChecks, IconLoader2 } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { Pager } from '@/components/console/pager';
@@ -37,10 +37,10 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-navy">Thông báo</h1>
+            <h1 className="text-lg font-semibold text-charcoal">Thông báo</h1>
             <p className="mt-1 text-sm text-ink/60">
               Cập nhật về đơn hàng, trả hàng, shop và tin nhắn. Thông báo quan trọng cũng được gửi
               qua email.
@@ -52,7 +52,7 @@ export function NotificationsPage() {
             disabled={!unread.data || all.isPending}
             onClick={() => all.mutate()}
           >
-            {all.isPending ? <Loader2 className="animate-spin" /> : <CheckCheck />}
+            {all.isPending ? <IconLoader2 className="animate-spin" /> : <IconChecks />}
             Đánh dấu đã đọc tất cả
           </Button>
         </div>
@@ -70,10 +70,10 @@ export function NotificationsPage() {
                 aria-checked={active}
                 onClick={() => set({ loc: f.value })}
                 className={cn(
-                  'shrink-0 rounded-full border px-3 py-1 text-xs transition',
+                  'shrink-0 rounded-lg border px-3 py-1 text-xs transition',
                   active
-                    ? 'border-navy bg-navy text-white'
-                    : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-ink/[0.06] bg-card text-ink/70 hover:border-champagne',
                 )}
               >
                 {f.label}
@@ -86,20 +86,20 @@ export function NotificationsPage() {
       {list.isPending ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : list.isError ? (
-        <div className="rounded-2xl border border-ivory-200 bg-card">
+        <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
           <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
         </div>
       ) : list.data.items.length === 0 ? (
-        <div className="rounded-2xl border border-ivory-200 bg-card">
+        <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
           <EmptyState
-            icon={Bell}
+            icon={IconBell}
             title={unreadOnly ? 'Không có thông báo chưa đọc' : 'Chưa có thông báo nào'}
             text="Khi đơn hàng, trả hàng hay tin nhắn có cập nhật, thông báo sẽ hiện ở đây."
           />
         </div>
       ) : (
         <>
-          <div className="divide-y overflow-hidden rounded-2xl border border-ivory-200 bg-card">
+          <div className="divide-y divide-ink/[0.06] overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
             {list.data.items.map((n) => (
               <NotificationItem key={n.id} n={n} onOpen={open} />
             ))}

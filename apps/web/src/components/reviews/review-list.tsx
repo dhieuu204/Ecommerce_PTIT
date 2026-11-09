@@ -1,5 +1,5 @@
+import { IconBuildingStore, IconMessage2, IconPhoto, IconStar } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ImageIcon, MessageSquareText, Star, Store } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -81,7 +81,7 @@ export function ReviewsSection({
         <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
       ) : summary!.ratingCount === 0 ? (
         <EmptyState
-          icon={MessageSquareText}
+          icon={IconMessage2}
           title="Chưa có đánh giá"
           text={
             source === 'product'
@@ -94,7 +94,7 @@ export function ReviewsSection({
           <SummaryPanel summary={summary!} filter={filter} onFilter={choose} />
           <div
             className={cn(
-              'mt-2 divide-y divide-ivory-200 transition-opacity',
+              'mt-2 divide-y divide-ink/[0.06] transition-opacity',
               list.isPlaceholderData && 'opacity-60',
             )}
           >
@@ -135,7 +135,7 @@ function SummaryPanel({
   const max = Math.max(1, ...Object.values(summary.stars));
   return (
     <div className="mt-5 grid gap-5 rounded-2xl bg-ivory/70 p-4 ring-1 ring-ivory-200 sm:p-5 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-8">
-      <div className="flex items-center gap-4 md:flex-col md:items-start md:justify-center md:gap-1.5 md:border-r md:border-ivory-200 md:pr-6">
+      <div className="flex items-center gap-4 md:flex-col md:items-start md:justify-center md:gap-1.5 md:border-r md:border-ink/[0.06] md:pr-6">
         <div className="text-5xl leading-none font-bold tracking-tight text-navy">
           {formatRating(avg)}
           <span className="ml-1 text-base font-medium text-ink/40">/5</span>
@@ -168,7 +168,7 @@ function SummaryPanel({
               >
                 <span className="flex items-center gap-1 font-medium text-ink/70">
                   {n}
-                  <Star className="size-3.5 fill-champagne text-champagne" />
+                  <IconStar className="size-3.5 fill-champagne text-champagne" />
                 </span>
                 <span className="h-2 overflow-hidden rounded-full bg-ivory-200">
                   <span
@@ -198,7 +198,7 @@ function SummaryPanel({
             active={!!filter.withImages}
             onClick={() => onFilter({ rating: filter.rating, withImages: !filter.withImages })}
           >
-            <ImageIcon className="size-3.5" />
+            <IconPhoto className="size-3.5" />
             Có hình ảnh ({summary.withImages})
           </FilterChip>
         </div>
@@ -222,10 +222,10 @@ function FilterChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
+        'inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[13px] font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
         active
-          ? 'border-navy bg-navy text-white'
-          : 'border-ivory-200 bg-card text-ink/75 hover:border-champagne hover:text-navy',
+          ? 'border-navy bg-champagne-50 font-semibold text-navy'
+          : 'border-ink/[0.06] bg-card text-ink/75 hover:border-champagne hover:text-navy',
       )}
     >
       {children}
@@ -276,7 +276,7 @@ export function ReviewItem({
         {r.sellerReply && (
           <div className="mt-3 rounded-xl border-l-[3px] border-champagne bg-ivory px-4 py-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-navy">
-              <Store className="size-3.5 text-champagne-600" />
+              <IconBuildingStore className="size-3.5 text-navy" />
               Phản hồi của shop
               {r.sellerRepliedAt && (
                 <span className="font-normal text-ink/45">· {formatDate(r.sellerRepliedAt)}</span>

@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react';
+import { IconMenu2 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { BrandLogo } from '@/components/brand-logo';
@@ -62,8 +62,8 @@ function MenuList({
                 cn(
                   'block rounded-lg border-l-[3px] px-3 py-2 text-sm transition',
                   activeFor(item.to, isActive)
-                    ? 'border-champagne bg-champagne-50 font-medium text-navy'
-                    : 'border-transparent text-ink hover:bg-ivory-200',
+                    ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                    : 'border-transparent text-ink hover:bg-page hover:text-navy',
                 )
               }
             >
@@ -109,11 +109,11 @@ export function ConsoleLayout({
               )}
               aria-label="Mở menu"
             >
-              <Menu className="size-4" />
+              <IconMenu2 className="size-4" />
             </SheetTrigger>
             <SheetContent side="left" className="w-72 bg-ivory p-0">
               <SheetHeader className="border-b">
-                <SheetTitle className="text-navy">{area}</SheetTitle>
+                <SheetTitle className="text-charcoal">{area}</SheetTitle>
               </SheetHeader>
               <MenuList menu={menu} note={menuNote} onNavigate={() => setOpen(false)} />
             </SheetContent>
@@ -144,7 +144,7 @@ export function ConsoleLayout({
         </div>
       </header>
       <div className="flex flex-1">
-        <aside className="hidden w-64 shrink-0 border-r bg-ivory-200/60 lg:block">
+        <aside className="hidden w-64 shrink-0 border-r border-black/[0.06] bg-card lg:block">
           <div className="sticky top-14">
             <MenuList menu={menu} note={menuNote} />
           </div>

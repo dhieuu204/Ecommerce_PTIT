@@ -1,16 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  Loader2,
-  PackageCheck,
-  RotateCcw,
-  Scale,
-  Truck,
-  XCircle,
-} from 'lucide-react';
+  IconAlertTriangle,
+  IconChevronLeft,
+  IconCircleCheck,
+  IconCircleX,
+  IconClock,
+  IconLoader2,
+  IconPackage,
+  IconRefresh,
+  IconScale,
+  IconTruck,
+} from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -81,7 +81,7 @@ export function ReturnDetailPage() {
   if (detail.isError) {
     return (
       <LoadError
-        className="rounded-2xl border bg-card"
+        className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
         message={detail.error.message}
         onRetry={() => detail.refetch()}
       />
@@ -97,7 +97,7 @@ export function ReturnDetailPage() {
           to="/tai-khoan/tra-hang"
           className="flex items-center gap-1 text-sm text-ink/60 hover:text-navy"
         >
-          <ChevronLeft className="size-4" /> Trả hàng / Hoàn tiền
+          <IconChevronLeft className="size-4" /> Trả hàng / Hoàn tiền
         </Link>
         <div className="flex items-center gap-2 text-sm text-ink/60">
           <Link to={`/tai-khoan/don-mua/${r.orderId}`} className="hover:text-navy">
@@ -159,7 +159,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={Clock}
+          icon={IconClock}
           title="Đã gửi yêu cầu, chờ shop trả lời"
           text={
             <>
@@ -174,7 +174,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="danger"
-          icon={XCircle}
+          icon={IconCircleX}
           title="Shop từ chối yêu cầu trả hàng"
           text={
             r.actions.canDispute ? (
@@ -189,7 +189,7 @@ function BuyerStatus({
           actions={
             r.actions.canDispute && (
               <Button onClick={onDispute} disabled={busy}>
-                <Scale className="size-4" /> Khiếu nại
+                <IconScale className="size-4" /> Khiếu nại
               </Button>
             )
           }
@@ -199,7 +199,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="warn"
-          icon={Scale}
+          icon={IconScale}
           title="Đang khiếu nại, chờ quản trị viên phân xử"
           text="Quản trị viên xem lời và ảnh của bạn và của shop rồi quyết định. Tiền của shop được giữ tới khi có kết quả."
         />
@@ -210,7 +210,7 @@ function BuyerStatus({
         return (
           <ActionBar
             tone="danger"
-            icon={AlertTriangle}
+            icon={IconAlertTriangle}
             title="GHN chưa nhận vận đơn trả hàng"
             text={r.shipment?.lastError ?? 'GHN từ chối tạo vận đơn.'}
             actions={
@@ -219,9 +219,9 @@ function BuyerStatus({
                 {r.actions.canRetryShipment && (
                   <Button onClick={onRetry} disabled={busy}>
                     {busy ? (
-                      <Loader2 className="size-4 animate-spin" />
+                      <IconLoader2 className="size-4 animate-spin" />
                     ) : (
-                      <RotateCcw className="size-4" />
+                      <IconRefresh className="size-4" />
                     )}
                     Tạo lại vận đơn
                   </Button>
@@ -235,7 +235,7 @@ function BuyerStatus({
         return (
           <ActionBar
             tone="info"
-            icon={Truck}
+            icon={IconTruck}
             title="GHN đã lấy hàng, đang chuyển về shop"
             text="Shop kiểm hàng khi nhận được rồi sàn hoàn tiền cho bạn."
           />
@@ -245,7 +245,7 @@ function BuyerStatus({
         return (
           <ActionBar
             tone="warn"
-            icon={AlertTriangle}
+            icon={IconAlertTriangle}
             title="GHN báo kiện trả gặp sự cố"
             text="Sàn đang xác minh với GHN. Nếu xác nhận thất lạc, bạn được hoàn đủ tiền."
           />
@@ -254,7 +254,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={PackageCheck}
+          icon={IconPackage}
           title="Shop đã chấp nhận, chuẩn bị hàng để GHN tới lấy"
           text={
             <>
@@ -276,7 +276,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={PackageCheck}
+          icon={IconPackage}
           title="Hàng trả đã về shop, shop đang kiểm hàng"
           text={
             <>
@@ -290,7 +290,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={Clock}
+          icon={IconClock}
           title={`Đang hoàn ${formatMoney(r.decidedRefund ?? 0)}`}
           text={
             r.refundStatus === 'NEEDS_MANUAL'
@@ -303,7 +303,7 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="success"
-          icon={CheckCircle2}
+          icon={IconCircleCheck}
           title={`Đã hoàn ${formatMoney(r.decidedRefund ?? 0)}`}
           text="Yêu cầu trả hàng đã xong."
         />
@@ -312,13 +312,13 @@ function BuyerStatus({
       return (
         <ActionBar
           tone="muted"
-          icon={XCircle}
+          icon={IconCircleX}
           title="Yêu cầu đã đóng, không hoàn tiền"
           text="Xem lý do ở các bước đã qua bên dưới."
         />
       );
     default:
-      return <ActionBar tone="muted" icon={XCircle} title="Yêu cầu đã hủy" />;
+      return <ActionBar tone="muted" icon={IconCircleX} title="Yêu cầu đã hủy" />;
   }
 }
 

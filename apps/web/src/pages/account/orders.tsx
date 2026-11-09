@@ -1,5 +1,5 @@
+import { IconChevronRight, IconClock, IconReceipt } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, Clock, ReceiptText } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
 import { Pager } from '@/components/console/pager';
@@ -10,13 +10,13 @@ import {
   ShopOrderStatusBadge,
   useCountdown,
 } from '@/components/orders/order-parts';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { API, api } from '@/lib/api';
 import { formatDateTime, formatMoney } from '@/lib/format';
 import type { BuyerTab, Order } from '@/lib/order-types';
 import type { Page } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { CARD, PRIMARY_BUTTON } from '@/pages/checkout/checkout-parts';
 
 const PAGE_SIZE = 10;
 const TABS: Array<{ value: BuyerTab; label: string }> = [
@@ -58,9 +58,12 @@ export function OrdersPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-navy">Đơn mua</h1>
+      <h1 className="mb-4 text-xl font-bold tracking-tight text-charcoal md:text-2xl">Đơn mua</h1>
       <nav
-        className="-mx-4 mb-4 flex gap-1 overflow-x-auto border-b border-ivory-200 bg-card px-4 md:mx-0 md:rounded-t-2xl"
+        className={cn(
+          CARD,
+          'mb-4 flex gap-1 overflow-x-auto px-2 [scrollbar-width:none] md:px-3 [&::-webkit-scrollbar]:hidden',
+        )}
         aria-label="Trạng thái đơn"
       >
         {TABS.map((t) => (
@@ -69,10 +72,10 @@ export function OrdersPage() {
             type="button"
             onClick={() => go({ tab: t.value })}
             className={cn(
-              'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition md:px-4',
+              'shrink-0 border-b-2 px-3 py-3.5 text-sm whitespace-nowrap transition',
               tab === t.value
                 ? 'border-navy font-semibold text-navy'
-                : 'border-transparent text-ink/60 hover:text-ink',
+                : 'border-transparent text-ink/60 hover:text-navy',
             )}
           >
             {t.label}
@@ -87,21 +90,20 @@ export function OrdersPage() {
           ))}
         </div>
       ) : list.isError ? (
-        <LoadError
-          className="rounded-2xl border bg-card"
-          message={list.error.message}
-          onRetry={() => list.refetch()}
-        />
+        <LoadError className={CARD} message={list.error.message} onRetry={() => list.refetch()} />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={ReceiptText}
+          className={CARD}
+          icon={IconReceipt}
           title="Chưa có đơn hàng"
           text="Đơn bạn đặt sẽ hiện ở đây."
           action={
-            <Button asChild>
-              <Link to="/">Mua sắm ngay</Link>
-            </Button>
+            <Link
+              to="/"
+              className={cn(PRIMARY_BUTTON, 'inline-flex h-11 items-center px-7 text-sm')}
+            >
+              Mua sắm ngay
+            </Link>
           }
         />
       ) : (
@@ -121,36 +123,44 @@ export function OrdersPage() {
   );
 }
 
+const SMALL_PRIMARY = cn(PRIMARY_BUTTON, 'inline-flex h-9 items-center px-5 text-sm');
+
 function OrderCard({ order }: { order: Order }) {
   const paid = order.paymentStatus !== 'UNPAID';
   const toReceive = order.shopOrders.some((so) => so.canConfirmReceived);
   const left = useCountdown(order.canPay ? order.payBefore : null);
   const link = `/tai-khoan/don-mua/${order.id}`;
   return (
-    <article className="overflow-hidden rounded-2xl border border-ivory-200 bg-card">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-ivory-200 px-4 py-3 text-sm md:px-5">
-        <div className="text-ink/60">
-          Đơn <b className="font-semibold text-navy">{order.code}</b> ·{' '}
-          {formatDateTime(order.createdAt)}
+    <article className={cn(CARD, 'overflow-hidden')}>
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-page/60 px-4 py-2.5 text-[13px] text-ink/55 lg:px-5">
+        <div className="flex flex-wrap items-center gap-x-2">
+          <b className="font-semibold text-charcoal">{order.code}</b>
+          <span aria-hidden className="text-ink/25">
+            |
+          </span>
+          <span>{formatDateTime(order.createdAt)}</span>
         </div>
         {order.canPay && left ? (
-          <span className="flex items-center gap-1 text-xs font-medium text-amber-700">
-            <Clock className="size-3.5" /> Còn {left} để thanh toán
+          <span className="flex items-center gap-1 font-medium text-navy">
+            <IconClock className="size-3.5 [stroke-width:1.75]" /> Còn {left} để thanh toán
           </span>
         ) : order.status === 'CANCELLED' ? (
-          <span className="text-xs font-medium text-ink/50">Đã hủy</span>
+          <span className="font-medium text-ink/50">Đã hủy</span>
         ) : order.status === 'COMPLETED' ? (
-          <span className="text-xs font-medium text-emerald-700">Hoàn tất</span>
+          <span className="font-medium text-ship">Hoàn tất</span>
         ) : order.paymentMethod === 'COD' ? (
-          <span className="text-xs font-medium text-champagne-600">Thanh toán khi nhận hàng</span>
+          <span className="font-medium text-champagne-600">Thanh toán khi nhận hàng</span>
         ) : null}
       </header>
-      <div className="divide-y divide-ivory-200">
+      <div className="divide-y divide-ink/[0.06]">
         {order.shopOrders.map((so) => (
-          <div key={so.id} className="px-4 py-3 md:px-5">
+          <div key={so.id} className="px-4 pt-3 lg:px-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-navy">
-                <ShopLogo url={so.shop.logoUrl} className="size-6 rounded-md border" />
+              <div className="flex min-w-0 items-center gap-2.5 text-sm font-semibold text-charcoal">
+                <ShopLogo
+                  url={so.shop.logoUrl}
+                  className="size-7 rounded-lg ring-1 ring-ink/[0.08]"
+                />
                 <span className="truncate">{so.shop.name}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -158,12 +168,12 @@ function OrderCard({ order }: { order: Order }) {
                 <ShopOrderStatusBadge status={so.status} paid={paid} />
               </div>
             </div>
-            <Link to={link} className="block">
+            <Link to={link} className="block divide-y divide-ink/[0.06]">
               {so.items.slice(0, 2).map((it) => (
                 <OrderItemRow key={it.id} item={it} link={false} />
               ))}
               {so.items.length > 2 && (
-                <div className="pb-1 text-xs text-ink/50">
+                <div className="py-2.5 text-[13px] text-ink/55">
                   và {so.items.length - 2} sản phẩm khác
                 </div>
               )}
@@ -171,26 +181,27 @@ function OrderCard({ order }: { order: Order }) {
           </div>
         ))}
       </div>
-      <footer className="flex flex-col gap-3 border-t border-ivory-200 bg-ivory/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between md:px-5">
-        <div className="text-sm text-ink/65">
-          Tổng thanh toán:{' '}
-          <span className="text-lg font-bold text-navy">{formatMoney(order.total)}</span>
+      <footer className="flex flex-col gap-3 border-t border-ink/[0.06] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between lg:px-5">
+        <div className="text-sm text-ink/60">
+          Tổng thanh toán{' '}
+          <span className="ml-1 text-lg font-bold text-navy">{formatMoney(order.total)}</span>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm" className="rounded-lg">
-            <Link to={link}>
-              Xem chi tiết <ChevronRight className="size-4" />
-            </Link>
-          </Button>
+          <Link
+            to={link}
+            className="inline-flex h-9 items-center gap-0.5 rounded-lg border border-ink/15 pr-3 pl-4 text-sm font-medium text-charcoal transition hover:border-navy/40 hover:text-navy"
+          >
+            Xem chi tiết <IconChevronRight className="size-4 [stroke-width:2]" />
+          </Link>
           {order.canPay && (
-            <Button asChild size="sm" className="rounded-lg">
-              <Link to={link}>Thanh toán</Link>
-            </Button>
+            <Link to={link} className={SMALL_PRIMARY}>
+              Thanh toán
+            </Link>
           )}
           {toReceive && (
-            <Button asChild size="sm" className="rounded-lg">
-              <Link to={link}>Đã nhận hàng</Link>
-            </Button>
+            <Link to={link} className={SMALL_PRIMARY}>
+              Đã nhận hàng
+            </Link>
           )}
         </div>
       </footer>

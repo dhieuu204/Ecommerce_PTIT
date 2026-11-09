@@ -1,5 +1,5 @@
+import { IconPackage, IconPhotoOff, IconReceipt } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { ImageOff, Package, ReceiptText } from 'lucide-react';
 import { Link } from 'react-router';
 import { shopOrderStatusLabel } from '@/components/orders/order-parts';
 import { API, apiBlob } from '@/lib/api';
@@ -51,7 +51,7 @@ export function ChatImage({ imageKey }: { imageKey: string }) {
   if (q.isError) {
     return (
       <div className={box} title="Không tải được ảnh">
-        <ImageOff className="size-6 text-ink/30" />
+        <IconPhotoOff className="size-6 text-ink/30" />
       </div>
     );
   }
@@ -67,9 +67,9 @@ export function ChatImage({ imageKey }: { imageKey: string }) {
   );
 }
 
-function Thumb({ url, icon: Icon }: { url: string | null; icon: typeof Package }) {
+function Thumb({ url, icon: Icon }: { url: string | null; icon: typeof IconPackage }) {
   return (
-    <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-ivory text-champagne-600">
+    <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-ivory text-champagne-600">
       {url ? (
         <img src={url} alt="" className="size-full object-cover" />
       ) : (
@@ -87,9 +87,9 @@ export function ProductCardView({ card }: { card: ProductCard }) {
   return (
     <Link
       to={`/san-pham/${card.productId}`}
-      className="flex w-64 max-w-full gap-3 rounded-2xl border border-ivory-200 bg-card p-2.5 text-left transition hover:border-champagne"
+      className="flex w-64 max-w-full gap-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-2.5 text-left transition hover:border-champagne"
     >
-      <Thumb url={card.image} icon={Package} />
+      <Thumb url={card.image} icon={IconPackage} />
       <span className="min-w-0 flex-1">
         <span className="line-clamp-2 text-sm font-medium text-ink">{card.name}</span>
         <span className="mt-1 block text-sm font-semibold text-navy">{price}</span>
@@ -107,9 +107,9 @@ export function OrderCardView({ card, role }: { card: OrderCard; role: ChatRole 
   return (
     <Link
       to={to}
-      className="flex w-64 max-w-full gap-3 rounded-2xl border border-ivory-200 bg-card p-2.5 text-left transition hover:border-champagne"
+      className="flex w-64 max-w-full gap-3 rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] p-2.5 text-left transition hover:border-champagne"
     >
-      <Thumb url={card.image} icon={ReceiptText} />
+      <Thumb url={card.image} icon={IconReceipt} />
       <span className="min-w-0 flex-1">
         <span className="block text-xs text-ink/50">Đơn {card.code}</span>
         <span className="line-clamp-1 text-sm font-medium text-ink">

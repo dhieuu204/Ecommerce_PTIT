@@ -1,5 +1,11 @@
+import {
+  IconChevronRight,
+  IconClipboardCheck,
+  IconClock,
+  IconSearch,
+  IconX,
+} from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChevronRight, ClipboardCheck, Clock3, Search, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -15,6 +21,7 @@ import { API, api } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import type { Page } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { CARD } from '@/pages/checkout/checkout-parts';
 import {
   APPROVAL_STATUS,
   ApprovalStatusBadge,
@@ -49,10 +56,10 @@ function Waiting({ row, compact }: { row: ShopApprovalRow; compact?: boolean }) 
     <span
       className={cn(
         'inline-flex items-center gap-1 font-medium',
-        late ? 'text-red-600' : 'text-ink',
+        late ? 'text-red-600' : 'text-charcoal',
       )}
     >
-      <Clock3 className="size-3.5" />
+      <IconClock className="size-3.5" />
       {compact ? 'Đã chờ ' : ''}
       {waited(row.submittedAt)}
     </span>
@@ -117,67 +124,31 @@ export function ShopApprovalsPage() {
       <PageHeader
         crumbs={[{ label: 'Kiểm duyệt' }, { label: 'Duyệt shop' }]}
         title="Duyệt shop"
-        description="Hồ sơ mở shop và yêu cầu đổi tên shop, tài khoản ngân hàng. Hồ sơ nộp sớm nhất lên đầu."
-      />
-
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
-        <div className="flex flex-col gap-3 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
-          <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Trạng thái hồ sơ">
-            {TABS.map((t) => {
-              const active = status === t.value;
-              return (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => update({ status: t.value === 'PENDING' ? null : t.value })}
-                  className={cn(
-                    'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
-                    active
-                      ? 'border-navy font-semibold text-navy'
-                      : 'border-transparent text-muted-foreground hover:text-ink',
-                  )}
-                >
-                  {t.label}
-                  {t.value === 'PENDING' && pendingCount.data && (
-                    <span
-                      className={cn(
-                        'rounded-full px-1.5 py-px text-[11px] font-semibold',
-                        pendingCount.data.total > 0
-                          ? 'bg-champagne text-navy'
-                          : 'bg-muted text-muted-foreground',
-                      )}
-                    >
-                      {pendingCount.data.total}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-          <div className="flex flex-col gap-2 pb-3 sm:flex-row md:pb-2.5">
+        actions={
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <div className="relative sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm tên shop, chủ shop…"
-                className="h-9 rounded-full bg-white pr-8 pl-9"
+                className="h-10 rounded-lg bg-card pr-8 pl-9"
                 aria-label="Tìm hồ sơ"
               />
               {search && (
                 <button
                   type="button"
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-ink"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-ink/40 transition hover:text-navy"
                   onClick={() => setSearch('')}
                   aria-label="Xóa tìm kiếm"
                 >
-                  <X className="size-4" />
+                  <IconX className="size-4" />
                 </button>
               )}
             </div>
             <select
               aria-label="Loại hồ sơ"
-              className={cn(nativeSelectClass, 'h-9 rounded-full sm:w-44')}
+              className={cn(nativeSelectClass, 'h-10 rounded-lg bg-card sm:w-44')}
               value={type}
               onChange={(e) => update({ type: e.target.value || null })}
             >
@@ -186,7 +157,38 @@ export function ShopApprovalsPage() {
               <option value="CHANGE">Đổi thông tin</option>
             </select>
           </div>
-        </div>
+        }
+      />
+
+      <div className={cn(CARD, 'overflow-hidden')}>
+        <nav
+          className="flex gap-1 overflow-x-auto border-b border-ink/[0.06] px-2 [scrollbar-width:none] md:px-3 [&::-webkit-scrollbar]:hidden"
+          aria-label="Trạng thái hồ sơ"
+        >
+          {TABS.map((t) => {
+            const active = status === t.value;
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => update({ status: t.value === 'PENDING' ? null : t.value })}
+                className={cn(
+                  '-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3.5 text-sm whitespace-nowrap transition',
+                  active
+                    ? 'border-navy font-semibold text-navy'
+                    : 'border-transparent text-ink/60 hover:text-navy',
+                )}
+              >
+                {t.label}
+                {t.value === 'PENDING' && pendingCount.data && pendingCount.data.total > 0 && (
+                  <span className="rounded-full bg-navy px-1.5 py-px text-[11px] font-semibold text-white tabular-nums">
+                    {pendingCount.data.total}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
         {list.isPending ? (
           <ListSkeleton />
@@ -194,7 +196,7 @@ export function ShopApprovalsPage() {
           <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
         ) : rows.length === 0 ? (
           <EmptyState
-            icon={ClipboardCheck}
+            icon={IconClipboardCheck}
             title={
               q
                 ? 'Không có hồ sơ khớp từ khóa'
@@ -216,31 +218,31 @@ export function ShopApprovalsPage() {
             <div className="hidden md:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-ivory text-left text-xs tracking-wide text-muted-foreground uppercase">
-                    <th className="px-5 py-3 font-medium">Shop</th>
-                    <th className="px-3 py-3 font-medium">Chủ shop</th>
-                    <th className="px-3 py-3 font-medium">Loại</th>
-                    <th className="px-3 py-3 font-medium">Bản</th>
-                    <th className="px-3 py-3 font-medium">Nộp lúc</th>
-                    <th className="px-3 py-3 font-medium">
+                  <tr className="border-b border-ink/[0.06] text-left text-[13px] text-ink/55">
+                    <th className="px-5 py-2.5 font-normal">Shop</th>
+                    <th className="px-3 py-2.5 font-normal">Chủ shop</th>
+                    <th className="px-3 py-2.5 font-normal">Loại</th>
+                    <th className="px-3 py-2.5 font-normal">Bản</th>
+                    <th className="px-3 py-2.5 font-normal">Nộp lúc</th>
+                    <th className="px-3 py-2.5 font-normal">
                       {status === 'PENDING' ? 'Đã chờ' : 'Trạng thái'}
                     </th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-ink/[0.06]">
                   {rows.map((r) => (
-                    <tr key={r.id} className="group transition hover:bg-champagne-50/40">
+                    <tr key={r.id} className="group transition hover:bg-page/50">
                       <td className="px-5 py-3.5">
                         <Link
                           to={`/quan-tri/duyet-shop/${r.id}`}
-                          className="font-semibold text-navy hover:underline"
+                          className="font-semibold text-charcoal transition hover:text-navy"
                         >
                           {r.shopName}
                         </Link>
                       </td>
                       <td className="px-3 py-3.5">
-                        <div className="text-ink">{r.ownerName}</div>
+                        <div className="text-charcoal">{r.ownerName}</div>
                         <div className="text-xs text-muted-foreground">{r.ownerEmail}</div>
                       </td>
                       <td className="px-3 py-3.5">
@@ -269,7 +271,7 @@ export function ShopApprovalsPage() {
                           asChild
                           size="sm"
                           variant="outline"
-                          className="rounded-full border-navy/30 text-navy group-hover:border-navy"
+                          className="rounded-lg border-ink/15 text-charcoal group-hover:border-navy/40 group-hover:text-navy hover:bg-transparent"
                         >
                           <Link to={`/quan-tri/duyet-shop/${r.id}`}>Xem</Link>
                         </Button>
@@ -286,10 +288,10 @@ export function ShopApprovalsPage() {
                 <li key={r.id}>
                   <Link
                     to={`/quan-tri/duyet-shop/${r.id}`}
-                    className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow-xs transition active:bg-champagne-50/50"
+                    className="flex items-center gap-3 rounded-xl border border-ink/10 bg-card p-4 transition active:bg-page"
                   >
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <div className="truncate font-semibold text-navy">{r.shopName}</div>
+                      <div className="truncate font-semibold text-charcoal">{r.shopName}</div>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <ApprovalTypeBadge type={r.type} />
                         {status !== 'PENDING' && <ApprovalStatusBadge status={r.status} />}
@@ -302,7 +304,7 @@ export function ShopApprovalsPage() {
                         <Waiting row={r} compact />
                       </div>
                     </div>
-                    <ChevronRight className="size-5 shrink-0 text-champagne-600" />
+                    <IconChevronRight className="size-5 shrink-0 text-ink/35" />
                   </Link>
                 </li>
               ))}
@@ -311,7 +313,7 @@ export function ShopApprovalsPage() {
         )}
 
         {list.data && list.data.total > 0 && (
-          <div className="border-t px-4 py-3 md:px-5">
+          <div className="border-t border-ink/[0.06] px-4 py-3 md:px-5">
             <Pager
               page={page}
               pageSize={PAGE_SIZE}
@@ -321,22 +323,19 @@ export function ShopApprovalsPage() {
           </div>
         )}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Cột "Đã chờ" tô đỏ khi hồ sơ chờ quá {OVERDUE_HOURS} giờ.
-      </p>
     </div>
   );
 }
 
 function ListSkeleton() {
   return (
-    <div className="divide-y">
+    <div className="divide-y divide-ink/[0.06]">
       {Array.from({ length: 5 }, (_, i) => (
         <div key={i} className="flex items-center gap-4 px-5 py-4">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="hidden h-4 w-48 md:block" />
           <Skeleton className="h-5 w-20 rounded-md" />
-          <Skeleton className="ml-auto h-8 w-16 rounded-full" />
+          <Skeleton className="ml-auto h-8 w-16 rounded-lg" />
         </div>
       ))}
     </div>

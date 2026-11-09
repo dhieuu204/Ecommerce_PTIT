@@ -1,13 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  PackageCheck,
-  Scale,
-  Truck,
-  XCircle,
-} from 'lucide-react';
+  IconAlertTriangle,
+  IconCircleCheck,
+  IconCircleX,
+  IconClock,
+  IconPackage,
+  IconScale,
+  IconTruck,
+} from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { toast } from 'sonner';
@@ -87,7 +87,7 @@ export function SellerReturnDetailPage() {
   if (detail.isError) {
     return (
       <LoadError
-        className="mx-auto max-w-5xl rounded-2xl border bg-card"
+        className="mx-auto max-w-5xl rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
         message={detail.error.message}
         onRetry={() => detail.refetch()}
       />
@@ -158,7 +158,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={Clock}
+          icon={IconClock}
           title="Người mua yêu cầu trả hàng, chờ bạn trả lời"
           text={
             <>
@@ -184,7 +184,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="muted"
-          icon={XCircle}
+          icon={IconCircleX}
           title="Bạn đã từ chối yêu cầu"
           text={<>Người mua còn khiếu nại được tới {formatDateTime(r.deadline)}.</>}
         />
@@ -193,7 +193,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="warn"
-          icon={Scale}
+          icon={IconScale}
           title="Đang khiếu nại, chờ quản trị viên phân xử"
           text="Tiền của đơn này được giữ tới khi có kết quả."
         />
@@ -202,7 +202,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="info"
-          icon={Truck}
+          icon={IconTruck}
           title={
             r.shipment?.status === 'PICKED'
               ? 'GHN đang chuyển hàng trả về shop'
@@ -215,7 +215,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="warn"
-          icon={PackageCheck}
+          icon={IconPackage}
           title="Hàng trả đã về shop, mời bạn kiểm hàng"
           text={
             <>
@@ -226,7 +226,7 @@ function SellerStatus({
           actions={
             r.actions.canInspect && (
               <Button onClick={onInspect} disabled={busy}>
-                <PackageCheck className="size-4" /> Kiểm hàng
+                <IconPackage className="size-4" /> Kiểm hàng
               </Button>
             )
           }
@@ -237,7 +237,7 @@ function SellerStatus({
       return (
         <ActionBar
           tone="success"
-          icon={CheckCircle2}
+          icon={IconCircleCheck}
           title={`Người mua được hoàn ${formatMoney(r.decidedRefund ?? 0)}`}
           text={
             r.platformCovers
@@ -248,10 +248,10 @@ function SellerStatus({
       );
     case 'CLOSED':
       return (
-        <ActionBar tone="muted" icon={CheckCircle2} title="Yêu cầu đã đóng, không hoàn tiền" />
+        <ActionBar tone="muted" icon={IconCircleCheck} title="Yêu cầu đã đóng, không hoàn tiền" />
       );
     default:
-      return <ActionBar tone="muted" icon={AlertTriangle} title="Người mua đã hủy yêu cầu" />;
+      return <ActionBar tone="muted" icon={IconAlertTriangle} title="Người mua đã hủy yêu cầu" />;
   }
 }
 
@@ -280,7 +280,7 @@ function AcceptDialog({
         'w-full rounded-xl border px-3 py-2.5 text-left text-sm transition',
         noReturn === value
           ? 'border-navy bg-navy/[0.04]'
-          : 'border-ivory-200 hover:border-champagne',
+          : 'border-ink/[0.06] hover:border-champagne',
       )}
     >
       <div className="font-medium text-navy">{title}</div>
@@ -419,8 +419,8 @@ function InspectDialog({
             className={cn(
               'rounded-xl border px-3 py-2 text-sm transition',
               result === value
-                ? 'border-navy bg-navy text-white'
-                : 'border-ivory-200 hover:border-champagne',
+                ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                : 'border-ink/[0.06] hover:border-champagne',
             )}
           >
             {label}
@@ -435,7 +435,7 @@ function InspectDialog({
               key={it.orderItemId}
               className={cn(
                 'flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 transition',
-                on ? 'border-navy/40 bg-navy/[0.03]' : 'border-ivory-200',
+                on ? 'border-navy/40 bg-navy/[0.03]' : 'border-ink/[0.06]',
               )}
             >
               <Checkbox

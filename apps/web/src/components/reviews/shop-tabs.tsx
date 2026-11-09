@@ -1,4 +1,4 @@
-import { MessageSquareText, Store } from 'lucide-react';
+import { IconMessage2, IconPackage } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router';
 import type { PublicShop } from '@/lib/catalog-types';
 import { cn } from '@/lib/utils';
@@ -15,21 +15,21 @@ export function ShopTabs({ shop, products }: { shop: PublicShop; products: React
     setParams(next === 'reviews' ? { tab: 'danh-gia' } : {}, { replace: true });
 
   const tabs = [
-    { key: 'products' as const, label: 'Sản phẩm', icon: Store, count: shop.productCount },
+    { key: 'products' as const, label: 'Sản phẩm', icon: IconPackage, count: shop.productCount },
     {
       key: 'reviews' as const,
       label: 'Đánh giá',
-      icon: MessageSquareText,
+      icon: IconMessage2,
       count: shop.ratingCount,
     },
   ];
 
   return (
-    <div className="mt-8">
+    <div className="mt-4">
       <div
         role="tablist"
         aria-label="Nội dung shop"
-        className="flex gap-1 border-b border-ivory-200"
+        className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] flex gap-1 overflow-hidden px-2 md:px-3"
       >
         {tabs.map((t) => (
           <button
@@ -39,18 +39,18 @@ export function ShopTabs({ shop, products }: { shop: PublicShop; products: React
             aria-selected={tab === t.key}
             onClick={() => open(t.key)}
             className={cn(
-              '-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition sm:px-5 sm:text-[15px]',
+              'inline-flex items-center gap-2 border-b-2 px-3 py-3.5 text-sm whitespace-nowrap transition sm:px-4',
               tab === t.key
-                ? 'border-navy text-navy'
-                : 'border-transparent text-ink/55 hover:text-navy',
+                ? 'border-navy font-semibold text-navy'
+                : 'border-transparent text-ink/60 hover:text-navy',
             )}
           >
-            <t.icon className={cn('size-4', tab === t.key ? 'text-champagne-600' : 'opacity-70')} />
+            <t.icon className="size-[1.125rem] [stroke-width:1.75]" />
             {t.label}
             <span
               className={cn(
-                'rounded-full px-2 text-xs font-medium',
-                tab === t.key ? 'bg-champagne-50 text-champagne-600' : 'bg-ivory-200 text-ink/55',
+                'rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums',
+                tab === t.key ? 'bg-champagne-50 text-navy' : 'bg-page text-ink/50',
               )}
             >
               {t.count.toLocaleString('vi-VN')}
@@ -59,9 +59,9 @@ export function ShopTabs({ shop, products }: { shop: PublicShop; products: React
         ))}
       </div>
       {tab === 'products' ? (
-        <div className="-mt-6">{products}</div>
+        products
       ) : (
-        <ReviewsSection source="shop" id={shop.id} className="mt-6" />
+        <ReviewsSection source="shop" id={shop.id} className="mt-4" />
       )}
     </div>
   );

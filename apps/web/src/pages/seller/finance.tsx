@@ -1,21 +1,21 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowDownLeft,
-  ArrowRightLeft,
-  ArrowUpRight,
-  Banknote,
-  CircleDollarSign,
-  HandCoins,
-  Hourglass,
-  Landmark,
-  Lock,
-  LockOpen,
-  ReceiptText,
-  Scale,
-  ShieldCheck,
-  Undo2,
-  Wallet as WalletIcon,
-} from 'lucide-react';
+  IconArrowBackUp,
+  IconArrowDownLeft,
+  IconArrowUpRight,
+  IconArrowsLeftRight,
+  IconBuildingBank,
+  IconCash,
+  IconCashBanknote,
+  IconCoin,
+  IconHourglass,
+  IconLock,
+  IconLockOpen,
+  IconReceipt,
+  IconScale,
+  IconShieldCheck,
+  IconWallet,
+} from '@tabler/icons-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -41,6 +41,7 @@ import type {
 } from '@/lib/finance-types';
 import type { Page } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { CARD } from '@/pages/checkout/checkout-parts';
 
 const PAGE_SIZE = 20;
 const walletKey = ['seller', 'wallet'] as const;
@@ -58,16 +59,16 @@ export const EARNING_STATUS: Record<EarningStatus, { label: string; tone: Tone }
   REFUNDED: { label: 'Trả hàng, hoàn toàn bộ', tone: 'neutral' },
 };
 
-const TX_TYPE: Record<WalletTxType, { label: string; icon: typeof ArrowDownLeft }> = {
-  HELD: { label: 'Tiền đơn hàng vào ví', icon: ArrowDownLeft },
-  RELEASED: { label: 'Chuyển sang khả dụng', icon: ArrowRightLeft },
-  REVERSED: { label: 'Trừ lại', icon: ArrowUpRight },
-  COMPENSATION: { label: 'Đền hàng thất lạc / hư hỏng', icon: ShieldCheck },
-  RETURN_DEDUCTED: { label: 'Trừ phần hàng trả', icon: Undo2 },
-  LOCKED: { label: 'Khóa tiền cho yêu cầu rút', icon: Lock },
-  UNLOCKED: { label: 'Mở khóa tiền (yêu cầu rút không thực hiện)', icon: LockOpen },
-  WITHDRAWN: { label: 'Sàn đã chuyển khoản cho shop', icon: Landmark },
-  ADJUSTMENT: { label: 'Điều chỉnh của sàn', icon: Scale },
+const TX_TYPE: Record<WalletTxType, { label: string; icon: typeof IconArrowDownLeft }> = {
+  HELD: { label: 'Tiền đơn hàng vào ví', icon: IconArrowDownLeft },
+  RELEASED: { label: 'Chuyển sang khả dụng', icon: IconArrowsLeftRight },
+  REVERSED: { label: 'Trừ lại', icon: IconArrowUpRight },
+  COMPENSATION: { label: 'Đền hàng thất lạc / hư hỏng', icon: IconShieldCheck },
+  RETURN_DEDUCTED: { label: 'Trừ phần hàng trả', icon: IconArrowBackUp },
+  LOCKED: { label: 'Khóa tiền cho yêu cầu rút', icon: IconLock },
+  UNLOCKED: { label: 'Mở khóa tiền (yêu cầu rút không thực hiện)', icon: IconLockOpen },
+  WITHDRAWN: { label: 'Sàn đã chuyển khoản cho shop', icon: IconBuildingBank },
+  ADJUSTMENT: { label: 'Điều chỉnh của sàn', icon: IconScale },
 };
 
 export const WITHDRAWAL_STATUS: Record<WithdrawalStatus, { label: string; tone: Tone }> = {
@@ -135,20 +136,16 @@ export function SellerFinancePage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeader
-        crumbs={[{ label: 'Tài chính' }]}
-        title="Tài chính"
-        description="Tiền của shop sau phí sàn. Tiền vào ngăn Đang giữ, sang Khả dụng khi đơn hoàn tất và sàn đã nhận được tiền; tiền khả dụng rút về tài khoản ngân hàng của shop."
-      />
+      <PageHeader crumbs={[{ label: 'Tài chính' }]} title="Tài chính" />
 
       {wallet.isPending ? (
-        <div className="mb-6 grid gap-4 md:grid-cols-2">
+        <div className="mb-4 grid gap-4 md:grid-cols-2">
           <Skeleton className="h-36 rounded-2xl" />
           <Skeleton className="h-36 rounded-2xl" />
         </div>
       ) : wallet.isError ? (
         <LoadError
-          className="mb-6 rounded-2xl border bg-card"
+          className={cn(CARD, 'mb-4')}
           message={wallet.error.message}
           onRetry={() => wallet.refetch()}
         />
@@ -162,8 +159,11 @@ export function SellerFinancePage() {
 
       <FlowSteps />
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
-        <nav className="flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5" aria-label="Mục">
+      <div className={cn(CARD, 'overflow-hidden')}>
+        <nav
+          className="flex gap-1 overflow-x-auto border-b border-ink/[0.06] px-2 [scrollbar-width:none] md:px-3 [&::-webkit-scrollbar]:hidden"
+          aria-label="Mục"
+        >
           {(
             [
               ['EARNINGS', 'Tiền theo đơn'],
@@ -176,10 +176,10 @@ export function SellerFinancePage() {
               type="button"
               onClick={() => update({ tab: TAB_PARAM[value], status: null })}
               className={cn(
-                '-mb-px shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
+                '-mb-px shrink-0 border-b-2 px-3 py-3.5 text-sm whitespace-nowrap transition',
                 tab === value
                   ? 'border-navy font-semibold text-navy'
-                  : 'border-transparent text-muted-foreground hover:text-ink',
+                  : 'border-transparent text-ink/60 hover:text-navy',
               )}
             >
               {label}
@@ -223,123 +223,129 @@ function Balances({
 }) {
   const canWithdraw = !w.openWithdrawal && w.available >= w.withdrawMin;
   return (
-    <div className={cn('mb-6 grid gap-4', w.locked > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2')}>
-      <div className="relative overflow-hidden rounded-2xl bg-navy p-5 text-white shadow-lg shadow-navy/20">
-        <div
-          className="absolute -top-10 -right-10 size-36 rounded-full bg-champagne/15"
-          aria-hidden
-        />
-        <div className="relative flex items-center gap-2 text-sm text-white/75">
-          <WalletIcon className="size-4 text-champagne" /> Khả dụng
+    <div className={cn('mb-4 grid gap-4', w.locked > 0 ? 'lg:grid-cols-3' : 'md:grid-cols-2')}>
+      <div className="flex flex-col justify-between rounded-2xl bg-gradient-to-br from-header-from to-header-to p-5 text-white">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-white/85">
+            <IconWallet className="size-[1.125rem] [stroke-width:1.75]" /> Số dư khả dụng
+          </div>
+          <div className="mt-2 text-3xl font-bold tracking-tight tabular-nums">
+            {formatMoney(w.available)}
+          </div>
         </div>
-        <div className="relative mt-2 text-3xl font-bold tabular-nums text-champagne">
-          {formatMoney(w.available)}
-        </div>
-        <p className="relative mt-2 text-xs text-white/65">
-          Đơn đã hoàn tất và sàn đã nhận được tiền.
-        </p>
-        <div className="relative mt-3">
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
           {w.openWithdrawal ? (
             <button
               type="button"
               onClick={onOpenWithdrawals}
-              className="text-left text-xs text-white/85 underline-offset-2 hover:underline"
+              className="text-left text-sm font-medium text-white underline-offset-2 hover:underline"
             >
               Đang có yêu cầu rút {formatMoney(w.openWithdrawal.amount)} (
               {WITHDRAWAL_STATUS[w.openWithdrawal.status].label.toLowerCase()})
             </button>
           ) : (
-            <Button
-              size="sm"
+            <button
+              type="button"
               onClick={onWithdraw}
               disabled={!canWithdraw}
-              className="rounded-lg bg-champagne text-navy hover:bg-champagne/90"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-card px-5 text-sm font-bold text-navy transition hover:bg-champagne-50 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <HandCoins className="size-4" /> Rút tiền
-            </Button>
+              <IconCashBanknote className="size-[1.125rem] [stroke-width:1.75]" /> Rút tiền
+            </button>
           )}
           {!w.openWithdrawal && !canWithdraw && (
-            <p className="mt-1 text-xs text-white/60">
-              Rút tối thiểu {formatMoney(w.withdrawMin)} mỗi lần.
-            </p>
+            <span className="text-xs text-white/85">
+              Rút tối thiểu {formatMoney(w.withdrawMin)} mỗi lần
+            </span>
           )}
         </div>
       </div>
-      <div className="rounded-2xl border border-champagne/50 bg-card p-5">
-        <div className="flex items-center gap-2 text-sm text-ink/65">
-          <Hourglass className="size-4 text-champagne-600" /> Đang giữ
+      <div className={cn(CARD, 'p-5')}>
+        <div className="flex items-center gap-2 text-sm text-ink/60">
+          <IconHourglass className="size-[1.125rem] text-navy [stroke-width:1.75]" /> Đang giữ
         </div>
-        <div className="mt-2 text-3xl font-bold tabular-nums text-navy">
+        <div className="mt-2 text-3xl font-bold tracking-tight text-charcoal tabular-nums">
           {formatMoney(w.pending)}
         </div>
-        <dl className="mt-2 space-y-0.5 text-xs text-ink/60">
+        <dl className="mt-3 space-y-1 border-t border-dashed border-ink/15 pt-3 text-xs text-ink/60">
           <div className="flex justify-between gap-3">
             <dt>Chờ đơn hoàn tất</dt>
-            <dd className="tabular-nums">{formatMoney(w.pendingWaitingCompletion)}</dd>
+            <dd className="font-medium text-charcoal tabular-nums">
+              {formatMoney(w.pendingWaitingCompletion)}
+            </dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt>Chờ đối soát tiền COD với GHN</dt>
-            <dd className="tabular-nums">{formatMoney(w.pendingWaitingCod)}</dd>
+            <dd className="font-medium text-charcoal tabular-nums">
+              {formatMoney(w.pendingWaitingCod)}
+            </dd>
           </div>
           {w.pendingWaitingReturn > 0 && (
             <div className="flex justify-between gap-3">
               <dt>Chờ xử lý yêu cầu trả hàng</dt>
-              <dd className="tabular-nums">{formatMoney(w.pendingWaitingReturn)}</dd>
+              <dd className="font-medium text-charcoal tabular-nums">
+                {formatMoney(w.pendingWaitingReturn)}
+              </dd>
             </div>
           )}
         </dl>
       </div>
       {w.locked > 0 && (
-        <div className="rounded-2xl border bg-card p-5">
-          <div className="flex items-center gap-2 text-sm text-ink/65">
-            <Lock className="size-4 text-ink/45" /> Đang khóa
+        <div className={cn(CARD, 'p-5')}>
+          <div className="flex items-center gap-2 text-sm text-ink/60">
+            <IconLock className="size-[1.125rem] text-ink/45 [stroke-width:1.75]" /> Đang khóa
           </div>
-          <div className="mt-2 text-3xl font-bold tabular-nums text-ink">
+          <div className="mt-2 text-3xl font-bold tracking-tight text-charcoal tabular-nums">
             {formatMoney(w.locked)}
           </div>
-          <p className="mt-2 text-xs text-ink/60">Tiền của yêu cầu rút đang chờ sàn xử lý.</p>
+          <p className="mt-3 border-t border-dashed border-ink/15 pt-3 text-xs text-ink/60">
+            Tiền của yêu cầu rút đang chờ sàn xử lý.
+          </p>
         </div>
       )}
     </div>
   );
 }
 
-/** Ba bước tiền đi: dễ hiểu cho seller mới */
+/** Bốn chặng của tiền: dễ hiểu cho seller mới */
 function FlowSteps() {
   const steps = [
     {
-      icon: Banknote,
+      icon: IconCash,
       title: 'Có tiền',
       text: 'Trả trước: người mua đã thanh toán. COD: GHN đã giao hàng.',
     },
     {
-      icon: Hourglass,
+      icon: IconHourglass,
       title: 'Đang giữ',
       text: 'Chờ đơn hoàn tất: người mua bấm Đã nhận hàng, hoặc hết hạn thì tự hoàn tất.',
     },
     {
-      icon: CircleDollarSign,
+      icon: IconCoin,
       title: 'Khả dụng',
       text: 'Đơn hoàn tất, không còn yêu cầu trả hàng, tiền đã về sàn (COD: sau đối soát GHN).',
     },
     {
-      icon: Landmark,
+      icon: IconBuildingBank,
       title: 'Rút tiền',
       text: 'Gửi yêu cầu (tiền bị khóa), sàn duyệt rồi chuyển khoản kèm biên lai.',
     },
   ];
   return (
-    <ol className="mb-6 grid gap-2 rounded-2xl border border-ivory-200 bg-ivory/50 p-3 sm:grid-cols-2 lg:grid-cols-4">
+    <ol className={cn(CARD, 'mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:py-4')}>
       {steps.map((s, i) => (
-        <li key={s.title} className="flex gap-3 rounded-xl bg-card px-3 py-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-champagne-50 text-champagne-600">
-            <s.icon className="size-4" />
+        <li
+          key={s.title}
+          className="flex gap-3 lg:border-l lg:border-ink/[0.06] lg:px-4 lg:first:border-l-0 lg:first:pl-1 lg:last:pr-1"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-navy">
+            <s.icon className="size-[1.125rem] [stroke-width:1.75]" />
           </span>
           <div className="min-w-0 text-xs">
-            <div className="text-sm font-semibold text-navy">
+            <div className="text-sm font-semibold text-charcoal">
               {i + 1}. {s.title}
             </div>
-            <div className="text-ink/60">{s.text}</div>
+            <div className="mt-0.5 leading-relaxed text-ink/55">{s.text}</div>
           </div>
         </li>
       ))}
@@ -368,7 +374,10 @@ function EarningsList({
   });
   return (
     <>
-      <div className="flex flex-wrap gap-2 border-b px-4 py-3 md:px-5" role="radiogroup">
+      <div
+        className="flex flex-wrap gap-2 border-b border-ink/[0.06] px-4 py-3 md:px-5"
+        role="radiogroup"
+      >
         {EARNING_FILTERS.map((f) => (
           <button
             key={f.value}
@@ -377,10 +386,10 @@ function EarningsList({
             aria-checked={status === f.value}
             onClick={() => onStatus(f.value)}
             className={cn(
-              'rounded-full border px-3 py-1 text-xs transition',
+              'rounded-lg border px-3 py-1 text-xs transition',
               status === f.value
-                ? 'border-navy bg-navy text-white'
-                : 'border-ivory-200 bg-card text-ink/70 hover:border-champagne',
+                ? 'border-navy bg-champagne-50 font-semibold text-navy'
+                : 'border-ink/15 bg-card text-ink/70 hover:border-navy/40 hover:text-navy',
             )}
           >
             {f.label}
@@ -393,26 +402,26 @@ function EarningsList({
         <LoadError message={list.error.message} onRetry={() => list.refetch()} />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          icon={ReceiptText}
+          icon={IconReceipt}
           title="Chưa có khoản tiền nào"
           text="Tiền của mỗi đơn hiện ở đây khi người mua đặt hàng."
         />
       ) : (
         <>
-          <div className="hidden grid-cols-[minmax(0,1fr)_8rem_7rem_8rem_11rem] gap-4 border-b bg-ivory/40 px-5 py-2.5 text-xs font-medium text-muted-foreground lg:grid">
+          <div className="hidden grid-cols-[minmax(0,1fr)_8rem_7rem_8rem_11rem] gap-4 border-b border-ink/[0.06] px-5 py-2.5 text-[13px] text-ink/55 lg:grid">
             <span>Đơn</span>
             <span className="text-right">Tiền hàng</span>
             <span className="text-right">Phí sàn</span>
             <span className="text-right">Shop nhận</span>
             <span>Trạng thái</span>
           </div>
-          <div className="divide-y">
+          <div className="divide-y divide-ink/[0.06]">
             {list.data.items.map((e) => (
               <EarningRow key={e.shopOrderId} e={e} />
             ))}
           </div>
           <Pager
-            className="border-t px-5 py-3"
+            className="border-t border-ink/[0.06] px-5 py-3"
             page={page}
             pageSize={PAGE_SIZE}
             total={list.data.total}
@@ -431,7 +440,7 @@ function EarningRow({ e }: { e: Earning }) {
       <div className="min-w-0 text-sm">
         <Link
           to={`/kenh-nguoi-ban/don-hang/${e.shopOrderId}`}
-          className="font-semibold text-navy hover:underline"
+          className="font-semibold text-charcoal transition hover:text-navy"
         >
           {e.shopOrderCode}
         </Link>
@@ -442,14 +451,12 @@ function EarningRow({ e }: { e: Earning }) {
       <Cell label="Tiền hàng" value={formatMoney(e.subtotal - e.shopDiscount)} />
       <Cell
         label={`Phí sàn (${e.platformFeeRate / 100}%)`}
-        value={`−${formatMoney(e.platformFee)}`}
+        value={`-${formatMoney(e.platformFee)}`}
         className="text-ink/60"
       />
       <div className="flex justify-between text-sm lg:block lg:text-right">
         <span className="text-xs text-muted-foreground lg:hidden">Shop nhận</span>
-        <span className="font-semibold text-navy tabular-nums">
-          {formatMoney(e.sellerReceives)}
-        </span>
+        <span className="font-bold text-navy tabular-nums">{formatMoney(e.sellerReceives)}</span>
         {e.returnDeduction > 0 && (
           <span className="block text-xs text-champagne-600">
             đã trừ trả hàng {formatMoney(e.returnDeduction)}
@@ -491,7 +498,7 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
   if (list.data.items.length === 0) {
     return (
       <EmptyState
-        icon={WalletIcon}
+        icon={IconWallet}
         title="Ví chưa có biến động"
         text="Mỗi lần tiền vào, chuyển ngăn hay bị trừ lại đều ghi một dòng ở đây."
       />
@@ -499,7 +506,7 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
   }
   return (
     <>
-      <ul className="divide-y">
+      <ul className="divide-y divide-ink/[0.06]">
         {list.data.items.map((t) => {
           const type = TX_TYPE[t.type];
           const into = t.toBucket && !t.fromBucket;
@@ -510,16 +517,16 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
                 className={cn(
                   'flex size-9 shrink-0 items-center justify-center rounded-full',
                   out
-                    ? 'bg-red-50 text-red-600'
+                    ? 'bg-red-50 text-red-500'
                     : into
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-champagne-50 text-champagne-600',
+                      ? 'bg-ship/10 text-ship'
+                      : 'bg-champagne-50 text-navy',
                 )}
               >
-                <type.icon className="size-4" />
+                <type.icon className="size-[1.125rem] [stroke-width:1.75]" />
               </span>
               <div className="min-w-0 flex-1 text-sm">
-                <div className="font-medium text-ink">{type.label}</div>
+                <div className="font-medium text-charcoal">{type.label}</div>
                 <div className="text-xs text-muted-foreground">
                   {t.fromBucket ? BUCKET[t.fromBucket] : 'Ngoài ví'} →{' '}
                   {t.toBucket ? BUCKET[t.toBucket] : 'Ra khỏi ví'}
@@ -541,10 +548,10 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
               <div
                 className={cn(
                   'shrink-0 text-right text-sm font-semibold tabular-nums',
-                  out ? 'text-red-600' : into ? 'text-emerald-700' : 'text-navy',
+                  out ? 'text-red-500' : into ? 'text-ship' : 'text-charcoal',
                 )}
               >
-                {out ? '−' : into ? '+' : ''}
+                {out ? '-' : into ? '+' : ''}
                 {formatMoney(t.amount)}
               </div>
             </li>
@@ -552,7 +559,7 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
         })}
       </ul>
       <Pager
-        className="border-t px-5 py-3"
+        className="border-t border-ink/[0.06] px-5 py-3"
         page={page}
         pageSize={PAGE_SIZE}
         total={list.data.total}
@@ -592,7 +599,7 @@ function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) =
   if (list.data.items.length === 0) {
     return (
       <EmptyState
-        icon={Landmark}
+        icon={IconBuildingBank}
         title="Chưa có yêu cầu rút tiền"
         text="Bấm Rút tiền ở ô Khả dụng. Mỗi lúc một yêu cầu, sàn duyệt rồi chuyển khoản."
       />
@@ -600,13 +607,13 @@ function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) =
   }
   return (
     <>
-      <ul className="divide-y">
+      <ul className="divide-y divide-ink/[0.06]">
         {list.data.items.map((w) => {
           const st = WITHDRAWAL_STATUS[w.status];
           return (
             <li key={w.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5 md:px-5">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-champagne-600">
-                <Landmark className="size-4" />
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-champagne-50 text-navy">
+                <IconBuildingBank className="size-[1.125rem] [stroke-width:1.75]" />
               </span>
               <div className="min-w-0 flex-1 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
@@ -619,13 +626,18 @@ function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) =
                 </div>
                 {w.reason && <div className="text-xs text-red-700">Lý do: {w.reason}</div>}
                 {w.status === 'PAID' && (
-                  <div className="text-xs text-emerald-700">
+                  <div className="text-xs text-ship">
                     Đã chuyển lúc {formatDateTime(w.paidAt)} · mã giao dịch {w.transferCode}
                   </div>
                 )}
               </div>
               {w.canCancel && (
-                <Button variant="outline" size="sm" onClick={() => setCancelling(w)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelling(w)}
+                  className="rounded-lg border-ink/15 text-charcoal hover:border-navy/40 hover:bg-transparent hover:text-navy"
+                >
                   Hủy yêu cầu
                 </Button>
               )}
@@ -634,7 +646,7 @@ function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) =
         })}
       </ul>
       <Pager
-        className="border-t px-5 py-3"
+        className="border-t border-ink/[0.06] px-5 py-3"
         page={page}
         pageSize={PAGE_SIZE}
         total={list.data.total}
@@ -729,8 +741,8 @@ function WithdrawDialog({
               : `Tối thiểu ${formatMoney(wallet.withdrawMin)}, tối đa ${formatMoney(wallet.available)}.`}
           </p>
         </div>
-        <div className="rounded-lg bg-ivory px-3 py-2 text-xs text-ink/70">
-          <div className="font-medium text-ink">Tài khoản nhận (theo hồ sơ shop)</div>
+        <div className="rounded-lg bg-page px-3 py-2.5 text-xs leading-relaxed text-ink/70">
+          <div className="font-medium text-charcoal">Tài khoản nhận (theo hồ sơ shop)</div>
           {bank
             ? `${bank.bankName} · ${maskAccount(bank.accountNumber)} · ${bank.accountName}`
             : shop.isPending
@@ -751,7 +763,7 @@ function WithdrawDialog({
 
 function ListSkeleton() {
   return (
-    <div className="divide-y">
+    <div className="divide-y divide-ink/[0.06]">
       {Array.from({ length: 4 }, (_, i) => (
         <div key={i} className="flex gap-4 px-5 py-4">
           <Skeleton className="size-9 rounded-full" />

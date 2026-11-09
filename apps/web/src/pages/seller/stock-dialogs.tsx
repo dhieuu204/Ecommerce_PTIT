@@ -1,5 +1,5 @@
+import { IconHistory, IconLoader2, IconMinus, IconPackage, IconPlus } from '@tabler/icons-react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { History, Loader2, Minus, PackagePlus, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -61,8 +61,8 @@ export function StockAdjustDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl sm:max-w-lg">
         <DialogHeader className="text-left">
-          <DialogTitle className="flex items-center gap-2 text-navy">
-            <PackagePlus className="size-5 text-champagne-600" /> Điều chỉnh tồn kho
+          <DialogTitle className="flex items-center gap-2 text-charcoal">
+            <IconPackage className="size-5 text-navy" /> Điều chỉnh tồn kho
           </DialogTitle>
           <DialogDescription className="line-clamp-2">
             {product.data?.name ?? 'Nhập thêm hàng hoặc giảm tồn, mỗi lần ghi một dòng lịch sử.'}
@@ -211,8 +211,8 @@ function AdjustForm({
         <div className="grid grid-cols-2 gap-2 rounded-xl bg-ivory p-1">
           {(
             [
-              { value: 'in', label: 'Nhập thêm', icon: Plus },
-              { value: 'out', label: 'Giảm', icon: Minus },
+              { value: 'in', label: 'Nhập thêm', icon: IconPlus },
+              { value: 'out', label: 'Giảm', icon: IconMinus },
             ] as const
           ).map(({ value, label, icon: Icon }) => (
             <button
@@ -300,7 +300,7 @@ function AdjustForm({
                   setReason(r);
                   setErrors((x) => ({ ...x, reason: undefined }));
                 }}
-                className="rounded-full border border-champagne/50 bg-champagne-50/60 px-2.5 py-1 text-xs text-navy transition hover:border-champagne hover:bg-champagne-50"
+                className="rounded-lg border border-champagne/50 bg-champagne-50/60 px-2.5 py-1 text-xs text-navy transition hover:border-champagne hover:bg-champagne-50"
               >
                 {r}
               </button>
@@ -322,7 +322,7 @@ function AdjustForm({
           onClick={() => void submit()}
           className={cn('min-w-36', mode === 'out' && 'bg-red-600 hover:bg-red-700')}
         >
-          {busy && <Loader2 className="animate-spin" />}
+          {busy && <IconLoader2 className="animate-spin" />}
           {mode === 'in' ? 'Nhập thêm' : 'Giảm tồn'}
         </Button>
       </DialogFooter>
@@ -428,7 +428,7 @@ export function StockHistoryList({
       {variants.length > 1 && (
         <select
           aria-label="Lọc theo biến thể"
-          className={cn(nativeSelectClass, 'mb-3 h-9 rounded-full sm:w-64')}
+          className={cn(nativeSelectClass, 'mb-3 h-9 rounded-lg sm:w-64')}
           value={variantId}
           onChange={(e) => setVariantId(e.target.value)}
         >
@@ -450,7 +450,7 @@ export function StockHistoryList({
         <LoadError message={list.error.message} onRetry={() => void list.refetch()} />
       ) : rows.length === 0 ? (
         <EmptyState
-          icon={History}
+          icon={IconHistory}
           title="Chưa có lịch sử tồn kho"
           text="Mỗi lần nhập thêm hoặc giảm tồn sẽ hiện ở đây."
           className="py-8"
@@ -460,12 +460,12 @@ export function StockHistoryList({
           <div className="hidden overflow-hidden rounded-xl border sm:block">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-ivory text-left text-xs tracking-wide text-muted-foreground uppercase">
-                  <th className="px-4 py-2.5 font-medium">Thời gian</th>
-                  <th className="px-3 py-2.5 font-medium">Biến thể</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Thay đổi</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Tồn sau</th>
-                  <th className="px-4 py-2.5 font-medium">Lý do</th>
+                <tr className="border-b border-ink/[0.06] text-left text-[13px] text-ink/55">
+                  <th className="px-4 py-2.5 font-normal">Thời gian</th>
+                  <th className="px-3 py-2.5 font-normal">Biến thể</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Thay đổi</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Tồn sau</th>
+                  <th className="px-4 py-2.5 font-normal">Lý do</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -554,8 +554,8 @@ export function StockHistoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl sm:max-w-3xl">
         <DialogHeader className="text-left">
-          <DialogTitle className="flex items-center gap-2 text-navy">
-            <History className="size-5 text-champagne-600" /> Lịch sử tồn kho
+          <DialogTitle className="flex items-center gap-2 text-charcoal">
+            <IconHistory className="size-5 text-navy" /> Lịch sử tồn kho
           </DialogTitle>
           <DialogDescription className="line-clamp-2">
             {product.data?.name ?? 'Mỗi lần nhập thêm hoặc giảm tồn là một dòng.'}

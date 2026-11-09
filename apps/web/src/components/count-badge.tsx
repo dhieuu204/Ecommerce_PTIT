@@ -23,7 +23,7 @@ export function CountBadge({
       className={cn(
         'flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] leading-none font-bold',
         floating
-          ? 'absolute -top-1.5 -right-2 bg-champagne text-navy ring-2 ring-navy'
+          ? 'absolute -top-1.5 -right-2 bg-navy text-white ring-2 ring-navy'
           : 'ml-2 inline-flex bg-navy text-white',
         className,
       )}

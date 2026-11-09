@@ -1,9 +1,9 @@
 /**
- * Kiểu dữ liệu P4 về tiền: ví seller, tiền từng đơn con, đối soát COD và VNPay, bảng GHN mô phỏng
+ * Kiểu dữ liệu P4 về tiền: ví seller, tiền từng đơn con, đối soát COD và VNPay
  * (docs/api/README.md mục 5). Thời gian là chuỗi ISO (UTC).
  */
 
-import type { AdminRefund, AdminRefundStatus, ShipmentStatus } from './order-types';
+import type { AdminRefund, AdminRefundStatus } from './order-types';
 
 export type EarningStatus =
   | 'UNPAID'
@@ -164,26 +164,4 @@ export interface VnpayReconciliation {
     createdAt: string;
   }>;
   resolved: VnpayPaymentException[];
-}
-
-// ----- GHN mô phỏng -----
-
-export type SimulatorEvent =
-  'PICKED' | 'DELIVERY_FAILED' | 'DELIVERED' | 'RETURN' | 'RETURNED' | 'LOST';
-
-export interface SimulatorRow {
-  id: string;
-  /** DELIVERY: giao cho người mua; RETURN: hàng trả của người mua gửi về shop (P5) */
-  type: 'DELIVERY' | 'RETURN';
-  ghnCode: string | null;
-  status: ShipmentStatus;
-  failedAttempts: number;
-  shopOrderId: string;
-  shopOrderCode: string;
-  shopName: string;
-  receiverName: string;
-  address: string;
-  codAmount: number;
-  createdAt: string;
-  actions: SimulatorEvent[];
 }

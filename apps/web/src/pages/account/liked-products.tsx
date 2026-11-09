@@ -1,5 +1,5 @@
+import { IconHeart, IconLoader2 } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Heart, Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { ProductCard, ProductCardSkeleton } from '@/components/catalog/product-card';
@@ -40,8 +40,8 @@ export function LikedProductsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ivory-200 bg-card px-4 py-4 md:px-5">
-        <h1 className="text-lg font-semibold text-navy">Sản phẩm yêu thích</h1>
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
+        <h1 className="text-lg font-semibold text-charcoal">Sản phẩm yêu thích</h1>
         <p className="mt-1 text-sm text-ink/60">
           Bấm “Yêu thích” ở trang sản phẩm để lưu lại; mới thả tim hiện trước.
         </p>
@@ -55,18 +55,18 @@ export function LikedProductsPage() {
         </div>
       ) : list.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={list.error.message}
           onRetry={() => list.refetch()}
         />
       ) : list.data.items.length === 0 ? (
         <EmptyState
-          className="rounded-2xl border bg-card"
-          icon={Heart}
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
+          icon={IconHeart}
           title="Chưa có sản phẩm yêu thích"
           text="Thả tim sản phẩm bạn thích để xem lại và mua sau."
           action={
-            <Button asChild variant="outline" className="rounded-full px-5">
+            <Button asChild variant="outline" className="rounded-lg px-5">
               <Link to="/tim-kiem">Khám phá sản phẩm</Link>
             </Button>
           }
@@ -92,7 +92,7 @@ export function LikedProductsPage() {
                     )}
                   />
                   {!p.available && (
-                    <span className="absolute inset-x-0 top-[38%] mx-auto w-fit rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white">
+                    <span className="absolute inset-x-0 top-[38%] mx-auto w-fit rounded-lg bg-ink/80 px-3 py-1 text-xs font-medium text-white">
                       Không còn bán
                     </span>
                   )}
@@ -105,9 +105,9 @@ export function LikedProductsPage() {
                     className="absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full bg-card/95 text-rose-500 shadow-sm ring-1 ring-ivory-200 transition hover:scale-105"
                   >
                     {removing ? (
-                      <Loader2 className="size-4 animate-spin" />
+                      <IconLoader2 className="size-4 animate-spin" />
                     ) : (
-                      <Heart className="size-4 fill-rose-500" />
+                      <IconHeart className="size-4 fill-rose-500" />
                     )}
                   </button>
                 </div>

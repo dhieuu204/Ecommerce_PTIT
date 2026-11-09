@@ -1,4 +1,10 @@
-import { ImagePlus, Loader2, PackageX, Store, X } from 'lucide-react';
+import {
+  IconBuildingStore,
+  IconLoader2,
+  IconPackageOff,
+  IconPhotoPlus,
+  IconX,
+} from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/status-badge';
@@ -57,11 +63,11 @@ export function TargetThumb({
   image: string | null;
   className?: string;
 }) {
-  const Icon = type === 'SHOP' ? Store : PackageX;
+  const Icon = type === 'SHOP' ? IconBuildingStore : IconPackageOff;
   return (
     <span
       className={cn(
-        'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ivory-200 bg-white',
+        'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink/[0.06] bg-white',
         className,
       )}
     >
@@ -140,7 +146,7 @@ export function ReportImagePicker({
       {value.map((img) => (
         <div
           key={img.key}
-          className="relative size-16 overflow-hidden rounded-xl border border-ivory-200 sm:size-20"
+          className="relative size-16 overflow-hidden rounded-xl border border-ink/[0.06] sm:size-20"
         >
           <img src={img.preview} alt="" className="size-full object-cover" />
           <button
@@ -150,7 +156,7 @@ export function ReportImagePicker({
             className="absolute top-1 right-1 rounded-full bg-black/55 p-0.5 text-white hover:bg-black/75"
             aria-label="Bỏ ảnh"
           >
-            <X className="size-3.5" />
+            <IconX className="size-3.5" />
           </button>
         </div>
       ))}
@@ -159,7 +165,7 @@ export function ReportImagePicker({
           key={`up-${i}`}
           className="flex size-16 items-center justify-center rounded-xl border border-dashed border-champagne sm:size-20"
         >
-          <Loader2 className="size-5 animate-spin text-champagne-600" />
+          <IconLoader2 className="size-5 animate-spin text-champagne-600" />
         </div>
       ))}
       {value.length + uploading < REPORT_MAX_IMAGES && (
@@ -169,7 +175,7 @@ export function ReportImagePicker({
           onClick={() => input.current?.click()}
           className="flex size-16 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-champagne text-[11px] text-champagne-600 transition hover:bg-champagne-50 disabled:opacity-50 sm:size-20 sm:text-xs"
         >
-          <ImagePlus className="size-5" />
+          <IconPhotoPlus className="size-5" />
           Thêm ảnh
         </button>
       )}

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ export function ReviewImages({ images, className }: { images: string[]; classNam
             key={url}
             type="button"
             onClick={() => setOpen(i)}
-            className="group size-16 overflow-hidden rounded-lg border border-ivory-200 bg-ivory outline-none focus-visible:ring-2 focus-visible:ring-champagne sm:size-20"
+            className="group size-16 overflow-hidden rounded-lg border border-ink/[0.06] bg-ivory outline-none focus-visible:ring-2 focus-visible:ring-champagne sm:size-20"
             aria-label={`Xem ảnh ${i + 1}`}
           >
             <img
@@ -73,7 +73,7 @@ function ImageViewer({
                   aria-label="Ảnh trước"
                   className="absolute left-1 flex size-10 items-center justify-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25"
                 >
-                  <ChevronLeft className="size-5" />
+                  <IconChevronLeft className="size-5" />
                 </button>
                 <button
                   type="button"
@@ -81,9 +81,9 @@ function ImageViewer({
                   aria-label="Ảnh sau"
                   className="absolute right-1 flex size-10 items-center justify-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25"
                 >
-                  <ChevronRight className="size-5" />
+                  <IconChevronRight className="size-5" />
                 </button>
-                <span className="absolute bottom-2 rounded-full bg-black/50 px-2.5 py-0.5 text-xs">
+                <span className="absolute bottom-2 rounded-md bg-black/50 px-2.5 py-0.5 text-xs">
                   {index + 1} / {images.length}
                 </span>
               </>

@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { IconLoader2 } from '@tabler/icons-react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { hasAnyPermission, useSession } from '@/lib/auth';
@@ -7,7 +7,7 @@ import type { Permission } from '@/lib/types';
 export function FullPageSpinner() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
-      <Loader2 className="size-6 animate-spin" />
+      <IconLoader2 className="size-6 animate-spin" />
     </div>
   );
 }

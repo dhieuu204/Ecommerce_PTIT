@@ -1,5 +1,5 @@
+import { IconAdjustments, IconHistory, IconLoader2, IconPencil } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { History, Loader2, Pencil, Settings2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { LoadError } from '@/components/console/empty-state';
@@ -108,13 +108,13 @@ function SourceSection({
     queryFn: () => api<SettingRow[]>(`${source.prefix}/admin/settings`),
   });
   return (
-    <section className="overflow-hidden rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+    <section className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
       <header className="flex items-center gap-3 border-b bg-ivory/50 px-4 py-3 md:px-5">
         <span className="flex size-9 items-center justify-center rounded-xl bg-navy text-white">
-          <Settings2 className="size-4" />
+          <IconAdjustments className="size-4" />
         </span>
         <div>
-          <div className="font-semibold text-navy">{source.title}</div>
+          <div className="font-bold tracking-tight text-charcoal">{source.title}</div>
           <div className="text-xs text-muted-foreground">{source.note}</div>
         </div>
       </header>
@@ -153,11 +153,11 @@ function SourceSection({
                   onClick={() => onHistory(row)}
                   aria-label="Lịch sử"
                 >
-                  <History className="size-4" />
+                  <IconHistory className="size-4" />
                 </Button>
                 {canEdit && (
                   <Button variant="outline" size="sm" onClick={() => onEdit(row)}>
-                    <Pencil className="size-3.5" /> Sửa
+                    <IconPencil className="size-3.5" /> Sửa
                   </Button>
                 )}
               </div>
@@ -214,7 +214,7 @@ function EditDialog({
     <Dialog open={!!target} onOpenChange={(o) => !o && !save.isPending && onClose()}>
       <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-navy">{row?.label}</DialogTitle>
+          <DialogTitle className="text-charcoal">{row?.label}</DialogTitle>
           <DialogDescription>
             Đang dùng: <b>{row && showValue(row)}</b>. Giới hạn {row?.min.toLocaleString('vi-VN')}–
             {row?.max.toLocaleString('vi-VN')} ({row?.unit}).
@@ -250,7 +250,7 @@ function EditDialog({
             Hủy
           </Button>
           <Button onClick={() => save.mutate()} disabled={!valid || save.isPending}>
-            {save.isPending && <Loader2 className="size-4 animate-spin" />}
+            {save.isPending && <IconLoader2 className="size-4 animate-spin" />}
             Lưu phiên bản mới
           </Button>
         </DialogFooter>
@@ -276,7 +276,7 @@ function HistoryDialog({
     <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[80vh] overflow-y-auto rounded-2xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-navy">Lịch sử: {target?.row.label}</DialogTitle>
+          <DialogTitle className="text-charcoal">Lịch sử: {target?.row.label}</DialogTitle>
         </DialogHeader>
         {hist.isPending ? (
           <Skeleton className="h-24 rounded-xl" />

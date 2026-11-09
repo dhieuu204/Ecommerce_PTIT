@@ -127,7 +127,7 @@ export function ProductCard({
 
         <h3
           className={cn(
-            'font-semibold text-charcoal transition group-hover:text-navy',
+            'font-semibold text-charcoal transition group-hover:text-charcoal',
             compact
               ? 'mt-2.5 truncate text-[13px]'
               : 'mt-3 line-clamp-2 min-h-10 text-sm leading-5',

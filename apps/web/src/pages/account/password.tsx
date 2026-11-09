@@ -1,5 +1,5 @@
+import { IconInfoCircle, IconShieldCheck } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Info, ShieldCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -69,10 +69,7 @@ export function PasswordPage() {
   const title = hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu';
 
   return (
-    <AccountCard
-      title={title}
-      description="Để bảo mật tài khoản, bạn không chia sẻ mật khẩu cho người khác."
-    >
+    <AccountCard title={title}>
       {profile.isPending ? (
         <div className="max-w-md space-y-5">
           {[0, 1, 2].map((i) => (
@@ -86,7 +83,7 @@ export function PasswordPage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,28rem)_1fr]">
           <form onSubmit={onSubmit} noValidate className="space-y-5">
             {!hasPassword && (
-              <Notice tone="info" icon={<Info />}>
+              <Notice tone="info" icon={<IconInfoCircle />}>
                 Tài khoản của bạn đăng nhập bằng Google và chưa có mật khẩu. Đặt mật khẩu để đăng
                 nhập được cả bằng email.
               </Notice>
@@ -146,8 +143,8 @@ export function PasswordPage() {
             </SubmitButton>
           </form>
           <aside className="hidden self-start rounded-2xl border border-champagne/30 bg-champagne-50/60 p-5 lg:block">
-            <ShieldCheck className="size-8 text-champagne-600" />
-            <h2 className="mt-3 font-semibold text-navy">Gợi ý mật khẩu an toàn</h2>
+            <IconShieldCheck className="size-8 text-navy" />
+            <h2 className="mt-3 font-semibold text-charcoal">Gợi ý mật khẩu an toàn</h2>
             <ul className="mt-2 list-disc space-y-1.5 pl-4 text-sm text-ink/80">
               <li>Từ 8 đến 72 ký tự; càng dài càng khó đoán.</li>
               <li>Trộn chữ hoa, chữ thường, chữ số và ký hiệu.</li>

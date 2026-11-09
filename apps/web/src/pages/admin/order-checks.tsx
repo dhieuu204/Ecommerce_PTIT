@@ -1,5 +1,5 @@
+import { IconChevronRight, IconLoader2, IconShieldCheck, IconUser } from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, Loader2, ShieldCheck, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -71,7 +71,7 @@ export function OrderChecksPage() {
         title="Duyệt đơn lớn"
         description="Đơn chạm luật kiểm tra (mặc định từ 10 triệu) chờ duyệt song song với thanh toán. Không bao giờ tự duyệt: quá hạn thì đơn tự hủy và hoàn tiền."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav className="-mb-px flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5">
           {TABS.map((t) => (
             <button
@@ -84,7 +84,7 @@ export function OrderChecksPage() {
                 'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                 status === t.value
                   ? 'border-navy font-semibold text-navy'
-                  : 'border-transparent text-muted-foreground hover:text-ink',
+                  : 'border-transparent text-ink/60 hover:text-navy',
               )}
             >
               {t.label}
@@ -101,7 +101,7 @@ export function OrderChecksPage() {
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
           <EmptyState
-            icon={ShieldCheck}
+            icon={IconShieldCheck}
             title={status === 'PENDING' ? 'Không có đơn chờ duyệt' : 'Chưa có đơn nào'}
           />
         ) : (
@@ -136,7 +136,7 @@ function CheckRow({ check: c }: { check: OrderCheck }) {
       className="grid gap-2 px-4 py-4 transition hover:bg-ivory/50 md:grid-cols-[minmax(0,1fr)_10rem_11rem_1.5rem] md:items-center md:gap-4 md:px-5"
     >
       <div className="min-w-0 text-sm">
-        <div className="font-semibold text-navy">Đơn {c.orderCode}</div>
+        <div className="font-bold tracking-tight text-charcoal">Đơn {c.orderCode}</div>
         <div className="truncate text-muted-foreground">
           {c.buyer.name} · {c.buyer.email}
         </div>
@@ -153,7 +153,7 @@ function CheckRow({ check: c }: { check: OrderCheck }) {
         <StatusBadge tone={s.tone}>{s.label}</StatusBadge>
         {left && <span className="font-medium text-red-600 tabular-nums">còn {left}</span>}
       </div>
-      <ChevronRight className="hidden size-4 text-ink/30 md:block" />
+      <IconChevronRight className="hidden size-4 text-ink/30 md:block" />
     </Link>
   );
 }
@@ -223,7 +223,7 @@ export function OrderCheckDetailPage() {
               onClick={() => decide.mutate({ decision: 'APPROVE' })}
               disabled={decide.isPending}
             >
-              {decide.isPending && <Loader2 className="size-4 animate-spin" />}
+              {decide.isPending && <IconLoader2 className="size-4 animate-spin" />}
               Duyệt đơn
             </Button>
           </div>
@@ -239,12 +239,15 @@ export function OrderCheckDetailPage() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="space-y-4">
           {c.order?.shopOrders.map((so) => (
-            <section key={so.shopOrderId} className="rounded-2xl border bg-card px-4 py-4 md:px-5">
-              <div className="mb-2 flex justify-between gap-2 font-semibold text-navy">
+            <section
+              key={so.shopOrderId}
+              className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5"
+            >
+              <div className="mb-2 flex justify-between gap-2 font-semibold text-charcoal">
                 <span>{so.shopName}</span>
                 <span className="text-xs font-normal text-muted-foreground">{so.code}</span>
               </div>
-              <ul className="divide-y text-sm">
+              <ul className="divide-y divide-ink/[0.06] text-sm">
                 {so.items.map((it, i) => (
                   <li key={i} className="flex justify-between gap-3 py-2">
                     <span className="min-w-0">
@@ -265,9 +268,9 @@ export function OrderCheckDetailPage() {
           ))}
         </div>
         <div className="space-y-4">
-          <section className="rounded-2xl border bg-card px-4 py-4 text-sm md:px-5">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-navy">
-              <UserRound className="size-4" /> Người mua
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 text-sm md:px-5">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-charcoal">
+              <IconUser className="size-4" /> Người mua
             </div>
             <div className="font-medium">{c.buyer.name}</div>
             <div className="text-muted-foreground">{c.buyer.email}</div>
@@ -286,7 +289,7 @@ export function OrderCheckDetailPage() {
               </div>
             )}
           </section>
-          <section className="rounded-2xl border bg-card px-4 py-4 md:px-5">
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
             <MoneyRow label="Tổng đơn" value={c.amount} strong />
             <div className="text-xs text-muted-foreground">Thanh toán: {c.paymentMethod}</div>
           </section>

@@ -1,15 +1,14 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
-  ArrowDownUp,
-  ChevronDown,
-  ChevronRight,
-  House,
-  PackageSearch,
-  SearchX,
-  Star,
-  Wallet,
-  X,
-} from 'lucide-react';
+  IconArrowsSort,
+  IconChevronDown,
+  IconChevronRight,
+  IconHome,
+  IconPackages,
+  IconSearchOff,
+  IconStarFilled,
+  IconX,
+} from '@tabler/icons-react';
 import { Popover } from 'radix-ui';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -40,23 +39,23 @@ export interface Crumb {
 /** "Trang chủ › Điện thoại › iPhone": mục cuối là trang đang xem (không bấm được) */
 export function Breadcrumb({ items, className }: { items: Crumb[]; className?: string }) {
   return (
-    <nav aria-label="Vị trí trang" className={cn('text-sm', className)}>
-      <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-ink/60">
-        <li>
-          <Link to="/" className="inline-flex items-center gap-1.5 transition hover:text-navy">
-            <House className="size-4" />
+    <nav aria-label="Vị trí trang" className={cn('py-3.5 text-[13px]', className)}>
+      <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-ink/55">
+        <li className="flex">
+          <Link to="/" className="inline-flex items-center gap-1 transition hover:text-navy">
+            <IconHome className="size-4 [stroke-width:1.75]" />
             Trang chủ
           </Link>
         </li>
         {items.map((c, i) => (
           <li key={`${c.label}-${i}`} className="flex items-center gap-1.5">
-            <ChevronRight className="size-3.5 text-ink/35" aria-hidden />
+            <IconChevronRight className="size-3.5 text-ink/30" aria-hidden />
             {c.to && i < items.length - 1 ? (
               <Link to={c.to} className="transition hover:text-navy">
                 {c.label}
               </Link>
             ) : (
-              <span aria-current="page" className="font-medium text-ink">
+              <span aria-current="page" className="font-medium text-charcoal">
                 {c.label}
               </span>
             )}
@@ -67,15 +66,15 @@ export function Breadcrumb({ items, className }: { items: Crumb[]; className?: s
   );
 }
 
-// ----- Nút dạng viên thuốc (chip) -----
+// ----- Chip lọc -----
 
 export function chipClass(active: boolean, size: 'md' | 'sm' = 'md') {
   return cn(
-    'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne focus-visible:ring-offset-1',
-    size === 'md' ? 'h-11 px-5 text-sm sm:px-6 sm:text-[15px]' : 'h-8 px-3.5 text-[13px]',
+    'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne focus-visible:ring-offset-1',
+    size === 'md' ? 'h-10 px-4 text-sm' : 'h-8 px-3 text-[13px]',
     active
-      ? 'border-navy bg-navy text-white shadow-sm shadow-navy/20'
-      : 'border-transparent bg-card text-ink shadow-[0_1px_2px_rgba(15,26,61,0.06)] hover:border-champagne hover:text-navy',
+      ? 'border-navy bg-champagne-50 text-navy'
+      : 'border-ink/15 bg-card text-ink/75 hover:border-navy/40 hover:text-navy',
   );
 }
 
@@ -90,7 +89,7 @@ export function ChipRow({
   return (
     <div
       className={cn(
-        '-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden',
+        '-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden',
         className,
       )}
     >
@@ -127,7 +126,7 @@ function MoneyInput({
       <span className="mb-1 block text-xs font-medium text-ink/60">{label}</span>
       <span
         className={cn(
-          'flex h-10 items-center rounded-lg border bg-white px-3 text-sm focus-within:border-champagne focus-within:ring-2 focus-within:ring-champagne/30',
+          'flex h-10 items-center rounded-lg border bg-card px-3 text-sm focus-within:border-navy/50',
           invalid ? 'border-destructive' : 'border-input',
         )}
       >
@@ -182,14 +181,14 @@ function CustomPrice({
     >
       <Popover.Trigger className={chipClass(active, 'sm')}>
         {label}
-        <ChevronDown className="size-3.5 opacity-70" />
+        <IconChevronDown className="size-3.5 opacity-70 [stroke-width:2]" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
           align="start"
           sideOffset={8}
           collisionPadding={16}
-          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-ivory-200 bg-card p-4 shadow-xl shadow-navy/10 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-xl bg-card p-4 shadow-[0_20px_50px_-24px_rgba(15,26,61,0.35)] ring-1 ring-ink/[0.06] data-[state=open]:animate-in data-[state=open]:fade-in-0"
         >
           <form
             noValidate
@@ -203,7 +202,7 @@ function CustomPrice({
               setOpen(false);
             }}
           >
-            <div className="text-sm font-semibold text-navy">Chọn khoảng giá</div>
+            <div className="text-sm font-bold text-charcoal">Chọn khoảng giá</div>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <MoneyInput
                 label="Từ"
@@ -247,6 +246,10 @@ function CustomPrice({
 
 // ----- Thanh công cụ: sắp xếp + mức giá -----
 
+const FILTER_LABEL = 'hidden w-16 shrink-0 text-[13px] text-ink/55 md:block';
+const FILTER_ROW =
+  '-mx-4 flex flex-1 items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden';
+
 export function CatalogToolbar({
   sort,
   sorts,
@@ -280,15 +283,12 @@ export function CatalogToolbar({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-ivory-200 bg-card p-3 shadow-[0_1px_2px_rgba(15,26,61,0.04)] sm:p-4',
+        'rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] divide-y divide-ink/[0.06] px-4',
         className,
       )}
     >
-      <div className="flex items-center gap-3">
-        <span className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-ink/70 md:inline-flex">
-          <ArrowDownUp className="size-4 text-champagne-600" />
-          Sắp xếp
-        </span>
+      <div className="flex items-center gap-3 py-3">
+        <span className={FILTER_LABEL}>Sắp xếp</span>
         <div className="hidden flex-wrap gap-2 md:flex" role="radiogroup" aria-label="Sắp xếp">
           {sorts.map((s) => (
             <button
@@ -297,12 +297,7 @@ export function CatalogToolbar({
               role="radio"
               aria-checked={s === sort}
               onClick={() => onSort(s)}
-              className={cn(
-                'h-8 rounded-lg border px-3.5 text-[13px] font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-champagne',
-                s === sort
-                  ? 'border-navy bg-navy text-white'
-                  : 'border-ivory-200 bg-ivory/60 text-ink/80 hover:border-champagne hover:text-navy',
-              )}
+              className={chipClass(s === sort, 'sm')}
             >
               {SORT_LABELS[s]}
             </button>
@@ -310,12 +305,8 @@ export function CatalogToolbar({
         </div>
         <div className="md:hidden">
           <Select value={sort} onValueChange={(v) => onSort(v as ProductSort)}>
-            <SelectTrigger
-              size="sm"
-              className="h-9 rounded-lg bg-ivory/60 pl-3"
-              aria-label="Sắp xếp"
-            >
-              <ArrowDownUp className="size-3.5 text-champagne-600" />
+            <SelectTrigger size="sm" className="h-9 rounded-lg pl-3" aria-label="Sắp xếp">
+              <IconArrowsSort className="size-3.5 text-navy [stroke-width:2]" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -327,21 +318,19 @@ export function CatalogToolbar({
             </SelectContent>
           </Select>
         </div>
-        <span className="ml-auto shrink-0 text-sm text-ink/60" aria-live="polite">
+        <span className="ml-auto shrink-0 text-[13px] text-ink/55" aria-live="polite">
           {total !== undefined && (
             <>
-              <b className="font-semibold text-navy">{total.toLocaleString('vi-VN')}</b> sản phẩm
+              <b className="font-semibold text-charcoal">{total.toLocaleString('vi-VN')}</b> sản
+              phẩm
             </>
           )}
         </span>
       </div>
 
-      <div className="mt-3 flex items-center gap-3 border-t border-dashed border-ivory-200 pt-3">
-        <span className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-ink/70 md:inline-flex">
-          <Wallet className="size-4 text-champagne-600" />
-          Mức giá
-        </span>
-        <div className="-mx-3 flex flex-1 items-center gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+      <div className="flex items-center gap-3 py-3">
+        <span className={FILTER_LABEL}>Mức giá</span>
+        <div className={FILTER_ROW}>
           <button type="button" className={chipClass(!hasPrice, 'sm')} onClick={() => onPrice()}>
             Tất cả
           </button>
@@ -366,9 +355,9 @@ export function CatalogToolbar({
             <button
               type="button"
               onClick={() => onPrice()}
-              className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-medium text-champagne-600 transition hover:text-navy"
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-medium text-navy transition hover:text-navy-900"
             >
-              <X className="size-3.5" />
+              <IconX className="size-3.5 [stroke-width:2]" />
               Bỏ lọc giá
             </button>
           )}
@@ -395,12 +384,9 @@ function RatingFilterRow({
   onChange: (min?: number) => void;
 }) {
   return (
-    <div className="mt-3 flex items-center gap-3 border-t border-dashed border-ivory-200 pt-3">
-      <span className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-ink/70 md:inline-flex">
-        <Star className="size-4 text-champagne-600" />
-        Đánh giá
-      </span>
-      <div className="-mx-3 flex flex-1 items-center gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+    <div className="flex items-center gap-3 py-3">
+      <span className={FILTER_LABEL}>Đánh giá</span>
+      <div className={FILTER_ROW}>
         <button
           type="button"
           className={chipClass(value === undefined, 'sm')}
@@ -416,14 +402,7 @@ function RatingFilterRow({
             className={chipClass(value === r.value, 'sm')}
             onClick={() => onChange(value === r.value ? undefined : r.value)}
           >
-            <Star
-              className={cn(
-                'size-3.5',
-                value === r.value
-                  ? 'fill-champagne text-champagne'
-                  : 'fill-champagne/80 text-champagne',
-              )}
-            />
+            <IconStarFilled className="size-3.5 text-champagne" />
             {r.label}
           </button>
         ))}
@@ -459,13 +438,15 @@ export function ProductResults({
   }
   if (isError) {
     return (
-      <div className="rounded-2xl border border-ivory-200 bg-card">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <LoadError message={error.message} onRetry={() => void refetch()} />
       </div>
     );
   }
   if (data.items.length === 0) {
-    return <div className="rounded-2xl border border-ivory-200 bg-card">{empty}</div>;
+    return (
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">{empty}</div>
+    );
   }
   return (
     <div>
@@ -501,7 +482,7 @@ export function NoProducts({
 }) {
   return (
     <EmptyState
-      icon={filtered ? SearchX : PackageSearch}
+      icon={filtered ? IconSearchOff : IconPackages}
       title={title ?? (filtered ? 'Không có sản phẩm hợp bộ lọc' : 'Chưa có sản phẩm')}
       text={
         text ??
@@ -524,15 +505,15 @@ export function NoProducts({
 export function NotFoundBlock({
   title,
   text,
-  icon = SearchX,
+  icon = IconSearchOff,
 }: {
   title: string;
   text: string;
-  icon?: typeof SearchX;
+  icon?: typeof IconSearchOff;
 }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
-      <div className="rounded-3xl border border-ivory-200 bg-card">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <EmptyState
           icon={icon}
           title={title}

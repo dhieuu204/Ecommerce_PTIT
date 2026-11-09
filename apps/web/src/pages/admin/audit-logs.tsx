@@ -1,13 +1,13 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
 import {
-  AlertTriangle,
-  ChevronDown,
-  History,
-  Loader2,
-  RotateCcw,
-  UserRound,
-  X,
-} from 'lucide-react';
+  IconAlertTriangle,
+  IconChevronDown,
+  IconHistory,
+  IconLoader2,
+  IconRefresh,
+  IconUser,
+  IconX,
+} from '@tabler/icons-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { EmptyState, LoadError } from '@/components/console/empty-state';
@@ -210,7 +210,7 @@ export function AuditLogsPage() {
         description="Ai đã làm gì, lúc nào, với đối tượng nào và vì sao. Gộp từ nhật ký của các service, mới nhất trước."
       />
 
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="grid grid-cols-2 gap-3 border-b p-3 md:p-4 lg:grid-cols-[auto_auto_1fr_auto] lg:items-end">
           <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground">Từ ngày</span>
@@ -253,21 +253,21 @@ export function AuditLogsPage() {
               className="col-span-2 justify-self-start text-muted-foreground lg:col-span-1"
               onClick={() => setParams(new URLSearchParams(), { replace: true })}
             >
-              <RotateCcw /> Bỏ lọc
+              <IconRefresh /> Bỏ lọc
             </Button>
           )}
           {(actorId || rangeError) && (
             <div className="col-span-2 flex flex-wrap items-center gap-2 lg:col-span-4">
               {actorId && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-champagne-50 py-1 pr-1.5 pl-3 text-xs text-navy ring-1 ring-champagne/40">
-                  <UserRound className="size-3.5" /> Người làm: {actorName || actorId.slice(0, 8)}
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-champagne-50 py-1 pr-1.5 pl-3 text-xs text-navy ring-1 ring-champagne/40">
+                  <IconUser className="size-3.5" /> Người làm: {actorName || actorId.slice(0, 8)}
                   <button
                     type="button"
                     aria-label="Bỏ lọc người làm"
                     className="rounded-full p-0.5 hover:bg-champagne/30"
                     onClick={() => update({ actor: null, actorName: null })}
                   >
-                    <X className="size-3.5" />
+                    <IconX className="size-3.5" />
                   </button>
                 </span>
               )}
@@ -278,7 +278,7 @@ export function AuditLogsPage() {
 
         {failedSources.length > 0 && !allFailed && (
           <div className="flex items-start gap-2 border-b bg-amber-50 px-4 py-2.5 text-xs text-amber-900 md:px-5">
-            <AlertTriangle className="mt-px size-3.5 shrink-0 text-amber-600" />
+            <IconAlertTriangle className="mt-px size-3.5 shrink-0 text-amber-600" />
             <span>
               Chưa tải được nhật ký của{' '}
               {failedSources.map((s, i) => (
@@ -314,7 +314,7 @@ export function AuditLogsPage() {
           />
         ) : merged.visible.length === 0 ? (
           <EmptyState
-            icon={History}
+            icon={IconHistory}
             title={filtered ? 'Không có thao tác khớp bộ lọc' : 'Chưa có thao tác nào'}
             text={
               filtered
@@ -326,12 +326,12 @@ export function AuditLogsPage() {
           <>
             <table className="hidden w-full text-sm md:table">
               <thead>
-                <tr className="bg-ivory text-left text-xs tracking-wide text-muted-foreground uppercase">
-                  <th className="px-5 py-3 font-medium">Thời gian</th>
-                  <th className="px-3 py-3 font-medium">Người làm</th>
-                  <th className="px-3 py-3 font-medium">Hành động</th>
-                  <th className="px-3 py-3 font-medium">Đối tượng</th>
-                  <th className="px-3 py-3 font-medium">Lý do</th>
+                <tr className="border-b border-ink/[0.06] text-left text-[13px] text-ink/55">
+                  <th className="px-5 py-3 font-normal">Thời gian</th>
+                  <th className="px-3 py-3 font-normal">Người làm</th>
+                  <th className="px-3 py-3 font-normal">Hành động</th>
+                  <th className="px-3 py-3 font-normal">Đối tượng</th>
+                  <th className="px-3 py-3 font-normal">Lý do</th>
                   <th className="w-10" />
                 </tr>
               </thead>
@@ -364,11 +364,8 @@ export function AuditLogsPage() {
                           <span className="line-clamp-2 text-ink">{r.reason ?? '—'}</span>
                         </td>
                         <td className="pr-4">
-                          <ChevronDown
-                            className={cn(
-                              'size-4 text-champagne-600 transition',
-                              expanded && 'rotate-180',
-                            )}
+                          <IconChevronDown
+                            className={cn('size-4 text-navy transition', expanded && 'rotate-180')}
                           />
                         </td>
                       </tr>
@@ -411,7 +408,7 @@ export function AuditLogsPage() {
                           </div>
                         )}
                       </div>
-                      <ChevronDown
+                      <IconChevronDown
                         className={cn(
                           'mt-1 size-4 shrink-0 text-champagne-600 transition',
                           expanded && 'rotate-180',
@@ -433,11 +430,11 @@ export function AuditLogsPage() {
               {query.hasNextPage ? (
                 <Button
                   variant="outline"
-                  className="rounded-full"
+                  className="rounded-lg"
                   disabled={query.isFetchingNextPage}
                   onClick={() => void query.fetchNextPage()}
                 >
-                  {query.isFetchingNextPage && <Loader2 className="animate-spin" />}
+                  {query.isFetchingNextPage && <IconLoader2 className="animate-spin" />}
                   Xem thêm
                 </Button>
               ) : (

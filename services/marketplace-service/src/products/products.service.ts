@@ -180,7 +180,11 @@ export class ProductsService {
       where: { id: { in: ids } },
       include: {
         variants: { where: { active: true } },
-        images: { where: { option1Value: null }, orderBy: { sort: 'asc' }, take: 1 },
+        images: {
+          // Ưu tiên ảnh chung; sản phẩm chỉ có ảnh theo phân loại thì lấy ảnh đầu tiên của phân loại
+          orderBy: [{ option1Value: { sort: 'asc', nulls: 'first' } }, { sort: 'asc' }],
+          take: 1,
+        },
         category: { select: { name: true } },
       },
     });

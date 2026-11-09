@@ -1,5 +1,5 @@
+import { IconChartLine, IconWallet } from '@tabler/icons-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ChartNoAxesCombined, Wallet } from 'lucide-react';
 import { LoadError } from '@/components/console/empty-state';
 import { PageHeader } from '@/components/layout/page-header';
 import { AdminFinanceView } from '@/components/reports/finance-view';
@@ -49,9 +49,9 @@ export function AdminReportsPage() {
       />
       <ReportTabs
         tabs={[
-          { value: 'van-hanh' as const, label: 'Vận hành', icon: ChartNoAxesCombined },
+          { value: 'van-hanh' as const, label: 'Vận hành', icon: IconChartLine },
           ...(canFinance
-            ? [{ value: 'tai-chinh' as const, label: 'Tài chính', icon: Wallet }]
+            ? [{ value: 'tai-chinh' as const, label: 'Tài chính', icon: IconWallet }]
             : []),
         ]}
         value={r.tab}
@@ -70,7 +70,7 @@ export function AdminReportsPage() {
         <ReportSkeleton tiles={r.tab === 'van-hanh' ? 4 : 8} />
       ) : q.isError ? (
         <LoadError
-          className="rounded-2xl border bg-card"
+          className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]"
           message={q.error.message}
           onRetry={() => q.refetch()}
         />

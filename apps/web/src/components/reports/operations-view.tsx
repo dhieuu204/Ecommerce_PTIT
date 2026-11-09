@@ -1,12 +1,12 @@
 import {
-  BadgeCheck,
-  Ban,
-  CircleDollarSign,
-  ReceiptText,
-  ShoppingBag,
-  Store,
-  Undo2,
-} from 'lucide-react';
+  IconArrowBackUp,
+  IconBan,
+  IconBuildingStore,
+  IconCoin,
+  IconReceipt,
+  IconRosetteDiscountCheck,
+  IconShoppingBag,
+} from '@tabler/icons-react';
 import { formatMoney } from '@/lib/format';
 import type {
   AdminOperationsReport,
@@ -84,7 +84,7 @@ export function OperationsView({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
           highlight
-          icon={CircleDollarSign}
+          icon={IconCoin}
           label="Giá trị đặt hàng"
           value={formatMoney(s.orderValue)}
           hint={
@@ -94,19 +94,19 @@ export function OperationsView({
           }
         />
         <StatTile
-          icon={ShoppingBag}
+          icon={IconShoppingBag}
           label="Số đơn"
           value={formatCount(s.orderCount)}
           hint={adminData ? `Từ ${formatCount(adminData.shopCount)} shop` : 'Đơn đã đặt'}
         />
         <StatTile
-          icon={BadgeCheck}
+          icon={IconRosetteDiscountCheck}
           label="Đơn hoàn tất"
           value={formatCount(s.completedCount)}
           hint={`Đã giao ${formatCount(s.deliveredCount)} đơn`}
         />
         <StatTile
-          icon={ReceiptText}
+          icon={IconReceipt}
           label="Doanh số"
           value={formatMoney(s.revenue)}
           hint="Của đơn hoàn tất, sau giảm giá và trả hàng"
@@ -114,20 +114,20 @@ export function OperationsView({
       </div>
       <div className={adminData ? 'grid gap-3 md:grid-cols-3' : 'grid gap-3 md:grid-cols-2'}>
         <RateTile
-          icon={Ban}
+          icon={IconBan}
           label="Tỉ lệ hủy"
           rate={s.cancelRate}
           hint={`${formatCount(s.cancelledCount)} / ${formatCount(s.orderCount)} đơn bị hủy`}
         />
         <RateTile
-          icon={Undo2}
+          icon={IconArrowBackUp}
           label="Tỉ lệ trả hàng"
           rate={s.returnRate}
           hint={`${formatCount(s.returnedCount)} / ${formatCount(s.deliveredCount)} đơn đã giao được hoàn tiền trả hàng`}
         />
         {adminData && (
           <StatTile
-            icon={Store}
+            icon={IconBuildingStore}
             label="Shop có đơn"
             value={formatCount(adminData.shopCount)}
             hint="Số shop có ít nhất một đơn trong khoảng"

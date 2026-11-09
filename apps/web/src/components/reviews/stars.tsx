@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { IconStar } from '@tabler/icons-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -30,13 +30,13 @@ export function Stars({
         const fill = Math.max(0, Math.min(1, value - i));
         return (
           <span key={i} className={cn('relative inline-block size-3.5', starClassName)}>
-            <Star className="absolute inset-0 size-full fill-ivory-200 text-ivory-200" />
+            <IconStar className="absolute inset-0 size-full fill-ivory-200 text-ivory-200" />
             {fill > 0 && (
               <span
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${fill * 100}%` }}
               >
-                <Star className="aspect-square h-full w-auto max-w-none fill-champagne text-champagne" />
+                <IconStar className="aspect-square h-full w-auto max-w-none fill-champagne text-champagne" />
               </span>
             )}
           </span>
@@ -90,7 +90,7 @@ export function StarInput({
             }}
             className="rounded-md p-0.5 transition outline-none hover:scale-110 focus-visible:ring-2 focus-visible:ring-champagne disabled:opacity-50"
           >
-            <Star
+            <IconStar
               className={cn(
                 'size-8 transition',
                 n <= shown ? 'fill-champagne text-champagne' : 'fill-ivory-200 text-ivory-200',
@@ -122,7 +122,7 @@ export function RatingInline({
       className={cn('inline-flex items-center gap-1 whitespace-nowrap', className)}
       title={`${formatRating(avg)} sao từ ${count.toLocaleString('vi-VN')} đánh giá`}
     >
-      <Star className="size-3 fill-champagne text-champagne" />
+      <IconStar className="size-3 fill-champagne text-champagne" />
       <b className="font-semibold text-ink">{formatRating(avg)}</b>
       <span className="text-ink/45">({formatCount(count)})</span>
     </span>

@@ -1,5 +1,11 @@
+import {
+  IconAlertTriangle,
+  IconChevronRight,
+  IconReceipt,
+  IconSearch,
+  IconX,
+} from '@tabler/icons-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, ReceiptText, Search, TriangleAlert, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -79,7 +85,7 @@ export function AdminOrdersPage() {
         title="Đơn hàng"
         description="Tra cứu đơn của mọi người mua. Hủy đơn khi được người mua/shop nhờ (bắt buộc ghi lý do)."
       />
-      <div className="rounded-2xl border bg-card shadow-sm shadow-navy/[0.03]">
+      <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <div className="flex flex-col gap-3 border-b px-4 pt-2 md:flex-row md:items-end md:justify-between md:px-5">
           <nav className="-mb-px flex gap-1 overflow-x-auto">
             {TABS.map((t) => (
@@ -91,7 +97,7 @@ export function AdminOrdersPage() {
                   'shrink-0 border-b-2 px-3 py-3 text-sm whitespace-nowrap transition',
                   tab === t.value
                     ? 'border-navy font-semibold text-navy'
-                    : 'border-transparent text-muted-foreground hover:text-ink',
+                    : 'border-transparent text-ink/60 hover:text-navy',
                 )}
               >
                 {t.label}
@@ -99,12 +105,12 @@ export function AdminOrdersPage() {
             ))}
           </nav>
           <div className="relative pb-3 md:w-72 md:pb-2.5">
-            <Search className="pointer-events-none absolute top-[18px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="pointer-events-none absolute top-[18px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Mã đơn tổng hoặc đơn con…"
-              className="h-9 rounded-full bg-white pr-8 pl-9"
+              className="h-9 rounded-lg bg-white pr-8 pl-9"
             />
             {search && (
               <button
@@ -113,7 +119,7 @@ export function AdminOrdersPage() {
                 onClick={() => setSearch('')}
                 aria-label="Xóa tìm kiếm"
               >
-                <X className="size-4" />
+                <IconX className="size-4" />
               </button>
             )}
           </div>
@@ -127,7 +133,7 @@ export function AdminOrdersPage() {
         ) : list.isError ? (
           <LoadError message={list.error.message} onRetry={() => list.refetch()} />
         ) : list.data.items.length === 0 ? (
-          <EmptyState icon={ReceiptText} title="Không có đơn nào" />
+          <EmptyState icon={IconReceipt} title="Không có đơn nào" />
         ) : (
           <>
             <div className="divide-y">
@@ -138,7 +144,7 @@ export function AdminOrdersPage() {
                   className="grid gap-2 px-4 py-4 transition hover:bg-ivory/50 md:grid-cols-[minmax(0,1fr)_9rem_minmax(0,14rem)_1.5rem] md:items-center md:gap-4 md:px-5"
                 >
                   <div className="min-w-0 text-sm">
-                    <div className="font-semibold text-navy">{o.code}</div>
+                    <div className="font-bold tracking-tight text-charcoal">{o.code}</div>
                     <div className="truncate text-muted-foreground">
                       {o.buyer?.name} · {formatDateTime(o.createdAt)}
                     </div>
@@ -158,7 +164,7 @@ export function AdminOrdersPage() {
                       />
                     ))}
                   </div>
-                  <ChevronRight className="hidden size-4 text-ink/30 md:block" />
+                  <IconChevronRight className="hidden size-4 text-ink/30 md:block" />
                 </Link>
               ))}
             </div>
@@ -252,9 +258,12 @@ export function AdminOrderDetailPage() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           {o.shopOrders.map((so) => (
-            <section key={so.id} className="rounded-2xl border bg-card px-4 py-4 md:px-5">
+            <section
+              key={so.id}
+              className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5"
+            >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="font-semibold text-navy">
+                <div className="font-bold tracking-tight text-charcoal">
                   {so.shop.name}{' '}
                   <span className="text-xs font-normal text-muted-foreground">{so.code}</span>
                 </div>
@@ -275,13 +284,13 @@ export function AdminOrderDetailPage() {
               )}
               {so.status === 'INCIDENT' && (
                 <div className="mt-2 flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-900 sm:flex-row sm:items-center">
-                  <TriangleAlert className="hidden size-5 shrink-0 sm:block" />
+                  <IconAlertTriangle className="hidden size-5 shrink-0 sm:block" />
                   <span className="min-w-0 flex-1">
-                    GHN báo kiện hàng thất lạc / hư hỏng. Xác minh với GHN rồi xác nhận: người mua
-                    trả trước được hoàn tiền, seller được đền tiền hàng.
+                    GHN báo kiện hàng thất lạc / hư hỏng. IconXác minh với GHN rồi xác nhận: người
+                    mua trả trước được hoàn tiền, seller được đền tiền hàng.
                   </span>
                   <Button size="sm" onClick={() => setIncidentTarget(so)}>
-                    Xác nhận sự cố
+                    IconXác nhận sự cố
                   </Button>
                 </div>
               )}
@@ -300,7 +309,7 @@ export function AdminOrderDetailPage() {
                     {formatMoney(so.returnRequest.refundAmount)}
                   </span>
                   <ReturnStatusBadge status={so.returnRequest.status} />
-                  <ChevronRight className="size-4 opacity-50" />
+                  <IconChevronRight className="size-4 opacity-50" />
                 </Link>
               )}
               {so.shipment && <ShipmentPanel shipment={so.shipment} forSeller className="mt-3" />}
@@ -328,14 +337,14 @@ export function AdminOrderDetailPage() {
           ))}
         </div>
         <div className="space-y-4">
-          <section className="rounded-2xl border bg-card px-4 py-4 text-sm md:px-5">
-            <div className="mb-1 font-semibold text-navy">Người nhận</div>
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 text-sm md:px-5">
+            <div className="mb-1 font-bold tracking-tight text-charcoal">Người nhận</div>
             <div>
               {o.receiver.name} · {o.receiver.phone}
             </div>
             <div className="text-muted-foreground">{o.receiver.address}</div>
           </section>
-          <section className="rounded-2xl border bg-card px-4 py-4 md:px-5">
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 md:px-5">
             <MoneyRow label="Tiền hàng" value={o.subtotal} />
             <MoneyRow label="Phí vận chuyển" value={o.shippingFee} />
             <MoneyRow label="Voucher shop" value={o.shopDiscount} minus />
@@ -348,8 +357,10 @@ export function AdminOrderDetailPage() {
             <div className="my-2 border-t" />
             <MoneyRow label="Tổng" value={o.total} strong />
           </section>
-          <section className="rounded-2xl border bg-card px-4 py-4 text-sm md:px-5">
-            <div className="mb-2 font-semibold text-navy">Thanh toán và hoàn tiền</div>
+          <section className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)] px-4 py-4 text-sm md:px-5">
+            <div className="mb-2 font-bold tracking-tight text-charcoal">
+              Thanh toán và hoàn tiền
+            </div>
             {payments.isPending ? (
               <Skeleton className="h-20 rounded-xl" />
             ) : payments.isError ? (

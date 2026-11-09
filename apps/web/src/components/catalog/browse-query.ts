@@ -21,14 +21,21 @@ export interface ProductSearchParams {
   pageSize?: number;
 }
 
-/** Tìm và lọc hàng đang bán (GET /products). Đổi trang/bộ lọc vẫn giữ kết quả cũ trong lúc tải. */
-export function useProductSearch(params: ProductSearchParams, enabled = true) {
-  return useQuery({
+/** Khóa và cách tải của GET /products, dùng chung cho hook và tải sẵn */
+export function productSearchOptions(params: ProductSearchParams) {
+  return {
     queryKey: ['products', params],
     queryFn: () =>
       api<Page<ProductCardData>>(`${API.market}/products`, {
         query: { pageSize: BROWSE_PAGE_SIZE, ...params },
       }),
+  };
+}
+
+/** Tìm và lọc hàng đang bán (GET /products). Đổi trang/bộ lọc vẫn giữ kết quả cũ trong lúc tải. */
+export function useProductSearch(params: ProductSearchParams, enabled = true) {
+  return useQuery({
+    ...productSearchOptions(params),
     placeholderData: keepPreviousData,
     enabled,
   });

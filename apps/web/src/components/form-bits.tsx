@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { IconEye, IconEyeOff, IconLoader2 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -11,10 +11,10 @@ import { cn } from '@/lib/utils';
 
 /** Ô nhập chuẩn (khớp ô chọn trong LocationFields) */
 export const inputClass =
-  'h-10 w-full min-w-0 rounded-lg border border-input bg-white px-3 text-sm text-ink outline-none transition placeholder:text-muted-foreground/80 focus:border-champagne focus:ring-[3px] focus:ring-champagne/30 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:focus:ring-destructive/20';
+  'h-10 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-sm text-charcoal outline-none transition placeholder:text-ink/40 focus:border-navy/50 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:focus:ring-destructive/20';
 
-/** Ô nhập bo tròn, cao hơn: dùng ở các trang đăng nhập/đăng ký */
-export const pillInputClass = cn(inputClass, 'h-12 rounded-full px-5 text-[15px]');
+/** Ô nhập cao hơn: dùng ở các trang đăng nhập/đăng ký */
+export const pillInputClass = cn(inputClass, 'h-12 rounded-lg px-4 text-[15px]');
 
 interface FieldProps {
   id: string;
@@ -32,7 +32,7 @@ export function Field({ id, label, error, hint, aside, className, children }: Fi
   return (
     <div className={cn('space-y-1.5', className)}>
       <div className="flex items-baseline justify-between gap-3">
-        <Label htmlFor={id} className="text-ink">
+        <Label htmlFor={id} className="text-charcoal">
           {label}
         </Label>
         {aside && <div className="text-xs text-muted-foreground">{aside}</div>}
@@ -82,13 +82,17 @@ export function PasswordInput({ className, pill, ...props }: PasswordInputProps)
         type="button"
         onClick={() => setShow((v) => !v)}
         className={cn(
-          'absolute top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-ivory-200 hover:text-navy',
+          'absolute top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink/45 transition hover:text-navy',
           pill ? 'right-3' : 'right-1.5',
         )}
         aria-label={show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
         tabIndex={-1}
       >
-        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        {show ? (
+          <IconEyeOff className="size-[1.125rem]" />
+        ) : (
+          <IconEye className="size-[1.125rem]" />
+        )}
       </button>
     </div>
   );
@@ -107,13 +111,13 @@ export function SubmitButton({
       type="submit"
       disabled={pending || props.disabled}
       className={cn(
-        'bg-navy font-semibold text-white shadow-sm shadow-navy/20 hover:bg-navy-800',
-        pill ? 'h-12 w-full rounded-full text-[15px]' : 'h-10 rounded-lg px-6',
+        'bg-gradient-to-r from-header-from to-header-to font-bold text-white shadow-[0_12px_24px_-12px_rgba(238,77,45,0.7)] hover:brightness-105',
+        pill ? 'h-12 w-full rounded-lg text-[15px]' : 'h-10 rounded-lg px-6',
         className,
       )}
       {...props}
     >
-      {pending && <Loader2 className="size-4 animate-spin" />}
+      {pending && <IconLoader2 className="size-4 animate-spin" />}
       {children}
     </Button>
   );
@@ -138,7 +142,7 @@ const STRENGTH: Record<number, { label: string; bar: string }> = [
   { label: 'Chưa đủ 8 ký tự', bar: 'bg-destructive' },
   { label: 'Dùng được', bar: 'bg-amber-500' },
   { label: 'Khá mạnh', bar: 'bg-champagne' },
-  { label: 'Mạnh', bar: 'bg-emerald-600' },
+  { label: 'Mạnh', bar: 'bg-ship' },
 ];
 
 /** Thanh 4 vạch gợi ý độ mạnh mật khẩu */
@@ -151,7 +155,7 @@ export function PasswordStrength({ password }: { password: string }) {
         {[1, 2, 3, 4].map((i) => (
           <span
             key={i}
-            className={cn('h-1 flex-1 rounded-full bg-ivory-200 transition', i <= s && level.bar)}
+            className={cn('h-1 flex-1 rounded-full bg-ink/10 transition', i <= s && level.bar)}
           />
         ))}
       </div>

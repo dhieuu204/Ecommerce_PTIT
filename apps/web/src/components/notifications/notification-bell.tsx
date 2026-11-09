@@ -1,5 +1,4 @@
-import { IconBell } from '@tabler/icons-react';
-import { CheckCheck, Loader2 } from 'lucide-react';
+import { IconBell, IconChecks, IconLoader2 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { CountBadge } from '@/components/count-badge';
@@ -79,7 +78,7 @@ export function NotificationBell({ tone }: { tone: 'shop' | 'light' | 'dark' }) 
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[min(24rem,calc(100vw-1.5rem))] p-0">
         <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
-          <span className="font-semibold text-navy">Thông báo</span>
+          <span className="font-bold text-charcoal">Thông báo</span>
           <button
             type="button"
             disabled={!count || all.isPending}
@@ -87,17 +86,17 @@ export function NotificationBell({ tone }: { tone: 'shop' | 'light' | 'dark' }) 
             className="flex items-center gap-1 text-xs font-medium text-champagne-600 transition hover:text-navy disabled:pointer-events-none disabled:opacity-40"
           >
             {all.isPending ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <IconLoader2 className="size-3.5 animate-spin" />
             ) : (
-              <CheckCheck className="size-3.5" />
+              <IconChecks className="size-3.5" />
             )}
             Đánh dấu đã đọc tất cả
           </button>
         </div>
-        <div className="max-h-[60vh] divide-y overflow-y-auto">
+        <div className="max-h-[60vh] divide-y divide-ink/[0.06] overflow-y-auto">
           {list.isPending ? (
             <div className="flex justify-center py-10 text-ink/40">
-              <Loader2 className="size-5 animate-spin" />
+              <IconLoader2 className="size-5 animate-spin" />
             </div>
           ) : list.isError ? (
             <p className="px-4 py-8 text-center text-sm text-ink/60">{list.error.message}</p>

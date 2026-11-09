@@ -439,7 +439,7 @@ P4 (giao hàng và đối soát): ORD-03 (bàn giao), SHIP-02..05, COD-01, COD-0
 ### Luồng P4 dùng các API trên
 
 1. Đơn đã qua kiểm tra (và đã trả nếu trả trước) ở "Chờ shop xác nhận". Seller bấm **Xác nhận và giao cho GHN** → vận đơn được tạo (MÔ PHỎNG khi chưa có token).
-2. Admin `SUPPORT` mở **GHN mô phỏng**, bấm "Đã lấy hàng" → đơn "Đang giao"; bấm "Đã giao" → đơn "Đã giao", người mua thấy nút "Đã nhận hàng". Đơn COD lúc này vào ngăn đang giữ của seller.
+2. Admin `SUPPORT` gọi API `/admin/carrier-simulator` (web đã bỏ trang bấm tay) với mốc "Đã lấy hàng" → đơn "Đang giao"; bấm "Đã giao" → đơn "Đã giao", người mua thấy nút "Đã nhận hàng". Đơn COD lúc này vào ngăn đang giữ của seller.
 3. Người mua bấm "Đã nhận hàng" (hoặc đủ 7 ngày) → đơn hoàn tất → tiền trả trước chuyển sang khả dụng; tiền COD chờ đối soát.
 4. Admin `FINANCE` tải file đối soát COD (hoặc file MÔ PHỎNG) → các dòng khớp làm tiền COD thành khả dụng; dòng lệch được ghi chú xử lý.
 5. Nhánh lỗi: bấm "Giao thất bại" đủ 3 lần → hoàn kiện, người mua trả trước được hoàn tiền hàng; "Đã hoàn" → seller xác nhận nhận kiện, chọn nhập lại kho. "Thất lạc" → admin xác nhận sự cố, người mua được hoàn, seller được đền.
@@ -541,7 +541,7 @@ P5 (hậu mãi và rút tiền): RET-01..04, DIS-01, DIS-02, REF-02, VCH-03 (ph�
 ### Luồng P5 dùng các API trên
 
 1. Đơn con đã giao (P4). Người mua mở đơn, bấm **Trả hàng/Hoàn tiền**, chọn món và số lượng, lý do, mô tả, tải ảnh → marketplace tạo yêu cầu "Chờ shop trả lời", phát `return.requested` → payment-service giữ tiền đơn đó.
-2. Seller **chấp nhận** → hệ thống tạo vận đơn trả (MÔ PHỎNG). Admin `SUPPORT` mở **GHN mô phỏng**, bấm "Đã lấy hàng" rồi "Đã giao" → yêu cầu "Shop đang kiểm hàng".
+2. Seller **chấp nhận** → hệ thống tạo vận đơn trả (MÔ PHỎNG). Admin `SUPPORT` gọi API `/admin/carrier-simulator` (web đã bỏ trang bấm tay) với mốc "Đã lấy hàng" rồi "Đã giao" → yêu cầu "Shop đang kiểm hàng".
 3. Seller **kiểm hàng đúng**, chọn dòng nhập lại kho → yêu cầu "Đang hoàn tiền", đơn con hoàn tất, phát `return.resolved` → payment-service hoàn phần tiền món trả qua VNPay (hoặc chờ hoàn tay với đơn COD), trừ tiền seller tương ứng, phí sàn tính lại, chuyển phần còn lại sang khả dụng → `refund.updated` → yêu cầu "Đã hoàn tiền".
 4. Nhánh tranh chấp: seller **từ chối** → người mua **khiếu nại** → admin `SUPPORT` mở **Tranh chấp**, xem lời và ảnh hai bên, quyết (chấp nhận trả hàng / hoàn toàn bộ / hoàn một phần / không hoàn) → marketplace áp quyết định.
 5. Seller có tiền khả dụng, bấm **Rút tiền** → tiền chuyển sang "đang khóa". Admin `FINANCE` (không phải chủ shop) **duyệt** ở trang Rút tiền → chuyển khoản ngoài hệ thống, nhập mã giao dịch + biên lai → "Đã chi", ngăn đang khóa giảm.

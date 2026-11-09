@@ -32,7 +32,6 @@ const GROUPS: AdminMenuGroup[] = [
       { to: '/quan-tri/don-hang', label: 'Đơn hàng', any: ['SUPPORT'] },
       { to: '/quan-tri/tra-hang', label: 'Trả hàng', any: ['SUPPORT'] },
       { to: '/quan-tri/tranh-chap', label: 'Tranh chấp', any: ['SUPPORT'] },
-      { to: '/quan-tri/ghn-mo-phong', label: 'GHN mô phỏng', any: ['SUPPORT'] },
     ],
   },
   {
