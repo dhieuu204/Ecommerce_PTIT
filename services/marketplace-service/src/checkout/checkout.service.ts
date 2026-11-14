@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { AppError, EventBus, SettingsService, type AuthUser } from '@san/nest-common';
 import { ORDER_PLACED } from '@san/shared';
-import { randomInt } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
+import { lineCommissions, pickClick } from '../affiliates/commission';
 import { AppConfig } from '../config';
+import { Notifier } from '../notifications/notifier.service';
 import { PrismaService } from '../prisma.service';
 import { MarketSetting } from '../settings';
 import { UserClient, type BuyerAddress } from '../clients/user.client';
@@ -152,6 +154,16 @@ export interface PlacedOrder {
   payBefore: Date | null;
 }
 
+/** CTV gắn với một shop trong đơn (P7) */
+interface AttributedAffiliate {
+  affiliateId: string;
+  clickId: string;
+  userId: string;
+  name: string;
+  /** Hoa hồng hiện tại của sản phẩm (phần vạn); null = không bật */
+  rates: Map<string, number | null>;
+}
+
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 const money = (n: number) => `${n.toLocaleString('vi-VN')}đ`;
@@ -170,6 +182,7 @@ export class CheckoutService {
     private readonly users: UserClient,
     private readonly shipping: ShippingFeeService,
     private readonly events: EventBus,
+    private readonly notifier: Notifier,
   ) {}
 
   async preview(
@@ -216,7 +229,11 @@ export class CheckoutService {
    * Đặt hàng từ một bản xem trước. Trả `created = false` khi phiên này đã đặt rồi (bấm 2 lần, mạng chập):
    * trả lại đúng đơn cũ, không tạo đơn mới.
    */
-  async place(buyer: AuthUser, checkoutId: string): Promise<PlacedOrder & { created: boolean }> {
+  async place(
+    buyer: AuthUser,
+    checkoutId: string,
+    affiliateClickIds: string[] = [],
+  ): Promise<PlacedOrder & { created: boolean }> {
     return this.prisma.$transaction(
       async (tx) => {
         // Mọi lần đặt hàng của cùng một buyer chạy lần lượt: bấm 2 lần không tạo 2 đơn,
@@ -269,7 +286,7 @@ export class CheckoutService {
           );
         }
 
-        const order = await this.createOrder(tx, buyer, checkout.id, fresh);
+        const order = await this.createOrder(tx, buyer, checkout.id, fresh, affiliateClickIds);
         await tx.cartItem.deleteMany({ where: { userId: buyer.id, id: { in: input.itemIds } } });
         await tx.checkout.update({ where: { id: checkout.id }, data: { orderId: order.orderId } });
         return { ...order, created: true };
@@ -285,6 +302,7 @@ export class CheckoutService {
     buyer: AuthUser,
     checkoutId: string,
     d: CheckoutData,
+    affiliateClickIds: string[],
   ): Promise<PlacedOrder> {
     const s = await this.settings.values([
       MarketSetting.paymentMinutes,
@@ -349,6 +367,7 @@ export class CheckoutService {
       select: { id: true, ownerId: true },
     });
     const owners = new Map(shopRows.map((r) => [r.id, r.ownerId]));
+    const affiliates = await this.attribute(tx, buyer.id, affiliateClickIds, d, owners, now);
 
     const order = await tx.order.create({
       data: {
@@ -387,6 +406,22 @@ export class CheckoutService {
 
     const placed = [];
     for (const [i, shop] of d.shops.entries()) {
+      // Mã dòng sinh trước để chia voucher shop theo dòng giống hệt lúc trả hàng (P5), rồi tính hoa hồng (P7)
+      const discounts = itemDiscounts(
+        shop.items.map((l) => l.lineTotal),
+        shop.shopDiscount + shop.platformDiscount,
+      );
+      const lines = shop.items.map((l, j) => ({ ...l, id: randomUUID(), discount: discounts[j]! }));
+      const aff = affiliates.get(shop.shop.id) ?? null;
+      const commissions = aff
+        ? lineCommissions(
+            lines.map((l) => ({ ...l, rate: aff.rates.get(l.productId) ?? null })),
+            shop.shopDiscount,
+          )
+        : [];
+      const commission = commissions.reduce((a, c) => a + c.commission, 0);
+      // Không có món nào bật hoa hồng thì không gắn CTV (CTV không thấy đơn 0đ)
+      const affiliate = aff && commission > 0 ? aff : null;
       const so = await tx.shopOrder.create({
         data: {
           code: `${code}-${i + 1}`,
@@ -402,6 +437,9 @@ export class CheckoutService {
           shippingFeeSource: shop.shippingFeeSource,
           total: shop.total,
           codAmount: cod ? shop.total : 0,
+          affiliateId: affiliate?.affiliateId ?? null,
+          affiliateClickId: affiliate?.clickId ?? null,
+          commission: affiliate ? commission : 0,
         },
       });
       if (cod) {
@@ -426,12 +464,9 @@ export class CheckoutService {
             WHERE id = ${l.productId}::uuid`;
         }
       }
-      const discounts = itemDiscounts(
-        shop.items.map((l) => l.lineTotal),
-        shop.shopDiscount + shop.platformDiscount,
-      );
       await tx.orderItem.createMany({
-        data: shop.items.map((l, j) => ({
+        data: lines.map((l, j) => ({
+          id: l.id,
           shopOrderId: so.id,
           productId: l.productId,
           variantId: l.variantId,
@@ -442,7 +477,9 @@ export class CheckoutService {
           originalPrice: l.originalPrice,
           quantity: l.quantity,
           weight: l.weight,
-          discount: discounts[j]!,
+          discount: l.discount,
+          commissionRate: affiliate ? commissions[j]!.rate : 0,
+          commission: affiliate ? commissions[j]!.commission : 0,
         })),
       });
       await tx.orderHistory.create({
@@ -483,7 +520,16 @@ export class CheckoutService {
           price: l.price,
           quantity: l.quantity,
         })),
+        affiliate: affiliate
+          ? {
+              affiliateId: affiliate.affiliateId,
+              userId: affiliate.userId,
+              name: affiliate.name,
+              commission,
+            }
+          : null,
       });
+      if (affiliate) await this.notifier.affiliateOrder(tx, affiliate.userId, so.code, commission);
     }
 
     await this.events.publish(tx, ORDER_PLACED, {
@@ -498,6 +544,64 @@ export class CheckoutService {
       placedAt: order.createdAt.toISOString(),
     });
     return { orderId: order.id, code, total: order.total, payBefore };
+  }
+
+  /**
+   * Cộng tác viên của từng shop trong đơn (P7, AFF-04): lượt bấm còn hạn do trình duyệt gửi kèm hoặc gắn với
+   * tài khoản người mua, chọn lượt mới nhất hợp lệ (`pickClick`). Kèm tỉ lệ hoa hồng hiện tại của sản phẩm.
+   */
+  private async attribute(
+    tx: Prisma.TransactionClient,
+    buyerId: string,
+    clickIds: string[],
+    d: CheckoutData,
+    owners: Map<string, string>,
+    now: Date,
+  ): Promise<Map<string, AttributedAffiliate>> {
+    const shopIds = d.shops.map((s) => s.shop.id);
+    const clicks = await tx.affiliateClick.findMany({
+      where: {
+        shopId: { in: shopIds },
+        expiresAt: { gt: now },
+        OR: [...(clickIds.length ? [{ id: { in: clickIds } }] : []), { userId: buyerId }],
+      },
+      include: { affiliate: { select: { userId: true, status: true, displayName: true } } },
+    });
+    const result = new Map<string, AttributedAffiliate>();
+    if (clicks.length === 0) return result;
+    const productIds = d.shops.flatMap((s) => s.items.map((i) => i.productId));
+    const products = await tx.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, commissionRate: true },
+    });
+    const rates = new Map(products.map((p) => [p.id, p.commissionRate]));
+    for (const shopId of shopIds) {
+      const picked = pickClick(
+        clicks
+          .filter((c) => c.shopId === shopId)
+          .map((c) => ({
+            id: c.id,
+            affiliateId: c.affiliateId,
+            affiliateUserId: c.affiliate.userId,
+            affiliateStatus: c.affiliate.status,
+            createdAt: c.createdAt,
+            expiresAt: c.expiresAt,
+          })),
+        buyerId,
+        owners.get(shopId) ?? '',
+        now,
+      );
+      if (!picked) continue;
+      const aff = clicks.find((c) => c.id === picked.id)!.affiliate;
+      result.set(shopId, {
+        affiliateId: picked.affiliateId,
+        clickId: picked.id,
+        userId: aff.userId,
+        name: aff.displayName,
+        rates,
+      });
+    }
+    return result;
   }
 
   /** Mã đơn: ngày đặt theo giờ Việt Nam (YYMMDD) + 6 ký tự ngẫu nhiên, ví dụ 261011ABC123 */

@@ -1,3 +1,9 @@
+import {
+  AFFILIATE_APPLICATION_SUBMITTED,
+  AFFILIATE_DECIDED,
+  type AffiliateApplicationSubmittedPayload,
+  type AffiliateDecidedPayload,
+} from './affiliate';
 import type { EventEnvelope } from './envelope';
 import {
   ADJUSTMENT_APPROVED,
@@ -61,6 +67,7 @@ import {
   type ShopSuspensionDecidedPayload,
 } from './shop';
 
+export * from './affiliate';
 export * from './envelope';
 export * from './finance';
 export * from './notification';
@@ -100,7 +107,15 @@ export interface EventPayloads {
   [PRODUCT_MODERATION_DECIDED]: ProductModerationDecidedPayload;
   [WITHDRAWAL_UPDATED]: WithdrawalUpdatedPayload;
   [NOTIFICATION_CREATED]: NotificationCreatedPayload;
+  [AFFILIATE_APPLICATION_SUBMITTED]: AffiliateApplicationSubmittedPayload;
+  [AFFILIATE_DECIDED]: AffiliateDecidedPayload;
 }
+
+/** Phiên bản nội dung của sự kiện đã đổi kiểu không tương thích; sự kiện không có ở đây là version 1 */
+export const EVENT_VERSIONS: Partial<Record<keyof EventPayloads, number>> = {
+  [WITHDRAWAL_REQUESTED]: 2,
+  [WITHDRAWAL_UPDATED]: 2,
+};
 
 export type EventType = keyof EventPayloads;
 export type SanEvent<T extends EventType = EventType> = EventEnvelope<T, EventPayloads[T]>;

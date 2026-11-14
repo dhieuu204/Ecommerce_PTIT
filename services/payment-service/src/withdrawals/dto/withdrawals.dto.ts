@@ -38,6 +38,12 @@ export class WithdrawalsQuery extends PageQuery {
   @IsIn(WITHDRAWAL_STATUSES, { message: 'Trạng thái không hợp lệ.' })
   status?: (typeof WITHDRAWAL_STATUSES)[number];
 
+  /** Chỉ yêu cầu của shop hoặc của cộng tác viên (P7, admin lọc) */
+  @ApiPropertyOptional({ enum: ['SHOP', 'AFFILIATE'] })
+  @IsOptional()
+  @IsIn(['SHOP', 'AFFILIATE'], { message: 'Loại chủ ví không hợp lệ.' })
+  ownerType?: 'SHOP' | 'AFFILIATE';
+
   /** Từ thời điểm (tạo yêu cầu) */
   @IsOptional()
   @Type(() => Date)

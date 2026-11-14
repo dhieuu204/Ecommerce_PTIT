@@ -42,7 +42,8 @@ export class AdjustmentsService implements OnModuleInit {
     } else {
       // Khóa theo đơn (cùng khóa với hoàn tiền trả hàng) và theo ví shop (cùng khóa với rút tiền)
       await this.payments.lock(tx, e.orderId);
-      await this.wallet.lockShop(tx, e.shopId);
+      const walletId = await this.wallet.shopWalletId(tx, e.shopId);
+      await this.wallet.lockWallet(tx, walletId);
       const already =
         (await tx.walletTransaction.count({ where: { adjustmentId: p.adjustmentId } })) +
         (await tx.refund.count({ where: { adjustmentId: p.adjustmentId } }));
@@ -53,7 +54,7 @@ export class AdjustmentsService implements OnModuleInit {
           const credit = p.sellerChange > 0;
           await this.wallet.move(
             tx,
-            { shopId: e.shopId, adjustmentId: p.adjustmentId, label: p.shopOrderCode },
+            { walletId, adjustmentId: p.adjustmentId, label: p.shopOrderCode },
             'ADJUSTMENT',
             Math.abs(p.sellerChange),
             credit ? null : 'AVAILABLE',
@@ -90,7 +91,7 @@ export class AdjustmentsService implements OnModuleInit {
     buyerPaid: number,
   ): Promise<string | null> {
     if (p.sellerChange < 0) {
-      const w = await tx.sellerWallet.findUnique({ where: { shopId: p.shopId } });
+      const w = await tx.wallet.findUnique({ where: { shopId: p.shopId } });
       const available = w?.available ?? 0;
       if (available < -p.sellerChange) {
         return `Số dư khả dụng của shop (${money(available)}) không đủ để trừ ${money(-p.sellerChange)}.`;

@@ -248,6 +248,11 @@ function Row({ order }: { order: SellerOrder }) {
               COD
             </span>
           )}
+          {order.affiliate && (
+            <span className="rounded-md bg-ivory-200 px-1.5 py-0.5 text-[11px] font-semibold text-charcoal">
+              Qua CTV
+            </span>
+          )}
           {deadline && hoursLeft !== null && (
             <span
               className={cn(

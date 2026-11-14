@@ -22,6 +22,8 @@ const GROUPS: AdminMenuGroup[] = [
     items: [
       { to: '/quan-tri/duyet-shop', label: 'Duyệt shop', any: ['MODERATION'] },
       { to: '/quan-tri/shop', label: 'Quản lý shop', any: ['MODERATION'] },
+      { to: '/quan-tri/duyet-ctv', label: 'Duyệt cộng tác viên', any: ['MODERATION'] },
+      { to: '/quan-tri/cong-tac-vien', label: 'Cộng tác viên', any: ['MODERATION'] },
       { to: '/quan-tri/bao-cao-vi-pham', label: 'Báo cáo vi phạm', any: ['MODERATION'] },
       { to: '/quan-tri/danh-muc', label: 'Danh mục', any: ['MODERATION'] },
     ],

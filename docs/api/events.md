@@ -414,3 +414,29 @@ payment-service phát trong cùng giao dịch với lúc đổi trạng thái y�
 1. Khai báo tên và kiểu payload trong file theo chủ đề ở `packages/shared/src/events/`, thêm một dòng vào `EventPayloads` trong `index.ts`.
 2. Thêm một mục vào file này (bảng sự kiện của phase và bảng trường).
 3. Cả hai việc nằm trong cùng Pull Request với code gửi sự kiện; báo người phụ trách service nhận.
+
+## 9. Sự kiện P7
+
+Kiểu: `packages/shared/src/events/affiliate.ts` (hồ sơ và quyết định CTV), `order.ts` (CTV của đơn con), `return.ts` (hoa hồng của món trả), `finance.ts` (chủ ví). Quyết định: `docs/phan-tich/14-quyet-dinh-p7-affiliate.md`.
+
+
+| Sự kiện | Chiều | Nội dung |
+| --- | --- | --- |
+| `affiliate_application.submitted` (mới, v1) | M → A | `affiliateId`, `version`, `user` (`userId`, `name`, `email`), `data` (tên hiển thị, kênh, số điện thoại, tài khoản ngân hàng chỉ 4 số cuối), `submittedAt`. approval tạo hồ sơ `PENDING`; hồ sơ cũ còn chờ → `REPLACED`. |
+| `affiliate.decided` (mới, v1) | A → M | `affiliateId`, `action` (`APPROVE`, `REJECT`, `SUSPEND`, `RESTORE`), `version` (với duyệt hồ sơ), `reason`, `decidedBy`, `decidedAt`. marketplace áp nếu mới hơn `moderated_at`; được duyệt lần đầu thì sinh mã CTV. |
+| `order.placed` (bổ sung, giữ v1) | M → P, A | Mỗi đơn con thêm `affiliate`: `{ affiliateId, userId, name, commission }` hoặc `null`. Thiếu trường = không có CTV. |
+| `return.resolved` (bổ sung, giữ v1) | M → P | Thêm `commissionBase`: tổng hoa hồng của các món trả (0 nếu đơn không có CTV). payment tính phần trừ theo mục 2 số 14. |
+| `withdrawal.requested` (**v2**) | P → A | Thay `shopId`, `shopName`, `owner { userId, name }` bằng `owner` = `{ type, shopId, affiliateId, userId, name, displayName }`; `wallet` đổi tên thành `balances`. |
+| `withdrawal.updated` (**v2**) | P → M | Thay `shopId`, `ownerId` bằng `owner` (như trên); marketplace báo đúng người, link tới ví shop hoặc ví CTV. |
+
+`withdrawal.cancelled`, `withdrawal_approval.decided` không chứa thông tin shop nên giữ v1. Phiên bản ghi ở `EVENT_VERSIONS` (`packages/shared/src/events/index.ts`); ba service cùng triển khai một lần nên không giữ song song v1.
+
+Thông báo mới (marketplace tạo, mục 3 của `13-quyet-dinh-p6.md`):
+
+| Loại | Người nhận | Lúc nào | Email |
+| --- | --- | --- | --- |
+| `AFFILIATE_APPROVED` / `AFFILIATE_REJECTED` | Người nộp | Hồ sơ CTV được duyệt / bị từ chối | Có |
+| `AFFILIATE_SUSPENDED` / `AFFILIATE_RESTORED` | CTV | Bị khóa / được mở | Có |
+| `AFFILIATE_ORDER` | CTV | Có đơn mới gắn với mình | |
+| `WITHDRAWAL_*` (có sẵn) | CTV | Như của shop | Như cũ |
+

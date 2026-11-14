@@ -1,5 +1,6 @@
 import { IconLoader2 } from '@tabler/icons-react';
 import { Navigate, Outlet, useLocation } from 'react-router';
+import { useMyAffiliate } from '@/hooks/use-my-affiliate';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { hasAnyPermission, useSession } from '@/lib/auth';
 import type { Permission } from '@/lib/types';
@@ -32,6 +33,17 @@ export function RequireActiveShop() {
   const status = shop.data?.status;
   if (status !== 'ACTIVE' && status !== 'SUSPENDED')
     return <Navigate to="/tai-khoan/shop" replace />;
+  return <Outlet />;
+}
+
+/** Khu Cộng tác viên (P7): đã được duyệt (bị khóa vẫn vào xem được); chưa thì về trang đăng ký */
+export function RequireActiveAffiliate() {
+  const me = useMyAffiliate();
+  if (me.isPending) return <FullPageSpinner />;
+  const status = me.data?.status;
+  if (status !== 'ACTIVE' && status !== 'SUSPENDED') {
+    return <Navigate to="/cong-tac-vien/dang-ky" replace />;
+  }
   return <Outlet />;
 }
 

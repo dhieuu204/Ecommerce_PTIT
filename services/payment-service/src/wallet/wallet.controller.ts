@@ -12,6 +12,7 @@ import { IsIn, IsOptional } from 'class-validator';
 import {
   SellerWalletService,
   type AdminWalletView,
+  type CommissionView,
   type EarningView,
   type ShopOrderMoneyView,
   type WalletTransactionView,
@@ -71,6 +72,38 @@ export class WalletController {
   }
 }
 
+/** Ví của cộng tác viên người gọi (P7, AFF-05). Chưa có đơn nào thì trả số 0 */
+@ApiTags('Ví cộng tác viên')
+@ApiBearerAuth()
+@Controller('affiliates/me')
+export class AffiliateWalletController {
+  constructor(private readonly wallets: SellerWalletService) {}
+
+  /** Số dư 3 ngăn của hoa hồng, số rút tối thiểu, yêu cầu rút đang xử lý */
+  @Get('wallet')
+  wallet(@CurrentUser() user: AuthUser): Promise<WalletView> {
+    return this.wallets.wallet(user, 'AFFILIATE');
+  }
+
+  /** Lịch sử biến động ví, mới nhất trước */
+  @Get('wallet/transactions')
+  transactions(
+    @CurrentUser() user: AuthUser,
+    @Query() q: PageQuery,
+  ): Promise<Page<WalletTransactionView>> {
+    return this.wallets.transactions(user, q, 'AFFILIATE');
+  }
+
+  /** Hoa hồng từng đơn con: dự kiến, bị trừ do trả hàng, CTV nhận, trạng thái tiền */
+  @Get('commissions')
+  commissions(
+    @CurrentUser() user: AuthUser,
+    @Query() q: EarningsQuery,
+  ): Promise<Page<CommissionView>> {
+    return this.wallets.commissions(user, q);
+  }
+}
+
 /** Ví và tiền đơn con cho admin tài chính (FIN-05 nguồn tiền khi duyệt rút, DIS-02 lập điều chỉnh) */
 @ApiTags('Admin: ví seller')
 @ApiBearerAuth()
@@ -84,6 +117,15 @@ export class AdminWalletController {
   @ApiResponse({ status: 404, description: 'NOT_FOUND: shop chưa có ví' })
   wallet(@Param('shopId', ParseIdPipe) shopId: string): Promise<AdminWalletView> {
     return this.wallets.adminWallet(shopId);
+  }
+
+  /** Ví một cộng tác viên và 20 biến động gần nhất (P7) */
+  @Get('affiliates/:affiliateId/wallet')
+  @ApiResponse({ status: 404, description: 'NOT_FOUND: CTV chưa có ví' })
+  affiliateWallet(
+    @Param('affiliateId', ParseIdPipe) affiliateId: string,
+  ): Promise<AdminWalletView> {
+    return this.wallets.adminAffiliateWallet(affiliateId);
   }
 
   /** Tiền của một đơn con theo mã: người mua đã trả, đã hoàn, seller nhận, ví của shop */

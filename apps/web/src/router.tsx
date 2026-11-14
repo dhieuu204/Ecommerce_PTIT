@@ -1,10 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import {
   FullPageSpinner,
+  RequireActiveAffiliate,
   RequireActiveShop,
   RequireAuth,
   RequirePermission,
 } from '@/components/guards';
+import { AffiliateLayout } from '@/components/layout/affiliate-layout';
 import { AccountLayout } from '@/components/layout/account-layout';
 import { AdminLayout, firstAdminPage } from '@/components/layout/admin-layout';
 import { SellerLayout } from '@/components/layout/seller-layout';
@@ -17,6 +19,7 @@ import { NotFoundPage } from '@/pages/not-found';
  * Bảng đường dẫn của web (React Router). Đường dẫn tiếng Việt không dấu.
  * - Khu mua hàng: /, /dang-nhap, /tai-khoan/...
  * - Kênh người bán: /kenh-nguoi-ban/... (shop đang hoạt động)
+ * - Cộng tác viên: /cong-tac-vien/... (CTV đã được duyệt, P7); đăng ký ở /cong-tac-vien/dang-ky
  * - Quản trị: /quan-tri/... (có bộ quyền admin)
  * Trang chủ tải ngay; các trang khác tải khi mở lần đầu (`lazy`) để lần vào web đầu tiên nhẹ hơn.
  */
@@ -75,6 +78,12 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
+          {
+            // P7: đăng ký cộng tác viên (trong khu mua hàng)
+            path: 'cong-tac-vien/dang-ky',
+            lazy: () =>
+              import('@/pages/affiliate/apply').then((m) => ({ Component: m.AffiliateApplyPage })),
+          },
           {
             path: 'gio-hang',
             lazy: () => import('@/pages/cart/cart').then((m) => ({ Component: m.CartPage })),
@@ -236,6 +245,13 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'tiep-thi-lien-ket',
+                lazy: () =>
+                  import('@/pages/seller/affiliate').then((m) => ({
+                    Component: m.SellerAffiliatePage,
+                  })),
+              },
+              {
                 path: 'voucher',
                 lazy: () =>
                   import('@/pages/seller/vouchers').then((m) => ({
@@ -313,6 +329,53 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        // P7: khu Cộng tác viên
+        path: 'cong-tac-vien',
+        element: <RequireActiveAffiliate />,
+        children: [
+          {
+            element: <AffiliateLayout />,
+            children: [
+              {
+                index: true,
+                lazy: () =>
+                  import('@/pages/affiliate/overview').then((m) => ({
+                    Component: m.AffiliateOverviewPage,
+                  })),
+              },
+              {
+                path: 'san-pham',
+                lazy: () =>
+                  import('@/pages/affiliate/products').then((m) => ({
+                    Component: m.AffiliateProductsPage,
+                  })),
+              },
+              {
+                path: 'don-hang',
+                lazy: () =>
+                  import('@/pages/affiliate/orders').then((m) => ({
+                    Component: m.AffiliateOrdersPage,
+                  })),
+              },
+              {
+                path: 'vi',
+                lazy: () =>
+                  import('@/pages/affiliate/wallet').then((m) => ({
+                    Component: m.AffiliateWalletPage,
+                  })),
+              },
+              {
+                path: 'ho-so',
+                lazy: () =>
+                  import('@/pages/affiliate/profile').then((m) => ({
+                    Component: m.AffiliateProfilePage,
+                  })),
+              },
+            ],
+          },
+        ],
+      },
+      {
         path: 'quan-tri',
         element: <RequirePermission />,
         children: [
@@ -335,6 +398,27 @@ export const router = createBrowserRouter([
                     lazy: () =>
                       import('@/pages/admin/shop-approval-detail').then((m) => ({
                         Component: m.ShopApprovalDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'duyet-ctv',
+                    lazy: () =>
+                      import('@/pages/admin/affiliates').then((m) => ({
+                        Component: m.AffiliateApprovalsPage,
+                      })),
+                  },
+                  {
+                    path: 'duyet-ctv/:approvalId',
+                    lazy: () =>
+                      import('@/pages/admin/affiliates').then((m) => ({
+                        Component: m.AffiliateApprovalDetailPage,
+                      })),
+                  },
+                  {
+                    path: 'cong-tac-vien',
+                    lazy: () =>
+                      import('@/pages/admin/affiliates').then((m) => ({
+                        Component: m.AdminAffiliatesPage,
                       })),
                   },
                   {

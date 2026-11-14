@@ -35,6 +35,8 @@ export interface SellerProductRow {
   soldCount: number;
   categoryName: string;
   updatedAt: Date;
+  /** Hoa hồng cộng tác viên (P7, phần vạn); null = không bật */
+  commissionRate: number | null;
 }
 
 export interface CategoryRef {
@@ -205,6 +207,7 @@ export class ProductsService {
         soldCount: p.soldCount,
         categoryName: p.category.name,
         updatedAt: p.updatedAt,
+        commissionRate: p.commissionRate,
       };
     });
     return toPage(items, Number(countRows[0]?.total ?? 0), q);

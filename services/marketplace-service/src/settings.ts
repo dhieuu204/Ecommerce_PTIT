@@ -15,6 +15,9 @@ export const MarketSetting = {
   returnInspectHours: 'return_inspect_hours',
   returnDisputeHours: 'return_dispute_hours',
   reviewDays: 'review_days',
+  affiliateClickDays: 'affiliate_click_days',
+  affiliateRateMin: 'affiliate_rate_min_percent_x100',
+  affiliateRateMax: 'affiliate_rate_max_percent_x100',
 } as const;
 
 export const MARKET_SETTINGS: SettingDefinition[] = [
@@ -148,5 +151,43 @@ export const MARKET_SETTINGS: SettingDefinition[] = [
     min: 1,
     max: 90,
     defaultValue: 30,
+  },
+  {
+    key: MarketSetting.affiliateClickDays,
+    label: 'Hạn của lượt bấm link cộng tác viên',
+    unit: 'ngày',
+    description:
+      'Người mua đặt hàng trong hạn này sau khi bấm link thì đơn được tính cho cộng tác viên có lượt bấm mới nhất (AFF-04).',
+    min: 1,
+    max: 30,
+    defaultValue: 7,
+  },
+  {
+    key: MarketSetting.affiliateRateMin,
+    label: 'Hoa hồng cộng tác viên thấp nhất',
+    unit: '% × 100',
+    description:
+      '100 = 1,00%. Shop đặt hoa hồng cho sản phẩm không được thấp hơn mức này (AFF-02).',
+    min: 1,
+    max: 5000,
+    defaultValue: 100,
+    check: (v, all) =>
+      v > all[MarketSetting.affiliateRateMax]!
+        ? 'Mức thấp nhất không được lớn hơn mức cao nhất.'
+        : null,
+  },
+  {
+    key: MarketSetting.affiliateRateMax,
+    label: 'Hoa hồng cộng tác viên cao nhất',
+    unit: '% × 100',
+    description:
+      '3000 = 30,00%. Cộng với phí sàn phải nhỏ hơn 100% để tiền shop nhận không âm. Đổi mức không ảnh hưởng hoa hồng đã đặt (AFF-02).',
+    min: 1,
+    max: 5000,
+    defaultValue: 3000,
+    check: (v, all) =>
+      v < all[MarketSetting.affiliateRateMin]!
+        ? 'Mức cao nhất không được nhỏ hơn mức thấp nhất.'
+        : null,
   },
 ];

@@ -22,13 +22,19 @@ type Tx = Prisma.TransactionClient;
 export interface WithdrawalApprovalView {
   id: string;
   withdrawalId: string;
-  shop: { id: string; name: string };
+  /** Ví của shop hay của cộng tác viên (P7) */
+  ownerType: WithdrawalApproval['ownerType'];
+  /** Tên shop hoặc tên hiển thị của CTV */
+  displayName: string;
+  shopId: string | null;
+  affiliateId: string | null;
+  /** Chủ shop hoặc CTV */
   owner: { id: string; name: string };
   amount: number;
   /** Chỉ 4 số cuối */
   bankAccount: WithdrawalRequestedPayload['bankAccount'];
   /** Số dư ví lúc yêu cầu (sau khi khóa) */
-  wallet: WithdrawalRequestedPayload['wallet'];
+  wallet: WithdrawalRequestedPayload['balances'];
   status: WithdrawalApprovalStatus;
   reason: string | null;
   decidedByName: string | null;
@@ -39,7 +45,7 @@ export interface WithdrawalApprovalView {
 /**
  * Duyệt rút tiền (FIN-05, STATE-02 D2/D4). Mọi yêu cầu rút đều cần admin tài chính duyệt; approval-service
  * chỉ lưu quyết định, payment-service kiểm yêu cầu còn chờ rồi mới áp (khóa/mở khóa tiền ở payment).
- * Admin là chủ shop thì không được tự duyệt.
+ * Admin là chủ shop hoặc chính CTV của yêu cầu thì không được tự duyệt.
  */
 @Injectable()
 export class WithdrawalApprovalsService {
@@ -50,19 +56,21 @@ export class WithdrawalApprovalsService {
     private readonly events: EventBus,
   ) {}
 
-  /** Nhận yêu cầu rút (withdrawal.requested). Nhận trùng thì bỏ qua */
+  /** Nhận yêu cầu rút (withdrawal.requested version 2: chủ ví là shop hoặc CTV). Nhận trùng thì bỏ qua */
   async onRequested(p: WithdrawalRequestedPayload, tx: Tx): Promise<void> {
     await tx.withdrawalApproval.createMany({
       data: [
         {
           withdrawalId: p.withdrawalId,
-          shopId: p.shopId,
-          shopName: p.shopName,
+          ownerType: p.owner.type,
+          shopId: p.owner.shopId,
+          affiliateId: p.owner.affiliateId,
+          displayName: p.owner.displayName,
           ownerId: p.owner.userId,
           ownerName: p.owner.name,
           amount: p.amount,
           bankAccount: p.bankAccount as unknown as Prisma.InputJsonValue,
-          wallet: p.wallet as unknown as Prisma.InputJsonValue,
+          wallet: p.balances as unknown as Prisma.InputJsonValue,
           requestedAt: new Date(p.requestedAt),
         },
       ],
@@ -131,7 +139,7 @@ export class WithdrawalApprovalsService {
         throw new AppError(
           403,
           'SELF_APPROVAL_FORBIDDEN',
-          'Bạn là chủ shop này nên không được tự duyệt yêu cầu rút tiền.',
+          'Đây là yêu cầu rút tiền của chính bạn nên bạn không được tự duyệt.',
         );
       }
       const approve = decision === 'APPROVE';
@@ -176,7 +184,10 @@ function view(a: WithdrawalApproval): WithdrawalApprovalView {
   return {
     id: a.id,
     withdrawalId: a.withdrawalId,
-    shop: { id: a.shopId, name: a.shopName },
+    ownerType: a.ownerType,
+    displayName: a.displayName,
+    shopId: a.shopId,
+    affiliateId: a.affiliateId,
     owner: { id: a.ownerId, name: a.ownerName },
     amount: a.amount,
     bankAccount: a.bankAccount as unknown as WithdrawalApprovalView['bankAccount'],

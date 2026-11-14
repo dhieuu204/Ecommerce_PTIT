@@ -52,56 +52,65 @@ enum ReturnState {
 /// Tiền của mỗi đơn con (PAY-04, FIN-03): buyer trả bao nhiêu, phí sàn, seller nhận bao nhiêu.
 /// Cũng là bản chép đơn nhận qua sự kiện order.placed để biết số tiền cần thu
 model SellerEarning {
-  id               String        @id @default(uuid()) @db.Uuid
-  orderId          String        @map("order_id") @db.Uuid
-  orderCode        String        @map("order_code") @db.VarChar(20)
-  shopOrderId      String        @unique @map("shop_order_id") @db.Uuid
-  shopOrderCode    String        @map("shop_order_code") @db.VarChar(24)
-  shopId           String        @map("shop_id") @db.Uuid
+  id                       String        @id @default(uuid()) @db.Uuid
+  orderId                  String        @map("order_id") @db.Uuid
+  orderCode                String        @map("order_code") @db.VarChar(20)
+  shopOrderId              String        @unique @map("shop_order_id") @db.Uuid
+  shopOrderCode            String        @map("shop_order_code") @db.VarChar(24)
+  shopId                   String        @map("shop_id") @db.Uuid
   /// Người mua (userId)
-  buyerId          String        @map("buyer_id") @db.Uuid
-  subtotal         Int
-  shopDiscount     Int           @map("shop_discount")
+  buyerId                  String        @map("buyer_id") @db.Uuid
+  subtotal                 Int
+  shopDiscount             Int           @map("shop_discount")
   /// Phần voucher sàn (sàn chịu, không trừ vào tiền seller)
-  platformDiscount Int           @map("platform_discount")
-  shippingFee      Int           @map("shipping_fee")
+  platformDiscount         Int           @map("platform_discount")
+  shippingFee              Int           @map("shipping_fee")
   /// Buyer trả cho đơn con = subtotal - shopDiscount - platformDiscount + shippingFee
-  buyerPaid        Int           @map("buyer_paid")
+  buyerPaid                Int           @map("buyer_paid")
   /// Phí sàn theo phần vạn (500 = 5%), chụp lúc nhận đơn
-  platformFeeRate  Int           @map("platform_fee_rate")
-  platformFee      Int           @map("platform_fee")
+  platformFeeRate          Int           @map("platform_fee_rate")
+  platformFee              Int           @map("platform_fee")
   /// Seller nhận = subtotal - shopDiscount - platformFee
-  sellerAmount     Int           @map("seller_amount")
-  status           EarningStatus @default(UNPAID)
+  sellerAmount             Int           @map("seller_amount")
+  status                   EarningStatus @default(UNPAID)
   /// Trống với đơn COD (không có hạn thanh toán)
-  payBefore        DateTime?     @map("pay_before") @db.Timestamptz(3)
-  paidAt           DateTime?     @map("paid_at") @db.Timestamptz(3)
+  payBefore                DateTime?     @map("pay_before") @db.Timestamptz(3)
+  paidAt                   DateTime?     @map("paid_at") @db.Timestamptz(3)
   // ----- P4 -----
-  paymentMethod    PaymentMethod @default(VNPAY) @map("payment_method")
+  paymentMethod            PaymentMethod @default(VNPAY) @map("payment_method")
   /// Số GHN thu hộ (= buyerPaid với COD, 0 với trả trước)
-  codAmount        Int           @default(0) @map("cod_amount")
+  codAmount                Int           @default(0) @map("cod_amount")
   /// Mã vận đơn GHN (nhận khi đã giao), dùng khớp file đối soát
-  ghnCode          String?       @map("ghn_code") @db.VarChar(40)
+  ghnCode                  String?       @map("ghn_code") @db.VarChar(40)
   /// Phí GHN tính cho vận đơn
-  carrierFee       Int?          @map("carrier_fee")
-  deliveredAt      DateTime?     @map("delivered_at") @db.Timestamptz(3)
-  completedAt      DateTime?     @map("completed_at") @db.Timestamptz(3)
+  carrierFee               Int?          @map("carrier_fee")
+  deliveredAt              DateTime?     @map("delivered_at") @db.Timestamptz(3)
+  completedAt              DateTime?     @map("completed_at") @db.Timestamptz(3)
   /// Tiền đã về sàn: trả trước lúc thu, COD lúc đối soát khớp
-  moneyReceivedAt  DateTime?     @map("money_received_at") @db.Timestamptz(3)
+  moneyReceivedAt          DateTime?     @map("money_received_at") @db.Timestamptz(3)
   /// Lúc chuyển sang ngăn khả dụng
-  releasedAt       DateTime?     @map("released_at") @db.Timestamptz(3)
+  releasedAt               DateTime?     @map("released_at") @db.Timestamptz(3)
   // ----- P5: trả hàng -----
   /// Yêu cầu trả hàng của đơn con (bên marketplace), mỗi đơn con tối đa một
-  returnId         String?       @map("return_id") @db.Uuid
-  returnState      ReturnState   @default(NONE) @map("return_state")
+  returnId                 String?       @map("return_id") @db.Uuid
+  returnState              ReturnState   @default(NONE) @map("return_state")
   /// Đã hoàn cho người mua do trả hàng
-  returnRefund     Int           @default(0) @map("return_refund")
+  returnRefund             Int           @default(0) @map("return_refund")
   /// Seller bị trừ do trả hàng; seller nhận cuối cùng = seller_amount - return_deduction
-  returnDeduction  Int           @default(0) @map("return_deduction")
+  returnDeduction          Int           @default(0) @map("return_deduction")
   /// Phí sàn được giảm vì tiền hàng còn lại ít đi (FIN-03)
-  returnFeeReversed Int          @default(0) @map("return_fee_reversed")
-  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  returnFeeReversed        Int           @default(0) @map("return_fee_reversed")
+  // ----- P7: cộng tác viên -----
+  /// CTV của đơn con (nhận qua order.placed), trống = không có
+  affiliateId              String?       @map("affiliate_id") @db.Uuid
+  /// Tài khoản của CTV (chủ ví CTV)
+  affiliateUserId          String?       @map("affiliate_user_id") @db.Uuid
+  /// Hoa hồng chụp lúc đặt, shop trả: seller_amount đã trừ khoản này
+  commission               Int           @default(0)
+  /// Hoa hồng bị trừ do trả hàng; CTV nhận cuối cùng = commission - return_commission_reversed
+  returnCommissionReversed Int           @default(0) @map("return_commission_reversed")
+  createdAt                DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@index([orderId])
   @@index([status, payBefore])
@@ -112,24 +121,37 @@ model SellerEarning {
 
 // ===== Ví seller (P4: FIN-01, FIN-02) =====
 
-/// Ví của mỗi shop: 3 ngăn tiền, không ngăn nào được âm (ràng buộc CHECK trong database)
-model SellerWallet {
-  shopId    String   @id @map("shop_id") @db.Uuid
-  /// Chủ shop (userId), nhận qua order.placed: seller xem ví bằng vé đăng nhập của mình
-  ownerId   String   @unique @map("owner_id") @db.Uuid
+/// Chủ ví (P7): shop hoặc cộng tác viên
+enum WalletOwnerType {
+  SHOP
+  AFFILIATE
+}
+
+/// Ví 3 ngăn của một shop hoặc một cộng tác viên (P7), không ngăn nào được âm (ràng buộc CHECK trong database).
+/// Đúng một trong shop_id, affiliate_id có giá trị, khớp owner_type (CHECK)
+model Wallet {
+  id          String          @id @default(uuid()) @db.Uuid
+  ownerType   WalletOwnerType @default(SHOP) @map("owner_type")
+  shopId      String?         @unique @map("shop_id") @db.Uuid
+  /// CTV bên marketplace (P7)
+  affiliateId String?         @unique @map("affiliate_id") @db.Uuid
+  /// Chủ shop hoặc tài khoản của CTV (userId): xem ví bằng vé đăng nhập của mình
+  ownerId     String          @map("owner_id") @db.Uuid
   /// Đang giữ: đã có tiền nhưng đơn chưa hoàn tất hoặc tiền COD chưa đối soát
-  pending   Int      @default(0)
+  pending     Int             @default(0)
   /// Khả dụng: rút được (P5)
-  available Int      @default(0)
+  available   Int             @default(0)
   /// Đang khóa cho yêu cầu rút tiền (P5)
-  locked    Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  locked      Int             @default(0)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   transactions WalletTransaction[]
   withdrawals  Withdrawal[]
 
-  @@map("seller_wallets")
+  /// Một người có thể vừa có shop vừa là CTV: mỗi loại tối đa một ví
+  @@unique([ownerType, ownerId])
+  @@map("wallets")
 }
 
 enum WalletTxType {
@@ -163,7 +185,7 @@ enum WalletBucket {
 /// tối đa một dòng, nên nhận trùng sự kiện không ghi tiền hai lần
 model WalletTransaction {
   id           String        @id @default(uuid()) @db.Uuid
-  shopId       String        @map("shop_id") @db.Uuid
+  walletId     String        @map("wallet_id") @db.Uuid
   type         WalletTxType
   /// Luôn dương
   amount       Int
@@ -179,13 +201,14 @@ model WalletTransaction {
   note         String?       @db.VarChar(300)
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  wallet     SellerWallet @relation(fields: [shopId], references: [shopId])
-  withdrawal Withdrawal?  @relation(fields: [withdrawalId], references: [id])
+  wallet     Wallet      @relation(fields: [walletId], references: [id])
+  withdrawal Withdrawal? @relation(fields: [withdrawalId], references: [id])
 
-  @@unique([shopOrderId, type])
+  /// Cùng một đơn con ghi vào ví shop và ví CTV (P7): mỗi ví mỗi loại tối đa một dòng
+  @@unique([walletId, shopOrderId, type])
   @@unique([withdrawalId, type])
   @@unique([adjustmentId, type])
-  @@index([shopId, createdAt])
+  @@index([walletId, createdAt])
   @@map("wallet_transactions")
 }
 
@@ -205,14 +228,17 @@ enum WithdrawalStatus {
   FAILED
 }
 
-/// Yêu cầu rút tiền và chi trả. Mỗi shop tối đa một yêu cầu đang xử lý (PENDING/APPROVED, ràng buộc viết tay)
+/// Yêu cầu rút tiền và chi trả. Mỗi ví tối đa một yêu cầu đang xử lý (PENDING/APPROVED, ràng buộc viết tay)
 model Withdrawal {
   id                String           @id @default(uuid()) @db.Uuid
-  shopId            String           @map("shop_id") @db.Uuid
-  /// Chủ shop lúc yêu cầu (userId): admin trùng người này không được tự chi
+  walletId          String           @map("wallet_id") @db.Uuid
+  /// Ví của shop hay của CTV (P7)
+  ownerType         WalletOwnerType  @default(SHOP) @map("owner_type")
+  /// Chủ shop hoặc CTV lúc yêu cầu (userId): admin trùng người này không được tự chi
   ownerId           String           @map("owner_id") @db.Uuid
   ownerName         String           @map("owner_name") @db.VarChar(100)
-  shopName          String           @map("shop_name") @db.VarChar(100)
+  /// Tên shop hoặc tên hiển thị của CTV lúc yêu cầu
+  displayName       String           @map("display_name") @db.VarChar(100)
   amount            Int
   status            WithdrawalStatus @default(PENDING)
   // Tài khoản nhận (chép từ hồ sơ shop lúc yêu cầu)
@@ -237,10 +263,10 @@ model Withdrawal {
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  wallet       SellerWallet        @relation(fields: [shopId], references: [shopId])
+  wallet       Wallet              @relation(fields: [walletId], references: [id])
   transactions WalletTransaction[]
 
-  @@index([shopId, createdAt])
+  @@index([walletId, createdAt])
   @@index([status, createdAt])
   @@map("withdrawals")
 }
@@ -337,34 +363,34 @@ enum PaymentStatus {
 
 /// Mỗi lần thanh toán VNPay của một đơn tổng (PAY-01..03), tối đa 3 lần
 model Payment {
-  id              String        @id @default(uuid()) @db.Uuid
-  orderId         String        @map("order_id") @db.Uuid
+  id              String           @id @default(uuid()) @db.Uuid
+  orderId         String           @map("order_id") @db.Uuid
   attempt         Int
   /// = vnp_TxnRef, mã giao dịch riêng của mỗi lần
-  ref             String        @unique @db.VarChar(40)
+  ref             String           @unique @db.VarChar(40)
   /// Idempotency-Key của lần bấm "Thanh toán"
-  requestKey      String        @unique @map("request_key") @db.VarChar(64)
+  requestKey      String           @unique @map("request_key") @db.VarChar(64)
   gateway         Gateway
   amount          Int
-  payUrl          String        @map("pay_url") @db.VarChar(2000)
-  status          PaymentStatus @default(PENDING)
+  payUrl          String           @map("pay_url") @db.VarChar(2000)
+  status          PaymentStatus    @default(PENDING)
   /// Tiền được áp vào đơn; false + SUCCEEDED = trả muộn/trả trùng, đã tạo khoản hoàn
-  applied         Boolean       @default(false)
-  transactionNo   String?       @map("transaction_no") @db.VarChar(40)
-  bankCode        String?       @map("bank_code") @db.VarChar(20)
-  paidAt          DateTime?     @map("paid_at") @db.Timestamptz(3)
+  applied         Boolean          @default(false)
+  transactionNo   String?          @map("transaction_no") @db.VarChar(40)
+  bankCode        String?          @map("bank_code") @db.VarChar(20)
+  paidAt          DateTime?        @map("paid_at") @db.Timestamptz(3)
   /// IP người mua (VNPay yêu cầu vnp_IpAddr)
-  clientIp        String        @map("client_ip") @db.VarChar(45)
+  clientIp        String           @map("client_ip") @db.VarChar(45)
   /// Dữ liệu VNPay gửi/trả gần nhất (không chứa khóa bí mật)
-  gatewayResponse Json?         @map("gateway_response")
+  gatewayResponse Json?            @map("gateway_response")
   /// Lần tra cứu gần nhất
-  checkedAt       DateTime?     @map("checked_at") @db.Timestamptz(3)
+  checkedAt       DateTime?        @map("checked_at") @db.Timestamptz(3)
   // ----- Đối soát VNPay (P4: PAY-05) -----
   reconcileStatus ReconcileStatus? @map("reconcile_status")
   reconcileNote   String?          @map("reconcile_note") @db.VarChar(500)
   reconciledAt    DateTime?        @map("reconciled_at") @db.Timestamptz(3)
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   refunds Refund[]
 
@@ -423,40 +449,40 @@ enum RefundStatus {
 /// Hoàn tiền cho buyer (REF-01, REF-02). Khoản hoàn do hủy/giao thất bại/sự cố: mỗi đơn con tối đa một
 /// (ràng buộc viết tay); trả hàng: mỗi yêu cầu một; điều chỉnh: mỗi đề nghị một
 model Refund {
-  id              String       @id @default(uuid()) @db.Uuid
+  id                String       @id @default(uuid()) @db.Uuid
   /// Lần thanh toán được hoàn; trống khi hoàn bằng chuyển khoản không gắn giao dịch (đơn COD, điều chỉnh)
-  paymentId       String?      @map("payment_id") @db.Uuid
-  orderId         String       @map("order_id") @db.Uuid
+  paymentId         String?      @map("payment_id") @db.Uuid
+  orderId           String       @map("order_id") @db.Uuid
   /// Trống = hoàn cả khoản trả muộn/trả trùng
-  shopOrderId     String?      @map("shop_order_id") @db.Uuid
-  amount          Int
-  reason          RefundReason
-  method          RefundMethod @default(GATEWAY)
+  shopOrderId       String?      @map("shop_order_id") @db.Uuid
+  amount            Int
+  reason            RefundReason
+  method            RefundMethod @default(GATEWAY)
   /// Yêu cầu trả hàng bên marketplace (P5)
-  returnId        String?      @unique @map("return_id") @db.Uuid
+  returnId          String?      @unique @map("return_id") @db.Uuid
   /// Đề nghị điều chỉnh bên approval-service (P5, DIS-02)
-  adjustmentId    String?      @unique @map("adjustment_id") @db.Uuid
+  adjustmentId      String?      @unique @map("adjustment_id") @db.Uuid
   // Tài khoản nhận của người mua (chỉ BANK_TRANSFER)
-  bankName          String?    @map("bank_name") @db.VarChar(100)
-  bankAccountNumber String?    @map("bank_account_number") @db.VarChar(30)
-  bankAccountName   String?    @map("bank_account_name") @db.VarChar(100)
-  status          RefundStatus @default(PENDING)
+  bankName          String?      @map("bank_name") @db.VarChar(100)
+  bankAccountNumber String?      @map("bank_account_number") @db.VarChar(30)
+  bankAccountName   String?      @map("bank_account_name") @db.VarChar(100)
+  status            RefundStatus @default(PENDING)
   /// Số lần đã gửi lệnh hoàn qua cổng
-  tries           Int          @default(0)
-  nextTryAt       DateTime?    @map("next_try_at") @db.Timestamptz(3)
+  tries             Int          @default(0)
+  nextTryAt         DateTime?    @map("next_try_at") @db.Timestamptz(3)
   /// Mã lệnh hoàn gần nhất (vnp_RequestId), mỗi lần gửi một mã
-  requestId       String?      @map("request_id") @db.VarChar(40)
-  lastError       String?      @map("last_error") @db.VarChar(500)
-  gatewayResponse Json?        @map("gateway_response")
+  requestId         String?      @map("request_id") @db.VarChar(40)
+  lastError         String?      @map("last_error") @db.VarChar(500)
+  gatewayResponse   Json?        @map("gateway_response")
   // Hoàn tay
-  transferCode    String?      @map("transfer_code") @db.VarChar(60)
-  receiptKey      String?      @map("receipt_key") @db.VarChar(200)
-  manualNote      String?      @map("manual_note") @db.VarChar(500)
+  transferCode      String?      @map("transfer_code") @db.VarChar(60)
+  receiptKey        String?      @map("receipt_key") @db.VarChar(200)
+  manualNote        String?      @map("manual_note") @db.VarChar(500)
   /// Admin tài chính hoàn tay (userId)
-  manualBy        String?      @map("manual_by") @db.Uuid
-  completedAt     DateTime?    @map("completed_at") @db.Timestamptz(3)
-  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  manualBy          String?      @map("manual_by") @db.Uuid
+  completedAt       DateTime?    @map("completed_at") @db.Timestamptz(3)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   payment Payment? @relation(fields: [paymentId], references: [id])
 

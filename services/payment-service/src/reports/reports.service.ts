@@ -31,7 +31,9 @@ export interface SellerFinanceSummary {
   refunded: number;
   /** Phí sàn sau khi đã đảo phần trả hàng, của đơn ghi nhận không bị hủy/giao thất bại */
   platformFee: number;
-  /** Tiền seller nhận (sau phí sàn, đã trừ phần trả hàng) của cùng các đơn đó */
+  /** Hoa hồng cộng tác viên shop trả (P7), sau khi đã trừ phần trả hàng, của cùng các đơn đó */
+  affiliateCommission: number;
+  /** Tiền seller nhận (sau phí sàn và hoa hồng CTV, đã trừ phần trả hàng) của cùng các đơn đó */
   sellerReceives: number;
   /** Tiền vào ngăn khả dụng trong khoảng: đơn chuyển từ đang giữ sang + tiền đền sự cố */
   released: number;
@@ -69,10 +71,16 @@ export interface AdminFinanceSummary {
   platformSubsidy: number;
   /** Phí sàn sau khi đã đảo phần trả hàng */
   platformFee: number;
-  /** Phải trả seller: số dư hiện tại của mọi ví (đang giữ + khả dụng + đang khóa) */
+  /** Phải trả seller: số dư hiện tại của mọi ví shop (đang giữ + khả dụng + đang khóa) */
   payableToSellers: number;
-  /** Đã chi cho seller: yêu cầu rút đã chuyển khoản trong khoảng */
+  /** Đã chi cho seller: yêu cầu rút của shop đã chuyển khoản trong khoảng */
   paidToSellers: number;
+  /** Hoa hồng CTV (P7) của đơn ghi nhận trong khoảng, đã trừ phần trả hàng; shop trả, không phải tiền sàn */
+  affiliateCommission: number;
+  /** Phải trả CTV: số dư hiện tại của mọi ví CTV */
+  payableToAffiliates: number;
+  /** Đã chi cho CTV: yêu cầu rút của CTV đã chuyển khoản trong khoảng */
+  paidToAffiliates: number;
 }
 
 export interface AdminFinanceDaily {
@@ -108,7 +116,9 @@ export class FinanceReportsService {
   /** Shop của chủ shop nhận ra qua ví (chủ shop lưu từ order.placed); chưa có ví → mọi số bằng 0 */
   async seller(user: AuthUser, q: ReportRangeQuery): Promise<SellerFinanceReport> {
     const range = resolveRange(q);
-    const wallet = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { ownerType_ownerId: { ownerType: 'SHOP', ownerId: user.id } },
+    });
     if (!wallet) {
       return {
         range: rangeView(range),
@@ -118,6 +128,7 @@ export class FinanceReportsService {
           orderValue: 0,
           refunded: 0,
           platformFee: 0,
+          affiliateCommission: 0,
           sellerReceives: 0,
           released: 0,
           withdrawn: 0,
@@ -126,12 +137,12 @@ export class FinanceReportsService {
         daily: range.dates.map((date) => ({ date, sellerReceives: 0, refunded: 0 })),
       };
     }
-    const shopId = wallet.shopId;
+    const shopId = wallet.shopId!;
     const [earnings, refunds, released, withdrawn] = await Promise.all([
       this.recorded(range, shopId),
       this.refunds(range, shopId),
-      this.released(range, shopId),
-      this.withdrawn(range, shopId),
+      this.released(range, wallet.id),
+      this.withdrawn(range, 'SHOP', wallet.id),
     ]);
     const daily = range.dates.map((date) => ({
       date,
@@ -146,6 +157,7 @@ export class FinanceReportsService {
         orderValue: total(earnings, 'order_value'),
         refunded: total(refunds, 'amount'),
         platformFee: total(earnings, 'platform_fee'),
+        affiliateCommission: total(earnings, 'affiliate_commission'),
         sellerReceives: total(earnings, 'seller_receives'),
         released: total(released, 'amount'),
         withdrawn: total(withdrawn, 'amount'),
@@ -157,16 +169,23 @@ export class FinanceReportsService {
 
   async admin(q: ReportRangeQuery): Promise<AdminFinanceReport> {
     const range = resolveRange(q);
-    const [earnings, refunds, vnpay, cod, withdrawn, wallets] = await Promise.all([
-      this.recorded(range, null),
-      this.refunds(range, null),
-      this.vnpayCollected(range),
-      this.codCollected(range),
-      this.withdrawn(range, null),
-      this.prisma.sellerWallet.aggregate({
-        _sum: { pending: true, available: true, locked: true },
-      }),
-    ]);
+    const [earnings, refunds, vnpay, cod, withdrawn, withdrawnCtv, wallets, ctvWallets] =
+      await Promise.all([
+        this.recorded(range, null),
+        this.refunds(range, null),
+        this.vnpayCollected(range),
+        this.codCollected(range),
+        this.withdrawn(range, 'SHOP', null),
+        this.withdrawn(range, 'AFFILIATE', null),
+        this.prisma.wallet.aggregate({
+          where: { ownerType: 'SHOP' },
+          _sum: { pending: true, available: true, locked: true },
+        }),
+        this.prisma.wallet.aggregate({
+          where: { ownerType: 'AFFILIATE' },
+          _sum: { pending: true, available: true, locked: true },
+        }),
+      ]);
     const daily = range.dates.map((date) => ({
       date,
       collected: num(vnpay.get(date)?.amount as bigint) + num(cod.get(date)?.amount as bigint),
@@ -193,6 +212,12 @@ export class FinanceReportsService {
         platformFee: total(earnings, 'platform_fee'),
         payableToSellers: payable.total,
         paidToSellers: total(withdrawn, 'amount'),
+        affiliateCommission: total(earnings, 'affiliate_commission'),
+        payableToAffiliates:
+          (ctvWallets._sum.pending ?? 0) +
+          (ctvWallets._sum.available ?? 0) +
+          (ctvWallets._sum.locked ?? 0),
+        paidToAffiliates: total(withdrawnCtv, 'amount'),
       },
       payable,
       daily,
@@ -217,6 +242,8 @@ export class FinanceReportsService {
         sum(buyer_paid) AS order_value,
         sum(platform_fee - return_fee_reversed) FILTER (WHERE kept) AS platform_fee,
         sum(seller_amount - return_deduction) FILTER (WHERE kept) AS seller_receives,
+        sum(commission - return_commission_reversed) FILTER (WHERE kept AND status <> 'COMPENSATED')
+          AS affiliate_commission,
         sum(platform_discount) FILTER (WHERE kept) AS platform_subsidy
       FROM (
         SELECT e.*,
@@ -268,19 +295,21 @@ export class FinanceReportsService {
       GROUP BY 1`);
   }
 
-  /** Tiền vào ngăn khả dụng của shop trong khoảng: chuyển từ đang giữ (RELEASED) và tiền đền sự cố */
-  private released(range: ReportRange, shopId: string) {
+  /** Tiền vào ngăn khả dụng của ví trong khoảng: chuyển từ đang giữ (RELEASED) và tiền đền sự cố */
+  private released(range: ReportRange, walletId: string) {
     return this.byDay(Prisma.sql`
       SELECT ${vnDay(Prisma.sql`created_at`)} AS day, sum(amount) AS amount
       FROM wallet_transactions
-      WHERE shop_id = ${shopId}::uuid AND type IN ('RELEASED', 'COMPENSATION')
+      WHERE wallet_id = ${walletId}::uuid AND type IN ('RELEASED', 'COMPENSATION')
         AND created_at >= ${range.start} AND created_at < ${range.end}
       GROUP BY 1`);
   }
 
-  /** Yêu cầu rút đã chuyển khoản trong khoảng (theo lúc chuyển) */
-  private withdrawn(range: ReportRange, shopId: string | null) {
-    const shopFilter = shopId ? Prisma.sql`AND shop_id = ${shopId}::uuid` : Prisma.empty;
+  /** Yêu cầu rút đã chuyển khoản trong khoảng (theo lúc chuyển), của shop hoặc CTV, một ví hoặc tất cả */
+  private withdrawn(range: ReportRange, ownerType: 'SHOP' | 'AFFILIATE', walletId: string | null) {
+    const shopFilter = Prisma.sql`AND owner_type = ${ownerType}::"WalletOwnerType" ${
+      walletId ? Prisma.sql`AND wallet_id = ${walletId}::uuid` : Prisma.empty
+    }`;
     return this.byDay(Prisma.sql`
       SELECT ${vnDay(Prisma.sql`paid_at`)} AS day, sum(amount) AS amount
       FROM withdrawals

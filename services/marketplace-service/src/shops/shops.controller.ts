@@ -7,7 +7,7 @@ import { ShopsService, type MyShop } from './shops.service';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Header Idempotency-Key bắt buộc: web sinh UUID mới mỗi lần bấm nút gửi */
-function requireKey(key: string | undefined): string {
+export function requireKey(key: string | undefined): string {
   if (!key || !UUID.test(key)) {
     throw new AppError(
       400,
@@ -18,7 +18,7 @@ function requireKey(key: string | undefined): string {
   return key.toLowerCase();
 }
 
-const idempotencyHeader = ApiHeader({
+export const idempotencyHeader = ApiHeader({
   name: 'Idempotency-Key',
   required: true,
   description: 'UUID do web sinh mỗi lần bấm nút; gửi lại cùng mã thì trả kết quả cũ',

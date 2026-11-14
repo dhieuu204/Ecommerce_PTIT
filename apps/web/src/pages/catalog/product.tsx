@@ -15,6 +15,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { AffiliateLinkButton } from '@/components/affiliate/affiliate-link-button';
+import { useAffiliateLanding } from '@/hooks/use-my-affiliate';
 import { toast } from 'sonner';
 import { ProductDescription } from '@/components/catalog/product-description';
 import { ChatWithShopButton } from '@/components/chat/chat-with-shop-button';
@@ -61,6 +63,8 @@ const CARD = 'rounded-3xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]';
 /** Trang chi tiết sản phẩm (CAT-04, CAT-03): ảnh, chọn phân loại, giá, mua, shop, mô tả, thông số, đánh giá */
 export function ProductPage() {
   const { productId = '' } = useParams();
+  // P7: mở từ link cộng tác viên (?aff=) thì ghi lượt bấm
+  useAffiliateLanding(productId ? { productId } : null);
   const product = useQuery({
     queryKey: ['product', productId],
     queryFn: () => api<ProductDetail>(`${API.market}/products/${productId}`),
@@ -283,6 +287,13 @@ function ProductView({ product }: { product: ProductDetail }) {
               />
               <ReportButton targetType="PRODUCT" targetId={product.id} shopId={product.shop.id} />
             </div>
+            <AffiliateLinkButton
+              target={{ productId: product.id }}
+              shopId={product.shop.id}
+              rate={product.commissionRate}
+              price={product.minPrice}
+              className="mt-3 w-full"
+            />
           </div>
         </section>
 

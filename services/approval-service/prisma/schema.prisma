@@ -276,14 +276,26 @@ enum WithdrawalApprovalStatus {
   CANCELLED
 }
 
+/// Chủ ví của yêu cầu rút (P7): shop hoặc cộng tác viên
+enum WalletOwnerType {
+  SHOP
+  AFFILIATE
+}
+
 /// Hồ sơ duyệt rút tiền (FIN-05). Tạo khi nhận withdrawal.requested; mọi yêu cầu rút đều phải duyệt
 model WithdrawalApproval {
   id            String                   @id @default(uuid()) @db.Uuid
   /// Yêu cầu rút bên payment-service
   withdrawalId  String                   @unique @map("withdrawal_id") @db.Uuid
-  shopId        String                   @map("shop_id") @db.Uuid
-  shopName      String                   @map("shop_name") @db.VarChar(100)
-  /// Chủ shop: admin trùng người này không được tự duyệt
+  /// Ví của shop hay của cộng tác viên (P7)
+  ownerType     WalletOwnerType          @default(SHOP) @map("owner_type")
+  /// Có với ví shop
+  shopId        String?                  @map("shop_id") @db.Uuid
+  /// Có với ví CTV (P7)
+  affiliateId   String?                  @map("affiliate_id") @db.Uuid
+  /// Tên shop hoặc tên hiển thị của CTV
+  displayName   String                   @map("display_name") @db.VarChar(100)
+  /// Chủ shop hoặc CTV: admin trùng người này không được tự duyệt
   ownerId       String                   @map("owner_id") @db.Uuid
   ownerName     String                   @map("owner_name") @db.VarChar(100)
   amount        Int
@@ -301,6 +313,42 @@ model WithdrawalApproval {
 
   @@index([status, requestedAt])
   @@map("withdrawal_approvals")
+}
+
+// ===== Cộng tác viên (P7: AFF-01) =====
+
+/// REGISTER: hồ sơ đăng ký CTV (chờ duyệt). SUSPEND/RESTORE: admin khóa/mở CTV (quyết luôn khi tạo)
+enum AffiliateApprovalType {
+  REGISTER
+  SUSPEND
+  RESTORE
+}
+
+/// Hồ sơ và quyết định về cộng tác viên. Hồ sơ REGISTER tạo khi nhận affiliate_application.submitted
+model AffiliateApproval {
+  id            String                @id @default(uuid()) @db.Uuid
+  /// CTV bên marketplace-service
+  affiliateId   String                @map("affiliate_id") @db.Uuid
+  type          AffiliateApprovalType
+  /// Phiên bản hồ sơ (REGISTER); khóa/mở ghi 0
+  version       Int                   @default(0)
+  status        ApprovalStatus        @default(PENDING)
+  /// Tài khoản của CTV: admin trùng người này không được tự quyết
+  userId        String                @map("user_id") @db.Uuid
+  userName      String                @map("user_name") @db.VarChar(100)
+  userEmail     String                @map("user_email") @db.VarChar(254)
+  /// Hồ sơ nhận trong sự kiện (AffiliateApplicationData; tài khoản chỉ 4 số cuối)
+  data          Json
+  /// Bắt buộc khi từ chối, khóa, mở
+  reason        String?               @db.VarChar(500)
+  decidedBy     String?               @map("decided_by") @db.Uuid
+  decidedByName String?               @map("decided_by_name") @db.VarChar(100)
+  decidedAt     DateTime?             @map("decided_at") @db.Timestamptz(3)
+  submittedAt   DateTime              @map("submitted_at") @db.Timestamptz(3)
+
+  @@index([status, submittedAt])
+  @@index([affiliateId, submittedAt])
+  @@map("affiliate_approvals")
 }
 
 /// Cấu hình có phiên bản (ADM-01): ngưỡng duyệt, hạn duyệt. Phiên bản lớn nhất đang dùng

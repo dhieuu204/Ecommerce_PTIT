@@ -20,6 +20,9 @@ export default function globalSetup(): void {
   // Test không gửi sự kiện thật lên RabbitMQ (sự kiện nằm lại trong bảng outbox để kiểm).
   // Đặt rỗng chứ không xóa, vì Prisma tự đọc .env và sẽ điền lại biến đã xóa.
   process.env.RABBITMQ_URL = '';
+  // Test luôn dùng cổng thanh toán MÔ PHỎNG, kể cả khi .env của máy đang điền khóa VNPay sandbox
+  process.env.VNPAY_TMN_CODE = '';
+  process.env.VNPAY_HASH_SECRET = '';
 
   try {
     execSync('prisma migrate deploy', { stdio: 'pipe', env: process.env });

@@ -131,6 +131,15 @@ Bảng cũ đổi ở P6: `products` thêm `rating_count`, `rating_total` (sao t
 | `messages` | P6 | id<br>conversation_id → conversations<br>sender_id ↗U, sender_role: BUYER \| SHOP<br>type: TEXT \| IMAGE \| PRODUCT \| ORDER<br>content (chữ, khóa ảnh riêng tư, mã sản phẩm hoặc mã đơn con), card (bản chụp thẻ sản phẩm/đơn)<br>client_key (chống gửi lặp, không trùng theo cuộc trò chuyện) | Tin nhắn, chỉ thêm |
 | `notifications` | P6 | id<br>user_id ↗U<br>type (ví dụ ORDER_DELIVERED), title, content, link<br>read_at | Thông báo trong app (MSG-02); loại quan trọng còn gửi email qua user-service |
 
+### Cộng tác viên (P7)
+
+| Bảng | Phase | Cột chính | Ghi chú |
+| --- | --- | --- | --- |
+| `affiliates` | P7 | id<br>user_id ↗U (không trùng: mỗi tài khoản 1 hồ sơ)<br>code (mã CTV 8 ký tự, không trùng, có khi được duyệt)<br>status: PENDING \| REJECTED \| ACTIVE \| SUSPENDED, version (tăng mỗi lần nộp lại)<br>display_name, channels (1–3 đường dẫn), phone<br>bank_name, bank_account_number, bank_account_name<br>reject_reason, suspend_reason, request_key (Idempotency-Key, không trùng)<br>moderated_at (bỏ quyết định khóa/mở cũ tới sau), approved_at | Cộng tác viên (AFF-01) |
+| `affiliate_clicks` | P7 | id<br>affiliate_id → affiliates, shop_id → shops, product_id? (trống với link shop)<br>user_id? ↗U (người bấm đang đăng nhập)<br>created_at, expires_at | Lượt bấm link tiếp thị (AFF-03) |
+
+Bảng cũ đổi ở P7: `products` thêm `commission_rate` (phần vạn, trống = không bật); `order_items` thêm `commission_rate`, `commission` (chụp lúc đặt); `shop_orders` thêm `affiliate_id` → affiliates, `affiliate_click_id`, `commission`.
+
 ## P: payment-service (payment_db)
 
 Sơ đồ: `docs/so-do/11-erd-p-payment-service`
@@ -156,6 +165,12 @@ Bảng cũ đổi ở P5:
 - `seller_earnings`: trạng thái thêm `REFUNDED` (trả hàng hoàn toàn bộ); thêm `return_id`, `return_state` (NONE \| OPEN \| RESOLVED: có yêu cầu trả hàng đang mở thì không chuyển khả dụng), `return_refund`, `return_deduction` (seller bị trừ), `return_fee_reversed` (phí sàn được giảm).
 - `wallet_transactions`: loại thêm `RETURN_DEDUCTED` (trừ ngăn đang giữ do trả hàng), `LOCKED` / `UNLOCKED` / `WITHDRAWN` (rút tiền), `ADJUSTMENT` (điều chỉnh DIS-02); thêm `withdrawal_id`, `adjustment_id` (mỗi cặp mã + loại không trùng).
 - `refunds`: `payment_id` để trống được (hoàn bằng chuyển khoản); thêm `method` (GATEWAY \| BANK_TRANSFER), `return_id` (không trùng), `adjustment_id` (không trùng), `bank_name`, `bank_account_number`, `bank_account_name`; lý do thêm `RETURN`, `ADJUSTMENT`. `shop_order_id` không còn không trùng tuyệt đối: chỉ khoản hoàn do hủy/giao thất bại/sự cố mới tối đa một khoản mỗi đơn con (ràng buộc viết tay).
+
+Bảng đổi ở P7 (migration viết tay, giữ dữ liệu cũ):
+- `seller_wallets` đổi tên thành **`wallets`**: khóa chính `id`; thêm `owner_type` (SHOP \| AFFILIATE), `affiliate_id` ↗M; `shop_id` để trống được; đúng một trong `shop_id`, `affiliate_id` có giá trị khớp `owner_type` (CHECK); `owner_id` không trùng theo cặp (`owner_type`, `owner_id`).
+- `wallet_transactions`: `shop_id` thay bằng `wallet_id` → wallets; không trùng theo (`wallet_id`, `shop_order_id`, `type`) vì một đơn con ghi vào cả ví shop và ví CTV.
+- `withdrawals`: `shop_id` thay bằng `wallet_id` → wallets; thêm `owner_type`; `shop_name` đổi tên thành `display_name`; mỗi ví tối đa 1 yêu cầu đang xử lý.
+- `seller_earnings`: thêm `affiliate_id`, `affiliate_user_id`, `commission`, `return_commission_reversed` (0 ≤ trừ ≤ hoa hồng); `seller_amount` đã trừ hoa hồng.
 
 ### Đối soát COD (P4)
 
@@ -191,3 +206,11 @@ Sơ đồ: `docs/so-do/12-erd-a-approval-service`
 | `disputes` | P5 | id<br>type: RETURN (tranh chấp trả hàng) \| ADJUSTMENT (điều chỉnh sau giải ngân, DIS-02)<br>return_id ↗M, return_code, stage: REQUEST_REJECTED \| GOODS_PROBLEM (cặp return_id + stage không trùng)<br>order_id ↗M, order_code, shop_order_id ↗M, shop_order_code<br>shop_id ↗M, shop_name, owner_id ↗U (không tự quyết)<br>buyer_id ↗U, buyer_name<br>data (hồ sơ trả hàng nhận qua sự kiện)<br>buyer_statement, buyer_images, seller_statement, seller_images<br>max_refund<br>status: PENDING \| RESOLVED \| APPROVED \| REJECTED \| EXECUTED \| FAILED<br>decision: ACCEPT_RETURN \| REFUND \| REJECT \| APPROVE<br>refund_amount, seller_change (ADJUSTMENT: cộng/trừ ví), bank_account (ADJUSTMENT)<br>reason (lý do lập ADJUSTMENT), created_by ↗U, created_by_name, request_key<br>deadline (hạn nhắc phân xử)<br>decision_note, decided_by ↗U, decided_by_name, decided_at<br>execution_note, executed_at | Tranh chấp trả hàng cần admin `SUPPORT` phân xử, và đề nghị điều chỉnh tiền cần admin `FINANCE` thứ hai duyệt (gộp `finance_exceptions` theo vòng ERD) |
 | `withdrawal_approvals` | P5 | id<br>withdrawal_id ↗P (không trùng)<br>shop_id ↗M, shop_name, owner_id ↗U, owner_name (không tự duyệt)<br>amount<br>bank_account (4 số cuối), wallet (số dư lúc yêu cầu)<br>status: PENDING \| APPROVED \| REJECTED \| CANCELLED<br>reason, decided_by ↗U, decided_by_name, decided_at, requested_at | Duyệt rút tiền |
 | `settings` (bổ sung) | P5 | | Thêm hạn nhắc phân xử tranh chấp (72 giờ) |
+
+### Cộng tác viên (P7)
+
+| Bảng | Phase | Cột chính | Ghi chú |
+| --- | --- | --- | --- |
+| `affiliate_approvals` | P7 | id<br>affiliate_id ↗M<br>type: REGISTER \| SUSPEND \| RESTORE, version (với REGISTER; mỗi phiên bản lưu 1 lần)<br>status: PENDING \| APPROVED \| REJECTED \| REPLACED (mỗi CTV tối đa 1 hồ sơ PENDING)<br>user_id ↗U, user_name, user_email (không tự quyết)<br>data (hồ sơ nhận qua sự kiện, tài khoản chỉ 4 số cuối)<br>reason, decided_by ↗U, decided_by_name, decided_at, submitted_at | Hồ sơ đăng ký CTV và quyết định khóa/mở (AFF-01) |
+
+Bảng cũ đổi ở P7: `withdrawal_approvals` thêm `owner_type` (SHOP \| AFFILIATE), `affiliate_id`; `shop_id` để trống được; `shop_name` đổi tên thành `display_name`.

@@ -392,6 +392,7 @@ describeDb('Sản phẩm của seller và tồn kho (CAT-02, CAT-03, INV-01)', (
         phone.id,
       ]);
       expect(all.body.items[2]).toEqual({
+        commissionRate: null,
         id: phone.id,
         name: 'Điện thoại iPhone 16 Pro',
         status: 'ACTIVE',

@@ -92,6 +92,8 @@ export interface SellerFinanceReport {
     orderValue: number;
     refunded: number;
     platformFee: number;
+    /** Hoa hồng cộng tác viên shop trả (P7), đã trừ phần trả hàng */
+    affiliateCommission: number;
     sellerReceives: number;
     released: number;
     withdrawn: number;
@@ -113,6 +115,10 @@ export interface AdminFinanceReport {
     platformFee: number;
     payableToSellers: number;
     paidToSellers: number;
+    /** P7: hoa hồng CTV (shop trả), phải trả CTV hiện tại, đã chi cho CTV trong khoảng */
+    affiliateCommission: number;
+    payableToAffiliates: number;
+    paidToAffiliates: number;
   };
   payable: BalanceView;
   daily: Array<{ date: string; collected: number; refunded: number; platformFee: number }>;

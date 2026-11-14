@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
+import { AffiliateLinkButton } from '@/components/affiliate/affiliate-link-button';
 import { useBrowseState, useProductSearch } from '@/components/catalog/browse-query';
 import {
   Breadcrumb,
@@ -26,6 +27,7 @@ import { ShopEngagement } from '@/components/reviews/engagement';
 import { ShopTabs } from '@/components/reviews/shop-tabs';
 import { formatCount, formatRating } from '@/components/reviews/stars';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAffiliateLanding } from '@/hooks/use-my-affiliate';
 import { API, ApiError, api } from '@/lib/api';
 import type { ProductSort, PublicShop, Voucher } from '@/lib/catalog-types';
 import { cn } from '@/lib/utils';
@@ -211,6 +213,8 @@ function ShopSkeleton() {
 /** Trang shop /shop/:shopId (CAT-04, VCH-01) */
 export function ShopPage() {
   const { shopId = '' } = useParams();
+  // P7: mở từ link cộng tác viên (?aff=) thì ghi lượt bấm
+  useAffiliateLanding(shopId ? { shopId } : null);
   const shop = useQuery({
     queryKey: ['public-shop', shopId],
     queryFn: () => api<PublicShop>(`${API.market}/shops/${shopId}`),
@@ -242,6 +246,13 @@ export function ShopPage() {
     <div className="mx-auto max-w-7xl px-4 pb-12">
       <Breadcrumb items={[{ label: s.name }]} />
       <ShopHeader shop={s} />
+      {!s.suspended && (
+        <AffiliateLinkButton
+          target={{ shopId: s.id }}
+          shopId={s.id}
+          className="mt-4 w-full sm:w-auto"
+        />
+      )}
       {s.suspended ? (
         <div className={cn(CARD, 'mt-4 flex flex-col items-center px-6 py-14 text-center')}>
           <span className="flex size-16 items-center justify-center rounded-full bg-champagne-50 text-navy">

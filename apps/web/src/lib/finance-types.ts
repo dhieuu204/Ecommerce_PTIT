@@ -30,8 +30,12 @@ export type WalletTxType =
   | 'ADJUSTMENT';
 
 export interface Wallet {
-  /** null: shop chưa có đơn nào */
+  /** null: chưa có đơn nào (chưa có ví) */
+  walletId: string | null;
+  /** Ví shop: mã shop; ví CTV: null */
   shopId: string | null;
+  /** Ví CTV (P7): mã CTV */
+  affiliateId: string | null;
   pending: number;
   available: number;
   locked: number;
@@ -78,6 +82,9 @@ export interface Earning {
   returnRefund: number;
   returnDeduction: number;
   returnFeeReversed: number;
+  /** P7: hoa hồng CTV shop trả (đã trừ trong sellerAmount) và phần được trả lại do trả hàng */
+  commission: number;
+  returnCommissionReversed: number;
   sellerReceives: number;
   status: EarningStatus;
   waitingFor: string | null;

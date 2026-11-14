@@ -16,6 +16,7 @@ import { useCurrentUser } from '@/lib/auth';
 import type {
   AdminWallet,
   AdminWithdrawalPage,
+  WalletOwnerType,
   Withdrawal,
   WithdrawalApproval,
   WithdrawalStatus,
@@ -28,6 +29,20 @@ import { WITHDRAWAL_STATUS } from '@/pages/seller/finance';
 const PAGE_SIZE = 20;
 const key = ['admin', 'withdrawals'] as const;
 type Tab = 'APPROVE' | 'PAY' | 'HISTORY';
+
+/** Nhãn chủ ví (P7): shop hoặc cộng tác viên */
+function OwnerTag({ type }: { type: WalletOwnerType }) {
+  return (
+    <span
+      className={cn(
+        'rounded-md px-1.5 py-0.5 text-[11px] font-semibold',
+        type === 'SHOP' ? 'bg-ivory-200 text-charcoal' : 'bg-champagne-50 text-navy',
+      )}
+    >
+      {type === 'SHOP' ? 'Shop' : 'Cộng tác viên'}
+    </span>
+  );
+}
 
 const TX_LABEL: Record<string, string> = {
   HELD: 'Tiền đơn vào ví',
@@ -54,8 +69,8 @@ export function WithdrawalsPage() {
     <div className="mx-auto max-w-6xl">
       <PageHeader
         crumbs={[{ label: 'Tài chính' }, { label: 'Rút tiền' }]}
-        title="Rút tiền của seller"
-        description="Mọi yêu cầu rút đều cần duyệt. Sau khi duyệt, chuyển khoản ngoài hệ thống rồi nhập mã giao dịch và ảnh biên lai; chỉ khi đó tiền mới ghi là đã chi. Chủ shop không tự duyệt, không tự chi cho shop mình."
+        title="Rút tiền"
+        description="Yêu cầu rút của shop và cộng tác viên đều cần duyệt. Sau khi duyệt, chuyển khoản ngoài hệ thống rồi nhập mã giao dịch và ảnh biên lai; chỉ khi đó tiền mới ghi là đã chi. Không ai tự duyệt hay tự chi cho yêu cầu của chính mình."
       />
       <div className="rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,26,61,0.04)]">
         <nav className="-mb-px flex gap-1 overflow-x-auto border-b px-4 pt-2 md:px-5">
@@ -127,7 +142,7 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
       toast.success(
         decision === 'APPROVE'
           ? 'Đã duyệt. Yêu cầu sang tab Chờ chuyển khoản sau vài giây.'
-          : 'Đã từ chối, tiền được mở khóa cho seller.',
+          : 'Đã từ chối, tiền được mở khóa về ví.',
       );
     },
     onError: (e) => toast.error(e.message),
@@ -144,17 +159,19 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
         {list.data.items.map((a) => (
           <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5 md:px-5">
             <div className="min-w-0 flex-1 text-sm">
-              <div className="font-bold tracking-tight text-charcoal">
-                {a.shop.name} · {formatMoney(a.amount)}
+              <div className="flex flex-wrap items-center gap-2 font-bold tracking-tight text-charcoal">
+                {a.displayName} · {formatMoney(a.amount)}
+                <OwnerTag type={a.ownerType} />
               </div>
               <div className="text-xs text-muted-foreground">
-                Chủ shop {a.owner.name} · {a.bankAccount.bankName}{' '}
-                {a.bankAccount.accountNumberMasked} · gửi {formatDateTime(a.requestedAt)}
+                {a.ownerType === 'SHOP' ? 'Chủ shop' : 'Người nhận'} {a.owner.name} ·{' '}
+                {a.bankAccount.bankName} {a.bankAccount.accountNumberMasked} · gửi{' '}
+                {formatDateTime(a.requestedAt)}
               </div>
             </div>
             {a.owner.id === me?.id ? (
               <span className="text-xs text-muted-foreground">
-                Shop của bạn: nhờ admin tài chính khác duyệt
+                Yêu cầu của bạn: nhờ admin tài chính khác duyệt
               </span>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setOpen(a)}>
@@ -175,12 +192,12 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
         <ConfirmDialog
           open
           onOpenChange={(o) => !o && setOpen(null)}
-          title={`Duyệt rút ${formatMoney(open.amount)} của ${open.shop.name}?`}
+          title={`Duyệt rút ${formatMoney(open.amount)} của ${open.displayName}?`}
           description="Kiểm tra nguồn tiền (các khoản đã vào ngăn khả dụng) trước khi duyệt."
           confirmLabel="Duyệt"
           onConfirm={() => decide.mutateAsync({ a: open, decision: 'APPROVE' })}
         >
-          <WalletSource shopId={open.shop.id} />
+          <WalletSource approval={open} />
           <div className="rounded-lg bg-ivory px-3 py-2 text-xs text-ink/70">
             Tài khoản nhận: {open.bankAccount.bankName} · {open.bankAccount.accountNumberMasked} ·{' '}
             {open.bankAccount.accountName}
@@ -201,8 +218,8 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
         open={rejecting !== null}
         onOpenChange={(o) => !o && setRejecting(null)}
         title="Từ chối yêu cầu rút?"
-        description="Tiền được mở khóa, trở lại ngăn khả dụng của seller."
-        reasons={['Cần đối soát thêm các đơn gần đây', 'Tài khoản nhận chưa khớp tên chủ shop']}
+        description="Tiền được mở khóa, trở lại ngăn khả dụng của ví."
+        reasons={['Cần đối soát thêm các đơn gần đây', 'Tài khoản nhận chưa khớp tên người nhận']}
         confirmLabel="Từ chối"
         onSubmit={(reason) => decide.mutateAsync({ a: rejecting!, decision: 'REJECT', reason })}
       />
@@ -210,11 +227,13 @@ function ApprovalList({ page, onPage }: { page: number; onPage: (p: number) => v
   );
 }
 
-/** Nguồn tiền của shop: số dư 3 ngăn và các biến động ví gần nhất (payment-service) */
-function WalletSource({ shopId }: { shopId: string }) {
+/** Nguồn tiền của ví (shop hoặc CTV): số dư 3 ngăn và các biến động gần nhất (payment-service) */
+function WalletSource({ approval: a }: { approval: WithdrawalApproval }) {
+  const path =
+    a.ownerType === 'SHOP' ? `shops/${a.shopId}/wallet` : `affiliates/${a.affiliateId}/wallet`;
   const q = useQuery({
-    queryKey: [...key, 'wallet', shopId],
-    queryFn: () => api<AdminWallet>(`${API.payment}/admin/shops/${shopId}/wallet`),
+    queryKey: [...key, 'wallet', path],
+    queryFn: () => api<AdminWallet>(`${API.payment}/admin/${path}`),
   });
   if (q.isPending) return <Skeleton className="h-32 rounded-xl" />;
   if (q.isError) return <p className="text-sm text-destructive">{q.error.message}</p>;
@@ -263,14 +282,20 @@ function PayoutList({
 }) {
   const qc = useQueryClient();
   const [status, setStatus] = useState<WithdrawalStatus | 'ALL'>('ALL');
+  const [ownerType, setOwnerType] = useState<WalletOwnerType | 'ALL'>('ALL');
   const [paying, setPaying] = useState<Withdrawal | null>(null);
   const [failing, setFailing] = useState<Withdrawal | null>(null);
   const filter = mode === 'PAY' ? 'APPROVED' : status === 'ALL' ? undefined : status;
   const list = useQuery({
-    queryKey: [...key, 'payouts', mode, filter, page],
+    queryKey: [...key, 'payouts', mode, filter, ownerType, page],
     queryFn: () =>
       api<AdminWithdrawalPage>(`${API.payment}/admin/withdrawals`, {
-        query: { status: filter, page, pageSize: PAGE_SIZE },
+        query: {
+          status: filter,
+          ownerType: ownerType === 'ALL' ? undefined : ownerType,
+          page,
+          pageSize: PAGE_SIZE,
+        },
       }),
     placeholderData: keepPreviousData,
   });
@@ -279,7 +304,7 @@ function PayoutList({
       api(`${API.payment}/admin/withdrawals/${w.id}/failed`, { method: 'POST', body: { reason } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: key });
-      toast.success('Đã ghi chuyển khoản lỗi, tiền được mở khóa cho seller.');
+      toast.success('Đã ghi chuyển khoản lỗi, tiền được mở khóa về ví.');
     },
     onError: (e) => toast.error(e.message),
   });
@@ -305,6 +330,16 @@ function PayoutList({
               </button>
             ),
           )}
+          <select
+            aria-label="Loại ví"
+            value={ownerType}
+            onChange={(e) => setOwnerType(e.target.value as WalletOwnerType | 'ALL')}
+            className="h-7 rounded-lg border border-ink/15 bg-card px-2 text-xs text-ink/80"
+          >
+            <option value="ALL">Shop và cộng tác viên</option>
+            <option value="SHOP">Chỉ shop</option>
+            <option value="AFFILIATE">Chỉ cộng tác viên</option>
+          </select>
           {list.data && (
             <span className="ml-auto text-sm text-ink/70">
               Tổng: <b className="text-navy">{formatMoney(list.data.totalAmount)}</b> (
@@ -332,8 +367,9 @@ function PayoutList({
                   <div className="min-w-0 flex-1 text-sm">
                     <div className="flex flex-wrap items-center gap-2">
                       <b className="text-navy">
-                        {w.shopName} · {formatMoney(w.amount)}
+                        {w.displayName} · {formatMoney(w.amount)}
                       </b>
+                      <OwnerTag type={w.ownerType} />
                       <StatusBadge tone={st.tone}>{st.label}</StatusBadge>
                     </div>
                     <div className="text-xs text-ink/70">
@@ -378,7 +414,7 @@ function PayoutList({
         open={failing !== null}
         onOpenChange={(o) => !o && setFailing(null)}
         title="Chuyển khoản không thành công?"
-        description="Tiền được mở khóa đúng một lần, trở lại ngăn khả dụng; seller gửi yêu cầu mới."
+        description="Tiền được mở khóa đúng một lần, trở lại ngăn khả dụng; chủ ví gửi yêu cầu mới."
         reasons={['Ngân hàng trả lại vì sai tên tài khoản', 'Tài khoản nhận bị khóa']}
         confirmLabel="Ghi chuyển lỗi"
         onSubmit={(reason) => failed.mutateAsync({ w: failing!, reason })}
@@ -387,7 +423,7 @@ function PayoutList({
   );
 }
 
-/** Nhập mã giao dịch + ảnh biên lai sau khi đã chuyển khoản cho seller */
+/** Nhập mã giao dịch + ảnh biên lai sau khi đã chuyển khoản cho shop hoặc CTV */
 function PaidDialog({
   withdrawal: w,
   onClose,
@@ -408,7 +444,7 @@ function PaidDialog({
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: key });
-      toast.success('Đã ghi đã chi cho seller.');
+      toast.success('Đã ghi đã chi.');
     },
     onError: (e) => toast.error(e.message),
   });
@@ -439,7 +475,7 @@ function PaidDialog({
           onClose();
         }
       }}
-      title={`Ghi đã chuyển ${formatMoney(w?.amount ?? 0)} cho ${w?.shopName ?? ''}`}
+      title={`Ghi đã chuyển ${formatMoney(w?.amount ?? 0)} cho ${w?.displayName ?? ''}`}
       description="Chỉ ghi sau khi đã chuyển khoản thành công. Không chắc kết quả thì kiểm tra sao kê trước, không chuyển lại."
       confirmLabel="Ghi đã chi"
       onConfirm={() =>

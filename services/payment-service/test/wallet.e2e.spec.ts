@@ -130,14 +130,14 @@ describeDb('Ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05)', () => 
       ),
     );
 
-  const wallet = (shopId: string) => t.prisma.sellerWallet.findUniqueOrThrow({ where: { shopId } });
+  const wallet = (shopId: string) => t.prisma.wallet.findUniqueOrThrow({ where: { shopId } });
   const earning = (p: OrderPlacedPayload, i = 0) =>
     t.prisma.sellerEarning.findUniqueOrThrow({ where: { shopOrderId: so(p, i).shopOrderId } });
 
   /** Số dư mỗi ngăn phải bằng tổng các dòng lịch sử vào trừ ra */
   async function expectLedgerMatches(shopId: string) {
     const w = await wallet(shopId);
-    const txs = await t.prisma.walletTransaction.findMany({ where: { shopId } });
+    const txs = await t.prisma.walletTransaction.findMany({ where: { wallet: { shopId } } });
     const sum = (bucket: string) =>
       txs.reduce(
         (a, x) =>
@@ -159,7 +159,7 @@ describeDb('Ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05)', () => 
     const p = order('COD');
     await placed(p);
     await placed(p);
-    expect(await t.prisma.sellerWallet.count()).toBe(2);
+    expect(await t.prisma.wallet.count()).toBe(2);
     expect((await wallet(so(p).shopId)).ownerId).toBe(sellerA.id);
     const e = await earning(p);
     expect(e).toMatchObject({
@@ -200,7 +200,9 @@ describeDb('Ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05)', () => 
       await completed(p);
       expect(await wallet(so(p).shopId)).toMatchObject({ pending: 0, available: SELLER_A });
       expect(await earning(p)).toMatchObject({ status: 'AVAILABLE', ghnCode: `SIM0${p.code}` });
-      expect(await t.prisma.walletTransaction.count({ where: { shopId: so(p).shopId } })).toBe(2);
+      expect(
+        await t.prisma.walletTransaction.count({ where: { wallet: { shopId: so(p).shopId } } }),
+      ).toBe(2);
       await expectLedgerMatches(so(p).shopId);
     });
 
@@ -274,7 +276,9 @@ describeDb('Ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05)', () => 
       expect(await t.prisma.refund.findMany()).toEqual([
         expect.objectContaining({ amount: so(p).total, reason: 'INCIDENT' }),
       ]);
-      const types = (await t.prisma.walletTransaction.findMany({ where: { shopId: so(p).shopId } }))
+      const types = (
+        await t.prisma.walletTransaction.findMany({ where: { wallet: { shopId: so(p).shopId } } })
+      )
         .map((x) => x.type)
         .sort();
       expect(types).toEqual(['COMPENSATION', 'HELD', 'REVERSED']);
@@ -516,11 +520,16 @@ describeDb('Ví seller và đối soát (P4: FIN-01/02, COD-02, PAY-05)', () => 
       const p = order();
       await placed(p);
       await expect(
-        t.prisma.sellerWallet.update({ where: { shopId: so(p).shopId }, data: { available: -1 } }),
+        t.prisma.wallet.update({ where: { shopId: so(p).shopId }, data: { available: -1 } }),
       ).rejects.toThrow();
       await expect(
         t.prisma.walletTransaction.create({
-          data: { shopId: so(p).shopId, type: 'HELD', amount: 0, toBucket: 'PENDING' },
+          data: {
+            wallet: { connect: { shopId: so(p).shopId } },
+            type: 'HELD',
+            amount: 0,
+            toBucket: 'PENDING',
+          },
         }),
       ).rejects.toThrow();
     });

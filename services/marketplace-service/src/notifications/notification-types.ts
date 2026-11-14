@@ -34,6 +34,12 @@ export const NOTIFICATION_TYPES = {
   WITHDRAWAL_REJECTED: { email: true },
   WITHDRAWAL_PAID: { email: true },
   WITHDRAWAL_FAILED: { email: true },
+  // ----- Cộng tác viên (P7). Rút tiền của CTV dùng chung loại WITHDRAWAL_* -----
+  AFFILIATE_APPROVED: { email: true },
+  AFFILIATE_REJECTED: { email: true },
+  AFFILIATE_SUSPENDED: { email: true },
+  AFFILIATE_RESTORED: { email: true },
+  AFFILIATE_ORDER: { email: false },
   // ----- Cả hai bên: chat (một thông báo khi cuộc trò chuyện có tin chưa đọc đầu tiên) -----
   CHAT_MESSAGE: { email: false },
 } as const satisfies Record<string, { email: boolean }>;

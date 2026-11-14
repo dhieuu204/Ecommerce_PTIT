@@ -25,7 +25,10 @@ const MENU: ConsoleMenuGroup[] = [
   },
   {
     title: 'Marketing',
-    items: [{ to: '/kenh-nguoi-ban/voucher', label: 'Voucher của shop' }],
+    items: [
+      { to: '/kenh-nguoi-ban/voucher', label: 'Voucher của shop' },
+      { to: '/kenh-nguoi-ban/tiep-thi-lien-ket', label: 'Tiếp thị liên kết' },
+    ],
   },
   {
     title: 'Tài chính',

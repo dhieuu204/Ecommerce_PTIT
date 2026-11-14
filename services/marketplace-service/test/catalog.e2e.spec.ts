@@ -251,6 +251,7 @@ describeDb('Xem hàng công khai (CAT-04, SRC-01)', () => {
       });
       const res = await t.http().get(`${API}/products/${p.iphone!.id}`).expect(200);
       expect(res.body).toEqual({
+        commissionRate: null,
         id: p.iphone!.id,
         name: 'Điện thoại iPhone 16 Pro Max',
         description: 'Hàng chính hãng VN/A, nguyên seal, bảo hành 12 tháng.',

@@ -1,4 +1,5 @@
 import {
+  IconAffiliate,
   IconArrowBackUp,
   IconBell,
   IconBuildingStore,
@@ -17,6 +18,7 @@ function iconFor(type: string): React.ComponentType<{ className?: string }> {
   if (type === 'CHAT_MESSAGE') return IconMessageCircle;
   if (type === 'REFUND_DONE') return IconWallet;
   if (type.startsWith('WITHDRAWAL')) return IconCash;
+  if (type.startsWith('AFFILIATE')) return IconAffiliate;
   if (type.startsWith('DISPUTE')) return IconScale;
   if (type.includes('RETURN')) return IconArrowBackUp;
   if (type.startsWith('SHOP_ORDER') || type.startsWith('ORDER')) return IconPackage;

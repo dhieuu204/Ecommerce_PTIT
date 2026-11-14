@@ -59,7 +59,7 @@ describeDb('Hậu mãi và rút tiền (P5: REF-02, FIN-02..06, DIS-02)', () => 
       where: { shopOrderId: p.shopOrders[0]!.shopOrderId },
     });
   const walletA = (p: OrderPlacedPayload) =>
-    t.prisma.sellerWallet.findUniqueOrThrow({ where: { shopId: p.shopOrders[0]!.shopId } });
+    t.prisma.wallet.findUniqueOrThrow({ where: { shopId: p.shopOrders[0]!.shopId } });
 
   /** Đơn 2 shop, chủ shop A là `sellerA`; trả trước thì đã thanh toán */
   async function order(method: 'VNPAY' | 'COD' = 'VNPAY'): Promise<OrderPlacedPayload> {
@@ -158,8 +158,8 @@ describeDb('Hậu mãi và rút tiền (P5: REF-02, FIN-02..06, DIS-02)', () => 
 
   /** Tổng các dòng lịch sử ví theo ngăn phải khớp số dư */
   async function expectLedgerMatches(shopId: string) {
-    const w = await t.prisma.sellerWallet.findUniqueOrThrow({ where: { shopId } });
-    const rows = await t.prisma.walletTransaction.findMany({ where: { shopId } });
+    const w = await t.prisma.wallet.findUniqueOrThrow({ where: { shopId } });
+    const rows = await t.prisma.walletTransaction.findMany({ where: { wallet: { shopId } } });
     const bucket = (b: 'PENDING' | 'AVAILABLE' | 'LOCKED') =>
       rows.reduce(
         (a, r) => a + (r.toBucket === b ? r.amount : 0) - (r.fromBucket === b ? r.amount : 0),
@@ -390,10 +390,10 @@ describeDb('Hậu mãi và rút tiền (P5: REF-02, FIN-02..06, DIS-02)', () => 
       const [ev2] = await outbox(t.prisma, WITHDRAWAL_REQUESTED);
       expect(ev2).toMatchObject({
         withdrawalId: res.body.id,
-        owner: { userId: sellerA.id },
+        owner: { type: 'SHOP', shopId: p.shopOrders[0]!.shopId, userId: sellerA.id },
         amount: 100_000,
         bankAccount: { accountNumberMasked: '•••• 6789' },
-        wallet: { available: SELLER_A - 100_000, locked: 100_000 },
+        balances: { available: SELLER_A - 100_000, locked: 100_000 },
       });
       // Gửi lại cùng mã: trả yêu cầu cũ; mã khác khi đang có yêu cầu: chặn
       expect((await withdraw(100_000, key).expect(201)).body.id).toBe(res.body.id);
@@ -592,7 +592,17 @@ describeDb('Hậu mãi và rút tiền (P5: REF-02, FIN-02..06, DIS-02)', () => 
         .expect(200);
 
       const events = await outbox(t.prisma, WITHDRAWAL_UPDATED);
-      const base = { shopId, ownerId: sellerA.id, amount: 100_000 };
+      const base = {
+        owner: {
+          type: 'SHOP',
+          shopId,
+          affiliateId: null,
+          userId: sellerA.id,
+          name: sellerA.name,
+          displayName: 'Shop A',
+        },
+        amount: 100_000,
+      };
       expect(events).toEqual([
         {
           ...base,

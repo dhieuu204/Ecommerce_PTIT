@@ -1,4 +1,5 @@
 import {
+  IconAffiliate,
   IconArrowBackUp,
   IconArrowDownLeft,
   IconArrowsLeftRight,
@@ -208,7 +209,11 @@ export function SellerFinanceView({ data }: { data: SellerFinanceReport }) {
           icon={IconCashBanknote}
           label="Tiền shop nhận"
           value={formatMoney(s.sellerReceives)}
-          hint="Sau phí sàn và trả hàng"
+          hint={
+            s.affiliateCommission > 0
+              ? 'Sau phí sàn, hoa hồng CTV và trả hàng'
+              : 'Sau phí sàn và trả hàng'
+          }
         />
         <StatTile
           icon={IconPercentage}
@@ -234,6 +239,14 @@ export function SellerFinanceView({ data }: { data: SellerFinanceReport }) {
           value={formatMoney(s.withdrawn)}
           hint="Đã chuyển khoản cho shop"
         />
+        {s.affiliateCommission > 0 && (
+          <StatTile
+            icon={IconAffiliate}
+            label="Hoa hồng cộng tác viên"
+            value={formatMoney(s.affiliateCommission)}
+            hint="Đơn qua link CTV, đã trừ trả hàng"
+          />
+        )}
       </div>
 
       <ReportSection title="Tiền theo ngày" description="Tiền shop nhận và khoản hoàn từng ngày">
@@ -309,6 +322,27 @@ export function AdminFinanceView({ data }: { data: AdminFinanceReport }) {
           </div>
         </div>
       </div>
+
+      <ReportSection
+        title="Cộng tác viên"
+        description="Hoa hồng do shop trả, sàn chỉ giữ hộ rồi chi cho cộng tác viên."
+        bodyClassName="grid gap-3 sm:grid-cols-3"
+      >
+        {(
+          [
+            ['Hoa hồng của đơn ghi nhận', s.affiliateCommission],
+            ['Phải trả cộng tác viên (hiện tại)', s.payableToAffiliates],
+            ['Đã chi cho cộng tác viên', s.paidToAffiliates],
+          ] as const
+        ).map(([label, value]) => (
+          <div key={label} className="rounded-xl bg-page px-4 py-3">
+            <div className="text-xs text-ink/60">{label}</div>
+            <div className="mt-1 text-lg font-bold text-charcoal tabular-nums">
+              {formatMoney(value)}
+            </div>
+          </div>
+        ))}
+      </ReportSection>
 
       <ReportSection
         title="Dòng tiền theo ngày"

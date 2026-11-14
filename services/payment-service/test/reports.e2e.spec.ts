@@ -108,10 +108,10 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
   ) {
     await t.prisma.withdrawal.create({
       data: {
-        shopId,
+        wallet: { connect: { shopId } },
         ownerId,
         ownerName: 'Chủ shop',
-        shopName: 'Shop',
+        displayName: 'Shop',
         amount,
         status,
         bankName: 'Vietcombank',
@@ -131,7 +131,7 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
   ) {
     await t.prisma.walletTransaction.create({
       data: {
-        shopId,
+        wallet: { connect: { shopId } },
         type,
         amount,
         fromBucket: type === 'RELEASED' ? 'PENDING' : null,
@@ -148,7 +148,7 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
    * Shop B: 1 đơn ghi nhận.
    */
   async function seed() {
-    await t.prisma.sellerWallet.create({
+    await t.prisma.wallet.create({
       data: {
         shopId: shopA,
         ownerId: sellerA.id,
@@ -157,7 +157,7 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
         locked: 20_000,
       },
     });
-    await t.prisma.sellerWallet.create({
+    await t.prisma.wallet.create({
       data: { shopId: shopB, ownerId: sellerB.id, available: 30_000 },
     });
     // 00:00 ngày 01/10: trả trước đã thu
@@ -265,6 +265,7 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
       refunded: 200_000,
       // 10.000 + (15.000 − 5.000); đơn bị hủy không tính
       platformFee: 20_000,
+      affiliateCommission: 0,
       // 170.000 + (285.000 − 95.000)
       sellerReceives: 360_000,
       released: 70_000,
@@ -297,6 +298,7 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
       orderValue: 500_000,
       refunded: 0,
       platformFee: 25_000,
+      affiliateCommission: 0,
       sellerReceives: 475_000,
       released: 0,
       withdrawn: 60_000,
@@ -337,6 +339,9 @@ describeDb('Báo cáo tài chính (P6: RPT-02)', () => {
       platformFee: 45_000,
       payableToSellers: 200_000,
       paidToSellers: 100_000,
+      affiliateCommission: 0,
+      payableToAffiliates: 0,
+      paidToAffiliates: 0,
     });
     expect(r.payable).toEqual({
       pending: 100_000,

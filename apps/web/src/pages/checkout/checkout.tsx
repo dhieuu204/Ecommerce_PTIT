@@ -43,6 +43,7 @@ import type {
   PaymentMethod,
   PlacedOrder,
 } from '@/lib/order-types';
+import { affiliateClickIds } from '@/lib/affiliate-link';
 import { cn } from '@/lib/utils';
 import { VariantPopover } from '@/pages/cart/variant-switcher';
 import {
@@ -248,7 +249,8 @@ export function CheckoutPage() {
     try {
       order = await api<PlacedOrder>(`${API.market}/orders`, {
         method: 'POST',
-        body: { checkoutId: data.checkoutId },
+        // P7: lượt bấm link cộng tác viên còn hạn (đơn có CTV thì shop trả hoa hồng, người mua không đổi gì)
+        body: { checkoutId: data.checkoutId, affiliateClickIds: affiliateClickIds() },
       });
     } catch (e) {
       setPlacing(null);

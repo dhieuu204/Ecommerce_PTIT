@@ -2,19 +2,32 @@
 
 import type { BankAccount } from './shop';
 
-/** payment-service → approval-service: seller gửi yêu cầu rút, tiền đã chuyển sang ngăn đang khóa. */
+/** Chủ ví (P7): shop hoặc cộng tác viên. Đúng một trong shopId, affiliateId có giá trị */
+export interface WalletOwner {
+  type: 'SHOP' | 'AFFILIATE';
+  shopId: string | null;
+  affiliateId: string | null;
+  /** Tài khoản của chủ shop hoặc của CTV: approval-service chặn admin tự duyệt yêu cầu của mình */
+  userId: string;
+  /** Tên người (chủ shop hoặc CTV) */
+  name: string;
+  /** Tên hiển thị của ví: tên shop hoặc tên CTV */
+  displayName: string;
+}
+
+/**
+ * payment-service → approval-service: chủ ví gửi yêu cầu rút, tiền đã chuyển sang ngăn đang khóa.
+ * Version 2 (P7): thay shopId, shopName bằng owner; wallet đổi tên thành balances.
+ */
 export const WITHDRAWAL_REQUESTED = 'withdrawal.requested';
 export interface WithdrawalRequestedPayload {
   withdrawalId: string;
-  shopId: string;
-  shopName: string;
-  /** Chủ shop: approval-service chặn admin là chủ shop tự duyệt */
-  owner: { userId: string; name: string };
+  owner: WalletOwner;
   amount: number;
   /** Chỉ gửi 4 số cuối của số tài khoản */
   bankAccount: { bankName: string; accountNumberMasked: string; accountName: string };
   /** Số dư ví sau khi khóa */
-  wallet: { pending: number; available: number; locked: number };
+  balances: { pending: number; available: number; locked: number };
   requestedAt: string;
 }
 
@@ -69,15 +82,14 @@ export interface AdjustmentExecutedPayload {
 }
 
 /**
- * payment-service → marketplace-service (P6, MSG-02): yêu cầu rút tiền đổi trạng thái sau khi seller gửi,
- * để marketplace báo cho chủ shop (trong app và email).
+ * payment-service → marketplace-service (P6, MSG-02): yêu cầu rút tiền đổi trạng thái sau khi gửi,
+ * để marketplace báo cho chủ ví (trong app và email). Version 2 (P7): thay shopId, ownerId bằng owner.
  */
 export const WITHDRAWAL_UPDATED = 'withdrawal.updated';
 export interface WithdrawalUpdatedPayload {
   withdrawalId: string;
-  shopId: string;
-  /** Chủ shop nhận thông báo */
-  ownerId: string;
+  /** Chủ ví nhận thông báo */
+  owner: WalletOwner;
   amount: number;
   status: 'APPROVED' | 'REJECTED' | 'PAID' | 'FAILED';
   /** Lý do khi REJECTED hoặc FAILED */

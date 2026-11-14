@@ -24,6 +24,8 @@ interface ConsoleLayoutProps {
   menuNote?: string;
   /** Thông báo đầu mọi trang của khu, ví dụ "Shop đang bị đình chỉ" */
   notice?: React.ReactNode;
+  /** Trang đầu của khu (bấm tên khu trên header); mặc định theo tone */
+  homeTo?: string;
 }
 
 function MenuList({
@@ -89,6 +91,7 @@ export function ConsoleLayout({
   headerInfo,
   menuNote,
   notice,
+  homeTo,
 }: ConsoleLayoutProps) {
   const [open, setOpen] = useState(false);
   const dark = tone === 'admin';
@@ -120,7 +123,7 @@ export function ConsoleLayout({
           </Sheet>
           <BrandLogo to="/" tone={dark ? 'inverse' : 'dark'} className="hidden sm:inline-flex" />
           <Link
-            to={dark ? '/quan-tri' : '/kenh-nguoi-ban'}
+            to={homeTo ?? (dark ? '/quan-tri' : '/kenh-nguoi-ban')}
             className="flex items-center gap-2 text-sm font-medium"
           >
             <span className={cn('hidden sm:inline', dark ? 'text-white/40' : 'text-border')}>

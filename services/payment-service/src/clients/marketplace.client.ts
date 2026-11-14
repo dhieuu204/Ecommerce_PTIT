@@ -10,6 +10,13 @@ export interface MyShopInfo {
   shop: { id: string; name: string | null; bankAccount: BankAccount | null } | null;
 }
 
+/** Hồ sơ cộng tác viên của người gọi (phần dùng tới từ GET /affiliates/me, P7) */
+export interface MyAffiliateInfo {
+  /** NONE: chưa đăng ký; ACTIVE: đang hoạt động; SUSPENDED: bị khóa... */
+  status: string;
+  affiliate: { id: string; displayName: string; bankAccount: BankAccount } | null;
+}
+
 /**
  * Gọi marketplace-service lấy hồ sơ shop của seller (tài khoản ngân hàng đang dùng) khi seller rút tiền,
  * chuyển kèm vé đăng nhập của seller (mặc định ERD: marketplace giữ tài khoản ngân hàng trong hồ sơ shop).
@@ -21,9 +28,18 @@ export class MarketplaceClient {
   constructor(private readonly config: AppConfig) {}
 
   async myShop(authorization: string): Promise<MyShopInfo> {
+    return this.get<MyShopInfo>(authorization, '/shops/me');
+  }
+
+  /** Hồ sơ CTV đang dùng (tài khoản nhận tiền) khi CTV rút tiền (P7) */
+  async myAffiliate(authorization: string): Promise<MyAffiliateInfo> {
+    return this.get<MyAffiliateInfo>(authorization, '/affiliates/me');
+  }
+
+  private async get<T>(authorization: string, path: string): Promise<T> {
     let res: Response;
     try {
-      res = await fetch(`${this.config.marketplaceApiUrl}/shops/me`, {
+      res = await fetch(`${this.config.marketplaceApiUrl}${path}`, {
         headers: { Authorization: authorization },
         signal: AbortSignal.timeout(10_000),
       });
@@ -31,7 +47,7 @@ export class MarketplaceClient {
       this.logger.error(`Không gọi được marketplace-service: ${(e as Error).message}`);
       throw unavailable();
     }
-    if (res.ok) return (await res.json()) as MyShopInfo;
+    if (res.ok) return (await res.json()) as T;
     if (res.status >= 400 && res.status < 500) {
       const err = (await res.json().catch(() => null)) as ErrorBody | null;
       if (err?.code) throw new AppError(res.status, err.code, err.message, err.details);
@@ -45,6 +61,6 @@ function unavailable(): AppError {
   return new AppError(
     503,
     'MARKETPLACE_SERVICE_UNAVAILABLE',
-    'Chưa lấy được thông tin shop, bạn thử lại sau ít phút.',
+    'Chưa lấy được tài khoản nhận tiền, bạn thử lại sau ít phút.',
   );
 }

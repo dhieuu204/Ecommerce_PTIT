@@ -18,6 +18,7 @@ import {
   PHONE_PATTERN,
   SubmitButton,
 } from '@/components/form-bits';
+import { CardNameInput } from '@/components/bank-account-fields';
 import { LocationFields } from '@/components/location-fields';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -487,23 +488,6 @@ function useActiveSection() {
 }
 
 /** Ô tên chủ tài khoản: tự viết hoa, bỏ dấu, giữ vị trí con trỏ */
-function CardNameInput({ onChange, className, ...props }: React.ComponentProps<'input'>) {
-  return (
-    <input
-      autoComplete="off"
-      className={cn(inputClass, 'uppercase', className)}
-      {...props}
-      onChange={(e) => {
-        const el = e.target;
-        const pos = el.selectionStart;
-        el.value = toCardName(el.value);
-        if (pos !== null) el.setSelectionRange(pos, pos);
-        onChange?.(e);
-      }}
-    />
-  );
-}
-
 /** Tải logo: bấm ô vuông chọn ảnh, tải lên ngay (POST /uploads/shop-logo) rồi hiện ảnh xem trước */
 function LogoUpload({
   focusRef,

@@ -68,6 +68,7 @@ Chưa bắt buộc tạo thêm 4 tên role đăng nhập. Tuy vậy, hệ thốn
 | **P4 — Giao & đối soát** | Seller xử lý, carrier, COD, thất bại/giao lại/hoàn kiện, sổ tiền, điều kiện ghi tiền seller. | Theo dõi đầy đủ hàng và tiền; COD chưa đối soát không được coi là đã về sàn. |
 | **P5 — Hậu mãi & rút tiền** | Trả hàng, tranh chấp, hoàn một phần, giữ tiền khi có hồ sơ, rút/chi trả và đối soát. | Một hồ sơ trả hàng chạy tới kết thúc; một yêu cầu rút có nguồn tiền, quyết định và kết quả thực hiện rõ. |
 | **P6 — Trải nghiệm & hoàn thiện** | Chat, thông báo, đánh giá, theo dõi, báo cáo, tối ưu tìm kiếm, kiểm thử tổng hợp. | Buyer/seller/admin dùng được trọn vòng đời; đủ bằng chứng nghiệm thu. |
+| **P7 — Cộng tác viên (mở rộng)** | Link tiếp thị một cấp: đăng ký và duyệt CTV, shop đặt hoa hồng, gắn đơn, ví và rút tiền của CTV (quyết định ở `docs/phan-tich/14-quyet-dinh-p7-affiliate.md`). | CTV lấy link → người mua đặt qua link → đơn hoàn tất → hoa hồng khả dụng → CTV rút tiền; trả hàng một phần tính lại hoa hồng. |
 
 **Kiểm thử và Kubernetes làm xuyên suốt:** P1 dựng deployment cơ bản và CI; mỗi giai đoạn bổ sung kiểm thử luồng và lỗi liên service. P6 tổng hợp demo chịu lỗi, không đợi đến P6 mới thử deploy.
 
@@ -180,6 +181,17 @@ Mỗi ID là đầu mục backlog để liên kết với sơ đồ và test. C�
 | RPT-02 | Báo cáo tài chính | Seller/Admin tài chính | P | P6 | Phân biệt giá trị đơn, tiền thực thu, khoản hoàn, trợ giá, phí và khoản phải trả seller. |
 
 ADM-01/02 là nhóm đầu việc xuyên service, không phải dữ liệu chung cho ai cũng sửa. Khi chia task phải tách theo chủ sở hữu cụ thể.
+
+### 5.9. Cộng tác viên (P7)
+
+| ID | Chức năng | Người dùng | Service | Giai đoạn | Hoàn thành khi |
+| --- | --- | --- | --- | --- | --- |
+| AFF-01 | Đăng ký, duyệt, khóa/mở cộng tác viên | Người dùng/Admin kiểm duyệt | M/A | P7 | Mỗi tài khoản một hồ sơ; admin không tự duyệt hồ sơ của mình; quyết định cũ tới sau không ghi đè quyết định mới. |
+| AFF-02 | Shop đặt hoa hồng sản phẩm | Seller | M | P7 | % nằm trong khoảng sàn cho phép; đổi % chỉ áp cho đơn đặt sau đó. |
+| AFF-03 | Link tiếp thị và lượt bấm | CTV/Buyer | M | P7 | Link mở đúng trang; lượt bấm có hạn; mã sai hoặc CTV bị khóa không làm hỏng trang. |
+| AFF-04 | Gắn đơn và tính hoa hồng | Hệ thống | M/P | P7 | Đúng CTV bấm gần nhất; tự mua hoặc chủ shop không có hoa hồng; đúng khi hủy, giao thất bại, trả hàng một phần. |
+| AFF-05 | Ví CTV và rút tiền | CTV/Admin tài chính | P/A | P7 | Tiền CTV đi cùng nhịp tiền seller; rút qua luồng duyệt và chi trả có sẵn; số dư không âm. |
+| AFF-06 | Khu Cộng tác viên và báo cáo | CTV/Seller | M/P | P7 | CTV thấy lượt bấm, đơn, hoa hồng theo ngày; seller thấy đơn qua CTV và hoa hồng phải trả. |
 
 ## 6. Bộ sơ đồ cần tạo và thứ tự
 

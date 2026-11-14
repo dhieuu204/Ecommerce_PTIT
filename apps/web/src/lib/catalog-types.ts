@@ -73,6 +73,8 @@ export interface ProductImage {
 /** GET /products/{productId} */
 export interface ProductDetail {
   id: string;
+  /** Hoa hồng cộng tác viên (P7, phần vạn); null = shop không bật */
+  commissionRate: number | null;
   name: string;
   description: string;
   status: 'ACTIVE';
@@ -178,6 +180,8 @@ export interface SellerProductRow {
   soldCount: number;
   categoryName: string;
   updatedAt: string;
+  /** Hoa hồng cộng tác viên (P7, phần vạn); null = không bật */
+  commissionRate: number | null;
 }
 
 export interface SellerVariant {

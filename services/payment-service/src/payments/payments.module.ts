@@ -12,10 +12,15 @@ import { CodReconciliationService } from '../reconciliation/cod-reconciliation.s
 import { ReconciliationController } from '../reconciliation/reconciliation.controller';
 import { VnpayReconciliationService } from '../reconciliation/vnpay-reconciliation.service';
 import { SellerWalletService } from '../wallet/seller-wallet.service';
-import { AdminWalletController, WalletController } from '../wallet/wallet.controller';
+import {
+  AdminWalletController,
+  AffiliateWalletController,
+  WalletController,
+} from '../wallet/wallet.controller';
 import { WalletService } from '../wallet/wallet.service';
 import {
   AdminWithdrawalsController,
+  AffiliateWithdrawalsController,
   SellerWithdrawalsController,
 } from '../withdrawals/withdrawals.controller';
 import { WithdrawalsService } from '../withdrawals/withdrawals.service';
@@ -35,9 +40,11 @@ import { PaymentsService } from './payments.service';
     AdminPaymentsController,
     RefundsController,
     WalletController,
+    AffiliateWalletController,
     AdminWalletController,
     ReconciliationController,
     SellerWithdrawalsController,
+    AffiliateWithdrawalsController,
     AdminWithdrawalsController,
   ],
   providers: [

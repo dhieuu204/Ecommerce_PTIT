@@ -32,6 +32,21 @@ export interface PlacedShopOrder {
   /** Buyer trả cho đơn con này = subtotal - shopDiscount - platformDiscount + shippingFee */
   total: number;
   items: PlacedOrderItem[];
+  /**
+   * Cộng tác viên của đơn con (P7, AFF-04); null hoặc thiếu = không có. `commission` = tổng hoa hồng
+   * các dòng, shop trả, trừ vào tiền seller nhận
+   */
+  affiliate?: PlacedAffiliate | null;
+}
+
+/** CTV gắn với đơn con lúc đặt (P7) */
+export interface PlacedAffiliate {
+  affiliateId: string;
+  /** Tài khoản của CTV (chủ ví CTV bên payment-service) */
+  userId: string;
+  /** Tên hiển thị của CTV */
+  name: string;
+  commission: number;
 }
 
 /** marketplace-service → payment-service, approval-service: buyer đặt hàng thành công. */

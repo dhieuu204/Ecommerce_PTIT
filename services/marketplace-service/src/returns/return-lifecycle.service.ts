@@ -15,6 +15,7 @@ import {
   SYSTEM_USER_ID,
   type Actor,
 } from '../orders/order-lifecycle.service';
+import { returnedCommission } from '../affiliates/commission';
 import { Notifier } from '../notifications/notifier.service';
 import { MarketSetting } from '../settings';
 import { ShipmentsService, type ReturnShipmentEvent } from '../shipping/shipments.service';
@@ -682,6 +683,12 @@ export class ReturnLifecycle implements OnModuleInit {
     platformCovers: boolean,
     at: Date,
   ): Promise<void> {
+    // P7: hoa hồng CTV của các món trả, payment-service trừ theo cùng tỉ lệ với tiền seller
+    const lines = await tx.orderItem.findMany({
+      where: { id: { in: ret.items.map((i) => i.orderItemId) } },
+      select: { id: true, quantity: true, commission: true },
+    });
+    const commissionBase = returnedCommission(lines, ret.items);
     await this.events.publish(tx, RETURN_RESOLVED, {
       returnId: ret.id,
       code: ret.code,
@@ -691,6 +698,7 @@ export class ReturnLifecycle implements OnModuleInit {
       refundAmount: amount,
       maxRefundAmount: ret.refundAmount,
       sellerBase: ret.sellerBase,
+      commissionBase,
       platformCovers,
       bankAccount:
         ret.bankName && ret.bankAccountNumber && ret.bankAccountName

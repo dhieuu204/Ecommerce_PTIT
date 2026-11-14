@@ -201,6 +201,8 @@ model Product {
   removedReason String?                  @map("removed_reason") @db.VarChar(500)
   /// Thời điểm của quyết định gỡ/khôi phục đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua (P6)
   moderatedAt   DateTime?                @map("moderated_at") @db.Timestamptz(3)
+  /// Hoa hồng cộng tác viên theo phần vạn (500 = 5%), shop đặt (P7, AFF-02). Trống = không bật
+  commissionRate Int?                    @map("commission_rate")
   createdAt     DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
   /// Từ khóa tìm kiếm đã bỏ dấu, PostgreSQL tự tính từ tên (cột GENERATED viết tay trong migration p2)
@@ -568,6 +570,12 @@ model ShopOrder {
   returnCloseBefore   DateTime?         @map("return_close_before") @db.Timestamptz(3)
   /// Ghi chú khi admin xác nhận sự cố GHN
   incidentNote        String?           @map("incident_note") @db.VarChar(500)
+  // ----- P7: cộng tác viên -----
+  /// CTV của đơn con (gắn lúc đặt theo lượt bấm mới nhất), trống = không có
+  affiliateId         String?           @map("affiliate_id") @db.Uuid
+  affiliateClickId    String?           @map("affiliate_click_id") @db.Uuid
+  /// Tổng hoa hồng các dòng (shop trả)
+  commission          Int               @default(0)
   createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -579,8 +587,10 @@ model ShopOrder {
   shipments     Shipment[]
   /// Yêu cầu trả hàng (P5), mỗi đơn con tối đa một
   returnRequest ReturnRequest?
+  affiliate     Affiliate?     @relation(fields: [affiliateId], references: [id])
 
   @@index([orderId])
+  @@index([affiliateId, createdAt])
   @@index([shopId, status, createdAt])
   @@index([status, confirmBefore])
   @@map("shop_orders")
@@ -605,6 +615,9 @@ model OrderItem {
   discount         Int     @default(0)
   /// Số món đã được hoàn đủ tiền do trả hàng (P5)
   returnedQuantity Int     @default(0) @map("returned_quantity")
+  /// Hoa hồng CTV chụp lúc đặt (P7): tỉ lệ phần vạn và số tiền của dòng; 0 = không có
+  commissionRate   Int     @default(0) @map("commission_rate")
+  commission       Int     @default(0)
 
   shopOrder   ShopOrder      @relation(fields: [shopOrderId], references: [id])
   variant     ProductVariant @relation(fields: [variantId], references: [id])
@@ -1003,6 +1016,71 @@ model Notification {
   @@index([userId, createdAt])
   @@index([userId, readAt])
   @@map("notifications")
+}
+
+// ===== Cộng tác viên (P7: AFF-01..06) =====
+
+enum AffiliateStatus {
+  /// Đã nộp hồ sơ, chờ admin duyệt
+  PENDING
+  /// Hồ sơ bị từ chối, sửa và nộp lại
+  REJECTED
+  /// Đang hoạt động: có mã CTV, link tính đơn
+  ACTIVE
+  /// Admin khóa: link không tính đơn mới, không rút tiền
+  SUSPENDED
+}
+
+/// Cộng tác viên: mỗi tài khoản tối đa một hồ sơ. Mỗi lần nộp lại tăng version (như hồ sơ shop)
+model Affiliate {
+  id                String          @id @default(uuid()) @db.Uuid
+  /// Tài khoản (userId bên user-service)
+  userId            String          @unique @map("user_id") @db.Uuid
+  /// Mã CTV trong link (?aff=), sinh khi được duyệt lần đầu, không đổi
+  code              String?         @unique @db.VarChar(8)
+  status            AffiliateStatus @default(PENDING)
+  version           Int             @default(1)
+  displayName       String          @map("display_name") @db.VarChar(60)
+  /// Đường dẫn kênh bán hàng, 1–3 kênh
+  channels          String[]
+  phone             String          @db.VarChar(10)
+  bankName          String          @map("bank_name") @db.VarChar(100)
+  bankAccountNumber String          @map("bank_account_number") @db.VarChar(30)
+  bankAccountName   String          @map("bank_account_name") @db.VarChar(100)
+  rejectReason      String?         @map("reject_reason") @db.VarChar(500)
+  suspendReason     String?         @map("suspend_reason") @db.VarChar(500)
+  /// Idempotency-Key của lần nộp gần nhất: gửi lại cùng key thì trả hồ sơ hiện tại
+  requestKey        String          @unique @map("request_key") @db.VarChar(64)
+  /// Thời điểm của quyết định khóa/mở đã áp dụng: sự kiện cũ hơn tới sau thì bỏ qua
+  moderatedAt       DateTime?       @map("moderated_at") @db.Timestamptz(3)
+  approvedAt        DateTime?       @map("approved_at") @db.Timestamptz(3)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  clicks     AffiliateClick[]
+  shopOrders ShopOrder[]
+
+  @@index([status, createdAt])
+  @@map("affiliates")
+}
+
+/// Lượt bấm link tiếp thị. Đơn đặt trong hạn được tính cho CTV có lượt bấm mới nhất của shop đó
+model AffiliateClick {
+  id          String   @id @default(uuid()) @db.Uuid
+  affiliateId String   @map("affiliate_id") @db.Uuid
+  shopId      String   @map("shop_id") @db.Uuid
+  /// Trống với link shop
+  productId   String?  @map("product_id") @db.Uuid
+  /// Người bấm nếu đang đăng nhập (đổi máy vẫn tính)
+  userId      String?  @map("user_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id])
+
+  @@index([affiliateId, createdAt])
+  @@index([userId, shopId, createdAt])
+  @@map("affiliate_clicks")
 }
 
 model Setting {

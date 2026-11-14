@@ -38,6 +38,11 @@ export interface ReturnResolvedPayload {
   maxRefundAmount: number;
   /** Tiền hàng sau voucher shop của các món trả (phần trừ tiền seller khi hoàn toàn bộ) */
   sellerBase: number;
+  /**
+   * Tổng hoa hồng CTV của các món trả (P7); 0 hoặc thiếu = đơn không có CTV. payment trừ hoa hồng
+   * theo cùng tỉ lệ với phần trừ tiền seller
+   */
+  commissionBase?: number;
   /** true: sàn chịu (kiện trả bị GHN làm thất lạc), không trừ tiền seller */
   platformCovers: boolean;
   /** Tài khoản nhận tiền hoàn của đơn COD; null với đơn trả trước (hoàn qua cổng) */

@@ -93,6 +93,53 @@ export class SellerWithdrawalsController {
   }
 }
 
+/** Rút tiền của cộng tác viên (P7, AFF-05): như của shop, tài khoản nhận lấy từ hồ sơ CTV */
+@ApiTags('Ví cộng tác viên')
+@ApiBearerAuth()
+@Controller('affiliates/me/withdrawals')
+export class AffiliateWithdrawalsController {
+  constructor(private readonly withdrawals: WithdrawalsService) {}
+
+  @Get()
+  list(@CurrentUser() user: AuthUser, @Query() q: WithdrawalsQuery): Promise<Page<WithdrawalView>> {
+    return this.withdrawals.sellerList(user, q, 'AFFILIATE');
+  }
+
+  /** Gửi yêu cầu rút: khóa số tiền, chờ admin tài chính duyệt. Header Idempotency-Key bắt buộc */
+  @Post()
+  @HttpCode(201)
+  @ApiResponse({
+    status: 400,
+    description: 'IDEMPOTENCY_KEY_REQUIRED, VALIDATION_ERROR (dưới mức tối thiểu)',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'WITHDRAWAL_IN_PROGRESS; INSUFFICIENT_BALANCE (details.available); AFFILIATE_NOT_ACTIVE; IDEMPOTENCY_KEY_REUSED',
+  })
+  @ApiResponse({ status: 503, description: 'MARKETPLACE_SERVICE_UNAVAILABLE' })
+  create(
+    @CurrentUser() user: AuthUser,
+    @Headers('authorization') authorization: string,
+    @Headers('idempotency-key') key: string | undefined,
+    @Body() dto: CreateWithdrawalDto,
+  ): Promise<WithdrawalView> {
+    return this.withdrawals.request(user, authorization, dto.amount, key, 'AFFILIATE');
+  }
+
+  /** Hủy khi chưa duyệt: mở khóa tiền */
+  @Post(':withdrawalId/cancel')
+  @HttpCode(200)
+  @ApiResponse({ status: 409, description: 'WITHDRAWAL_NOT_CANCELLABLE' })
+  @ApiResponse({ status: 404, description: 'NOT_FOUND' })
+  cancel(
+    @CurrentUser() user: AuthUser,
+    @Param('withdrawalId', ParseIdPipe) id: string,
+  ): Promise<WithdrawalView> {
+    return this.withdrawals.cancel(user, id, 'AFFILIATE');
+  }
+}
+
 /** Chi trả rút tiền cho admin tài chính (FIN-06): chuyển khoản ngoài hệ thống, nhập chứng từ */
 @ApiTags('Admin: rút tiền')
 @ApiBearerAuth()

@@ -14,13 +14,14 @@ import type {
   EarningStatus,
   Prisma,
   SellerEarning,
-  SellerWallet,
+  Wallet,
   WalletBucket,
+  WalletOwnerType,
   WalletTransaction,
   WalletTxType,
   WithdrawalStatus,
 } from '../../generated/prisma';
-import { finalSellerAmount } from './wallet.service';
+import { finalCommission, finalSellerAmount } from './wallet.service';
 
 /** Yêu cầu rút đang xử lý (chờ duyệt hoặc chờ chuyển khoản) */
 export interface OpenWithdrawalView {
@@ -31,8 +32,12 @@ export interface OpenWithdrawalView {
 }
 
 export interface WalletView {
-  /** null: shop chưa có đơn nào (chưa có ví) */
+  /** null: chưa có đơn nào (chưa có ví) */
+  walletId: string | null;
+  /** Ví shop: mã shop; ví CTV: null */
   shopId: string | null;
+  /** Ví CTV (P7): mã CTV; ví shop: null */
+  affiliateId: string | null;
   pending: number;
   available: number;
   locked: number;
@@ -69,6 +74,10 @@ export interface EarningView {
   shopDiscount: number;
   platformFeeRate: number;
   platformFee: number;
+  /** Hoa hồng CTV shop trả (P7), đã trừ trong sellerAmount */
+  commission: number;
+  /** Hoa hồng được trả lại cho shop do trả hàng (P7) */
+  returnCommissionReversed: number;
   sellerAmount: number;
   /** Đã hoàn cho người mua do trả hàng (P5) */
   returnRefund: number;
@@ -88,9 +97,29 @@ export interface EarningView {
   createdAt: Date;
 }
 
-/** Ví của một shop cho admin tài chính: số dư, yêu cầu rút đang xử lý, biến động gần nhất (nguồn tiền) */
+/** Hoa hồng của một đơn con, CTV xem (P7, AFF-05). Không có thông tin người mua */
+export interface CommissionView {
+  shopOrderId: string;
+  shopOrderCode: string;
+  /** Hoa hồng chụp lúc đặt */
+  commission: number;
+  /** Bị trừ do trả hàng */
+  returnCommissionReversed: number;
+  /** CTV nhận cuối cùng (0 khi đơn hủy, giao thất bại, sự cố) */
+  receives: number;
+  status: EarningStatus;
+  waitingFor: string | null;
+  completedAt: Date | null;
+  releasedAt: Date | null;
+  createdAt: Date;
+}
+
+/** Ví cho admin tài chính: số dư, yêu cầu rút đang xử lý, biến động gần nhất (nguồn tiền) */
 export interface AdminWalletView {
-  shopId: string;
+  walletId: string;
+  ownerType: WalletOwnerType;
+  shopId: string | null;
+  affiliateId: string | null;
   ownerId: string;
   pending: number;
   available: number;
@@ -112,6 +141,8 @@ export interface ShopOrderMoneyView {
   buyerPaid: number;
   /** Tổng các khoản hoàn đã tạo cho đơn con */
   refunded: number;
+  /** Hoa hồng CTV của đơn con (P7) */
+  commission: number;
   sellerAmount: number;
   returnDeduction: number;
   sellerReceives: number;
@@ -119,7 +150,7 @@ export interface ShopOrderMoneyView {
   wallet: { pending: number; available: number; locked: number };
 }
 
-/** Lý do tiền đơn con chưa khả dụng, hiện cho seller */
+/** Lý do tiền đơn con chưa khả dụng, hiện cho seller và CTV */
 export function waitingFor(e: SellerEarning): string | null {
   if (e.status === 'UNPAID') {
     return e.paymentMethod === 'COD' ? 'Chờ giao hàng (COD)' : 'Chờ người mua thanh toán';
@@ -131,7 +162,10 @@ export function waitingFor(e: SellerEarning): string | null {
   return null;
 }
 
-/** Ví và tiền của shop cho chủ shop và admin tài chính xem (FIN-01, FIN-02, FIN-05) */
+/**
+ * Ví và tiền của shop hoặc cộng tác viên cho chủ ví và admin tài chính xem (FIN-01, FIN-02, FIN-05, P7).
+ * Nhận ra ví qua chủ ví (userId) và loại ví, nên ai cũng chỉ xem được ví của chính mình.
+ */
 @Injectable()
 export class SellerWalletService {
   constructor(
@@ -139,12 +173,14 @@ export class SellerWalletService {
     private readonly settings: SettingsService,
   ) {}
 
-  async wallet(user: AuthUser): Promise<WalletView> {
+  async wallet(user: AuthUser, ownerType: WalletOwnerType = 'SHOP'): Promise<WalletView> {
     const withdrawMin = await this.settings.get(PaymentSetting.withdrawMinAmount);
-    const w = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+    const w = await this.myWallet(user.id, ownerType);
     if (!w) {
       return {
+        walletId: null,
         shopId: null,
+        affiliateId: null,
         pending: 0,
         available: 0,
         locked: 0,
@@ -156,12 +192,15 @@ export class SellerWalletService {
       };
     }
     const held = await this.prisma.sellerEarning.findMany({
-      where: { shopId: w.shopId, status: 'HELD' },
+      where: { ...earningsOf(w), status: 'HELD' },
     });
-    const sum = (list: SellerEarning[]) => list.reduce((a, e) => a + finalSellerAmount(e), 0);
+    const amount = w.ownerType === 'SHOP' ? finalSellerAmount : finalCommission;
+    const sum = (list: SellerEarning[]) => list.reduce((a, e) => a + amount(e), 0);
     const notReturning = held.filter((e) => e.returnState !== 'OPEN');
     return {
+      walletId: w.id,
       shopId: w.shopId,
+      affiliateId: w.affiliateId,
       pending: w.pending,
       available: w.available,
       locked: w.locked,
@@ -169,14 +208,18 @@ export class SellerWalletService {
       pendingWaitingCod: sum(notReturning.filter((e) => e.completedAt && !e.moneyReceivedAt)),
       pendingWaitingReturn: sum(held.filter((e) => e.returnState === 'OPEN')),
       withdrawMin,
-      openWithdrawal: await this.openWithdrawal(w.shopId),
+      openWithdrawal: await this.openWithdrawal(w.id),
     };
   }
 
-  async transactions(user: AuthUser, q: PageQuery): Promise<Page<WalletTransactionView>> {
-    const w = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+  async transactions(
+    user: AuthUser,
+    q: PageQuery,
+    ownerType: WalletOwnerType = 'SHOP',
+  ): Promise<Page<WalletTransactionView>> {
+    const w = await this.myWallet(user.id, ownerType);
     if (!w) return toPage([], 0, q);
-    const where = { shopId: w.shopId };
+    const where = { walletId: w.id };
     const [rows, total] = await Promise.all([
       this.prisma.walletTransaction.findMany({
         where,
@@ -192,9 +235,9 @@ export class SellerWalletService {
     user: AuthUser,
     q: PageQuery & { status?: EarningStatus },
   ): Promise<Page<EarningView>> {
-    const w = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+    const w = await this.myWallet(user.id, 'SHOP');
     if (!w) return toPage([], 0, q);
-    const where: Prisma.SellerEarningWhereInput = { shopId: w.shopId };
+    const where: Prisma.SellerEarningWhereInput = { shopId: w.shopId! };
     if (q.status) where.status = q.status;
     const [rows, total] = await Promise.all([
       this.prisma.sellerEarning.findMany({
@@ -214,6 +257,8 @@ export class SellerWalletService {
         shopDiscount: e.shopDiscount,
         platformFeeRate: e.platformFeeRate,
         platformFee: e.platformFee,
+        commission: e.commission,
+        returnCommissionReversed: e.returnCommissionReversed,
         sellerAmount: e.sellerAmount,
         returnRefund: e.returnRefund,
         returnDeduction: e.returnDeduction,
@@ -232,28 +277,73 @@ export class SellerWalletService {
     );
   }
 
+  /** Hoa hồng từng đơn con của CTV (P7, AFF-05), mới nhất trước */
+  async commissions(
+    user: AuthUser,
+    q: PageQuery & { status?: EarningStatus },
+  ): Promise<Page<CommissionView>> {
+    const w = await this.myWallet(user.id, 'AFFILIATE');
+    if (!w) return toPage([], 0, q);
+    const where: Prisma.SellerEarningWhereInput = { affiliateId: w.affiliateId! };
+    if (q.status) where.status = q.status;
+    const [rows, total] = await Promise.all([
+      this.prisma.sellerEarning.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...skipTake(q),
+      }),
+      this.prisma.sellerEarning.count({ where }),
+    ]);
+    return toPage(
+      rows.map((e) => ({
+        shopOrderId: e.shopOrderId,
+        shopOrderCode: e.shopOrderCode,
+        commission: e.commission,
+        returnCommissionReversed: e.returnCommissionReversed,
+        receives: LOST.includes(e.status) ? 0 : finalCommission(e),
+        status: e.status,
+        waitingFor: waitingFor(e),
+        completedAt: e.completedAt,
+        releasedAt: e.releasedAt,
+        createdAt: e.createdAt,
+      })),
+      total,
+      q,
+    );
+  }
+
   // ----- admin tài chính -----
 
   /** Ví một shop và 20 biến động gần nhất (trang duyệt rút xem nguồn tiền) */
   async adminWallet(shopId: string): Promise<AdminWalletView> {
-    const w = await this.prisma.sellerWallet.findUnique({ where: { shopId } });
+    const w = await this.prisma.wallet.findUnique({ where: { shopId } });
     if (!w) throw new AppError(404, 'NOT_FOUND', 'Shop chưa có ví (chưa có đơn nào).');
     return this.adminWalletView(w);
   }
 
-  async adminWalletView(w: SellerWallet): Promise<AdminWalletView> {
+  /** Ví một CTV và 20 biến động gần nhất (P7) */
+  async adminAffiliateWallet(affiliateId: string): Promise<AdminWalletView> {
+    const w = await this.prisma.wallet.findUnique({ where: { affiliateId } });
+    if (!w) throw new AppError(404, 'NOT_FOUND', 'Cộng tác viên chưa có ví (chưa có đơn nào).');
+    return this.adminWalletView(w);
+  }
+
+  async adminWalletView(w: Wallet): Promise<AdminWalletView> {
     const rows = await this.prisma.walletTransaction.findMany({
-      where: { shopId: w.shopId },
+      where: { walletId: w.id },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 20,
     });
     return {
+      walletId: w.id,
+      ownerType: w.ownerType,
       shopId: w.shopId,
+      affiliateId: w.affiliateId,
       ownerId: w.ownerId,
       pending: w.pending,
       available: w.available,
       locked: w.locked,
-      openWithdrawal: await this.openWithdrawal(w.shopId),
+      openWithdrawal: await this.openWithdrawal(w.id),
       recentTransactions: await this.txViews(rows),
     };
   }
@@ -269,7 +359,7 @@ export class SellerWalletService {
         where: { shopOrderId: e.shopOrderId },
         _sum: { amount: true },
       }),
-      this.prisma.sellerWallet.findUniqueOrThrow({ where: { shopId: e.shopId } }),
+      this.prisma.wallet.findUniqueOrThrow({ where: { shopId: e.shopId } }),
     ]);
     return {
       shopOrderId: e.shopOrderId,
@@ -281,6 +371,7 @@ export class SellerWalletService {
       paymentMethod: e.paymentMethod,
       buyerPaid: e.buyerPaid,
       refunded: refunded._sum.amount ?? 0,
+      commission: e.commission,
       sellerAmount: e.sellerAmount,
       returnDeduction: e.returnDeduction,
       sellerReceives: finalSellerAmount(e),
@@ -289,12 +380,17 @@ export class SellerWalletService {
     };
   }
 
-  private async openWithdrawal(shopId: string): Promise<OpenWithdrawalView | null> {
-    const w = await this.prisma.withdrawal.findFirst({
-      where: { shopId, status: { in: ['PENDING', 'APPROVED'] } },
+  private myWallet(userId: string, ownerType: WalletOwnerType): Promise<Wallet | null> {
+    return this.prisma.wallet.findUnique({
+      where: { ownerType_ownerId: { ownerType, ownerId: userId } },
+    });
+  }
+
+  private async openWithdrawal(walletId: string): Promise<OpenWithdrawalView | null> {
+    return this.prisma.withdrawal.findFirst({
+      where: { walletId, status: { in: ['PENDING', 'APPROVED'] } },
       select: { id: true, amount: true, status: true, createdAt: true },
     });
-    return w;
   }
 
   private async txViews(rows: WalletTransaction[]): Promise<WalletTransactionView[]> {
@@ -321,4 +417,12 @@ export class SellerWalletService {
       createdAt: r.createdAt,
     }));
   }
+}
+
+/** Trạng thái tiền đơn con mà CTV không còn hoa hồng */
+const LOST: EarningStatus[] = ['EXPIRED', 'CANCELLED', 'FAILED', 'COMPENSATED'];
+
+/** Các đơn con có tiền vào ví này: ví shop theo shop, ví CTV theo CTV */
+function earningsOf(w: Wallet): Prisma.SellerEarningWhereInput {
+  return w.ownerType === 'SHOP' ? { shopId: w.shopId! } : { affiliateId: w.affiliateId! };
 }

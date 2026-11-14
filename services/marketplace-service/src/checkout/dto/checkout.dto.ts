@@ -67,4 +67,14 @@ export class PlaceOrderDto {
   /** Mã phiên nhận từ bước xem trước */
   @IsUUID('all', { message: 'Mã phiên đặt hàng không hợp lệ.' })
   checkoutId!: string;
+
+  /**
+   * Mã lượt bấm link tiếp thị trình duyệt đang giữ (P7, AFF-04), mỗi shop một mã. Mã sai hoặc hết hạn thì
+   * bỏ qua, không báo lỗi.
+   */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsUUID('all', { each: true, message: 'Mã lượt bấm không hợp lệ.' })
+  affiliateClickIds?: string[];
 }

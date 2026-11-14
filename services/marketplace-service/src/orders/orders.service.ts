@@ -180,6 +180,17 @@ export interface SellerOrderView {
   returnRequest: ReturnSummary | null;
   shipment: ShipmentView | null;
   history?: HistoryView[];
+  /** Đơn qua cộng tác viên (P7): shop trả hoa hồng, đã trừ trong sellerAmount */
+  affiliate: SellerAffiliateView | null;
+}
+
+/** CTV của đơn con, seller xem (không có tài khoản ngân hàng của CTV) */
+export interface SellerAffiliateView {
+  name: string;
+  /** Tổng hoa hồng chụp lúc đặt */
+  commission: number;
+  /** Hoa hồng từng dòng hàng (theo mã dòng) */
+  lines: Array<{ orderItemId: string; commissionRate: number; commission: number }>;
 }
 
 export interface SellerOrderPage extends Page<SellerOrderView> {
@@ -248,6 +259,7 @@ const sellerInclude = (detail: boolean) =>
     items: { orderBy: { id: 'asc' } },
     shipments: shipmentInclude(detail),
     returnRequest: returnSelect,
+    affiliate: { select: { displayName: true } },
     ...(detail ? { history: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } } : {}),
   }) satisfies Prisma.ShopOrderInclude;
 
@@ -870,6 +882,17 @@ export class OrdersService {
       returnRequest: so.returnRequest,
       shipment: this.shipmentView(so.shipments),
       ...(so.history ? { history: so.history.map(historyView) } : {}),
+      affiliate: so.affiliate
+        ? {
+            name: so.affiliate.displayName,
+            commission: so.commission,
+            lines: so.items.map((i) => ({
+              orderItemId: i.id,
+              commissionRate: i.commissionRate,
+              commission: i.commission,
+            })),
+          }
+        : null,
     };
   }
 }

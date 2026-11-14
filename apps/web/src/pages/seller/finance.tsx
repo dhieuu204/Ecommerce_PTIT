@@ -46,6 +46,37 @@ import { CARD } from '@/pages/checkout/checkout-parts';
 const PAGE_SIZE = 20;
 const walletKey = ['seller', 'wallet'] as const;
 
+/**
+ * Ví đang xem: của shop (Kênh người bán) hoặc của cộng tác viên (P7). Các phần số dư, lịch sử, rút tiền
+ * dùng chung, chỉ khác đường dẫn API, liên kết tới đơn và nơi lấy tài khoản nhận.
+ */
+export interface WalletScope {
+  /** Ví dụ `${API.payment}/shops/me` */
+  base: string;
+  queryKey: readonly string[];
+  /** Liên kết tới đơn con; null khi người xem không mở được đơn (CTV) */
+  orderHref: ((shopOrderId: string) => string) | null;
+  /** "shop" hoặc "bạn": dùng trong câu thông báo */
+  who: string;
+}
+
+export const SHOP_WALLET: WalletScope = {
+  base: `${API.payment}/shops/me`,
+  queryKey: walletKey,
+  orderHref: (id) => `/kenh-nguoi-ban/don-hang/${id}`,
+  who: 'shop',
+};
+
+/** Tài khoản nhận tiền hiện trong hộp rút tiền */
+export interface Payee {
+  account: { bankName: string; accountNumber: string; accountName: string } | null | undefined;
+  loading: boolean;
+  /** Ví dụ "theo hồ sơ shop" */
+  source: string;
+  /** Hướng dẫn đổi tài khoản */
+  change: React.ReactNode;
+}
+
 type Tone = 'pending' | 'danger' | 'success' | 'neutral' | 'info';
 
 export const EARNING_STATUS: Record<EarningStatus, { label: string; tone: Tone }> = {
@@ -67,7 +98,7 @@ const TX_TYPE: Record<WalletTxType, { label: string; icon: typeof IconArrowDownL
   RETURN_DEDUCTED: { label: 'Trừ phần hàng trả', icon: IconArrowBackUp },
   LOCKED: { label: 'Khóa tiền cho yêu cầu rút', icon: IconLock },
   UNLOCKED: { label: 'Mở khóa tiền (yêu cầu rút không thực hiện)', icon: IconLockOpen },
-  WITHDRAWN: { label: 'Sàn đã chuyển khoản cho shop', icon: IconBuildingBank },
+  WITHDRAWN: { label: 'Sàn đã chuyển khoản', icon: IconBuildingBank },
   ADJUSTMENT: { label: 'Điều chỉnh của sàn', icon: IconScale },
 };
 
@@ -119,10 +150,25 @@ export function SellerFinancePage() {
   const status = (params.get('status') ?? 'ALL') as EarningStatus | 'ALL';
   const page = Math.max(1, Number(params.get('page')) || 1);
 
+  const shop = useMyShop();
   const wallet = useQuery({
     queryKey: [...walletKey, 'balance'],
     queryFn: () => api<Wallet>(`${API.payment}/shops/me/wallet`),
   });
+  const payee: Payee = {
+    account: shop.data?.shop?.bankAccount,
+    loading: shop.isPending,
+    source: 'theo hồ sơ shop',
+    change: (
+      <>
+        Đổi tài khoản ở{' '}
+        <Link to="/kenh-nguoi-ban/ho-so-shop" className="text-navy underline">
+          Hồ sơ shop
+        </Link>{' '}
+        (cần sàn duyệt lại).
+      </>
+    ),
+  };
 
   const update = (next: Record<string, string | null>) => {
     const p = new URLSearchParams(params);
@@ -194,14 +240,24 @@ export function SellerFinancePage() {
             onPage={(p) => update({ page: String(p) })}
           />
         ) : tab === 'HISTORY' ? (
-          <HistoryList page={page} onPage={(p) => update({ page: String(p) })} />
+          <HistoryList
+            scope={SHOP_WALLET}
+            page={page}
+            onPage={(p) => update({ page: String(p) })}
+          />
         ) : (
-          <WithdrawalsList page={page} onPage={(p) => update({ page: String(p) })} />
+          <WithdrawalsList
+            scope={SHOP_WALLET}
+            page={page}
+            onPage={(p) => update({ page: String(p) })}
+          />
         )}
       </div>
 
       {wallet.data && (
         <WithdrawDialog
+          scope={SHOP_WALLET}
+          payee={payee}
           open={withdrawing}
           onOpenChange={setWithdrawing}
           wallet={wallet.data}
@@ -212,16 +268,19 @@ export function SellerFinancePage() {
   );
 }
 
-function Balances({
+export function Balances({
   wallet: w,
   onWithdraw,
   onOpenWithdrawals,
+  blockedReason,
 }: {
   wallet: Wallet;
   onWithdraw: () => void;
   onOpenWithdrawals: () => void;
+  /** Chưa rút được vì lý do khác số dư (ví dụ CTV đang bị khóa) */
+  blockedReason?: string;
 }) {
-  const canWithdraw = !w.openWithdrawal && w.available >= w.withdrawMin;
+  const canWithdraw = !blockedReason && !w.openWithdrawal && w.available >= w.withdrawMin;
   return (
     <div className={cn('mb-4 grid gap-4', w.locked > 0 ? 'lg:grid-cols-3' : 'md:grid-cols-2')}>
       <div className="flex flex-col justify-between rounded-2xl bg-gradient-to-br from-header-from to-header-to p-5 text-white">
@@ -255,7 +314,7 @@ function Balances({
           )}
           {!w.openWithdrawal && !canWithdraw && (
             <span className="text-xs text-white/85">
-              Rút tối thiểu {formatMoney(w.withdrawMin)} mỗi lần
+              {blockedReason ?? `Rút tối thiểu ${formatMoney(w.withdrawMin)} mỗi lần`}
             </span>
           )}
         </div>
@@ -308,7 +367,7 @@ function Balances({
 }
 
 /** Bốn chặng của tiền: dễ hiểu cho seller mới */
-function FlowSteps() {
+export function FlowSteps() {
   const steps = [
     {
       icon: IconCash,
@@ -457,6 +516,11 @@ function EarningRow({ e }: { e: Earning }) {
       <div className="flex justify-between text-sm lg:block lg:text-right">
         <span className="text-xs text-muted-foreground lg:hidden">Shop nhận</span>
         <span className="font-bold text-navy tabular-nums">{formatMoney(e.sellerReceives)}</span>
+        {e.commission > 0 && (
+          <span className="block text-xs text-ink/55">
+            đã trừ hoa hồng CTV {formatMoney(e.commission - e.returnCommissionReversed)}
+          </span>
+        )}
         {e.returnDeduction > 0 && (
           <span className="block text-xs text-champagne-600">
             đã trừ trả hàng {formatMoney(e.returnDeduction)}
@@ -483,11 +547,19 @@ function Cell({ label, value, className }: { label: string; value: string; class
   );
 }
 
-function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => void }) {
+export function HistoryList({
+  scope,
+  page,
+  onPage,
+}: {
+  scope: WalletScope;
+  page: number;
+  onPage: (p: number) => void;
+}) {
   const list = useQuery({
-    queryKey: [...walletKey, 'transactions', page],
+    queryKey: [...scope.queryKey, 'transactions', page],
     queryFn: () =>
-      api<Page<WalletTransaction>>(`${API.payment}/shops/me/wallet/transactions`, {
+      api<Page<WalletTransaction>>(`${scope.base}/wallet/transactions`, {
         query: { page, pageSize: PAGE_SIZE },
       }),
     placeholderData: keepPreviousData,
@@ -534,12 +606,16 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
                   {t.shopOrderCode && (
                     <>
                       {' · '}
-                      <Link
-                        to={`/kenh-nguoi-ban/don-hang/${t.shopOrderId}`}
-                        className="text-navy hover:underline"
-                      >
-                        {t.shopOrderCode}
-                      </Link>
+                      {scope.orderHref && t.shopOrderId ? (
+                        <Link
+                          to={scope.orderHref(t.shopOrderId)}
+                          className="text-navy hover:underline"
+                        >
+                          {t.shopOrderCode}
+                        </Link>
+                      ) : (
+                        t.shopOrderCode
+                      )}
                     </>
                   )}
                 </div>
@@ -570,27 +646,35 @@ function HistoryList({ page, onPage }: { page: number; onPage: (p: number) => vo
 }
 
 /** Lịch sử yêu cầu rút: trạng thái, tài khoản nhận, mã giao dịch; hủy được khi sàn chưa duyệt */
-function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) => void }) {
+export function WithdrawalsList({
+  scope,
+  page,
+  onPage,
+}: {
+  scope: WalletScope;
+  page: number;
+  onPage: (p: number) => void;
+}) {
   const qc = useQueryClient();
   const [cancelling, setCancelling] = useState<Withdrawal | null>(null);
   const list = useQuery({
-    queryKey: [...walletKey, 'withdrawals', page],
+    queryKey: [...scope.queryKey, 'withdrawals', page],
     queryFn: () =>
-      api<Page<Withdrawal>>(`${API.payment}/shops/me/withdrawals`, {
+      api<Page<Withdrawal>>(`${scope.base}/withdrawals`, {
         query: { page, pageSize: PAGE_SIZE },
       }),
     placeholderData: keepPreviousData,
   });
   const cancel = useMutation({
     mutationFn: (w: Withdrawal) =>
-      api<Withdrawal>(`${API.payment}/shops/me/withdrawals/${w.id}/cancel`, { method: 'POST' }),
+      api<Withdrawal>(`${scope.base}/withdrawals/${w.id}/cancel`, { method: 'POST' }),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: walletKey });
+      void qc.invalidateQueries({ queryKey: scope.queryKey });
       toast.success('Đã hủy yêu cầu rút, tiền trở lại ngăn khả dụng.');
     },
     onError: (e) => {
       toast.error(e.message);
-      void qc.invalidateQueries({ queryKey: walletKey });
+      void qc.invalidateQueries({ queryKey: scope.queryKey });
     },
   });
   if (list.isPending) return <ListSkeleton />;
@@ -664,41 +748,44 @@ function WithdrawalsList({ page, onPage }: { page: number; onPage: (p: number) =
   );
 }
 
-/** Rút tiền (FIN-04): số tiền từ mức tối thiểu tới toàn bộ số khả dụng, về tài khoản trong hồ sơ shop */
-function WithdrawDialog({
+/** Rút tiền (FIN-04): số tiền từ mức tối thiểu tới toàn bộ số khả dụng, về tài khoản trong hồ sơ */
+export function WithdrawDialog({
+  scope,
+  payee,
   open,
   onOpenChange,
   wallet,
   onDone,
 }: {
+  scope: WalletScope;
+  payee: Payee;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   wallet: Wallet;
   onDone: () => void;
 }) {
   const qc = useQueryClient();
-  const shop = useMyShop();
   const [amount, setAmount] = useState<number | null>(wallet.available);
   // Mỗi lần mở hộp một mã chống gửi lặp
   const [key, setKey] = useState(() => crypto.randomUUID());
-  const bank = shop.data?.shop?.bankAccount;
+  const bank = payee.account;
   const tooSmall = (amount ?? 0) < wallet.withdrawMin;
   const tooBig = (amount ?? 0) > wallet.available;
   const submit = useMutation({
     mutationFn: () =>
-      api<Withdrawal>(`${API.payment}/shops/me/withdrawals`, {
+      api<Withdrawal>(`${scope.base}/withdrawals`, {
         method: 'POST',
         idempotencyKey: key,
         body: { amount },
       }),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: walletKey });
+      void qc.invalidateQueries({ queryKey: scope.queryKey });
       toast.success('Đã gửi yêu cầu rút tiền, chờ sàn duyệt.');
       onDone();
     },
     onError: (e) => {
       toast.error(e.message);
-      void qc.invalidateQueries({ queryKey: walletKey });
+      void qc.invalidateQueries({ queryKey: scope.queryKey });
     },
   });
   return (
@@ -742,26 +829,20 @@ function WithdrawDialog({
           </p>
         </div>
         <div className="rounded-lg bg-page px-3 py-2.5 text-xs leading-relaxed text-ink/70">
-          <div className="font-medium text-charcoal">Tài khoản nhận (theo hồ sơ shop)</div>
+          <div className="font-medium text-charcoal">Tài khoản nhận ({payee.source})</div>
           {bank
             ? `${bank.bankName} · ${maskAccount(bank.accountNumber)} · ${bank.accountName}`
-            : shop.isPending
+            : payee.loading
               ? 'Đang tải...'
-              : 'Shop chưa có tài khoản ngân hàng.'}
-          <div className="mt-0.5">
-            Đổi tài khoản ở{' '}
-            <Link to="/kenh-nguoi-ban/ho-so-shop" className="text-navy underline">
-              Hồ sơ shop
-            </Link>{' '}
-            (cần sàn duyệt lại).
-          </div>
+              : 'Chưa có tài khoản ngân hàng nhận tiền.'}
+          <div className="mt-0.5">{payee.change}</div>
         </div>
       </div>
     </ConfirmDialog>
   );
 }
 
-function ListSkeleton() {
+export function ListSkeleton() {
   return (
     <div className="divide-y divide-ink/[0.06]">
       {Array.from({ length: 4 }, (_, i) => (

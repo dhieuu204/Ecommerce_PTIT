@@ -681,3 +681,70 @@ Mỗi service đã cài `@nestjs/swagger`. Chạy service rồi mở:
 - Mỗi controller có `@ApiTags(...)`; API cần đăng nhập có `@ApiBearerAuth()`.
 - Mỗi mã lỗi riêng của API (ví dụ `EMAIL_TAKEN`) ghi bằng `@ApiResponse({ status: 409, description: 'EMAIL_TAKEN: ...' })`.
 - Frontend chờ API của phase có trên Swagger rồi mới nối thật; trong lúc chờ, dựng giao diện với dữ liệu giả theo bảng ở mục 2–5.
+
+## 9. Danh sách API P7
+
+P7 (cộng tác viên bán hàng, mở rộng sau 6 phase): AFF-01..06. Quyết định: `docs/phan-tich/14-quyet-dinh-p7-affiliate.md` (link tiếp thị một cấp, shop trả hoa hồng theo % từng sản phẩm, CTV bấm gần nhất trong 7 ngày, tính trên tiền hàng sau voucher shop, ví 3 ngăn dùng chung cho shop và CTV, admin duyệt CTV).
+
+### Quy tắc chung của P7
+
+- **Tỉ lệ hoa hồng** theo phần vạn (500 = 5%), trong khoảng `affiliate_rate_min_percent_x100`–`affiliate_rate_max_percent_x100` (bảng `settings` của marketplace, mặc định 100–3000). Chụp vào dòng hàng lúc đặt.
+- **Hoa hồng dòng** = ⌊(thành tiền − phần voucher shop của dòng) × tỉ lệ⌋; phần voucher shop chia như P5 khi trả hàng. Seller nhận = tiền hàng − voucher shop − phí sàn − hoa hồng.
+- **Lượt bấm** hết hạn sau `affiliate_click_days` (7). Đơn con gắn CTV có lượt bấm mới nhất còn hạn của shop đó (trình duyệt gửi kèm, hoặc gắn với tài khoản người mua), CTV phải `ACTIVE`, không phải người mua, không phải chủ shop.
+- **Tiền CTV** đi cùng nhịp và cùng giao dịch với tiền seller của đơn con (bảng ở `14-quyet-dinh-p7-affiliate.md` mục 2 số 14).
+- CTV **không thấy** tên, số điện thoại, địa chỉ người mua.
+
+Quy ước như các phase trước: cần đăng nhập trừ chỗ ghi "công khai"; gửi tạo mới có header `Idempotency-Key`; admin có bộ quyền ghi rõ; thao tác admin ghi nhật ký.
+
+### marketplace-service (`/api/market/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/affiliates/me` | Người dùng | AFF-01 | `{ status, affiliate }`: `status` = `NONE` (chưa đăng ký), `PENDING`, `REJECTED`, `ACTIVE`, `SUSPENDED`; `affiliate` có lý do từ chối/khóa, mã CTV và đủ số tài khoản (chỉ chủ hồ sơ và payment-service đọc). |
+| POST `/affiliates/me/application` | Người dùng | AFF-01 | `Idempotency-Key`. Nộp lần đầu hoặc nộp lại khi `REJECTED`. Đang `PENDING`/`ACTIVE`/`SUSPENDED` → 409 `AFFILIATE_APPLICATION_NOT_ALLOWED`. Phát `affiliate_application.submitted`. |
+| PATCH `/affiliates/me/bank-account` | CTV | AFF-05 | Đổi tài khoản nhận. Đang có yêu cầu rút chưa xong → 409 `WITHDRAWAL_IN_PROGRESS` (hỏi payment-service). |
+| GET `/affiliate-products` | CTV | AFF-03 | Sản phẩm đang bán có bật hoa hồng, lọc `categoryId` (cấp 1 gồm con), `q`, `sort` (`rate` mặc định, `best_selling`, `newest`); bỏ sản phẩm của shop mình; kèm `commissionFrom` (hoa hồng ở giá thấp nhất). CTV không `ACTIVE` → 409 `AFFILIATE_NOT_ACTIVE`. |
+| POST `/affiliate-clicks` | Công khai | AFF-03 | `{ code, productId? , shopId? }`. Mã sai/CTV không hoạt động/sản phẩm không có → 404 `AFFILIATE_LINK_INVALID` (web bỏ qua, không báo lỗi cho người mua). Có vé đăng nhập thì gắn `user_id`. Trả `{ clickId, shopId, expiresAt }`. |
+| POST `/orders` (bổ sung) | Người mua | AFF-04 | Thêm `affiliateClickIds` (tối đa 20). Gắn CTV theo `14-quyet-dinh-p7-affiliate.md` mục 2 số 10–11, cùng transaction tạo đơn; đơn con không có món nào bật hoa hồng thì không gắn. Mã lượt bấm sai hoặc hết hạn thì bỏ qua, không báo lỗi. |
+| GET `/products/{productId}` (bổ sung) | Công khai | AFF-03 | Thêm `commissionRate` (web chỉ hiện nút "Lấy link" cho CTV). |
+| GET `/affiliates/me/stats` | CTV | AFF-06 | `from`, `to` (giờ Việt Nam, tối đa 366 ngày): lượt bấm, số đơn, hoa hồng dự kiến, theo ngày; 10 sản phẩm mang về nhiều hoa hồng nhất. |
+| GET `/affiliates/me/orders` | CTV | AFF-06 | Đơn con gắn với mình, phân trang: mã đơn con, sản phẩm, trạng thái, hoa hồng (không có thông tin người mua). |
+| GET `/shops/me/affiliate-settings` | Chủ shop | AFF-02 | `{ min, max }`: khoảng % hoa hồng sàn cho phép (phần vạn). |
+| PUT `/shops/me/product-commissions` | Chủ shop | AFF-02 | `{ productIds (1–100), rate }`, `rate` trong khoảng cấu hình hoặc `null` để tắt. Sai khoảng → 400 `VALIDATION_ERROR` (`details.min`, `details.max`); có sản phẩm không thuộc shop → 404. Trả `{ updated }`. |
+| GET `/shops/me/products` (bổ sung) | Chủ shop | AFF-02 | Mỗi sản phẩm thêm `commissionRate`. |
+| GET `/shops/me/orders`, `/shops/me/orders/{id}` (bổ sung) | Chủ shop | AFF-06 | Thêm `affiliate`: `{ name, commission, lines }` hoặc `null`. |
+| GET `/shops/me/affiliate-orders` | Chủ shop | AFF-06 | Đơn con qua CTV, mới nhất trước: tên CTV, tiền hàng, hoa hồng, trạng thái. |
+| GET `/admin/affiliates` | `MODERATION` | AFF-01 | Danh sách CTV, lọc trạng thái, tìm tên/mã, phân trang; kèm số đơn và tổng hoa hồng. |
+
+### payment-service (`/api/payment/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/affiliates/me/wallet` | CTV | AFF-05 | Ví 3 ngăn của CTV, `withdrawMin`, `openWithdrawal`. Chưa có hoa hồng nào → trả ví số 0. |
+| GET `/affiliates/me/commissions` | CTV | AFF-05 | Hoa hồng từng đơn con: dự kiến, đã trừ do trả hàng, trạng thái tiền. |
+| GET, POST `/affiliates/me/withdrawals`, POST `.../{id}/cancel` | CTV | AFF-05 | Như rút tiền của shop (P5). Lấy tài khoản nhận từ hồ sơ CTV (gọi marketplace bằng vé của CTV); CTV không hoạt động → 409 `AFFILIATE_NOT_ACTIVE`. |
+| GET `/shops/me/earnings` (bổ sung) | Chủ shop | AFF-04 | Mỗi đơn con thêm `commission`, `returnCommissionReversed`. |
+| GET `/admin/withdrawals` (bổ sung) | `FINANCE` | AFF-05 | Lọc thêm `ownerType` (`SHOP`, `AFFILIATE`). Mọi API rút tiền trả `walletId`, `ownerType`, `displayName` (tên shop hoặc tên CTV) thay cho `shopId`, `shopName`. |
+| GET `/shops/me/wallet`, `/affiliates/me/wallet` | Chủ ví | AFF-05 | Thêm `walletId`, `affiliateId`. |
+| GET `/admin/reports/finance`, `/shops/me/reports/finance` (bổ sung) | `FINANCE`, chủ shop | AFF-06 | Admin thêm `affiliateCommission`, `payableToAffiliates`, `paidToAffiliates` (`payableToSellers`, `paidToSellers` chỉ còn tính ví shop); seller thêm `affiliateCommission`. |
+| GET `/admin/affiliates/{affiliateId}/wallet` | `FINANCE` | AFF-05 | Ví CTV và 20 biến động gần nhất (xem nguồn tiền khi duyệt rút). |
+
+### approval-service (`/api/approval/v1`)
+
+| Phương thức, đường dẫn | Ai gọi | Mã | Quy tắc chính |
+| --- | --- | --- | --- |
+| GET `/admin/affiliate-approvals` | `MODERATION` | AFF-01 | Lọc `status` (`PENDING` mặc định), `type`, phân trang; chờ lâu nhất lên đầu. |
+| GET `/admin/affiliate-approvals/{id}` | `MODERATION` | AFF-01 | Hồ sơ, các lần nộp trước, lý do từ chối cũ. |
+| POST `/admin/affiliate-approvals/{id}/decision` | `MODERATION` | AFF-01 | `{ decision: APPROVE \| REJECT, reason? }` (lý do bắt buộc khi từ chối). Admin là chính CTV → 403 `SELF_APPROVAL_FORBIDDEN`; đã quyết → 409 `ALREADY_DECIDED`. Phát `affiliate.decided`. |
+| POST `/admin/affiliates/{affiliateId}/suspension` | `MODERATION` | AFF-01 | `{ action: SUSPEND \| RESTORE, reason }`. Lưu quyết định rồi phát `affiliate.decided`; marketplace kiểm trạng thái hiện tại khi áp. |
+| `/admin/withdrawal-approvals` (bổ sung) | `FINANCE` | AFF-05 | Hiện thêm loại chủ ví và tên CTV; quy tắc chặn tự duyệt áp cho cả CTV. |
+
+### Luồng P7 dùng các API trên
+
+1. Người dùng mở **Tài khoản › Cộng tác viên**, nộp hồ sơ → admin `MODERATION` mở **Duyệt cộng tác viên**, duyệt → người dùng nhận thông báo, có mã CTV, vào khu **Cộng tác viên**.
+2. Chủ shop mở **Kênh người bán › Tiếp thị liên kết**, chọn sản phẩm, đặt % hoa hồng.
+3. CTV mở **Sản phẩm có hoa hồng** (hoặc nút "Lấy link" ở trang sản phẩm/shop), sao chép link, chia sẻ.
+4. Người mua mở link (`?aff=`) → web ghi lượt bấm → đặt hàng như thường → đơn gắn CTV; CTV nhận thông báo, thấy đơn ở **Đơn qua link của tôi**; shop thấy nhãn "Qua CTV" và hoa hồng trong chi tiết đơn.
+5. Đơn có tiền → hoa hồng vào ngăn đang giữ; đơn hoàn tất và tiền đã về sàn → khả dụng → CTV **Ví và rút tiền** → admin `FINANCE` duyệt và chi như rút tiền của shop.
+6. Admin `MODERATION` khóa CTV vi phạm ở **Cộng tác viên** → link ngừng tính đơn mới, CTV không rút được tiền.
+

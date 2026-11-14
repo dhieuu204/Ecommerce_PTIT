@@ -149,16 +149,21 @@ describeDb('Tranh chấp, duyệt rút tiền, điều chỉnh (P5: DIS-01, DIS-
     function requested(): WithdrawalRequestedPayload {
       return {
         withdrawalId: randomUUID(),
-        shopId: randomUUID(),
-        shopName: 'Shop A',
-        owner: { userId: owner.id, name: owner.name },
+        owner: {
+          type: 'SHOP',
+          shopId: randomUUID(),
+          affiliateId: null,
+          userId: owner.id,
+          name: owner.name,
+          displayName: 'Shop A',
+        },
         amount: 100_000,
         bankAccount: {
           bankName: 'Vietcombank',
           accountNumberMasked: '•••• 6789',
           accountName: 'NGUYEN VAN A',
         },
-        wallet: { pending: 0, available: 71_000, locked: 100_000 },
+        balances: { pending: 0, available: 71_000, locked: 100_000 },
         requestedAt: new Date().toISOString(),
       };
     }

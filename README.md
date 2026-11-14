@@ -55,6 +55,8 @@ Trả hàng, tranh chấp và rút tiền (P5): người mua mở một đơn đ
 
 Kiểm thử tổng hợp (P6): khi 4 service đang chạy bằng `pnpm dev` (chế độ MÔ PHỎNG GHN) và đã có dữ liệu demo, chạy `pnpm test:e2e`. Lệnh đi hết một vòng thật qua cả 4 service: đặt đơn COD → shop xác nhận → giao hàng mô phỏng → hoàn tất → thông báo (trong app, Socket.IO, email) → đánh giá và trả lời → theo dõi, thả tim, lọc sao → chat realtime → báo cáo vi phạm, gỡ rồi khôi phục sản phẩm → báo cáo vận hành và tài chính. Mỗi lần chạy tạo thêm một đơn thử; sản phẩm dùng thử được trả về trạng thái đang bán.
 
+Vòng cộng tác viên (P7): `pnpm test:e2e:affiliate` (cùng điều kiện như trên). Tài khoản `phocongnghe@example.com` đăng ký và được duyệt làm CTV, Galaxy Hub bật hoa hồng 10% cho một sản phẩm, người mua đặt COD qua link, kiểm hoa hồng vào ví CTV, admin khóa rồi mở CTV.
+
 | Công cụ               | Địa chỉ                                    |
 | --------------------- | ------------------------------------------ |
 | Web                   | http://localhost:5173                      |

@@ -46,7 +46,11 @@ export class CheckoutController {
     @Body() dto: PlaceOrderDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<PlacedOrder> {
-    const { created, ...order } = await this.checkout.place(user, dto.checkoutId);
+    const { created, ...order } = await this.checkout.place(
+      user,
+      dto.checkoutId,
+      dto.affiliateClickIds ?? [],
+    );
     res.status(created ? 201 : 200);
     return order;
   }

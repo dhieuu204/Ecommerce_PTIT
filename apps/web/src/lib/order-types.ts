@@ -260,6 +260,12 @@ export type BuyerTab =
 export type AdminTab = BuyerTab | 'INCIDENT';
 
 export interface SellerOrder {
+  /** Đơn qua cộng tác viên (P7): shop trả hoa hồng, đã trừ trong sellerAmount */
+  affiliate: {
+    name: string;
+    commission: number;
+    lines: Array<{ orderItemId: string; commissionRate: number; commission: number }>;
+  } | null;
   id: string;
   code: string;
   orderId: string;

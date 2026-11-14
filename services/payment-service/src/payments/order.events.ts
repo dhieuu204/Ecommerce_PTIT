@@ -70,6 +70,8 @@ export class PaymentOrderEvents implements OnModuleInit {
     const cod = p.paymentMethod === 'COD';
     const rows = p.shopOrders.map((so) => {
       const fee = platformFee(so.subtotal, so.shopDiscount, rate);
+      // P7: hoa hồng CTV do shop trả, trừ vào tiền seller nhận; phí sàn vẫn tính trên tiền hàng sau voucher shop
+      const commission = so.affiliate?.commission ?? 0;
       return {
         orderId: p.orderId,
         orderCode: p.code,
@@ -84,13 +86,21 @@ export class PaymentOrderEvents implements OnModuleInit {
         buyerPaid: so.total,
         platformFeeRate: rate,
         platformFee: fee,
-        sellerAmount: so.subtotal - so.shopDiscount - fee,
+        sellerAmount: Math.max(0, so.subtotal - so.shopDiscount - fee - commission),
+        affiliateId: so.affiliate?.affiliateId ?? null,
+        affiliateUserId: so.affiliate?.userId ?? null,
+        commission,
         paymentMethod: p.paymentMethod,
         codAmount: cod ? so.total : 0,
         payBefore: p.payBefore ? new Date(p.payBefore) : null,
       };
     });
-    for (const so of p.shopOrders) await this.wallet.ensureWallet(tx, so.shopId, so.ownerId);
+    for (const so of p.shopOrders) {
+      await this.wallet.ensureShopWallet(tx, so.shopId, so.ownerId);
+      if (so.affiliate) {
+        await this.wallet.ensureAffiliateWallet(tx, so.affiliate.affiliateId, so.affiliate.userId);
+      }
+    }
     // Nhận trùng sự kiện thì bỏ qua
     const { count } = await tx.sellerEarning.createMany({ data: rows, skipDuplicates: true });
     if (count === 0) return;
@@ -202,8 +212,14 @@ export class PaymentOrderEvents implements OnModuleInit {
       // đã trừ. Trạng thái khác (đã khả dụng, đã hủy...) thì ví không bị trừ: không ghi khoản trừ để sổ
       // tiền đơn con khớp ví; phần chênh xử lý bằng điều chỉnh ví (DIS-02).
       const applied = row.status === 'HELD' || row.status === 'UNPAID';
-      if (s.deduction > 0 && row.status === 'HELD') {
-        await this.wallet.deductReturn(tx, row, s.deduction, `Trả hàng ${p.code}`);
+      if ((s.deduction > 0 || s.commissionReduction > 0) && row.status === 'HELD') {
+        await this.wallet.deductReturn(
+          tx,
+          row,
+          s.deduction,
+          s.commissionReduction,
+          `Trả hàng ${p.code}`,
+        );
       } else if (s.deduction > 0 && !applied) {
         this.logger.error(
           `Tiền đơn con ${row.shopOrderCode} đang ${row.status}, không trừ được trả hàng ${p.code} (${s.deduction}đ): cần điều chỉnh ví.`,
@@ -213,10 +229,11 @@ export class PaymentOrderEvents implements OnModuleInit {
         returnRefund: amount,
         returnDeduction: applied ? s.deduction : 0,
         returnFeeReversed: applied ? s.feeReversed : 0,
+        returnCommissionReversed: applied ? s.commissionReduction : 0,
         ...(s.newSellerAmount === 0 && applied ? { status: 'REFUNDED' as const } : {}),
       });
       this.logger.log(
-        `Trả hàng ${p.code}: hoàn người mua ${amount}đ, trừ seller ${s.deduction}đ, giảm phí sàn ${s.feeReversed}đ.`,
+        `Trả hàng ${p.code}: hoàn người mua ${amount}đ, trừ seller ${s.deduction}đ, giảm phí sàn ${s.feeReversed}đ, trừ hoa hồng CTV ${s.commissionReduction}đ.`,
       );
     }
     await tx.sellerEarning.update({ where: { id: row.id }, data });

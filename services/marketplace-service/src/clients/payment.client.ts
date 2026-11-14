@@ -53,6 +53,31 @@ export class PaymentClient {
     this.logger.error(`payment-service trả HTTP ${res.status}`);
     throw unavailable();
   }
+
+  /** Ví của CTV (P7): marketplace chỉ cần biết đang có yêu cầu rút chưa xong hay không */
+  async affiliateWallet(authorization: string): Promise<{ openWithdrawal: unknown }> {
+    const fail = () =>
+      new AppError(
+        503,
+        'PAYMENT_SERVICE_UNAVAILABLE',
+        'Chưa kiểm tra được yêu cầu rút tiền, bạn thử lại sau ít phút.',
+      );
+    let res: Response;
+    try {
+      res = await fetch(`${this.config.paymentApiUrl}/affiliates/me/wallet`, {
+        headers: { Authorization: authorization },
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (e) {
+      this.logger.error(`Không gọi được payment-service: ${(e as Error).message}`);
+      throw fail();
+    }
+    if (!res.ok) {
+      this.logger.error(`payment-service trả HTTP ${res.status} khi đọc ví CTV`);
+      throw fail();
+    }
+    return (await res.json()) as { openWithdrawal: unknown };
+  }
 }
 
 function unavailable(): AppError {

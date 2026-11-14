@@ -93,6 +93,8 @@ export interface ProductDetail {
   images: ProductImageView[];
   variants: PublicVariant[];
   shop: { id: string; name: string; logoUrl: string | null; productCount: number; joinedAt: Date };
+  /** Hoa hồng cộng tác viên (P7, phần vạn); null = shop không bật. Web chỉ hiện cho CTV */
+  commissionRate: number | null;
   /** P6: sao trung bình (null khi chưa có đánh giá), số đánh giá, số lượt thả tim, người xem đã thả tim chưa */
   ratingAvg: number | null;
   ratingCount: number;
@@ -238,6 +240,7 @@ export class CatalogService {
       ratingCount: p.ratingCount,
       likeCount,
       liked: liked > 0,
+      commissionRate: p.commissionRate,
     };
   }
 

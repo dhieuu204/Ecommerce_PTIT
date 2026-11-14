@@ -13,7 +13,9 @@ import {
   WITHDRAWAL_CANCELLED,
   WITHDRAWAL_REQUESTED,
   WITHDRAWAL_UPDATED,
+  type BankAccount,
   type Page,
+  type WalletOwner,
   type WithdrawalApprovalDecidedPayload,
 } from '@san/shared';
 import { MarketplaceClient } from '../clients/marketplace.client';
@@ -22,15 +24,24 @@ import { PrismaService } from '../prisma.service';
 import { PaymentSetting } from '../settings';
 import { SellerWalletService, type AdminWalletView } from '../wallet/seller-wallet.service';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service';
-import { Prisma, type Withdrawal, type WithdrawalStatus } from '../../generated/prisma';
+import {
+  Prisma,
+  type Wallet,
+  type WalletOwnerType,
+  type Withdrawal,
+  type WithdrawalStatus,
+} from '../../generated/prisma';
 import type { PayoutDto, WithdrawalsQuery } from './dto/withdrawals.dto';
 
 type Tx = Prisma.TransactionClient;
 
 export interface WithdrawalView {
   id: string;
-  shopId: string;
-  shopName: string;
+  walletId: string;
+  /** Ví của shop hay của cộng tác viên (P7) */
+  ownerType: WalletOwnerType;
+  /** Tên shop hoặc tên hiển thị của CTV lúc yêu cầu */
+  displayName: string;
   ownerId: string;
   ownerName: string;
   amount: number;
@@ -57,14 +68,14 @@ export interface AdminWithdrawalPage extends Page<WithdrawalView> {
 }
 
 export interface WithdrawalDetailView extends WithdrawalView {
-  /** Ví hiện tại và các biến động gần nhất của shop (nguồn tiền) */
+  /** Ví hiện tại và các biến động gần nhất (nguồn tiền) */
   wallet: AdminWalletView;
 }
 
 /**
- * Rút tiền và chi trả (FIN-04..06, STATE-02 khu D). Gửi yêu cầu = khóa tiền (khả dụng → đang khóa) bằng
- * câu lệnh có điều kiện, khóa theo shop nên hai yêu cầu cùng lúc không khóa vượt số dư; mỗi shop chỉ một yêu
- * cầu đang xử lý. Admin tài chính duyệt ở approval-service; payment-service kiểm yêu cầu còn chờ rồi mới áp.
+ * Rút tiền và chi trả (FIN-04..06, STATE-02 khu D) của shop và cộng tác viên (P7, AFF-05). Gửi yêu cầu =
+ * khóa tiền (khả dụng → đang khóa) bằng câu lệnh có điều kiện, khóa theo ví nên hai yêu cầu cùng lúc không
+ * khóa vượt số dư; mỗi ví chỉ một yêu cầu đang xử lý. Admin tài chính duyệt ở approval-service; payment-service kiểm yêu cầu còn chờ rồi mới áp.
  * Chỉ ghi "đã chi" khi có mã giao dịch và biên lai. Từ chối, seller hủy, chuyển lỗi → mở khóa đúng một lần.
  */
 @Injectable()
@@ -85,7 +96,7 @@ export class WithdrawalsService implements OnModuleInit {
     this.events.subscribe(WITHDRAWAL_APPROVAL_DECIDED, (p, tx: Tx) => this.applyDecision(p, tx));
   }
 
-  // ===== Seller =====
+  // ===== Chủ ví: shop hoặc cộng tác viên =====
 
   /** Gửi yêu cầu rút (FIN-04). Header Idempotency-Key: gửi lại cùng mã thì trả lại yêu cầu đã tạo */
   async request(
@@ -93,6 +104,7 @@ export class WithdrawalsService implements OnModuleInit {
     authorization: string,
     amount: number,
     requestKey: string | undefined,
+    ownerType: WalletOwnerType = 'SHOP',
   ): Promise<WithdrawalView> {
     if (!requestKey) {
       throw new AppError(
@@ -114,39 +126,25 @@ export class WithdrawalsService implements OnModuleInit {
         fields: { amount: `Số tiền rút tối thiểu ${min.toLocaleString('vi-VN')}đ.` },
       });
     }
-    const w = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+    const w = await this.myWallet(user.id, ownerType);
     if (!w || w.available < amount) throw insufficient(w?.available ?? 0);
-    if (await this.openOf(this.prisma, w.shopId)) throw inProgress();
+    if (await this.openOf(this.prisma, w.id)) throw inProgress();
 
-    // Tài khoản nhận lấy từ hồ sơ shop đang dùng (gọi trước giao dịch, không giữ khóa khi chờ mạng)
-    const my = await this.marketplace.myShop(authorization);
-    if (my.status !== 'ACTIVE' || !my.shop || my.shop.id !== w.shopId) {
-      throw new AppError(
-        409,
-        'SHOP_NOT_ACTIVE',
-        'Shop đang không hoạt động nên chưa rút tiền được.',
-      );
-    }
-    const bank = my.shop.bankAccount;
-    if (!bank) {
-      throw new AppError(
-        409,
-        'BANK_ACCOUNT_MISSING',
-        'Shop chưa có tài khoản ngân hàng nhận tiền.',
-      );
-    }
+    // Tài khoản nhận lấy từ hồ sơ shop / CTV đang dùng (gọi trước giao dịch, không giữ khóa khi chờ mạng)
+    const { bank, displayName } = await this.payee(authorization, w);
 
     let created: Withdrawal;
     try {
       created = await this.prisma.$transaction(async (tx) => {
-        await this.wallet.lockShop(tx, w.shopId);
-        if (await this.openOf(tx, w.shopId)) throw inProgress();
+        await this.wallet.lockWallet(tx, w.id);
+        if (await this.openOf(tx, w.id)) throw inProgress();
         const row = await tx.withdrawal.create({
           data: {
-            shopId: w.shopId,
+            walletId: w.id,
+            ownerType: w.ownerType,
             ownerId: user.id,
             ownerName: user.name,
-            shopName: my.shop!.name ?? '',
+            displayName,
             amount,
             bankName: bank.bankName,
             bankAccountNumber: bank.accountNumber,
@@ -157,7 +155,7 @@ export class WithdrawalsService implements OnModuleInit {
         try {
           await this.wallet.move(
             tx,
-            { shopId: w.shopId, withdrawalId: row.id, label: 'rút tiền' },
+            { walletId: w.id, withdrawalId: row.id, label: 'rút tiền' },
             'LOCKED',
             amount,
             'AVAILABLE',
@@ -166,45 +164,47 @@ export class WithdrawalsService implements OnModuleInit {
           );
         } catch (e) {
           if (e instanceof InsufficientBalanceError) {
-            const now = await tx.sellerWallet.findUniqueOrThrow({ where: { shopId: w.shopId } });
+            const now = await tx.wallet.findUniqueOrThrow({ where: { id: w.id } });
             throw insufficient(now.available);
           }
           throw e;
         }
-        const after = await tx.sellerWallet.findUniqueOrThrow({ where: { shopId: w.shopId } });
+        const after = await tx.wallet.findUniqueOrThrow({ where: { id: w.id } });
         await this.events.publish(tx, WITHDRAWAL_REQUESTED, {
           withdrawalId: row.id,
-          shopId: row.shopId,
-          shopName: row.shopName,
-          owner: { userId: user.id, name: user.name },
+          owner: owner(w, row),
           amount,
           bankAccount: {
             bankName: bank.bankName,
             accountNumberMasked: mask(bank.accountNumber),
             accountName: bank.accountName,
           },
-          wallet: { pending: after.pending, available: after.available, locked: after.locked },
+          balances: { pending: after.pending, available: after.available, locked: after.locked },
           requestedAt: row.createdAt.toISOString(),
         });
         return row;
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        // Bấm hai lần cùng lúc (trùng mã) hoặc đã có yêu cầu đang xử lý (ràng buộc mỗi shop một yêu cầu)
+        // Bấm hai lần cùng lúc (trùng mã) hoặc đã có yêu cầu đang xử lý (ràng buộc mỗi ví một yêu cầu)
         const again = await this.findReplay(user.id, requestKey);
         if (again) return view(again, 'SELLER');
         throw inProgress();
       }
       throw e;
     }
-    this.logger.log(`Shop ${created.shopName} yêu cầu rút ${amount}đ (${created.id}).`);
+    this.logger.log(`${created.displayName} yêu cầu rút ${amount}đ (${created.id}).`);
     return view(created, 'SELLER');
   }
 
-  async sellerList(user: AuthUser, q: WithdrawalsQuery): Promise<Page<WithdrawalView>> {
-    const w = await this.prisma.sellerWallet.findUnique({ where: { ownerId: user.id } });
+  async sellerList(
+    user: AuthUser,
+    q: WithdrawalsQuery,
+    ownerType: WalletOwnerType = 'SHOP',
+  ): Promise<Page<WithdrawalView>> {
+    const w = await this.myWallet(user.id, ownerType);
     if (!w) return toPage([], 0, q);
-    const where: Prisma.WithdrawalWhereInput = { shopId: w.shopId, ...filter(q) };
+    const where: Prisma.WithdrawalWhereInput = { ...filter(q), walletId: w.id };
     const [rows, total] = await Promise.all([
       this.prisma.withdrawal.findMany({
         where,
@@ -220,14 +220,18 @@ export class WithdrawalsService implements OnModuleInit {
     );
   }
 
-  /** Seller hủy khi chưa duyệt: mở khóa đúng một lần, báo approval-service */
-  async cancel(user: AuthUser, withdrawalId: string): Promise<WithdrawalView> {
+  /** Chủ ví hủy khi chưa duyệt: mở khóa đúng một lần, báo approval-service */
+  async cancel(
+    user: AuthUser,
+    withdrawalId: string,
+    ownerType: WalletOwnerType = 'SHOP',
+  ): Promise<WithdrawalView> {
     const found = await this.prisma.withdrawal.findFirst({
-      where: { id: withdrawalId, ownerId: user.id },
+      where: { id: withdrawalId, ownerId: user.id, ownerType },
     });
     if (!found) throw notFound();
     const row = await this.prisma.$transaction(async (tx) => {
-      await this.wallet.lockShop(tx, found.shopId);
+      await this.wallet.lockWallet(tx, found.walletId);
       const now = new Date();
       const { count } = await tx.withdrawal.updateMany({
         where: { id: withdrawalId, status: 'PENDING' },
@@ -259,7 +263,7 @@ export class WithdrawalsService implements OnModuleInit {
   async applyDecision(p: WithdrawalApprovalDecidedPayload, tx: Tx): Promise<void> {
     const w = await tx.withdrawal.findUnique({ where: { id: p.withdrawalId } });
     if (!w) throw new Error(`Chưa có yêu cầu rút ${p.withdrawalId}`);
-    await this.wallet.lockShop(tx, w.shopId);
+    await this.wallet.lockWallet(tx, w.walletId);
     const fresh = await tx.withdrawal.findUniqueOrThrow({ where: { id: w.id } });
     if (fresh.status !== 'PENDING') {
       this.logger.warn(`Bỏ qua quyết định cho yêu cầu rút ${w.id} đang ${fresh.status}.`);
@@ -282,7 +286,10 @@ export class WithdrawalsService implements OnModuleInit {
   // ===== Admin tài chính: chi trả =====
 
   async adminList(q: WithdrawalsQuery): Promise<AdminWithdrawalPage> {
-    const where = filter(q);
+    const where: Prisma.WithdrawalWhereInput = {
+      ...filter(q),
+      ...(q.ownerType ? { ownerType: q.ownerType } : {}),
+    };
     const [rows, total, sum] = await Promise.all([
       this.prisma.withdrawal.findMany({
         where,
@@ -336,12 +343,12 @@ export class WithdrawalsService implements OnModuleInit {
       });
       await this.wallet.move(
         tx,
-        { shopId: w.shopId, withdrawalId: w.id, label: `mã GD ${dto.transferCode}` },
+        { walletId: w.walletId, withdrawalId: w.id, label: `mã GD ${dto.transferCode}` },
         'WITHDRAWN',
         w.amount,
         'LOCKED',
         null,
-        'Đã chuyển khoản cho seller',
+        w.ownerType === 'SHOP' ? 'Đã chuyển khoản cho seller' : 'Đã chuyển khoản cho cộng tác viên',
       );
       await this.publishUpdated(tx, row);
       await writeAudit(tx, {
@@ -391,7 +398,7 @@ export class WithdrawalsService implements OnModuleInit {
 
   // ----- phần dùng chung -----
 
-  /** Thao tác chi trả: chủ shop không tự chi; chỉ yêu cầu đã duyệt (cập nhật có điều kiện, chỉ một bên được) */
+  /** Thao tác chi trả: chủ ví (chủ shop hoặc CTV) không tự chi; chỉ yêu cầu đã duyệt (cập nhật có điều kiện, chỉ một bên được) */
   private async adminAction(
     admin: AuthUser,
     withdrawalId: string,
@@ -403,11 +410,11 @@ export class WithdrawalsService implements OnModuleInit {
       throw new AppError(
         403,
         'SELF_PAYOUT_FORBIDDEN',
-        'Bạn là chủ shop này nên không được tự chi trả cho shop mình.',
+        'Đây là yêu cầu rút tiền của chính bạn nên bạn không được tự chi trả.',
       );
     }
     await this.prisma.$transaction(async (tx) => {
-      await this.wallet.lockShop(tx, w.shopId);
+      await this.wallet.lockWallet(tx, w.walletId);
       const fresh = await tx.withdrawal.findUniqueOrThrow({ where: { id: withdrawalId } });
       if (fresh.status !== 'APPROVED') {
         throw new AppError(
@@ -422,15 +429,15 @@ export class WithdrawalsService implements OnModuleInit {
 
   /**
    * Báo marketplace (P6, MSG-02) yêu cầu rút vừa được duyệt, bị từ chối, đã chi hoặc chuyển lỗi, để báo chủ
-   * shop. Gọi trong cùng giao dịch với lúc đổi trạng thái.
+   * ví. Gọi trong cùng giao dịch với lúc đổi trạng thái.
    */
   private async publishUpdated(tx: Tx, w: Withdrawal): Promise<void> {
     const status = w.status;
     if (status === 'PENDING' || status === 'CANCELLED') return;
+    const wallet = await tx.wallet.findUniqueOrThrow({ where: { id: w.walletId } });
     await this.events.publish(tx, WITHDRAWAL_UPDATED, {
       withdrawalId: w.id,
-      shopId: w.shopId,
-      ownerId: w.ownerId,
+      owner: owner(wallet, w),
       amount: w.amount,
       status,
       reason: status === 'REJECTED' || status === 'FAILED' ? w.reason : null,
@@ -441,7 +448,7 @@ export class WithdrawalsService implements OnModuleInit {
   private async unlock(tx: Tx, w: Withdrawal, note: string): Promise<void> {
     await this.wallet.move(
       tx,
-      { shopId: w.shopId, withdrawalId: w.id, label: 'rút tiền' },
+      { walletId: w.walletId, withdrawalId: w.id, label: 'rút tiền' },
       'UNLOCKED',
       w.amount,
       'LOCKED',
@@ -450,8 +457,50 @@ export class WithdrawalsService implements OnModuleInit {
     );
   }
 
-  private openOf(db: Tx | PrismaService, shopId: string) {
-    return db.withdrawal.findFirst({ where: { shopId, status: { in: ['PENDING', 'APPROVED'] } } });
+  private openOf(db: Tx | PrismaService, walletId: string) {
+    return db.withdrawal.findFirst({
+      where: { walletId, status: { in: ['PENDING', 'APPROVED'] } },
+    });
+  }
+
+  private myWallet(userId: string, ownerType: WalletOwnerType): Promise<Wallet | null> {
+    return this.prisma.wallet.findUnique({
+      where: { ownerType_ownerId: { ownerType, ownerId: userId } },
+    });
+  }
+
+  /** Tài khoản nhận và tên hiển thị: shop lấy từ hồ sơ shop, CTV từ hồ sơ CTV (P7) */
+  private async payee(
+    authorization: string,
+    w: Wallet,
+  ): Promise<{ bank: BankAccount; displayName: string }> {
+    if (w.ownerType === 'AFFILIATE') {
+      const my = await this.marketplace.myAffiliate(authorization);
+      if (my.status !== 'ACTIVE' || !my.affiliate || my.affiliate.id !== w.affiliateId) {
+        throw new AppError(
+          409,
+          'AFFILIATE_NOT_ACTIVE',
+          'Tài khoản cộng tác viên đang không hoạt động nên chưa rút tiền được.',
+        );
+      }
+      return { bank: my.affiliate.bankAccount, displayName: my.affiliate.displayName };
+    }
+    const my = await this.marketplace.myShop(authorization);
+    if (my.status !== 'ACTIVE' || !my.shop || my.shop.id !== w.shopId) {
+      throw new AppError(
+        409,
+        'SHOP_NOT_ACTIVE',
+        'Shop đang không hoạt động nên chưa rút tiền được.',
+      );
+    }
+    if (!my.shop.bankAccount) {
+      throw new AppError(
+        409,
+        'BANK_ACCOUNT_MISSING',
+        'Shop chưa có tài khoản ngân hàng nhận tiền.',
+      );
+    }
+    return { bank: my.shop.bankAccount, displayName: my.shop.name ?? '' };
   }
 
   private async findReplay(userId: string, requestKey: string): Promise<Withdrawal | null> {
@@ -478,6 +527,18 @@ function filter(q: WithdrawalsQuery): Prisma.WithdrawalWhereInput {
   return where;
 }
 
+/** Chủ ví trong sự kiện rút tiền (version 2, P7) */
+function owner(wallet: Wallet, w: Withdrawal): WalletOwner {
+  return {
+    type: wallet.ownerType,
+    shopId: wallet.shopId,
+    affiliateId: wallet.affiliateId,
+    userId: w.ownerId,
+    name: w.ownerName,
+    displayName: w.displayName,
+  };
+}
+
 function mask(n: string): string {
   return `•••• ${n.slice(-4)}`;
 }
@@ -485,8 +546,9 @@ function mask(n: string): string {
 function view(w: Withdrawal, viewer: 'SELLER' | 'ADMIN'): WithdrawalView {
   return {
     id: w.id,
-    shopId: w.shopId,
-    shopName: w.shopName,
+    walletId: w.walletId,
+    ownerType: w.ownerType,
+    displayName: w.displayName,
     ownerId: w.ownerId,
     ownerName: w.ownerName,
     amount: w.amount,
@@ -517,7 +579,7 @@ function inProgress(): AppError {
   return new AppError(
     409,
     'WITHDRAWAL_IN_PROGRESS',
-    'Shop đang có một yêu cầu rút chưa xong, chờ yêu cầu đó kết thúc rồi gửi tiếp.',
+    'Bạn đang có một yêu cầu rút chưa xong, chờ yêu cầu đó kết thúc rồi gửi tiếp.',
   );
 }
 

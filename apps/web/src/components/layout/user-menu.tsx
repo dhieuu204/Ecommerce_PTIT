@@ -1,4 +1,5 @@
 import {
+  IconAffiliate,
   IconBuildingStore,
   IconHeart,
   IconLogout,
@@ -18,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/user-avatar';
+import { useMyAffiliate } from '@/hooks/use-my-affiliate';
 import { useMyShop } from '@/hooks/use-my-shop';
 import { logout, useCurrentUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
@@ -29,10 +31,13 @@ import { cn } from '@/lib/utils';
 export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' | 'shop' }) {
   const user = useCurrentUser();
   const shop = useMyShop();
+  const affiliate = useMyAffiliate();
   const navigate = useNavigate();
   if (!user) return null;
   const isAdmin = user.permissions.length > 0;
   const shopActive = shop.data?.status === 'ACTIVE' || shop.data?.status === 'SUSPENDED';
+  const affiliateActive =
+    affiliate.data?.status === 'ACTIVE' || affiliate.data?.status === 'SUSPENDED';
 
   return (
     <DropdownMenu>
@@ -86,6 +91,11 @@ export function UserMenu({ tone = 'dark' }: { tone?: 'dark' | 'light' | 'shop' }
         <DropdownMenuItem asChild>
           <Link to={shopActive ? '/kenh-nguoi-ban' : '/tai-khoan/shop'}>
             <IconBuildingStore /> {shopActive ? 'Kênh người bán' : 'Shop của tôi'}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={affiliateActive ? '/cong-tac-vien' : '/cong-tac-vien/dang-ky'}>
+            <IconAffiliate /> Cộng tác viên
           </Link>
         </DropdownMenuItem>
         {isAdmin && (

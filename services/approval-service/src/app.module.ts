@@ -4,6 +4,7 @@ import { HealthController } from './health/health.controller';
 import { OrderChecksModule } from './order-checks/order-checks.module';
 import { PrismaService } from './prisma.service';
 import { APPROVAL_SETTINGS } from './settings';
+import { AffiliateApprovalsModule } from './affiliate-approvals/affiliate-approvals.module';
 import { ShopApprovalsModule } from './shop-approvals/shop-approvals.module';
 import { ShopModerationModule } from './shop-moderation/shop-moderation.module';
 import { DisputesModule } from './disputes/disputes.module';
@@ -29,6 +30,8 @@ import { ReportsModule } from './reports/reports.module';
     DisputesModule,
     WithdrawalApprovalsModule,
     ReportsModule,
+    // P7: cộng tác viên (AFF-01)
+    AffiliateApprovalsModule,
   ],
   controllers: [HealthController],
 })

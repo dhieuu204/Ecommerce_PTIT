@@ -42,6 +42,10 @@ export const links = {
   sellerProfile: '/kenh-nguoi-ban/ho-so-shop',
   sellerFinance: '/kenh-nguoi-ban/tai-chinh',
   myShop: '/tai-khoan/shop',
+  affiliateHome: '/cong-tac-vien',
+  affiliateOrders: '/cong-tac-vien/don-hang',
+  affiliateWallet: '/cong-tac-vien/vi',
+  affiliateApply: '/cong-tac-vien/dang-ky',
 };
 
 const byWhom: Record<CancelActor, string> = {
@@ -400,14 +404,70 @@ export class Notifier {
     });
   }
 
+  // ===== Cộng tác viên (P7) =====
+
+  /** Hồ sơ CTV được duyệt / bị từ chối, CTV bị khóa / được mở */
+  async affiliateDecision(
+    tx: Tx,
+    userId: string,
+    action: 'APPROVE' | 'REJECT' | 'SUSPEND' | 'RESTORE',
+    reason: string | null,
+  ): Promise<void> {
+    const text = {
+      APPROVE: {
+        type: 'AFFILIATE_APPROVED',
+        title: 'Bạn đã là cộng tác viên',
+        content:
+          'Hồ sơ cộng tác viên đã được duyệt. Bạn vào khu Cộng tác viên để lấy link tiếp thị sản phẩm nhé.',
+        link: links.affiliateHome,
+      },
+      REJECT: {
+        type: 'AFFILIATE_REJECTED',
+        title: 'Hồ sơ cộng tác viên chưa được duyệt',
+        content: `Hồ sơ cộng tác viên bị từ chối: ${reasonText(reason)}. Bạn sửa lại hồ sơ rồi nộp lại nhé.`,
+        link: links.affiliateApply,
+      },
+      SUSPEND: {
+        type: 'AFFILIATE_SUSPENDED',
+        title: 'Tài khoản cộng tác viên bị khóa',
+        content: `Tài khoản cộng tác viên bị khóa: ${reasonText(reason)}. Link của bạn tạm ngừng tính đơn mới, các đơn đã có vẫn được tính hoa hồng.`,
+        link: links.affiliateHome,
+      },
+      RESTORE: {
+        type: 'AFFILIATE_RESTORED',
+        title: 'Tài khoản cộng tác viên đã được mở',
+        content: `Tài khoản cộng tác viên hoạt động trở lại. Ghi chú của quản trị viên: ${reasonText(reason)}.`,
+        link: links.affiliateHome,
+      },
+    } as const;
+    await this.notifications.notify(tx, { userId, ...text[action] });
+  }
+
+  /** Có đơn mới qua link của CTV */
+  async affiliateOrder(
+    tx: Tx,
+    userId: string,
+    shopOrderCode: string,
+    commission: number,
+  ): Promise<void> {
+    await this.notifications.notify(tx, {
+      userId,
+      type: 'AFFILIATE_ORDER',
+      title: 'Có đơn mới qua link của bạn',
+      content: `Đơn ${shopOrderCode} được đặt qua link của bạn, hoa hồng dự kiến ${money(commission)}. Hoa hồng sang khả dụng khi đơn hoàn tất.`,
+      link: links.affiliateOrders,
+    });
+  }
+
   /** Yêu cầu rút tiền đổi trạng thái (withdrawal.updated) */
   async withdrawal(tx: Tx, p: WithdrawalUpdatedPayload): Promise<void> {
     const amount = money(p.amount);
+    const whose = p.owner.type === 'SHOP' ? 'của shop' : 'của bạn';
     const text = {
       APPROVED: {
         type: 'WITHDRAWAL_APPROVED',
         title: 'Yêu cầu rút tiền đã được duyệt',
-        content: `Yêu cầu rút ${amount} đã được duyệt, sàn sẽ chuyển khoản tới tài khoản của shop.`,
+        content: `Yêu cầu rút ${amount} đã được duyệt, sàn sẽ chuyển khoản tới tài khoản ${whose}.`,
       },
       REJECTED: {
         type: 'WITHDRAWAL_REJECTED',
@@ -417,7 +477,7 @@ export class Notifier {
       PAID: {
         type: 'WITHDRAWAL_PAID',
         title: 'Đã chuyển tiền rút',
-        content: `Sàn đã chuyển khoản ${amount} tới tài khoản ngân hàng của shop.`,
+        content: `Sàn đã chuyển khoản ${amount} tới tài khoản ngân hàng ${whose}.`,
       },
       FAILED: {
         type: 'WITHDRAWAL_FAILED',
@@ -426,9 +486,9 @@ export class Notifier {
       },
     } as const;
     await this.notifications.notify(tx, {
-      userId: p.ownerId,
+      userId: p.owner.userId,
       ...text[p.status],
-      link: links.sellerFinance,
+      link: p.owner.type === 'SHOP' ? links.sellerFinance : links.affiliateWallet,
     });
   }
 

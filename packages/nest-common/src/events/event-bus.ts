@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   EVENTS_EXCHANGE,
+  EVENT_VERSIONS,
   type EventPayloads,
   type EventType,
   type SanEvent,
@@ -74,7 +75,7 @@ export class EventBus implements OnApplicationBootstrap, OnApplicationShutdown {
     const event: SanEvent<T> = {
       eventId: randomUUID(),
       type,
-      version: 1,
+      version: EVENT_VERSIONS[type] ?? 1,
       occurredAt: new Date().toISOString(),
       producer: this.service,
       correlationId: currentCorrelationId(),

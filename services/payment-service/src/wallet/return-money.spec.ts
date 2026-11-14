@@ -26,6 +26,7 @@ describe('Tiền seller sau trả hàng (REF-02, FIN-03)', () => {
       newSellerAmount: 213_750,
       deduction: 171_000,
       feeReversed: 9_000,
+      commissionReduction: 0,
     });
   });
 
@@ -65,6 +66,7 @@ describe('Tiền seller sau trả hàng (REF-02, FIN-03)', () => {
       newSellerAmount: 384_750,
       deduction: 0,
       feeReversed: 0,
+      commissionReduction: 0,
     });
   });
 

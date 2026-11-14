@@ -485,8 +485,14 @@ describeDb('Thông báo theo từng việc nghiệp vụ (P6: MSG-02)', () => {
       await t.prisma.$transaction((tx) =>
         notifier.withdrawal(tx, {
           withdrawalId: randomUUID(),
-          shopId: shop.id,
-          ownerId: seller.id,
+          owner: {
+            type: 'SHOP',
+            shopId: shop.id,
+            affiliateId: null,
+            userId: seller.id,
+            name: 'Chủ shop',
+            displayName: 'Shop',
+          },
           amount: 1_250_000,
           status,
           reason,

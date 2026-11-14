@@ -9,7 +9,10 @@ export interface EarningAmounts {
   shopDiscount: number;
   platformFeeRate: number;
   platformFee: number;
+  /** Đã trừ hoa hồng CTV (P7) */
   sellerAmount: number;
+  /** Hoa hồng CTV chụp lúc đặt (P7); thiếu = 0 */
+  commission?: number;
 }
 
 /** Kết quả yêu cầu trả hàng nhận qua return.resolved */
@@ -20,6 +23,8 @@ export interface ReturnRefundInput {
   maxRefundAmount: number;
   /** Tiền hàng sau voucher shop của các món trả */
   sellerBase: number;
+  /** Hoa hồng CTV của các món trả (P7); thiếu = 0 */
+  commissionBase?: number;
   /** Sàn chịu (kiện trả thất lạc): không trừ tiền seller */
   platformCovers: boolean;
 }
@@ -35,6 +40,8 @@ export interface ReturnSettlement {
   deduction: number;
   /** Phí sàn được giảm */
   feeReversed: number;
+  /** Hoa hồng CTV bị trừ (P7): cùng tỉ lệ với phần tiền hàng bị bớt */
+  commissionReduction: number;
 }
 
 /**
@@ -54,12 +61,24 @@ export function settleReturn(e: EarningAmounts, r: ReturnRefundInput): ReturnSet
   const newBase = Math.max(0, base - baseReduction);
   const newPlatformFee =
     baseReduction === 0 ? e.platformFee : Math.floor((newBase * e.platformFeeRate) / 10_000);
-  const newSellerAmount = baseReduction === 0 ? e.sellerAmount : newBase - newPlatformFee;
+  // P7: hoa hồng CTV của các món trả bị trừ theo đúng tỉ lệ như tiền hàng (hoàn đủ → cả phần của món trả)
+  const commission = e.commission ?? 0;
+  const commissionBase = Math.min(r.commissionBase ?? 0, commission);
+  const commissionReduction =
+    baseReduction === 0
+      ? 0
+      : full
+        ? commissionBase
+        : Math.floor((commissionBase * r.refundAmount) / r.maxRefundAmount);
+  const newCommission = commission - commissionReduction;
+  const newSellerAmount =
+    baseReduction === 0 ? e.sellerAmount : Math.max(0, newBase - newPlatformFee - newCommission);
   return {
     baseReduction,
     newPlatformFee,
     newSellerAmount,
     deduction: Math.max(0, e.sellerAmount - newSellerAmount),
     feeReversed: Math.max(0, e.platformFee - newPlatformFee),
+    commissionReduction,
   };
 }

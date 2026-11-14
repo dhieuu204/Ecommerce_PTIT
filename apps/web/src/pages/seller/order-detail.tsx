@@ -254,6 +254,14 @@ export function SellerOrderDetailPage() {
               value={o.platformFee ?? 0}
               minus
             />
+            {o.affiliate && (
+              <MoneyRow
+                label="Hoa hồng cộng tác viên"
+                hint={`Đơn qua link của ${o.affiliate.name}`}
+                value={o.affiliate.commission}
+                minus
+              />
+            )}
             <div className="my-2.5 border-t border-dashed border-ink/15" />
             {o.sellerAmount !== null ? (
               <MoneyRow label="Dự kiến nhận" value={o.sellerAmount} strong />

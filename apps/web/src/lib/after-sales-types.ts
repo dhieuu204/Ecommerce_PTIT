@@ -117,10 +117,15 @@ export interface SellerReturnPage {
 export type WithdrawalStatus =
   'PENDING' | 'APPROVED' | 'PAID' | 'REJECTED' | 'CANCELLED' | 'FAILED';
 
+/** Chủ ví (P7): shop hoặc cộng tác viên */
+export type WalletOwnerType = 'SHOP' | 'AFFILIATE';
+
 export interface Withdrawal {
   id: string;
-  shopId: string;
-  shopName: string;
+  walletId: string;
+  ownerType: WalletOwnerType;
+  /** Tên shop hoặc tên hiển thị của CTV lúc yêu cầu */
+  displayName: string;
   ownerId: string;
   ownerName: string;
   amount: number;
@@ -140,7 +145,10 @@ export interface Withdrawal {
 }
 
 export interface AdminWallet {
-  shopId: string;
+  walletId: string;
+  ownerType: WalletOwnerType;
+  shopId: string | null;
+  affiliateId: string | null;
   ownerId: string;
   pending: number;
   available: number;
@@ -170,7 +178,12 @@ export interface AdminWithdrawalPage {
 export interface WithdrawalApproval {
   id: string;
   withdrawalId: string;
-  shop: { id: string; name: string };
+  ownerType: WalletOwnerType;
+  /** Tên shop hoặc tên hiển thị của CTV */
+  displayName: string;
+  shopId: string | null;
+  affiliateId: string | null;
+  /** Chủ shop hoặc CTV */
   owner: { id: string; name: string };
   amount: number;
   bankAccount: { bankName: string; accountNumberMasked: string; accountName: string };

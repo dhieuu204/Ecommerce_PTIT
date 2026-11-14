@@ -22,6 +22,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { FollowsModule } from './follows/follows.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ChatModule } from './chat/chat.module';
+import { AffiliatesModule } from './affiliates/affiliates.module';
 
 // Mỗi nhóm nghiệp vụ là một module riêng trong src/<ten-module>/ (xem CLAUDE.md, mục Quy ước code).
 @Module({
@@ -57,6 +58,8 @@ import { ChatModule } from './chat/chat.module';
     // P6: đánh giá (ENG-01, ENG-02), theo dõi shop và thả tim (ENG-03)
     ReviewsModule,
     FollowsModule,
+    // P7: cộng tác viên bán hàng (AFF-01..06)
+    AffiliatesModule,
   ],
   controllers: [HealthController],
 })

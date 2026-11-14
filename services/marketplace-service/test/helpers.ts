@@ -184,7 +184,7 @@ export async function createTestApp(): Promise<TestApp> {
 
 export async function resetDb(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, shipments, shipment_history, returns, return_items, settings CASCADE',
+    'TRUNCATE shop_applications, shops, audit_logs, outbox_events, inbox_events, cart_items, vouchers, stock_history, product_images, product_variants, products, categories, voucher_usages, checkouts, orders, shop_orders, order_items, order_history, shipments, shipment_history, returns, return_items, settings, affiliates, affiliate_clicks CASCADE',
   );
 }
 
