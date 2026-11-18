@@ -22,8 +22,8 @@ const URLS = {
   approval: env('E2E_APPROVAL_URL', 'http://localhost:3004') + '/api/approval/v1',
 };
 const PASSWORD = 'demo12345';
-/** Tài khoản demo chưa có shop hoạt động: dùng làm cộng tác viên */
-const CTV_EMAIL = 'phocongnghe@example.com';
+/** Chủ shop Táo Xanh (tài khoản seed) làm CTV cho hàng của Galaxy Hub: chủ shop vẫn làm CTV cho shop khác được */
+const CTV_EMAIL = 'taoxanh@example.com';
 const SELLER_EMAIL = 'galaxyhub@example.com';
 const RATE = 1000; // 10%
 

@@ -57,7 +57,7 @@ function ProductSection({
 }
 
 /**
- * Trang chủ khu mua hàng theo thiết kế đã chốt (HK-Shop-Homepage-Sections): banner chính, 2 thẻ ưu đãi +
+ * Trang chủ khu mua hàng theo thiết kế trang chủ đã chốt 27/10/2026: banner chính, 2 thẻ ưu đãi +
  * voucher, cam kết, mua theo danh mục, điện thoại nổi bật, đang giảm giá, sản phẩm tiêu điểm, laptop nổi bật, shop nổi bật,
  * hàng mới về. Các khu hiện dần khi cuộn tới.
  */

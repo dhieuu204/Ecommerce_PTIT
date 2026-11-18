@@ -97,7 +97,7 @@ function MoreLink({ to, dark }: { to: string; dark?: boolean }) {
 }
 
 /**
- * Tiêu đề khu (thiết kế HK-Shop-Homepage-Sections):
+ * Tiêu đề khu (thiết kế trang chủ đã chốt):
  * - mặc định: gạch cam ngắn phía trước tiêu đề đậm, dòng phụ xám bên dưới (nếu có);
  * - có `kicker`: dòng chữ hoa nhỏ màu cam có gạch phía trước, tiêu đề lớn hơn bên dưới.
  */

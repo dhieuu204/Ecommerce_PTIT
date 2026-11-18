@@ -66,7 +66,7 @@ function CartAction({ loggedIn }: { loggedIn: boolean }) {
 }
 
 /**
- * Header khu mua hàng (thiết kế HK-Shop-Homepage-Sections/01-header): một thanh nền cam gồm logo, ô tìm
+ * Header khu mua hàng (thiết kế trang chủ đã chốt, phần header): một thanh nền cam gồm logo, ô tìm
  * kiếm, các nút icon có chữ; bên dưới là thanh danh mục.
  * Máy tính: header cuộn đi, thanh danh mục dính đầu trang. Điện thoại: header dính, ô tìm xuống hàng riêng.
  */
